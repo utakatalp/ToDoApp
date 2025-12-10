@@ -1,6 +1,5 @@
-package com.example.todoapp.ui.theme
+package com.todoapp.mobile.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

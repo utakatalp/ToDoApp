@@ -1,8 +1,5 @@
-package com.example.uikit
+package com.todoapp.uikit
 
-import android.graphics.Color
-import android.widget.Button
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
@@ -12,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.lang.reflect.Modifier
 
 @Composable
 fun Asd(){
