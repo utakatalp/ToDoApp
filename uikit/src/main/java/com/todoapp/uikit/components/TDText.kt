@@ -24,7 +24,5 @@ fun TDText(
 fun TDTextExample() {
     TDText(
         text = "This is a text.",
-        textStyle = TextStyle(
-        )
     )
 }
