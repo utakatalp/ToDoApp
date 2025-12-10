@@ -9,6 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.todoapp"
+    namespace = "com.example.todoapp"
     compileSdk {
         version = release(36)
     }
@@ -45,6 +46,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":uikit"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
