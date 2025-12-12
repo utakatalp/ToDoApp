@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
                 println(
                     "asdşasdasd"
                 )
-                val alp = "asdşasdasd      213     "
+                val alp = "asdşasdasd      212312313     "
             }
         }
     }
