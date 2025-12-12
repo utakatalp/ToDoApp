@@ -21,5 +21,5 @@ class MainActivity : ComponentActivity() {
     }
 }
 fun test() {
-    val unused = 123
+    val unused = 12556
 }
