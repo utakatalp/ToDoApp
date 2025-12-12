@@ -13,11 +13,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             ToDoAppTheme {
                 println(
-                    "TESTTTTTTT DETEKTTT",
+                    "TESTTTTTTT DE TEKTTT",
                 )
                 println("asdşasdasd"
                 )
-                val alp = "asdşasdasd      "
+                val alp = "asdşasdasd          "
 
             }
         }
