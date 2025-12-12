@@ -12,19 +12,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ToDoAppTheme {
-                println("TESTTTTTTT DE TEKTTT",
-                )
-                println(
-                    "asdşasdasd"
-                )
-                val alp = "     asdşasdasd      212323  12313     " +
-                        "" +
-                        "" +
-                        ""
             }
         }
     }
-}
-fun test() {
-    val unused = 12551231236
 }

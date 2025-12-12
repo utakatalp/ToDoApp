@@ -63,52 +63,17 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     }
 }
 detekt {
-    autoCorrect = true // Ktlint ile otomatik olarak formatlama işleminin yapılması
-    buildUponDefaultConfig = true // Default olarak yapılandırma
-    allRules = false // Bütün kuralların aktif edilip edilmemesi
-    config.setFrom("$projectDir/detekt.yml") // Kuralların bulunduğu detekt.yml dosyasını çalışması
-    baseline = file("$projectDir/config/baseline.xml") // Sorunların reportlandığı baseline.xml dosyası
+    autoCorrect = true
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom("$projectDir/detekt.yml")
+    baseline = file("$projectDir/config/baseline.xml")
 }
-// Adım-3
 tasks.withType<Detekt>().configureEach {
     jvmTarget = "17"
 }
 tasks.withType<DetektCreateBaselineTask>().configureEach {
     jvmTarget = "17"
-}
-
-fun Project.getGitStagedFiles(rootDir: File): Provider<List<File>> =
-    providers
-        .exec {
-            commandLine("git", "--no-pager", "diff", "--name-only", "--cached")
-        }.standardOutput.asText
-        .map { outputText ->
-            outputText
-                .trim()
-                .split("\n")
-                .filter { it.isNotBlank() }
-                .map { File(rootDir, it) }
-        }
-tasks.withType<Detekt>().configureEach {
-    if (project.hasProperty("precommit")) {
-        val rootDir = project.rootDir
-        val projectDir = projectDir
-
-        val fileCollection = files()
-
-        setSource(
-            getGitStagedFiles(rootDir)
-                .map { stagedFiles ->
-                    val stagedFilesFromThisProject =
-                        stagedFiles
-                            .filter { it.startsWith(projectDir) }
-
-                    fileCollection.setFrom(*stagedFilesFromThisProject.toTypedArray())
-
-                    fileCollection.asFileTree
-                },
-        )
-    }
 }
 
 dependencies {
