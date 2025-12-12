@@ -15,7 +15,10 @@ class MainActivity : ComponentActivity() {
                 println(
                     "TESTTTTTTT DETEKTTT",
                 )
-                println("asdşasdasd")
+                println("asdşasdasd"
+                )
+                val alp = "asdşasdasd      "
+
             }
         }
     }
