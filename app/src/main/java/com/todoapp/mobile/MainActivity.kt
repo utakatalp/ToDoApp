@@ -12,10 +12,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ToDoAppTheme {
-                println("TESTTTTTTT DETEKTTT",
+                println(
+                    "TESTTTTTTT DETEKTTT",
                 )
                 println("asdşasdasd")
             }
         }
     }
+}
+fun test() {
+    val unused = 123
 }
