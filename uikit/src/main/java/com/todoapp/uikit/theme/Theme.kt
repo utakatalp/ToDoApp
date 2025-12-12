@@ -12,12 +12,10 @@ object TDTheme {
         @ReadOnlyComposable
         get() = if (isSystemInDarkTheme()) LocalDarkColors.current else LocalLightColors.current
 
-
     //val icons: TDIcons
     //    @Composable
     //    @ReadOnlyComposable
     //    get() = LocalIcons.current
-
 
     val typography: TDTypography
         @Composable

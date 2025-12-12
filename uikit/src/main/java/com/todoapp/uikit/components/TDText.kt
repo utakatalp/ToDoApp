@@ -7,16 +7,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.uikit.R
 import com.todoapp.uikit.theme.TDTheme
-
 
 @Composable
 fun TDText(
@@ -34,12 +30,6 @@ fun TDText(
         textAlign = textAlign,
         style = style.merge(
             color = color,
-            fontFamily = FontFamily(
-                Font(R.font.poppins_regular, FontWeight.Normal),
-                Font(R.font.poppins_medium, FontWeight.Medium),
-                Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
-                Font(R.font.poppins_bold, FontWeight.Bold),
-            ),
         ),
         overflow = overflow,
         maxLines = maxLines,
@@ -73,19 +63,13 @@ fun TDText(
         textAlign = textAlign,
         style = style.merge(
             color = color,
-            fontFamily = FontFamily(
-                Font(R.font.poppins_regular, FontWeight.Normal),
-                Font(R.font.poppins_medium, FontWeight.Medium),
-                Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
-                Font(R.font.poppins_bold, FontWeight.Bold),
-            ),
         ),
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun TDTextExample() {
+private fun TDTextExample() {
     TDText(
         text = "This is a text.",
     )
@@ -93,8 +77,7 @@ fun TDTextExample() {
 
 @Preview(showBackground = true)
 @Composable
-fun TDAnnotatedTextExample() {
-
+private fun TDAnnotatedTextExample() {
     TDText(
         fullText = "This should be a text.",
         spanText = "should",
