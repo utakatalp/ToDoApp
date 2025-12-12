@@ -77,6 +77,38 @@ tasks.withType<DetektCreateBaselineTask>().configureEach {
     jvmTarget = "17"
 }
 
+fun Project.getGitStagedFiles(rootDir: File): Provider<List<File>> {
+    return providers.exec {
+        commandLine("git", "--no-pager", "diff", "--name-only", "--cached")
+    }.standardOutput.asText
+        .map { outputText ->
+            outputText.trim()
+                .split("\n")
+                .filter { it.isNotBlank() }
+                .map { File(rootDir, it) }
+        }
+}
+tasks.withType<Detekt>().configureEach {
+    if (project.hasProperty("precommit")) {
+        val rootDir = project.rootDir
+        val projectDir = projectDir
+
+        val fileCollection = files()
+
+        setSource(
+            getGitStagedFiles(rootDir)
+                .map { stagedFiles ->
+                    val stagedFilesFromThisProject = stagedFiles
+                        .filter { it.startsWith(projectDir) }
+
+                    fileCollection.setFrom(*stagedFilesFromThisProject.toTypedArray())
+
+                    fileCollection.asFileTree
+                }
+        )
+    }
+}
+
 dependencies {
     implementation(project(":uikit"))
     implementation(libs.androidx.core.ktx)
