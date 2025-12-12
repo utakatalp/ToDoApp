@@ -12,13 +12,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ToDoAppTheme {
-                println(
-                    "TESTTTTTTT DE TEKTTT",
+                println("TESTTTTTTT DE TEKTTT",
                 )
                 println(
                     "asdşasdasd"
                 )
-                val alp = "asdşasdasd      212312313     "
+                val alp = "     asdşasdasd      212312313     " +
+                        "" +
+                        "" +
+                        ""
             }
         }
     }
