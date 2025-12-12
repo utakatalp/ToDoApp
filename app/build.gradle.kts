@@ -77,17 +77,18 @@ tasks.withType<DetektCreateBaselineTask>().configureEach {
     jvmTarget = "17"
 }
 
-fun Project.getGitStagedFiles(rootDir: File): Provider<List<File>> {
-    return providers.exec {
-        commandLine("git", "--no-pager", "diff", "--name-only", "--cached")
-    }.standardOutput.asText
+fun Project.getGitStagedFiles(rootDir: File): Provider<List<File>> =
+    providers
+        .exec {
+            commandLine("git", "--no-pager", "diff", "--name-only", "--cached")
+        }.standardOutput.asText
         .map { outputText ->
-            outputText.trim()
+            outputText
+                .trim()
                 .split("\n")
                 .filter { it.isNotBlank() }
                 .map { File(rootDir, it) }
         }
-}
 tasks.withType<Detekt>().configureEach {
     if (project.hasProperty("precommit")) {
         val rootDir = project.rootDir
@@ -98,13 +99,14 @@ tasks.withType<Detekt>().configureEach {
         setSource(
             getGitStagedFiles(rootDir)
                 .map { stagedFiles ->
-                    val stagedFilesFromThisProject = stagedFiles
-                        .filter { it.startsWith(projectDir) }
+                    val stagedFilesFromThisProject =
+                        stagedFiles
+                            .filter { it.startsWith(projectDir) }
 
                     fileCollection.setFrom(*stagedFilesFromThisProject.toTypedArray())
 
                     fileCollection.asFileTree
-                }
+                },
         )
     }
 }
