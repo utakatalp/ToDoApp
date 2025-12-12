@@ -1,3 +1,6 @@
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +8,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -28,7 +33,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -42,6 +47,34 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    android.set(true)
+    ignoreFailures.set(false)
+    additionalEditorconfig.set( // not supported until ktlint 0.49
+        mapOf(
+            "ktlint_standard_function-naming" to "disabled",
+        ),
+    )
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+    }
+}
+detekt {
+    autoCorrect = true // Ktlint ile otomatik olarak formatlama işleminin yapılması
+    buildUponDefaultConfig = true // Default olarak yapılandırma
+    allRules = false // Bütün kuralların aktif edilip edilmemesi
+    config.setFrom("$projectDir/detekt.yml") // Kuralların bulunduğu detekt.yml dosyasını çalışması
+    baseline = file("$projectDir/config/baseline.xml") // Sorunların reportlandığı baseline.xml dosyası
+}
+// Adım-3
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "17"
+}
+tasks.withType<DetektCreateBaselineTask>().configureEach {
+    jvmTarget = "17"
 }
 
 dependencies {
@@ -64,7 +97,7 @@ dependencies {
 
     // Dependency Injection (Hilt)
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler) // kapt yerine ksp kullanıyoruz
+    ksp(libs.hilt.compiler)
 
     // Network (Retrofit & Serialization)
     implementation(libs.retrofit)
@@ -80,4 +113,5 @@ dependencies {
 
     // Utils
     implementation(libs.timber)
+    detektPlugins(libs.detekt.formatting)
 }
