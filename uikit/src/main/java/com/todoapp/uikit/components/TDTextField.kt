@@ -176,9 +176,10 @@ fun TextFieldPreview() {
 
         TDTextField(
             value = "Example Password",
+            supportingText = "Example Error",
             onValueChange = {},
             label = "Password",
-            isError = false,
+            isError = true,
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_password),
