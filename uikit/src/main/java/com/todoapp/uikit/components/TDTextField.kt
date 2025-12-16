@@ -126,7 +126,7 @@ fun TDTextField(
 
 @Preview(showBackground = true)
 @Composable
-fun TextFieldPreview() {
+private fun TextFieldPreview() {
 
     var passwordVisible by remember { mutableStateOf(false) }
 
