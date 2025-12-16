@@ -240,7 +240,7 @@ private fun specifyColorBetweenRange(
 
 @Preview(showBackground = true, name = "Date Picker Preview")
 @Composable
-fun TDDatePickerPreview() {
+private fun TDDatePickerPreview() {
     val currentMonth = YearMonth.now()
     Column {
         TDDatePicker(

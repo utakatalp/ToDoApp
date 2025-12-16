@@ -18,8 +18,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             ToDoAppTheme {
                 Scaffold {
-                    Column(modifier = Modifier.padding(it)) {
+                    Column(modifier = Modifier.padding(it).navi) {
                         TDDatePickerPreview()
+                        Mo
                     }
                 }
             }
