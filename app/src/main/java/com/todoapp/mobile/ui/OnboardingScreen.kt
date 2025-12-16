@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -101,72 +103,77 @@ fun OnboardingScreen(
 
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .align(alignment = Alignment.BottomCenter)
-                .background(TDTheme.colors.white)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
 
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
+                    .wrapContentHeight()
+                    .align(alignment = Alignment.BottomCenter)
+                    .background(TDTheme.colors.white)
             ) {
-                TDText(
-                    modifier = Modifier
-                        .padding(top = 36.dp, start = 24.dp),
-                    textAlign = TextAlign.Start,
-                    color = TDTheme.colors.black,
-                    style = TDTheme.typography.heading1,
-                    text = stringResource(id = R.string.onboarding_title)
-                )
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                TDText(
+                Column(
                     modifier = Modifier
-                        .padding(bottom = 24.dp, start = 24.dp, end = 24.dp, top = 4.dp),
-                    textAlign = TextAlign.Start,
-                    color = TDTheme.colors.black,
-                    style = TDTheme.typography.regularTextStyle,
-                    text = stringResource(id = R.string.onboarding_description)
-                )
-
-                TDButton(
-                    modifier = Modifier
-                        .align(alignment = Alignment.CenterHorizontally)
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                        .padding(horizontal = if (isLandscape) 256.dp else 12.dp),
-                    text = stringResource(id = R.string.onboarding_get_started),
-                    isEnable = true,
-                    type = TDButtonType.PRIMARY,
-                    size = TDButtonSize.MEDIUM,
-                    icon = null,
-                    onClick = {
-                        onAction(UiAction.OnRegisterClick)
-                    }
-                )
+                        .align(Alignment.BottomCenter)
+                ) {
+                    TDText(
+                        modifier = Modifier
+                            .padding(top = 36.dp, start = 24.dp),
+                        textAlign = TextAlign.Start,
+                        color = TDTheme.colors.black,
+                        style = TDTheme.typography.heading1,
+                        text = stringResource(id = R.string.onboarding_title)
+                    )
 
-                TDText(
-                    modifier = Modifier
-                        .clickable { onAction(UiAction.OnLoginClick) }
-                        .padding(bottom = 12.dp)
-                        .align(alignment = Alignment.CenterHorizontally),
-                    fullText = stringResource(id = R.string.onboarding_login_span),
-                    spanText = stringResource(id = R.string.onboarding_login_text_span),
-                    color = TDTheme.colors.black,
-                    style = TDTheme.typography.regularTextStyle,
-                    spanStyle = SpanStyle(
-                        color = TDTheme.colors.purple,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center
-                )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    TDText(
+                        modifier = Modifier
+                            .padding(bottom = 24.dp, start = 24.dp, end = 24.dp, top = 4.dp),
+                        textAlign = TextAlign.Start,
+                        color = TDTheme.colors.black,
+                        style = TDTheme.typography.regularTextStyle,
+                        text = stringResource(id = R.string.onboarding_description)
+                    )
+
+                    TDButton(
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                            .padding(horizontal = if (isLandscape) 256.dp else 12.dp),
+                        text = stringResource(id = R.string.onboarding_get_started),
+                        isEnable = true,
+                        type = TDButtonType.PRIMARY,
+                        size = TDButtonSize.MEDIUM,
+                        icon = null,
+                        onClick = {
+                            onAction(UiAction.OnRegisterClick)
+                        }
+                    )
+
+                    TDText(
+                        modifier = Modifier
+                            .clickable { onAction(UiAction.OnLoginClick) }
+                            .padding(bottom = 12.dp)
+                            .align(alignment = Alignment.CenterHorizontally),
+                        fullText = stringResource(id = R.string.onboarding_login_span),
+                        spanText = stringResource(id = R.string.onboarding_login_text_span),
+                        color = TDTheme.colors.black,
+                        style = TDTheme.typography.regularTextStyle,
+                        spanStyle = SpanStyle(
+                            color = TDTheme.colors.purple,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
-
         }
-
     }
 }
 
