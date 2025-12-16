@@ -10,6 +10,7 @@ internal val LocalLightColors = staticCompositionLocalOf { lightColors() }
 internal val LocalDarkColors = staticCompositionLocalOf { darkColors() }
 
 internal fun lightColors(
+    lightPurple: Color = Color(0xFFA9BAFF),
     gray: Color = Color(0xFF717171),
     purple: Color = Color(0xFF4566EC),
     black: Color = Color(0xFF090E23),
@@ -38,10 +39,12 @@ internal fun lightColors(
     lightYellow = lightYellow,
     white = white,
     softPink = softPink,
-    lightGray = lightGray
+    lightGray = lightGray,
+    lightPurple = lightPurple
 )
 
 internal fun darkColors( // will be changed
+    lightPurple: Color = Color(0xFFA9BAFF),
     gray: Color = Color(0xFF717171),
     purple: Color = Color(0xFF4566EC),
     black: Color = Color(0xFF090E23),
@@ -70,10 +73,12 @@ internal fun darkColors( // will be changed
     lightYellow = lightYellow,
     white = white,
     softPink = softPink,
-    lightGray = lightGray
+    lightGray = lightGray,
+    lightPurple = lightPurple
 )
 
 class TDColor(
+    lightPurple: Color,
     gray: Color,
     black: Color,
     purple: Color,
@@ -89,6 +94,8 @@ class TDColor(
     softPink: Color,
     lightGray: Color,
 ) {
+    private var _lightPurple: Color by mutableStateOf(lightPurple)
+    val lightPurple: Color = _lightPurple
     private var _lightGray: Color by mutableStateOf(lightGray)
     val lightGray: Color = _lightGray
     private var _gray: Color by mutableStateOf(value = gray)
