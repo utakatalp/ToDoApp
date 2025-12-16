@@ -1,96 +1,89 @@
 package com.todoapp.uikit.components
 
-import androidx.compose.foundation.text.TextAutoSize
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
+import com.todoapp.uikit.theme.TDTheme
 
-object TDFontSizes {
-    val Small = 12.sp
-    val Medium = 16.sp
-    val Large = 22.sp
-    val XLarge = 32.sp
-}
-object TDFontWeights{
-    val Regular = FontWeight.Normal
-    val Medium = FontWeight.Medium
-    val Bold = FontWeight.Bold
-}
 @Composable
-fun TDSmallText(
+fun TDText(
+    modifier: Modifier = Modifier,
     text: String,
-    fontWeight: FontWeight = TDFontWeights.Regular
+    color: Color = TDTheme.colors.black,
+    style: TextStyle = TDTheme.typography.regularTextStyle,
+    overflow: TextOverflow = TextOverflow.Clip,
+    maxLines: Int = Int.MAX_VALUE,
+    textAlign: TextAlign? = null,
 ) {
     Text(
         text = text,
-        fontSize = TDFontSizes.Small,
-        fontWeight = fontWeight
+        modifier = modifier,
+        textAlign = textAlign,
+        style = style.merge(
+            color = color,
+        ),
+        overflow = overflow,
+        maxLines = maxLines,
     )
 }
 
 @Composable
 fun TDText(
-    text: String,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
-    autoSize: TextAutoSize? = null,
-    fontSize: TextUnit = TDFontSizes.Medium,
-    fontStyle: FontStyle? = null,
-    fontWeight: FontWeight? = TDFontWeights.Regular,
-    fontFamily: FontFamily? = null,
-    letterSpacing: TextUnit = TextUnit.Unspecified,
-    textDecoration: TextDecoration? = null,
+    fullText: String,
+    spanText: String,
+    color: Color = TDTheme.colors.brown,
+    style: TextStyle = TDTheme.typography.regularTextStyle,
+    spanStyle: SpanStyle = SpanStyle(),
     textAlign: TextAlign? = null,
-    lineHeight: TextUnit = TextUnit.Unspecified,
-    overflow: TextOverflow = TextOverflow.Clip,
-    softWrap: Boolean = true,
-    maxLines: Int = Int.MAX_VALUE,
-    minLines: Int = 1,
-    onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    style: TextStyle = LocalTextStyle.current,
 ) {
     Text(
-        text = text,
+        text = buildAnnotatedString {
+            withStyle(style = style.toSpanStyle()) {
+                append(fullText)
+                val mStartIndex = fullText.indexOf(spanText)
+                val mEndIndex = mStartIndex.plus(spanText.length)
+                addStyle(
+                    style = spanStyle,
+                    start = mStartIndex,
+                    end = mEndIndex,
+                )
+            }
+        },
         modifier = modifier,
-        color = color,
-        autoSize = autoSize,
-        fontSize = fontSize,
-        fontStyle = fontStyle,
-        fontWeight = fontWeight,
-        fontFamily = fontFamily,
-        letterSpacing = letterSpacing,
-        textDecoration = textDecoration,
         textAlign = textAlign,
-        lineHeight = lineHeight,
-        overflow = overflow,
-        softWrap = softWrap,
-        maxLines = maxLines,
-        minLines = minLines,
-        onTextLayout = onTextLayout,
-        style = style,
+        style = style.merge(
+            color = color,
+        ),
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun TDTextExample(){
+private fun TDTextExample() {
     TDText(
-        text = "This is a text",
-        fontSize = TDFontSizes.Large,
-        fontWeight = TDFontWeights.Regular,
-        style = TextStyle()
+        text = "This is a text.",
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TDAnnotatedTextExample() {
+    TDText(
+        fullText = "This should be a text.",
+        spanText = "should",
+        spanStyle = SpanStyle(
+            color = TDTheme.colors.gray,
+            fontWeight = FontWeight.Bold
+        )
     )
 }
