@@ -53,7 +53,6 @@ fun TDTextField(
     onTogglePasswordVisible: (() -> Unit)? = null,
     onFocusChange: ((Boolean) -> Unit)? = null,
 ) {
-
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     var isFocused by remember { mutableStateOf(false) }
 
@@ -69,13 +68,14 @@ fun TDTextField(
                 {
                     IconButton(onClick = onTogglePasswordVisible) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(
-                                if (passwordVisible) {
-                                    R.drawable.ic_visibility
-                                } else {
-                                    R.drawable.ic_visibility_off
-                                }
-                            ),
+                            imageVector =
+                                ImageVector.vectorResource(
+                                    if (passwordVisible) {
+                                        R.drawable.ic_visibility
+                                    } else {
+                                        R.drawable.ic_visibility_off
+                                    },
+                                ),
                             contentDescription = null,
                         )
                     }
@@ -92,13 +92,14 @@ fun TDTextField(
         }
 
     OutlinedTextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .bringIntoViewRequester(bringIntoViewRequester)
-            .onFocusChanged { focusState ->
-                isFocused = focusState.isFocused
-                onFocusChange?.invoke(focusState.isFocused)
-            },
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .bringIntoViewRequester(bringIntoViewRequester)
+                .onFocusChanged { focusState ->
+                    isFocused = focusState.isFocused
+                    onFocusChange?.invoke(focusState.isFocused)
+                },
         value = value,
         onValueChange = onValueChange,
         label = { Text(text = label) },
@@ -116,26 +117,29 @@ fun TDTextField(
             if (!supportingText.isNullOrEmpty()) {
                 Text(
                     text = supportingText,
-                    color = if (isError) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.onSurfaceVariant
+                    color =
+                        if (isError) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                 )
             }
-        }
+        },
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun TextFieldPreview() {
-
     var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .padding(top = 24.dp, start = 16.dp, end = 16.dp)
+        modifier =
+            Modifier
+                .fillMaxHeight()
+                .padding(top = 24.dp, start = 16.dp, end = 16.dp),
     ) {
-
         TDTextField(
             value = "john",
             onValueChange = {},

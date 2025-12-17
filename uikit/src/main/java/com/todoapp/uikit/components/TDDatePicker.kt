@@ -18,18 +18,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.uikit.R
+import com.todoapp.uikit.theme.TDTheme
+import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import com.example.uikit.R
-import com.todoapp.uikit.theme.TDTheme
-import java.time.LocalDate
-import java.time.DayOfWeek
 
 @Composable
 fun TDDatePicker(
@@ -40,43 +40,43 @@ fun TDDatePicker(
     selectedFirstDate: LocalDate? = null,
     selectedSecondDate: LocalDate? = null,
     onDaySelected: (LocalDate) -> Unit,
-    onFirstDayDeselected: () -> Unit,
-    onSecondDayDeselected: () -> Unit,
+    onFirstDayDeselect: () -> Unit,
+    onSecondDayDeselect: () -> Unit,
 ) {
     val daysOfWeekEntries = DayOfWeek.entries
-    val days = daysOfWeekEntries.map {
-        it.toString().take(2)
-    }
-    val daysOfWeek = days.map {
-        it.lowercase().replaceFirstChar { char -> char.uppercase() }
-    }
+    val days =
+        daysOfWeekEntries.map {
+            it.toString().take(2)
+        }
+    val daysOfWeek =
+        days.map {
+            it.lowercase().replaceFirstChar { char -> char.uppercase() }
+        }
     val firstDayOfMonth = selectedMonth.atDay(1)
     val calendarStartDate =
         firstDayOfMonth.minusDays((firstDayOfMonth.dayOfWeek.value - 1).toLong())
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-
-
-
-        Row(
-            modifier = Modifier
+        modifier =
+            modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+                .padding(top = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(
                 onClick = onMonthBacked,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(40.dp),
             ) {
                 Icon(
-                    painterResource(R.drawable.outline_arrow_back_ios_new_24),
+                    painterResource(R.drawable.ic_arrow_back),
                     contentDescription = "Previous Month",
                 )
             }
@@ -86,47 +86,47 @@ fun TDDatePicker(
                     selectedMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
                         .replaceFirstChar { it.uppercase() }
                 } ${selectedMonth.year}",
-                style = TDTheme.typography.heading5
+                style = TDTheme.typography.heading5,
             )
             Spacer(Modifier.weight(1f))
             IconButton(
                 onClick = onMonthForwarded,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(40.dp),
             ) {
                 Icon(
-                    painterResource(R.drawable.outline_arrow_forward_ios_24),
+                    painterResource(R.drawable.ic_arrow_forward),
                     contentDescription = "Previous Month",
                 )
             }
-
         }
         Spacer(Modifier.height(16.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-
-            ) {
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+        ) {
             daysOfWeek.forEach { day ->
                 TDText(
                     text = day,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
-                    style = TDTheme.typography.dayOfTheCalendar
+                    style = TDTheme.typography.dayOfTheCalendar,
                 )
             }
         }
         HorizontalDivider(
-            modifier = Modifier
-                .padding(vertical = 8.dp),
-            thickness = 1.dp
+            modifier =
+                Modifier.padding(vertical = 8.dp),
+            thickness = 1.dp,
         )
         for (week in 0 until 5) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
             ) {
                 for (day in 0 until 7) {
                     val currentDate = calendarStartDate.plusDays((week * 7 + day).toLong())
@@ -135,38 +135,40 @@ fun TDDatePicker(
                     val isCurrentDateInRange =
                         isCurrentDateInRange(selectedFirstDate, selectedSecondDate, currentDate)
                     Box(
-                        modifier = Modifier
-                            .height(30.dp)
-                            .weight(1f)
-                            .background(
-                                color = specifyColorBetweenRange(
-                                    selectedFirstDate = selectedFirstDate,
-                                    selectedSecondDate = selectedSecondDate,
-                                    currentDate = currentDate
-                                )
-                            )
-                            .padding(horizontal = 6.dp)
-                            .clickable {
-                                if (selectedFirstDate == currentDate) {
-                                    onFirstDayDeselected()
-                                } else if (selectedSecondDate == currentDate) {
-                                    onSecondDayDeselected()
-                                } else {
-                                    onDaySelected(currentDate)
-                                }
-                            },
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .height(30.dp)
+                                .weight(1f)
+                                .background(
+                                    color =
+                                        specifyColorBetweenRange(
+                                            selectedFirstDate = selectedFirstDate,
+                                            selectedSecondDate = selectedSecondDate,
+                                            currentDate = currentDate,
+                                        ),
+                                ).padding(horizontal = 6.dp)
+                                .clickable {
+                                    if (selectedFirstDate == currentDate) {
+                                        onFirstDayDeselect()
+                                    } else if (selectedSecondDate == currentDate) {
+                                        onSecondDayDeselect()
+                                    } else {
+                                        onDaySelected(currentDate)
+                                    }
+                                },
+                        contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = currentDate.dayOfMonth.toString(),
-                            color = specifyTextColor(
-                                currentDate,
-                                selectedFirstDate,
-                                selectedSecondDate,
-                                isFromCurrentMonth,
-                                isCurrentDateInRange
-                            ),
-                            style = TDTheme.typography.subheeading4
+                            color =
+                                specifyTextColor(
+                                    currentDate,
+                                    selectedFirstDate,
+                                    selectedSecondDate,
+                                    isFromCurrentMonth,
+                                    isCurrentDateInRange,
+                                ),
+                            style = TDTheme.typography.subheeading4,
                         )
                     }
                 }
@@ -181,57 +183,61 @@ private fun specifyTextColor(
     selectedFirstDate: LocalDate?,
     selectedSecondDate: LocalDate?,
     isFromCurrentMonth: Boolean,
-    isCurrentDateInRange: Boolean
-): Color = if (currentDate == selectedFirstDate || currentDate == selectedSecondDate) {
-    TDTheme.colors.white
-} else if (isFromCurrentMonth) {
-    TDTheme.colors.black
-} else if (isCurrentDateInRange) {
-    TDTheme.colors.black
-} else TDTheme.colors.lightGray
+    isCurrentDateInRange: Boolean,
+): Color =
+    if (currentDate == selectedFirstDate || currentDate == selectedSecondDate) {
+        TDTheme.colors.white
+    } else if (isFromCurrentMonth) {
+        TDTheme.colors.black
+    } else if (isCurrentDateInRange) {
+        TDTheme.colors.black
+    } else {
+        TDTheme.colors.lightGray
+    }
 
 @Composable
 private fun isCurrentDateInRange(
     selectedFirstDate: LocalDate?,
     selectedSecondDate: LocalDate?,
-    currentDate: LocalDate
-): Boolean = if (selectedFirstDate != null && selectedSecondDate != null) {
-    val startDate =
-        if (selectedFirstDate.isBefore(selectedSecondDate)) selectedFirstDate else selectedSecondDate
-    val endDate =
-        if (selectedFirstDate.isAfter(selectedSecondDate)) selectedFirstDate else selectedSecondDate
+    currentDate: LocalDate,
+): Boolean =
+    if (selectedFirstDate != null && selectedSecondDate != null) {
+        val startDate =
+            if (selectedFirstDate.isBefore(selectedSecondDate)) selectedFirstDate else selectedSecondDate
+        val endDate =
+            if (selectedFirstDate.isAfter(selectedSecondDate)) selectedFirstDate else selectedSecondDate
 
-    currentDate.isAfter(startDate) && currentDate.isBefore(endDate)
-} else {
-    false
-}
+        currentDate.isAfter(startDate) && currentDate.isBefore(endDate)
+    } else {
+        false
+    }
 
 @Composable
 private fun specifyColorBetweenRange(
     selectedFirstDate: LocalDate?,
     selectedSecondDate: LocalDate?,
     currentDate: LocalDate,
-): Color {
-    return when {
+): Color =
+    when {
         currentDate == selectedFirstDate || currentDate == selectedSecondDate -> TDTheme.colors.purple
 
-        selectedFirstDate != null && selectedSecondDate != null &&
-                currentDate.isAfter(
-                    minOf(
-                        selectedFirstDate,
-                        selectedSecondDate
-                    )
-                ) &&
-                currentDate.isBefore(
-                    maxOf(
-                        selectedFirstDate,
-                        selectedSecondDate
-                    )
-                ) -> TDTheme.colors.lightPurple
+        selectedFirstDate != null &&
+            selectedSecondDate != null &&
+            currentDate.isAfter(
+                minOf(
+                    selectedFirstDate,
+                    selectedSecondDate,
+                ),
+            ) &&
+            currentDate.isBefore(
+                maxOf(
+                    selectedFirstDate,
+                    selectedSecondDate,
+                ),
+            ) -> TDTheme.colors.lightPurple
 
         else -> Color.Transparent
     }
-}
 
 @Preview(showBackground = true, name = "Date Picker Preview")
 @Composable
@@ -241,12 +247,8 @@ private fun TDDatePickerPreview() {
         TDDatePicker(
             selectedMonth = currentMonth.plusMonths(2),
             onDaySelected = {},
-            onFirstDayDeselected = {},
-            onSecondDayDeselected = {}
+            onFirstDayDeselect = {},
+            onSecondDayDeselect = {},
         )
     }
 }
-
-
-
-
