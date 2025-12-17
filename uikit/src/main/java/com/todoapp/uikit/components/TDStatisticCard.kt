@@ -169,7 +169,7 @@ private fun CrossInBoxComponent() {
 
 @Preview(showBackground = true)
 @Composable
-fun TDStatisticCardCompletedPreview() {
+private fun TDStatisticCardCompletedPreview() {
     TDStatisticCard(
         "Task Complete",
         taskAmount = 10,
@@ -179,7 +179,7 @@ fun TDStatisticCardCompletedPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun TDStatisticCardPendingPreview() {
+private fun TDStatisticCardPendingPreview() {
     TDStatisticCard(
         "Task Pending",
         taskAmount = 3,
