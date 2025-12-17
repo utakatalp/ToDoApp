@@ -5,16 +5,15 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -60,23 +59,27 @@ fun OnboardingScreen(
         }
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(TDTheme.colors.purple)
             .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
     ) {
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
+        Spacer(Modifier.weight(0.30f))
+
         Image(
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .size(250.dp)
-                .padding(bottom = if (isLandscape) (120.dp) else 0.dp),
+                .size(150.dp)
+                .align(Alignment.CenterHorizontally),
             painter = painterResource(id = R.drawable.logo_text),
             contentDescription = null,
         )
+
+        Spacer(Modifier.weight(0.30f))
 
         val bgImages = remember {
             listOf(
@@ -88,92 +91,80 @@ fun OnboardingScreen(
         }
 
         Crossfade(
+            modifier = Modifier
+                .heightIn(200.dp)
+                .weight(2f),
             targetState = uiState.bgIndex,
         ) { idx ->
             Image(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = if (isLandscape) (96.dp) else 0.dp),
-                contentScale = ContentScale.Fit,
+                    .fillMaxWidth(),
+                contentScale = ContentScale.Crop,
                 alignment = Alignment.Center,
                 painter = painterResource(id = bgImages[idx]),
                 contentDescription = null,
             )
         }
 
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .background(TDTheme.colors.white)
+
         ) {
-
-            Box(
+            TDText(
                 modifier = Modifier
+                    .padding(top = 36.dp, start = 24.dp),
+                textAlign = TextAlign.Start,
+                color = TDTheme.colors.black,
+                style = TDTheme.typography.heading1,
+                text = stringResource(id = R.string.onboarding_title)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            TDText(
+                modifier = Modifier
+                    .padding(bottom = 24.dp, start = 24.dp, end = 24.dp, top = 4.dp),
+                textAlign = TextAlign.Start,
+                color = TDTheme.colors.black,
+                style = TDTheme.typography.regularTextStyle,
+                text = stringResource(id = R.string.onboarding_description)
+            )
+
+            TDButton(
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterHorizontally)
                     .fillMaxWidth()
-                    .wrapContentHeight()
-                    .align(alignment = Alignment.BottomCenter)
-                    .background(TDTheme.colors.white)
-            ) {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                ) {
-                    TDText(
-                        modifier = Modifier
-                            .padding(top = 36.dp, start = 24.dp),
-                        textAlign = TextAlign.Start,
-                        color = TDTheme.colors.black,
-                        style = TDTheme.typography.heading1,
-                        text = stringResource(id = R.string.onboarding_title)
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    TDText(
-                        modifier = Modifier
-                            .padding(bottom = 24.dp, start = 24.dp, end = 24.dp, top = 4.dp),
-                        textAlign = TextAlign.Start,
-                        color = TDTheme.colors.black,
-                        style = TDTheme.typography.regularTextStyle,
-                        text = stringResource(id = R.string.onboarding_description)
-                    )
-
-                    TDButton(
-                        modifier = Modifier
-                            .align(alignment = Alignment.CenterHorizontally)
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                            .padding(horizontal = if (isLandscape) 256.dp else 12.dp),
-                        text = stringResource(id = R.string.onboarding_get_started),
-                        isEnable = true,
-                        type = TDButtonType.PRIMARY,
-                        size = TDButtonSize.MEDIUM,
-                        icon = null,
-                        onClick = {
-                            onAction(UiAction.OnRegisterClick)
-                        }
-                    )
-
-                    TDText(
-                        modifier = Modifier
-                            .clickable { onAction(UiAction.OnLoginClick) }
-                            .padding(bottom = 12.dp)
-                            .align(alignment = Alignment.CenterHorizontally),
-                        fullText = stringResource(id = R.string.onboarding_login_span),
-                        spanText = stringResource(id = R.string.onboarding_login_text_span),
-                        color = TDTheme.colors.black,
-                        style = TDTheme.typography.regularTextStyle,
-                        spanStyle = SpanStyle(
-                            color = TDTheme.colors.purple,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        textAlign = TextAlign.Center
-                    )
+                    .padding(bottom = 12.dp)
+                    .padding(horizontal = if (isLandscape) 256.dp else 12.dp),
+                text = stringResource(id = R.string.onboarding_get_started),
+                isEnable = true,
+                type = TDButtonType.PRIMARY,
+                size = TDButtonSize.MEDIUM,
+                icon = null,
+                onClick = {
+                    onAction(UiAction.OnRegisterClick)
                 }
-            }
+            )
+
+            TDText(
+                modifier = Modifier
+                    .clickable { onAction(UiAction.OnLoginClick) }
+                    .padding(bottom = 12.dp)
+                    .align(alignment = Alignment.CenterHorizontally),
+                fullText = stringResource(id = R.string.onboarding_login_span),
+                spanText = stringResource(id = R.string.onboarding_login_text_span),
+                color = TDTheme.colors.black,
+                style = TDTheme.typography.regularTextStyle,
+                spanStyle = SpanStyle(
+                    color = TDTheme.colors.purple,
+                    fontWeight = FontWeight.Bold
+                ),
+                textAlign = TextAlign.Center
+            )
         }
+
     }
 }
 
