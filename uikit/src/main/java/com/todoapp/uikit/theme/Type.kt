@@ -174,7 +174,6 @@ class TDTypography {
                         alignment = LineHeightStyle.Alignment.Center,
                         trim = LineHeightStyle.Trim.None,
                     ),
-                color = TDTheme.colors.black,
             )
     val subheading3: TextStyle
         @Composable
