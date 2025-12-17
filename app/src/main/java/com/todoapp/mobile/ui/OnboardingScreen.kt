@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -90,7 +90,7 @@ fun OnboardingScreen(
 
             Spacer(Modifier.weight(0.30f))
 
-            val bgImages = remember {
+            val bgImages = rememberSaveable {
                 listOf(
                     R.drawable.onboarding_bg,
                     R.drawable.onboarding_bg1,
@@ -200,7 +200,7 @@ fun OnboardingScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                val bgImages = remember {
+                val bgImages = rememberSaveable {
                     listOf(
                         R.drawable.onboarding_bg,
                         R.drawable.onboarding_bg1,
