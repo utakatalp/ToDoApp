@@ -24,17 +24,17 @@ class MainActivity : ComponentActivity() {
             ToDoAppTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    contentWindowInsets = WindowInsets(0)
+                    contentWindowInsets = WindowInsets(0),
                 ) { innerPadding ->
                     NavGraph(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                            .consumeWindowInsets(innerPadding),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                                .consumeWindowInsets(innerPadding),
                         startDestination = Screen.Onboarding,
-                        navController = navController
+                        navController = navController,
                     )
-
                 }
             }
         }

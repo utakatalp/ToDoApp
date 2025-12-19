@@ -57,7 +57,6 @@ fun OnboardingScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
 ) {
-
     uiEffect.CollectWithLifecycle { effect ->
         when (effect) {
             UiEffect.NavigateToLogin -> onNavigateToLogin()
@@ -69,137 +68,29 @@ fun OnboardingScreen(
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     if (isPortrait) {
-
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(TDTheme.colors.purple)
-                .statusBarsPadding()
-                .verticalScroll(rememberScrollState())
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(TDTheme.colors.purple)
+                    .statusBarsPadding()
+                    .verticalScroll(rememberScrollState()),
         ) {
-
             Spacer(Modifier.weight(0.30f))
 
             Image(
-                modifier = Modifier
-                    .size(150.dp)
-                    .align(Alignment.CenterHorizontally),
+                modifier =
+                    Modifier
+                        .size(150.dp)
+                        .align(Alignment.CenterHorizontally),
                 painter = painterResource(id = R.drawable.logo_text),
                 contentDescription = null,
             )
 
             Spacer(Modifier.weight(0.30f))
 
-            val bgImages = rememberSaveable {
-                listOf(
-                    R.drawable.onboarding_bg,
-                    R.drawable.onboarding_bg1,
-                    R.drawable.onboarding_bg2,
-                    R.drawable.onboarding_bg3,
-                )
-            }
-
-            Crossfade(
-                modifier = Modifier
-                    .heightIn(200.dp)
-                    .weight(2f),
-                targetState = uiState.bgIndex,
-            ) { idx ->
-                Image(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    painter = painterResource(id = bgImages[idx]),
-                    contentDescription = null,
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(TDTheme.colors.white)
-                    .navigationBarsPadding()
-
-            ) {
-                TDText(
-                    modifier = Modifier
-                        .padding(top = 36.dp, start = 24.dp),
-                    textAlign = TextAlign.Start,
-                    color = TDTheme.colors.black,
-                    style = TDTheme.typography.heading1,
-                    text = stringResource(id = R.string.onboarding_title)
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                TDText(
-                    modifier = Modifier
-                        .padding(bottom = 24.dp, start = 24.dp, end = 24.dp, top = 4.dp),
-                    textAlign = TextAlign.Start,
-                    color = TDTheme.colors.black,
-                    style = TDTheme.typography.regularTextStyle,
-                    text = stringResource(id = R.string.onboarding_description)
-                )
-
-                TDButton(
-                    modifier = Modifier
-                        .align(alignment = Alignment.CenterHorizontally)
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                        .padding(horizontal = 12.dp),
-                    text = stringResource(id = R.string.onboarding_get_started),
-                    isEnable = true,
-                    type = TDButtonType.PRIMARY,
-                    size = TDButtonSize.MEDIUM,
-                    icon = null,
-                    onClick = {
-                        onAction(UiAction.OnRegisterClick)
-                    }
-                )
-
-                TDText(
-                    modifier = Modifier
-                        .clickable { onAction(UiAction.OnLoginClick) }
-                        .padding(bottom = 12.dp)
-                        .align(alignment = Alignment.CenterHorizontally),
-                    fullText = stringResource(id = R.string.onboarding_login_span),
-                    spanText = stringResource(id = R.string.onboarding_login_text_span),
-                    color = TDTheme.colors.black,
-                    style = TDTheme.typography.regularTextStyle,
-                    spanStyle = SpanStyle(
-                        color = TDTheme.colors.purple,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    } else {
-
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .background(TDTheme.colors.purple)
-                    .weight(1f)
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    modifier = Modifier
-                        .size(150.dp),
-                    painter = painterResource(id = R.drawable.logo_text),
-                    contentDescription = null,
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                val bgImages = rememberSaveable {
+            val bgImages =
+                rememberSaveable {
                     listOf(
                         R.drawable.onboarding_bg,
                         R.drawable.onboarding_bg1,
@@ -208,18 +99,139 @@ fun OnboardingScreen(
                     )
                 }
 
-                Crossfade(
-                    modifier = Modifier
+            Crossfade(
+                modifier =
+                    Modifier
+                        .heightIn(200.dp)
+                        .weight(2f),
+                targetState = uiState.bgIndex,
+            ) { idx ->
+                Image(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center,
+                    painter = painterResource(id = bgImages[idx]),
+                    contentDescription = null,
+                )
+            }
+
+            Column(
+                modifier =
+                    Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .background(TDTheme.colors.white)
+                        .navigationBarsPadding(),
+            ) {
+                TDText(
+                    modifier =
+                        Modifier
+                            .padding(top = 36.dp, start = 24.dp),
+                    textAlign = TextAlign.Start,
+                    color = TDTheme.colors.black,
+                    style = TDTheme.typography.heading1,
+                    text = stringResource(id = R.string.onboarding_title),
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TDText(
+                    modifier =
+                        Modifier
+                            .padding(bottom = 24.dp, start = 24.dp, end = 24.dp, top = 4.dp),
+                    textAlign = TextAlign.Start,
+                    color = TDTheme.colors.black,
+                    style = TDTheme.typography.regularTextStyle,
+                    text = stringResource(id = R.string.onboarding_description),
+                )
+
+                TDButton(
+                    modifier =
+                        Modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                            .padding(horizontal = 12.dp),
+                    text = stringResource(id = R.string.onboarding_get_started),
+                    isEnable = true,
+                    type = TDButtonType.PRIMARY,
+                    size = TDButtonSize.MEDIUM,
+                    icon = null,
+                    onClick = {
+                        onAction(UiAction.OnRegisterClick)
+                    },
+                )
+
+                TDText(
+                    modifier =
+                        Modifier
+                            .clickable { onAction(UiAction.OnLoginClick) }
+                            .padding(bottom = 12.dp)
+                            .align(alignment = Alignment.CenterHorizontally),
+                    fullText = stringResource(id = R.string.onboarding_login_span),
+                    spanText = stringResource(id = R.string.onboarding_login_text_span),
+                    color = TDTheme.colors.black,
+                    style = TDTheme.typography.regularTextStyle,
+                    spanStyle =
+                        SpanStyle(
+                            color = TDTheme.colors.purple,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    } else {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxSize(),
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .background(TDTheme.colors.purple)
+                        .weight(1f)
+                        .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Image(
+                    modifier =
+                        Modifier
+                            .size(150.dp),
+                    painter = painterResource(id = R.drawable.logo_text),
+                    contentDescription = null,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                val bgImages =
+                    rememberSaveable {
+                        listOf(
+                            R.drawable.onboarding_bg,
+                            R.drawable.onboarding_bg1,
+                            R.drawable.onboarding_bg2,
+                            R.drawable.onboarding_bg3,
+                        )
+                    }
+
+                Crossfade(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                     targetState = uiState.bgIndex,
                 ) { idx ->
                     Box {
                         Image(
-                            modifier = Modifier
-                                .fillMaxWidth(1f)
-                                .heightIn(max = 260.dp)
-                                .aspectRatio(1.3f),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(1f)
+                                    .heightIn(max = 260.dp)
+                                    .aspectRatio(1.3f),
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center,
                             painter = painterResource(id = bgImages[idx]),
@@ -230,39 +242,42 @@ fun OnboardingScreen(
             }
 
             Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .background(TDTheme.colors.white)
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .background(TDTheme.colors.white)
+                        .weight(1f),
                 verticalArrangement = Arrangement.Center,
             ) {
-
                 TDText(
-                    modifier = Modifier
-                        .padding(top = 48.dp, start = 24.dp),
+                    modifier =
+                        Modifier
+                            .padding(top = 48.dp, start = 24.dp),
                     textAlign = TextAlign.Start,
                     color = TDTheme.colors.black,
                     style = TDTheme.typography.heading1,
-                    text = stringResource(id = R.string.onboarding_title)
+                    text = stringResource(id = R.string.onboarding_title),
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 TDText(
-                    modifier = Modifier
-                        .padding(bottom = 24.dp, start = 24.dp, end = 24.dp),
+                    modifier =
+                        Modifier
+                            .padding(bottom = 24.dp, start = 24.dp, end = 24.dp),
                     textAlign = TextAlign.Start,
                     color = TDTheme.colors.black,
                     style = TDTheme.typography.regularTextStyle,
-                    text = stringResource(id = R.string.onboarding_description)
+                    text = stringResource(id = R.string.onboarding_description),
                 )
 
                 TDButton(
-                    modifier = Modifier
-                        .align(alignment = Alignment.CenterHorizontally)
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                        .padding(horizontal = 32.dp),
+                    modifier =
+                        Modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                            .padding(horizontal = 32.dp),
                     text = stringResource(id = R.string.onboarding_get_started),
                     isEnable = true,
                     type = TDButtonType.PRIMARY,
@@ -270,23 +285,25 @@ fun OnboardingScreen(
                     icon = null,
                     onClick = {
                         onAction(UiAction.OnRegisterClick)
-                    }
+                    },
                 )
 
                 TDText(
-                    modifier = Modifier
-                        .clickable { onAction(UiAction.OnLoginClick) }
-                        .padding(bottom = 12.dp)
-                        .align(alignment = Alignment.CenterHorizontally),
+                    modifier =
+                        Modifier
+                            .clickable { onAction(UiAction.OnLoginClick) }
+                            .padding(bottom = 12.dp)
+                            .align(alignment = Alignment.CenterHorizontally),
                     fullText = stringResource(id = R.string.onboarding_login_span),
                     spanText = stringResource(id = R.string.onboarding_login_text_span),
                     color = TDTheme.colors.black,
                     style = TDTheme.typography.regularTextStyle,
-                    spanStyle = SpanStyle(
-                        color = TDTheme.colors.purple,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center
+                    spanStyle =
+                        SpanStyle(
+                            color = TDTheme.colors.purple,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                    textAlign = TextAlign.Center,
                 )
             }
         }
@@ -296,7 +313,7 @@ fun OnboardingScreen(
 @Preview(
     showBackground = true,
     widthDp = 830,
-    heightDp = 400
+    heightDp = 400,
 )
 @Composable
 fun OnboardingScreenLandScapePreview(

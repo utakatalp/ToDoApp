@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+private const val INTERVAL = 1500L
 class OnboardingViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -22,11 +23,10 @@ class OnboardingViewModel : ViewModel() {
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
-
     init {
         viewModelScope.launch {
             while (true) {
-                delay(1500)
+                delay(INTERVAL)
                 _uiState.update { state ->
                     state.copy(bgIndex = (state.bgIndex + 1) % 4)
                 }

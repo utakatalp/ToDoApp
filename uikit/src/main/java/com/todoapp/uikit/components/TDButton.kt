@@ -55,52 +55,57 @@ fun TDButton(
                         ),
                 )
 
-        TDButtonSize.MEDIUM -> TextStyle(
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold,
-            fontFamily = FontFamily(
-                Font(R.font.poppins_regular, FontWeight.Normal),
-                Font(R.font.poppins_medium, FontWeight.Medium),
-                Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
-                Font(R.font.poppins_bold, FontWeight.Bold),
-            ),
-        )
-    }
-    val height = when (size) {
-        TDButtonSize.SMALL -> 40.dp
-        TDButtonSize.MEDIUM -> 60.dp
-    }
+            TDButtonSize.MEDIUM ->
+                TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily =
+                        FontFamily(
+                            Font(R.font.poppins_regular, FontWeight.Normal),
+                            Font(R.font.poppins_medium, FontWeight.Medium),
+                            Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
+                            Font(R.font.poppins_bold, FontWeight.Bold),
+                        ),
+                )
+        }
+    val height =
+        when (size) {
+            TDButtonSize.SMALL -> 40.dp
+            TDButtonSize.MEDIUM -> 60.dp
+        }
 
-    val width = when (size) {
-        TDButtonSize.SMALL -> 140.dp
-        TDButtonSize.MEDIUM -> 200.dp
-    }
+    val width =
+        when (size) {
+            TDButtonSize.SMALL -> 140.dp
+            TDButtonSize.MEDIUM -> 200.dp
+        }
 
-    val paddingValues = when (size) {
-        TDButtonSize.SMALL -> PaddingValues(horizontal = 10.dp, vertical = 8.dp)
-        TDButtonSize.MEDIUM -> PaddingValues(horizontal = 12.dp, vertical = 12.dp)
-    }
+    val paddingValues =
+        when (size) {
+            TDButtonSize.SMALL -> PaddingValues(horizontal = 10.dp, vertical = 8.dp)
+            TDButtonSize.MEDIUM -> PaddingValues(horizontal = 12.dp, vertical = 12.dp)
+        }
 
     when (type) {
         TDButtonType.PRIMARY -> {
             Button(
-                modifier = Modifier
-                    .height(height)
-                    .then(modifier)
-                    .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.width(width)),
+                modifier =
+                    Modifier
+                        .height(height)
+                        .then(modifier)
+                        .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.width(width)),
                 onClick = onClick,
                 enabled = isEnable,
                 contentPadding = paddingValues,
                 shape = RoundedCornerShape(6.dp),
-                colors = ButtonColors(
-                    containerColor = TDTheme.colors.purple,
-                    contentColor = TDTheme.colors.white,
-                    disabledContainerColor = TDTheme.colors.purple.copy(alpha = 0.8f),
-                    disabledContentColor = TDTheme.colors.white.copy(alpha = 0.8f),
-                ),
-
-
-                ) {
+                colors =
+                    ButtonColors(
+                        containerColor = TDTheme.colors.purple,
+                        contentColor = TDTheme.colors.white,
+                        disabledContainerColor = TDTheme.colors.purple.copy(alpha = 0.8f),
+                        disabledContentColor = TDTheme.colors.white.copy(alpha = 0.8f),
+                    ),
+            ) {
                 icon?.let {
                     Icon(
                         imageVector = icon,
@@ -118,20 +123,22 @@ fun TDButton(
 
         TDButtonType.SECONDARY -> {
             Button(
-                modifier = Modifier
-                    .height(height)
-                    .then(modifier)
-                    .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.width(width)),
+                modifier =
+                    Modifier
+                        .height(height)
+                        .then(modifier)
+                        .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.width(width)),
                 onClick = onClick,
                 enabled = isEnable,
                 contentPadding = paddingValues,
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonColors(
-                    containerColor = TDTheme.colors.white,
-                    contentColor = TDTheme.colors.purple,
-                    disabledContainerColor = TDTheme.colors.white.copy(alpha = 0.8f),
-                    disabledContentColor = TDTheme.colors.purple.copy(alpha = 0.8f),
-                )
+                colors =
+                    ButtonColors(
+                        containerColor = TDTheme.colors.white,
+                        contentColor = TDTheme.colors.purple,
+                        disabledContainerColor = TDTheme.colors.white.copy(alpha = 0.8f),
+                        disabledContentColor = TDTheme.colors.purple.copy(alpha = 0.8f),
+                    ),
             ) {
                 icon?.let {
                     Icon(
@@ -190,7 +197,7 @@ private fun TDButtonPreview() {
             onClick = {},
             type = TDButtonType.SECONDARY,
             size = TDButtonSize.MEDIUM,
-            fullWidth = true
+            fullWidth = true,
         )
     }
 }

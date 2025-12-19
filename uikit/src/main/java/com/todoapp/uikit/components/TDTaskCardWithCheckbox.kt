@@ -28,33 +28,38 @@ fun TDTaskCardWithCheckbox(
     taskText: String,
     onCheckBoxClick: (Boolean) -> Unit,
 ) {
-    Column() {
+    Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(40.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TDCheckBox(isChecked = isChecked, onCheckBoxClick = onCheckBoxClick)
             Spacer(Modifier.weight(0.1f))
             TDText(
                 text = taskText,
-                style = TDTheme.typography.regularTextStyle.copy(
-                    textDecoration = if (isChecked) {
-                        TextDecoration.LineThrough
-                    } else TextDecoration.None
-                )
+                style =
+                    TDTheme.typography.regularTextStyle.copy(
+                        textDecoration =
+                            if (isChecked) {
+                                TextDecoration.LineThrough
+                            } else {
+                                TextDecoration.None
+                            },
+                    ),
             )
             Spacer(Modifier.weight(2f))
             Icon(
                 painter = painterResource(R.drawable.ic_drag),
                 contentDescription = "drag",
-                tint = TDTheme.colors.gray
+                tint = TDTheme.colors.gray,
             )
         }
         Spacer(Modifier.size(10.dp))
         HorizontalDivider(
-            thickness = 1.dp
+            thickness = 1.dp,
         )
     }
 }
@@ -63,30 +68,32 @@ fun TDTaskCardWithCheckbox(
 private fun TDCheckBox(
     modifier: Modifier = Modifier,
     isChecked: Boolean,
-    onCheckBoxClick: (Boolean) -> Unit
+    onCheckBoxClick: (Boolean) -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier
-            .background(TDTheme.colors.lightGray)
-            .clickable(
-                onClick = { onCheckBoxClick(isChecked) }
-            )
+        modifier =
+            modifier
+                .background(TDTheme.colors.lightGray)
+                .clickable(
+                    onClick = { onCheckBoxClick(isChecked) },
+                ),
     ) {
         Icon(
-            modifier = Modifier
-                .size(20.dp)
-                .border(width = 1.dp, color = TDTheme.colors.purple),
+            modifier =
+                Modifier
+                    .size(20.dp)
+                    .border(width = 1.dp, color = TDTheme.colors.purple),
             painter = painterResource(id = R.drawable.ic_rectangle_sharp),
             contentDescription = "rectangle",
-            tint = TDTheme.colors.white
+            tint = TDTheme.colors.white,
         )
         if (isChecked) {
             Icon(
                 modifier = Modifier.size(10.dp),
                 painter = painterResource(id = R.drawable.ic_check),
                 contentDescription = "check",
-                tint = TDTheme.colors.purple
+                tint = TDTheme.colors.purple,
             )
         }
     }
@@ -98,7 +105,7 @@ private fun TDTaskCardWithCheckboxPreview() {
     TDTaskCardWithCheckbox(
         isChecked = true,
         taskText = "Buy a cat food",
-        onCheckBoxClick = { }
+        onCheckBoxClick = { },
     )
 }
 
@@ -108,7 +115,7 @@ private fun TDTaskCardWithoutCheckboxPreview() {
     TDTaskCardWithCheckbox(
         isChecked = false,
         taskText = "Buy a cat food",
-        onCheckBoxClick = { }
+        onCheckBoxClick = { },
     )
 }
 

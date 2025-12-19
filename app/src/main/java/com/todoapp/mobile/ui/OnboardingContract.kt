@@ -7,11 +7,13 @@ object OnboardingContract {
 
     sealed interface UiAction {
         data object OnLoginClick : UiAction
+
         data object OnRegisterClick : UiAction
     }
 
     sealed interface UiEffect {
         data object NavigateToLogin : UiEffect
+
         data object NavigateToRegister : UiEffect
     }
 }

@@ -3,6 +3,15 @@ config:
   warningsAsErrors: false
   excludes: ''
 
+complexity:
+  LongMethod:
+    active: true
+    threshold: 60
+    ignoreAnnotated:
+      - Composable
+
+
+
 naming:
   ClassNaming:
     excludes: &testFolders
@@ -20,6 +29,8 @@ naming:
 style:
   MagicNumber:
     active: true
+    ignoreAnnotated:
+      [ 'Composable' ]
     excludes:
       - "**/ui/theme/**"
       - "**/theme/**"

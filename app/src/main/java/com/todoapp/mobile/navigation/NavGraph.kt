@@ -31,7 +31,7 @@ fun NavGraph(
                 uiEffect = viewModel.uiEffect,
                 onAction = viewModel::onAction,
                 onNavigateToRegister = {},
-                onNavigateToLogin = {}
+                onNavigateToLogin = {},
             )
         }
     }
