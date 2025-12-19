@@ -20,8 +20,6 @@ appcompat = "1.6.1"
 material = "1.10.0"
 runtime = "1.10.0"
 material3 = "1.4.0"
-uiToolingPreview = "1.10.0"
-uiTooling = "1.10.0"
 ktlint = "14.0.1"
 detekt = "1.23.4"
 
@@ -63,8 +61,6 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
-
-
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text" }

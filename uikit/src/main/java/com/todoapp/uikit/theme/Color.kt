@@ -10,6 +10,8 @@ internal val LocalLightColors = staticCompositionLocalOf { lightColors() }
 internal val LocalDarkColors = staticCompositionLocalOf { darkColors() }
 
 internal fun lightColors(
+    bgColor: Color = Color.White,
+    lightPurple: Color = Color(0xFFA9BAFF),
     gray: Color = Color(0xFF717171),
     purple: Color = Color(0xFF4566EC),
     black: Color = Color(0xFF090E23),
@@ -24,24 +26,29 @@ internal fun lightColors(
     white: Color = Color(0xFFFFFAF0),
     softPink: Color = Color(0xFFF5D3BB),
     lightGray: Color = Color(0xFFC0C0C0),
-): TDColor = TDColor(
-    gray = gray,
-    black = black,
-    purple = purple,
-    brown = brown,
-    green = green,
-    orange = orange,
-    darkBrown = darkBrown,
-    lightBrown = lightBrown,
-    beige = beige,
-    lightOrange = lightOrange,
-    lightYellow = lightYellow,
-    white = white,
-    softPink = softPink,
-    lightGray = lightGray
-)
+): TDColor =
+    TDColor(
+        bgColor = bgColor,
+        gray = gray,
+        black = black,
+        purple = purple,
+        brown = brown,
+        green = green,
+        orange = orange,
+        darkBrown = darkBrown,
+        lightBrown = lightBrown,
+        beige = beige,
+        lightOrange = lightOrange,
+        lightYellow = lightYellow,
+        white = white,
+        softPink = softPink,
+        lightGray = lightGray,
+        lightPurple = lightPurple,
+    )
 
 internal fun darkColors( // will be changed
+    bgColor: Color = Color.Black,
+    lightPurple: Color = Color(0xFFA9BAFF),
     gray: Color = Color(0xFF717171),
     purple: Color = Color(0xFF4566EC),
     black: Color = Color(0xFF090E23),
@@ -56,24 +63,29 @@ internal fun darkColors( // will be changed
     white: Color = Color(0xFFFFFAF0),
     softPink: Color = Color(0xFFF5D3BB),
     lightGray: Color = Color(0xFFC0C0C0),
-): TDColor = TDColor(
-    gray = gray,
-    black = black,
-    purple = purple,
-    brown = brown,
-    green = green,
-    orange = orange,
-    darkBrown = darkBrown,
-    lightBrown = lightBrown,
-    beige = beige,
-    lightOrange = lightOrange,
-    lightYellow = lightYellow,
-    white = white,
-    softPink = softPink,
-    lightGray = lightGray
-)
+): TDColor =
+    TDColor(
+        bgColor = bgColor,
+        gray = gray,
+        black = black,
+        purple = purple,
+        brown = brown,
+        green = green,
+        orange = orange,
+        darkBrown = darkBrown,
+        lightBrown = lightBrown,
+        beige = beige,
+        lightOrange = lightOrange,
+        lightYellow = lightYellow,
+        white = white,
+        softPink = softPink,
+        lightGray = lightGray,
+        lightPurple = lightPurple,
+    )
 
 class TDColor(
+    bgColor: Color,
+    lightPurple: Color,
     gray: Color,
     black: Color,
     purple: Color,
@@ -89,6 +101,10 @@ class TDColor(
     softPink: Color,
     lightGray: Color,
 ) {
+    private var _bgColor: Color by mutableStateOf(bgColor)
+    val bgColor: Color = _bgColor
+    private var _lightPurple: Color by mutableStateOf(lightPurple)
+    val lightPurple: Color = _lightPurple
     private var _lightGray: Color by mutableStateOf(lightGray)
     val lightGray: Color = _lightGray
     private var _gray: Color by mutableStateOf(value = gray)

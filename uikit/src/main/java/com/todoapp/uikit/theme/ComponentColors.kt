@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun textFieldColors(): TextFieldColors {
-    return OutlinedTextFieldDefaults.colors(
+fun textFieldColors(): TextFieldColors =
+    OutlinedTextFieldDefaults.colors(
         focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
         focusedTrailingIconColor = MaterialTheme.colorScheme.primary,
         focusedContainerColor = MaterialTheme.colorScheme.background,
@@ -23,4 +23,3 @@ fun textFieldColors(): TextFieldColors {
         unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
         cursorColor = MaterialTheme.colorScheme.primary,
     )
-}
