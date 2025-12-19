@@ -1,0 +1,28 @@
+config:
+  validation: true
+  warningsAsErrors: false
+  excludes: ''
+
+naming:
+  ClassNaming:
+    excludes: &testFolders
+      - '**/test/**'
+      - '**/androidTest/**'
+  ConstructorParameterNaming:
+    excludes: *testFolders
+  FunctionNaming:
+    ignoreAnnotated:
+      [ 'Composable' ]
+    active: true
+    excludes: [ '**/jvmTest/**', '**/test/**', '**/androidTest/**', '**/commonTest/**' ]
+    functionPattern: '[a-z][a-zA-Z0-9]*'
+    excludeClassPattern: '$^'
+style:
+  MagicNumber:
+    active: true
+    excludes:
+      - "**/ui/theme/**"
+      - "**/theme/**"
+formatting:
+  Indentation:
+    active: false

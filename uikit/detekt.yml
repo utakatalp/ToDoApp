@@ -1,0 +1,45 @@
+config:
+  validation: true
+  warningsAsErrors: false
+  excludes: ''
+
+naming:
+  ClassNaming:
+    excludes: &testFolders
+      - '**/test/**'
+      - '**/androidTest/**'
+  ConstructorParameterNaming:
+    excludes: *testFolders
+  FunctionNaming:
+    ignoreAnnotated:
+      [ 'Composable' ]
+    active: true
+    excludes: [ '**/jvmTest/**', '**/test/**', '**/androidTest/**', '**/commonTest/**' ]
+    functionPattern: '[a-z][a-zA-Z0-9]*'
+    excludeClassPattern: '$^'
+style:
+  UnusedPrivateMember:
+    active: true
+    ignoreAnnotated:
+      - Preview
+      - PreviewLightDark
+  MagicNumber:
+    active: true
+    excludes:
+      - "**/ui/theme/**"
+      - "**/theme/**"
+      - "**/uikit/components/**"
+formatting:
+  Indentation:
+    active: false
+complexity:
+  LongMethod:
+    active: true
+    excludes:
+      - '**/uikit/components/**'
+      - '**/uikit/theme/**'
+  LongParameterList:
+    active: true
+    excludes:
+      - '**/uikit/components/**'
+      - '**/uikit/theme/**'

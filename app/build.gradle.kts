@@ -1,3 +1,6 @@
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +8,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -15,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.todoapp.mobile"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -28,7 +33,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -42,6 +47,33 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    android.set(true)
+    ignoreFailures.set(false)
+    additionalEditorconfig.set( // not supported until ktlint 0.49
+        mapOf(
+            "ktlint_standard_function-naming" to "disabled",
+        ),
+    )
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+    }
+}
+detekt {
+    autoCorrect = true
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom("$projectDir/detekt.yml")
+    baseline = file("$projectDir/config/baseline.xml")
+}
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "17"
+}
+tasks.withType<DetektCreateBaselineTask>().configureEach {
+    jvmTarget = "17"
 }
 
 dependencies {
@@ -66,7 +98,7 @@ dependencies {
 
     // Dependency Injection (Hilt)
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler) // kapt yerine ksp kullanıyoruz
+    ksp(libs.hilt.compiler)
 
     // Network (Retrofit & Serialization)
     implementation(libs.retrofit)
@@ -82,4 +114,5 @@ dependencies {
 
     // Utils
     implementation(libs.timber)
+    detektPlugins(libs.detekt.formatting)
 }

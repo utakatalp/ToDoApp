@@ -40,17 +40,20 @@ fun TDButton(
     fullWidth: Boolean = false,
     onClick: () -> Unit,
 ) {
-    val textStyle = when (size) {
-        TDButtonSize.SMALL -> TextStyle(
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            fontFamily = FontFamily(
-                Font(R.font.poppins_regular, FontWeight.Normal),
-                Font(R.font.poppins_medium, FontWeight.Medium),
-                Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
-                Font(R.font.poppins_bold, FontWeight.Bold),
-            ),
-        )
+    val textStyle =
+        when (size) {
+            TDButtonSize.SMALL ->
+                TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    fontFamily =
+                        FontFamily(
+                            Font(R.font.poppins_regular, FontWeight.Normal),
+                            Font(R.font.poppins_medium, FontWeight.Medium),
+                            Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
+                            Font(R.font.poppins_bold, FontWeight.Bold),
+                        ),
+                )
 
         TDButtonSize.MEDIUM -> TextStyle(
             fontSize = 18.sp,
@@ -135,7 +138,7 @@ fun TDButton(
                         modifier = Modifier.size(14.dp),
                         imageVector = icon,
                         contentDescription = text,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
@@ -152,7 +155,6 @@ fun TDButton(
 @Preview(showBackground = false)
 @Composable
 private fun TDButtonPreview() {
-
     Column {
         TDButton(
             text = "Primary Button",

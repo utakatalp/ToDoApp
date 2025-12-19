@@ -28,9 +28,10 @@ fun TDText(
         text = text,
         modifier = modifier,
         textAlign = textAlign,
-        style = style.merge(
-            color = color,
-        ),
+        style =
+            style.merge(
+                color = color,
+            ),
         overflow = overflow,
         maxLines = maxLines,
     )
@@ -47,23 +48,25 @@ fun TDText(
     textAlign: TextAlign? = null,
 ) {
     Text(
-        text = buildAnnotatedString {
-            withStyle(style = style.toSpanStyle()) {
-                append(fullText)
-                val mStartIndex = fullText.indexOf(spanText)
-                val mEndIndex = mStartIndex.plus(spanText.length)
-                addStyle(
-                    style = spanStyle,
-                    start = mStartIndex,
-                    end = mEndIndex,
-                )
-            }
-        },
+        text =
+            buildAnnotatedString {
+                withStyle(style = style.toSpanStyle()) {
+                    append(fullText)
+                    val mStartIndex = fullText.indexOf(spanText)
+                    val mEndIndex = mStartIndex.plus(spanText.length)
+                    addStyle(
+                        style = spanStyle,
+                        start = mStartIndex,
+                        end = mEndIndex,
+                    )
+                }
+            },
         modifier = modifier,
         textAlign = textAlign,
-        style = style.merge(
-            color = color,
-        ),
+        style =
+            style.merge(
+                color = color,
+            ),
     )
 }
 
@@ -81,9 +84,10 @@ private fun TDAnnotatedTextExample() {
     TDText(
         fullText = "This should be a text.",
         spanText = "should",
-        spanStyle = SpanStyle(
-            color = TDTheme.colors.gray,
-            fontWeight = FontWeight.Bold
-        )
+        spanStyle =
+            SpanStyle(
+                color = TDTheme.colors.gray,
+                fontWeight = FontWeight.Bold,
+            ),
     )
 }
