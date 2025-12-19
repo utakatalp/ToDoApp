@@ -10,9 +10,14 @@ internal val LocalLightColors = staticCompositionLocalOf { lightColors() }
 internal val LocalDarkColors = staticCompositionLocalOf { darkColors() }
 
 internal fun lightColors(
+    red: Color = Color(0xFFFFB1B5),
+    crossRed: Color = Color(0xFFB2282D),
+    statusCardGray: Color = Color(0xFF6E7180),
+    bgColorPurple: Color = Color(0xFFEFF2FF),
     bgColor: Color = Color.White,
     lightPurple: Color = Color(0xFFA9BAFF),
     gray: Color = Color(0xFF717171),
+    darkPurple: Color = Color(0xFF1C3082),
     purple: Color = Color(0xFF4566EC),
     black: Color = Color(0xFF090E23),
     brown: Color = Color(0xFF3F2D20),
@@ -28,9 +33,14 @@ internal fun lightColors(
     lightGray: Color = Color(0xFFC0C0C0),
 ): TDColor =
     TDColor(
+        red = red,
+        crossRed = crossRed,
+        statusCardGray = statusCardGray,
+        bgColorPurple = bgColorPurple,
         bgColor = bgColor,
         gray = gray,
         black = black,
+        darkPurple = darkPurple,
         purple = purple,
         brown = brown,
         green = green,
@@ -47,9 +57,14 @@ internal fun lightColors(
     )
 
 internal fun darkColors( // will be changed
+    red: Color = Color(0xFFFFB1B5),
+    crossRed: Color = Color(0xFFB2282D),
+    statusCardGray: Color = Color(0xFF6E7180),
+    bgColorPurple: Color = Color(0xFFEFF2FF),
     bgColor: Color = Color.Black,
     lightPurple: Color = Color(0xFFA9BAFF),
     gray: Color = Color(0xFF717171),
+    darkPurple: Color = Color(0xFF1C3082),
     purple: Color = Color(0xFF4566EC),
     black: Color = Color(0xFF090E23),
     brown: Color = Color(0xFF3F2D20),
@@ -65,10 +80,15 @@ internal fun darkColors( // will be changed
     lightGray: Color = Color(0xFFC0C0C0),
 ): TDColor =
     TDColor(
+        red = red,
+        crossRed = crossRed,
+        statusCardGray = statusCardGray,
+        bgColorPurple = bgColorPurple,
         bgColor = bgColor,
         gray = gray,
         black = black,
         purple = purple,
+        darkPurple = darkPurple,
         brown = brown,
         green = green,
         orange = orange,
@@ -84,10 +104,15 @@ internal fun darkColors( // will be changed
     )
 
 class TDColor(
+    red: Color,
+    crossRed: Color,
+    statusCardGray: Color,
+    bgColorPurple: Color,
     bgColor: Color,
     lightPurple: Color,
     gray: Color,
     black: Color,
+    darkPurple: Color,
     purple: Color,
     brown: Color,
     green: Color,
@@ -101,6 +126,16 @@ class TDColor(
     softPink: Color,
     lightGray: Color,
 ) {
+    private var _red: Color by mutableStateOf(red)
+    val red: Color = _red
+    private var _crossRed: Color by mutableStateOf(crossRed)
+    val crossRed: Color = _crossRed
+    private var _statusCardGray: Color by mutableStateOf(statusCardGray)
+    val statusCardGray: Color = _statusCardGray
+    private var _bgColorPurple: Color by mutableStateOf(bgColorPurple)
+    val bgColorPurple: Color = _bgColorPurple
+    private var _darkPurple: Color by mutableStateOf(darkPurple)
+    val darkPurple: Color = _darkPurple
     private var _bgColor: Color by mutableStateOf(bgColor)
     val bgColor: Color = _bgColor
     private var _lightPurple: Color by mutableStateOf(lightPurple)
