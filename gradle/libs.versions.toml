@@ -20,6 +20,9 @@ appcompat = "1.6.1"
 material = "1.10.0"
 runtime = "1.10.0"
 material3 = "1.4.0"
+navigationRuntimeKtx = "2.9.6"
+navigationCompose = "2.9.6"
+
 ktlint = "14.0.1"
 detekt = "1.23.4"
 
@@ -64,6 +67,8 @@ detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-form
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text" }
+androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
