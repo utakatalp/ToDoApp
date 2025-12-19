@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -66,7 +67,6 @@ fun OnboardingScreen(
 
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     if (isPortrait) {
 
@@ -119,6 +119,7 @@ fun OnboardingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(TDTheme.colors.white)
+                    .navigationBarsPadding()
 
             ) {
                 TDText(
@@ -146,7 +147,7 @@ fun OnboardingScreen(
                         .align(alignment = Alignment.CenterHorizontally)
                         .fillMaxWidth()
                         .padding(bottom = 12.dp)
-                        .padding(horizontal = if (isLandscape) 256.dp else 12.dp),
+                        .padding(horizontal = 12.dp),
                     text = stringResource(id = R.string.onboarding_get_started),
                     isEnable = true,
                     type = TDButtonType.PRIMARY,
@@ -174,9 +175,7 @@ fun OnboardingScreen(
                 )
             }
         }
-    }
-
-    if (isLandscape) {
+    } else {
 
         Row(
             modifier = Modifier
