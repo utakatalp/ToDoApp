@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,6 +25,7 @@ import com.todoapp.uikit.theme.TDTheme
 
 @Composable
 fun TDTaskCardWithCheckbox(
+    modifier: Modifier = Modifier,
     isChecked: Boolean,
     taskText: String,
     onCheckBoxClick: (Boolean) -> Unit,
@@ -31,9 +33,9 @@ fun TDTaskCardWithCheckbox(
     Column {
         Row(
             modifier =
-                Modifier
+                modifier
                     .fillMaxWidth()
-                    .height(40.dp),
+                    .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TDCheckBox(isChecked = isChecked, onCheckBoxClick = onCheckBoxClick)
@@ -54,12 +56,13 @@ fun TDTaskCardWithCheckbox(
             Icon(
                 painter = painterResource(R.drawable.ic_drag),
                 contentDescription = "drag",
-                tint = TDTheme.colors.gray,
+                tint = TDTheme.colors.gray.copy(alpha = 0.4f),
             )
         }
-        Spacer(Modifier.size(10.dp))
         HorizontalDivider(
+            modifier = Modifier.padding(start = 32.dp),
             thickness = 1.dp,
+            color = TDTheme.colors.gray.copy(alpha = 0.3f),
         )
     }
 }
