@@ -1,4 +1,4 @@
-package com.todoapp.mobile.ui
+package com.todoapp.mobile.ui.onboarding
 
 import android.content.res.Configuration
 import androidx.compose.animation.Crossfade
@@ -36,8 +36,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
-import com.todoapp.mobile.ui.OnboardingContract.UiAction
-import com.todoapp.mobile.ui.OnboardingContract.UiState
+import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiAction
+import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
