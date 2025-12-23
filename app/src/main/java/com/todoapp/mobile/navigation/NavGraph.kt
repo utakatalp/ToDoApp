@@ -26,11 +26,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.uikit.R
 import com.todoapp.mobile.common.CollectWithLifecycle
-import com.todoapp.mobile.ui.OnboardingContract.UiEffect
-import com.todoapp.mobile.ui.OnboardingScreen
-import com.todoapp.mobile.ui.OnboardingViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
+import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
+import com.todoapp.mobile.ui.onboarding.OnboardingScreen
+import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.uikit.components.TDTopBar
 import com.todoapp.uikit.components.TopBarAction
 import com.todoapp.uikit.components.TopBarState
@@ -51,7 +51,7 @@ fun NavGraph(
             val viewModel: OnboardingViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
-            navigationEffectController(uiEffect, navController)
+            NavigationEffectController(uiEffect, navController)
             OnboardingScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
@@ -75,7 +75,7 @@ fun NavGraph(
 }
 
 @Composable
-private fun navigationEffectController(
+private fun NavigationEffectController(
     uiEffect: Flow<UiEffect>,
     navController: NavHostController,
 ) {
