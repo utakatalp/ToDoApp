@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -39,7 +38,7 @@ fun TDTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
+    label: String?,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
@@ -102,7 +101,11 @@ fun TDTextField(
                 },
         value = value,
         onValueChange = onValueChange,
-        label = { Text(text = label) },
+        label = {
+            if (label != null) {
+                Text(text = label)
+            }
+        },
         singleLine = singleLine,
         enabled = enabled,
         isError = isError,
@@ -111,7 +114,6 @@ fun TDTextField(
         visualTransformation = trailingTransformation,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
-        shape = RoundedCornerShape(12.dp),
         colors = textFieldColors(),
         supportingText = {
             if (!supportingText.isNullOrEmpty()) {
@@ -158,18 +160,13 @@ private fun TextFieldPreview() {
             value = "doe",
             onValueChange = {},
             label = "Last Name",
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_name),
-                    contentDescription = null,
-                )
-            },
+            leadingIcon = null,
         )
 
         TDTextField(
             value = "johndoe@hotmail.com",
             onValueChange = {},
-            label = "Email",
+            label = "",
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_mail),

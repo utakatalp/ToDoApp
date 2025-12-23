@@ -1,6 +1,5 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
-import org.gradle.kotlin.dsl.withType
 
 plugins {
     id("com.android.library")
@@ -43,7 +42,8 @@ android {
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     android.set(true)
     ignoreFailures.set(false)
-    additionalEditorconfig.set( // not supported until ktlint 0.49
+    additionalEditorconfig.set(
+        // not supported until ktlint 0.49
         mapOf(
             "ktlint_standard_function-naming" to "disabled",
         ),
@@ -72,8 +72,10 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.material3)
     implementation(libs.material)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.navigation.runtime.ktx)
     debugImplementation(libs.androidx.ui.tooling)
     detektPlugins(libs.detekt.formatting)
 }
