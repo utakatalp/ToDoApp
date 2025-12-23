@@ -1,4 +1,4 @@
-package com.todoapp.mobile.ui
+package com.todoapp.mobile.ui.onboarding
 
 object OnboardingContract {
     data class UiState(
