@@ -1,4 +1,4 @@
-package com.todoapp.mobile.ui
+package com.todoapp.mobile.ui.onboarding
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 
