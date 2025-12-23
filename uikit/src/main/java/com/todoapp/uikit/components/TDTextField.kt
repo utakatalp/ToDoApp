@@ -159,7 +159,7 @@ private fun TextFieldPreview() {
         TDTextField(
             value = "doe",
             onValueChange = {},
-            label = "Last Name",
+            label = "",
             leadingIcon = null,
         )
 
