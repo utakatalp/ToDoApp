@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -37,33 +36,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
-import com.todoapp.mobile.common.CollectWithLifecycle
 import com.todoapp.mobile.ui.OnboardingContract.UiAction
-import com.todoapp.mobile.ui.OnboardingContract.UiEffect
 import com.todoapp.mobile.ui.OnboardingContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun OnboardingScreen(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
-    uiEffect: Flow<UiEffect>,
-    onNavigateToLogin: () -> Unit,
-    onNavigateToRegister: () -> Unit,
 ) {
-    uiEffect.CollectWithLifecycle { effect ->
-        when (effect) {
-            UiEffect.NavigateToLogin -> onNavigateToLogin()
-            UiEffect.NavigateToRegister -> onNavigateToRegister()
-        }
-    }
-
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
@@ -73,7 +58,6 @@ fun OnboardingScreen(
                 Modifier
                     .fillMaxSize()
                     .background(TDTheme.colors.purple)
-                    .statusBarsPadding()
                     .verticalScroll(rememberScrollState()),
         ) {
             Spacer(Modifier.weight(0.30f))
@@ -323,9 +307,9 @@ fun OnboardingScreenLandScapePreview(
         OnboardingScreen(
             uiState = uiState,
             onAction = {},
-            uiEffect = emptyFlow(),
-            onNavigateToLogin = {},
-            onNavigateToRegister = {},
+            // uiEffect = emptyFlow(),
+            // onNavigateToLogin = {},
+            // onNavigateToRegister = {},
         )
     }
 }
@@ -339,9 +323,9 @@ fun OnboardingScreenPreview(
         OnboardingScreen(
             uiState = uiState,
             onAction = {},
-            uiEffect = emptyFlow(),
-            onNavigateToLogin = {},
-            onNavigateToRegister = {},
+            // uiEffect = emptyFlow(),
+            // onNavigateToLogin = {},
+            // onNavigateToRegister = {},
         )
     }
 }
