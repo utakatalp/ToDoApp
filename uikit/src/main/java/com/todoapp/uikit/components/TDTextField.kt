@@ -23,14 +23,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.theme.TDTheme
 import com.todoapp.uikit.theme.textFieldColors
 
 @Composable
@@ -131,6 +134,46 @@ fun TDTextField(
     )
 }
 
+@Composable
+fun TDLabeledTextField(
+    title: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String? = null,
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    singleLine: Boolean = true,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    style: TextStyle = TDTheme.typography.regularTextStyle,
+    color: Color = TDTheme.colors.gray,
+) {
+    Column(modifier = modifier) {
+        TDText(
+            text = title,
+            style = style,
+            color = color,
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            isError = isError,
+            singleLine = singleLine,
+            colors = textFieldColors(),
+            visualTransformation = visualTransformation,
+            placeholder = {
+                if (placeholder != null) TDText(text = placeholder, color = TDTheme.colors.gray)
+            },
+            textStyle = TDTheme.typography.regularTextStyle,
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun TextFieldPreview() {
@@ -157,7 +200,7 @@ private fun TextFieldPreview() {
         Spacer(modifier = Modifier.height(4.dp))
 
         TDTextField(
-            value = "doe",
+            value = "Doing Homework",
             onValueChange = {},
             label = "",
             leadingIcon = null,
@@ -189,6 +232,18 @@ private fun TextFieldPreview() {
             },
             passwordVisible = passwordVisible,
             onTogglePasswordVisible = { passwordVisible = !passwordVisible },
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TDLabeledTextField(
+            title = "Title",
+            value = "Doing Homework",
+            onValueChange = {},
+            placeholder = "Placeholder",
+            isError = true,
+            enabled = false,
+            singleLine = false,
         )
     }
 }
