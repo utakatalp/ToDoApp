@@ -1,10 +1,10 @@
-package com.todoapp.mobile.ui
+package com.todoapp.mobile.ui.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.todoapp.mobile.ui.OnboardingContract.UiAction
-import com.todoapp.mobile.ui.OnboardingContract.UiEffect
-import com.todoapp.mobile.ui.OnboardingContract.UiState
+import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiAction
+import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
+import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
