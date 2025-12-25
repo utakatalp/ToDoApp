@@ -71,6 +71,9 @@ fun NavGraph(
         composable<Screen.Settings> { }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
+        composable<Screen.Statistic> { }
+        composable<Screen.Calendar> { }
+        composable<Screen.Profile> { }
     }
 }
 
@@ -103,6 +106,7 @@ fun ToDoApp() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { ShowTopBar(showTopBar, navController) },
+        bottomBar = { TDBottomBar(navController) },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
         NavGraph(
