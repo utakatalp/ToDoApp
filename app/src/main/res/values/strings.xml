@@ -5,4 +5,19 @@
     <string name="onboarding_get_started">Get Started</string>
     <string name="onboarding_login_span">Already have an account? Login</string>
     <string name="onboarding_login_text_span">Login</string>
+    <string name="task_complete">Task Complete</string>
+    <string name="task_pending">Task Pending</string>
+    <string name="tasks_today">Tasks Today</string>
+    <string name="add_new_task">Add New Task</string>
+    <string name="close_button">Close Button</string>
+    <string name="task_title">Task Title</string>
+    <string name="set_time">Set time</string>
+    <string name="starts">Starts</string>
+    <string name="ends">Ends</string>
+    <string name="description">Description</string>
+    <string name="create_task">Create Task</string>
+    <string name="home">Home</string>
+    <string name="settings">settings</string>
+    <string name="search">search</string>
+    <string name="notification">notification</string>
 </resources>

@@ -32,7 +32,7 @@ import kotlin.math.max
 @Composable
 fun TDWeeklyDatePicker(
     modifier: Modifier,
-    selectedDate: LocalDate = LocalDate.now(),
+    selectedDate: LocalDate? = LocalDate.now(),
     onDateSelect: (LocalDate) -> Unit,
 ) {
     val currentMonth = YearMonth.now()
@@ -43,7 +43,7 @@ fun TDWeeklyDatePicker(
         listState.animateScrollToItem(
             max(
                 0,
-                selectedDate.dayOfMonth - 4,
+                selectedDate?.dayOfMonth?.minus(4) ?: 1,
             ),
         )
     }
