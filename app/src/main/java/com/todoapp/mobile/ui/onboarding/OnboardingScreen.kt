@@ -105,15 +105,16 @@ fun OnboardingScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .background(TDTheme.colors.white)
+                        .background(TDTheme.colors.background)
                         .navigationBarsPadding(),
-            ) {
+
+                ) {
                 TDText(
                     modifier =
                         Modifier
                             .padding(top = 36.dp, start = 24.dp),
                     textAlign = TextAlign.Start,
-                    color = TDTheme.colors.black,
+                    color = TDTheme.colors.onBackground,
                     style = TDTheme.typography.heading1,
                     text = stringResource(id = R.string.onboarding_title),
                 )
@@ -125,7 +126,7 @@ fun OnboardingScreen(
                         Modifier
                             .padding(bottom = 24.dp, start = 24.dp, end = 24.dp, top = 4.dp),
                     textAlign = TextAlign.Start,
-                    color = TDTheme.colors.black,
+                    color = TDTheme.colors.onBackground,
                     style = TDTheme.typography.regularTextStyle,
                     text = stringResource(id = R.string.onboarding_description),
                 )
@@ -155,8 +156,9 @@ fun OnboardingScreen(
                             .align(alignment = Alignment.CenterHorizontally),
                     fullText = stringResource(id = R.string.onboarding_login_span),
                     spanText = stringResource(id = R.string.onboarding_login_text_span),
-                    color = TDTheme.colors.black,
-                    style = TDTheme.typography.regularTextStyle,
+                    style = TDTheme.typography.regularTextStyle.copy(
+                        color = TDTheme.colors.onBackground
+                    ),
                     spanStyle =
                         SpanStyle(
                             color = TDTheme.colors.purple,
@@ -229,7 +231,9 @@ fun OnboardingScreen(
                 modifier =
                     Modifier
                         .fillMaxHeight()
-                        .background(TDTheme.colors.white)
+                        .background(
+                            TDTheme.colors.background
+                        )
                         .weight(1f),
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -238,7 +242,7 @@ fun OnboardingScreen(
                         Modifier
                             .padding(top = 48.dp, start = 24.dp),
                     textAlign = TextAlign.Start,
-                    color = TDTheme.colors.black,
+                    color = TDTheme.colors.onBackground,
                     style = TDTheme.typography.heading1,
                     text = stringResource(id = R.string.onboarding_title),
                 )
@@ -250,7 +254,7 @@ fun OnboardingScreen(
                         Modifier
                             .padding(bottom = 24.dp, start = 24.dp, end = 24.dp),
                     textAlign = TextAlign.Start,
-                    color = TDTheme.colors.black,
+                    color = TDTheme.colors.onBackground,
                     style = TDTheme.typography.regularTextStyle,
                     text = stringResource(id = R.string.onboarding_description),
                 )
@@ -280,8 +284,9 @@ fun OnboardingScreen(
                             .align(alignment = Alignment.CenterHorizontally),
                     fullText = stringResource(id = R.string.onboarding_login_span),
                     spanText = stringResource(id = R.string.onboarding_login_text_span),
-                    color = TDTheme.colors.black,
-                    style = TDTheme.typography.regularTextStyle,
+                    style = TDTheme.typography.regularTextStyle.copy(
+                        color = TDTheme.colors.onBackground
+                    ),
                     spanStyle =
                         SpanStyle(
                             color = TDTheme.colors.purple,
@@ -307,9 +312,6 @@ fun OnboardingScreenLandScapePreview(
         OnboardingScreen(
             uiState = uiState,
             onAction = {},
-            // uiEffect = emptyFlow(),
-            // onNavigateToLogin = {},
-            // onNavigateToRegister = {},
         )
     }
 }
@@ -323,9 +325,6 @@ fun OnboardingScreenPreview(
         OnboardingScreen(
             uiState = uiState,
             onAction = {},
-            // uiEffect = emptyFlow(),
-            // onNavigateToLogin = {},
-            // onNavigateToRegister = {},
         )
     }
 }
