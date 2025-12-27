@@ -35,7 +35,7 @@ fun TDStatisticCard(
             modifier =
                 modifier
                     .size(width = 162.dp, height = 96.dp)
-                    .background(TDTheme.colors.bgColorPurple),
+                    .background(TDTheme.colors.onBackground),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -47,6 +47,7 @@ fun TDStatisticCard(
                 Spacer(Modifier.width(10.dp))
                 TDText(
                     text = text,
+                    color = TDTheme.colors.background,
                     style = TDTheme.typography.subheading1,
                 )
             }
@@ -59,7 +60,7 @@ fun TDStatisticCard(
                     spanText = "$taskAmount",
                     spanStyle =
                         SpanStyle(
-                            color = TDTheme.colors.black,
+                            color = TDTheme.colors.background,
                             fontWeight = FontWeight.Bold,
                             fontSize = 22.sp,
                         ),
