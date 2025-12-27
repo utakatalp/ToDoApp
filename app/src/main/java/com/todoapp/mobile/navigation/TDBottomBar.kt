@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -70,7 +71,8 @@ fun TDBottomBar(
                     val iconId = if (selected) screen.selectedIcon else screen.icon
                     Icon(
                         painter = painterResource(id = iconId),
-                        contentDescription = stringResource(screen.title)
+                        contentDescription = stringResource(screen.title),
+                        tint = Color.Unspecified
                     )
                 },
                 label = { Text(text = stringResource(id = screen.title)) },
