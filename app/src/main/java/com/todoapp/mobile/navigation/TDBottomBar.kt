@@ -1,6 +1,5 @@
 package com.todoapp.mobile.navigation
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.Icon
@@ -35,14 +34,9 @@ fun TDBottomBar(
     } == true
 
     if (!showBottomBar) return
-    val isDark = isSystemInDarkTheme()
 
     NavigationBar(
-        containerColor = if (isDark) {
-            TDTheme.colors.black
-        } else {
-            TDTheme.colors.white
-        }
+        containerColor = TDTheme.colors.background
     ) {
         items.forEach { screen ->
             val screenRoute = screen.route
