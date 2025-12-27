@@ -23,9 +23,15 @@ object TDTheme {
 }
 
 @Composable
-fun TDTheme(content: @Composable () -> Unit) {
+fun TDTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
+) {
+    val colors = if (darkTheme) darkColors() else lightColors()
+
     CompositionLocalProvider(
-        LocalLightColors provides TDTheme.colors,
+        LocalLightColors provides colors,
+        LocalDarkColors provides colors,
         // LocalIcons provides TDTheme.icons,
         LocalTypography provides TDTheme.typography,
     ) {
