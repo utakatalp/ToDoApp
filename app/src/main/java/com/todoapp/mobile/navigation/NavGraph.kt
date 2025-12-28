@@ -26,6 +26,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.uikit.R
 import com.todoapp.mobile.common.CollectWithLifecycle
+import com.todoapp.mobile.ui.calendar.CalendarScreen
+import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
@@ -69,10 +71,19 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
+        composable<Screen.Calendar> {
+            val viewModel: CalendarViewModel = viewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            CalendarScreen(
+                uiState = uiState,
+                uiEffect = uiEffect,
+                onAction = viewModel::onAction,
+            )
+        }
         composable<Screen.Settings> {}
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
-        composable<Screen.Calendar> { }
         composable<Screen.Statistic> { }
         composable<Screen.Profile> { }
         composable<Screen.Task> { }

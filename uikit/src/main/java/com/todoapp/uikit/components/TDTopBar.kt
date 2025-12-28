@@ -34,7 +34,7 @@ fun TDTopBar(state: TopBarState) {
         },
         colors =
             TopAppBarDefaults.topAppBarColors(
-                containerColor = TDTheme.colors.white,
+                containerColor = TDTheme.colors.background,
             ),
     )
 }
