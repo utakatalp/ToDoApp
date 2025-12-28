@@ -75,6 +75,7 @@ fun NavGraph(
         composable<Screen.Calendar> { }
         composable<Screen.Statistic> { }
         composable<Screen.Profile> { }
+        composable<Screen.Task> { }
     }
 }
 
