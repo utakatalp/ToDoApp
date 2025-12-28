@@ -15,13 +15,6 @@ sealed class AppDestination(
         selectedIcon = R.drawable.ic_selected_home,
     )
 
-    data object Statistic : AppDestination(
-        title = R.string.navbar_statistic_screen_page_name,
-        route = Screen.Statistic::class.qualifiedName!!,
-        icon = R.drawable.ic_statistic,
-        selectedIcon = R.drawable.ic_selected_statistic,
-    )
-
     data object Calendar : AppDestination(
         title = R.string.navbar_calendar_screen_page_name,
         route = Screen.Calendar::class.qualifiedName!!,
@@ -29,7 +22,14 @@ sealed class AppDestination(
         selectedIcon = R.drawable.ic_selected_calendar,
     )
 
+    data object Statistic : AppDestination(
+        title = R.string.navbar_statistic_screen_page_name,
+        route = Screen.Statistic::class.qualifiedName!!,
+        icon = R.drawable.ic_statistic,
+        selectedIcon = R.drawable.ic_selected_statistic,
+    )
+
     companion object {
-        val bottomBarItems = listOf(Home, Statistic, Calendar)
+        val bottomBarItems = listOf(Home, Calendar, Statistic)
     }
 }
