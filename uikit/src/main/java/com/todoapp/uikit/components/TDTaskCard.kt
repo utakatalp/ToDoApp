@@ -31,7 +31,7 @@ fun TDTaskCard(
                 .fillMaxWidth(),
     ) {
         VerticalDivider(
-            thickness = 4.dp,
+            thickness = 3.dp,
             color = randVerticalColor,
         )
         Column(
