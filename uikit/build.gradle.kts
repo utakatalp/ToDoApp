@@ -72,9 +72,11 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.material3)
     implementation(libs.material)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.runtime.ktx)
     debugImplementation(libs.androidx.ui.tooling)
     detektPlugins(libs.detekt.formatting)
 }

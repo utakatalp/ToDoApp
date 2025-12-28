@@ -26,4 +26,8 @@ interface Screen {
 
     @Serializable
     data object Profile : Screen
+    data object Calendar : Screen
+
+    @Serializable
+    data object Task : Screen
 }

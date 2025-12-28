@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -168,6 +169,121 @@ fun TDDatePicker(
                                     isFromCurrentMonth,
                                     isCurrentDateInRange,
                                 ),
+                            style = TDTheme.typography.subheeading4,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TDDatePickerSingleInput(
+    selectedMonth: YearMonth,
+    modifier: Modifier = Modifier,
+    onMonthForward: () -> Unit = {},
+    onMonthBack: () -> Unit = {},
+    selectedDate: LocalDate? = null,
+    onDaySelect: (LocalDate) -> Unit,
+    onDayDeselect: () -> Unit,
+) {
+    val daysOfWeekEntries = DayOfWeek.entries
+    val days = daysOfWeekEntries.map { it.toString().take(2) }
+    val daysOfWeek = days.map { it.lowercase().replaceFirstChar { ch -> ch.uppercase() } }
+
+    val firstDayOfMonth = selectedMonth.atDay(1)
+    val calendarStartDate =
+        firstDayOfMonth.minusDays((firstDayOfMonth.dayOfWeek.value - 1).toLong())
+
+    Column(
+        modifier = modifier.fillMaxWidth().padding(top = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onMonthBack, modifier = Modifier.size(40.dp)) {
+                Icon(
+                    painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = "Previous Month",
+                )
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            TDText(
+                text = "${
+                    selectedMonth.month
+                        .getDisplayName(TextStyle.FULL, Locale.getDefault())
+                        .replaceFirstChar { it.uppercase() }
+                } ${selectedMonth.year}",
+                style = TDTheme.typography.heading5,
+            )
+
+            Spacer(Modifier.weight(1f))
+
+            IconButton(onClick = onMonthForward, modifier = Modifier.size(40.dp)) {
+                Icon(
+                    painterResource(R.drawable.ic_arrow_forward),
+                    contentDescription = "Next Month",
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            daysOfWeek.forEach { day ->
+                TDText(
+                    text = day,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    style = TDTheme.typography.dayOfTheCalendar,
+                )
+            }
+        }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 1.dp)
+
+        for (week in 0 until 5) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            ) {
+                for (day in 0 until 7) {
+                    val currentDate = calendarStartDate.plusDays((week * 7 + day).toLong())
+                    val isFromCurrentMonth =
+                        currentDate.year == selectedMonth.year && currentDate.month == selectedMonth.month
+
+                    val isSelected = selectedDate == currentDate
+
+                    Box(
+                        modifier =
+                            Modifier
+                                .height(30.dp)
+                                .weight(1f)
+                                .padding(horizontal = 6.dp)
+                                .background(
+                                    // ✅ sadece seçili gün vurgusu
+                                    color = if (isSelected) TDTheme.colors.purple else Color.Transparent,
+                                    shape = RoundedCornerShape(8.dp),
+                                ).clickable {
+                                    if (isSelected) onDayDeselect() else onDaySelect(currentDate)
+                                },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = currentDate.dayOfMonth.toString(),
+                            color =
+                                when {
+                                    !isFromCurrentMonth -> TDTheme.colors.gray.copy(alpha = 0.35f)
+                                    isSelected -> Color.White
+                                    else -> TDTheme.colors.gray
+                                },
                             style = TDTheme.typography.subheeading4,
                         )
                     }

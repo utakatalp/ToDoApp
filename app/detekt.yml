@@ -9,7 +9,9 @@ complexity:
     threshold: 60
     ignoreAnnotated:
       - Composable
-
+  TooManyFunctions:
+    active: true
+    ignorePrivate: true
 
 
 naming:
@@ -27,6 +29,10 @@ naming:
     functionPattern: '[a-z][a-zA-Z0-9]*'
     excludeClassPattern: '$^'
 style:
+  UnusedPrivateMember:
+    active: true
+    ignoreAnnotated:
+      - Preview
   MagicNumber:
     active: true
     ignoreAnnotated:
@@ -35,5 +41,11 @@ style:
       - "**/ui/theme/**"
       - "**/theme/**"
 formatting:
+  active: true
   Indentation:
     active: false
+  ArgumentListWrapping:
+    active: true
+    indentSize: 4
+    maxLineLength: 120
+    ignoreWhenParameterCountLessThan: 2

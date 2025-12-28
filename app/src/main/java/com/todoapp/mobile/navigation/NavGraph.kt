@@ -1,8 +1,8 @@
 package com.todoapp.mobile.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -14,8 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -34,8 +34,10 @@ import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.uikit.components.TDTopBar
 import com.todoapp.uikit.components.TopBarAction
 import com.todoapp.uikit.components.TopBarState
+import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
@@ -60,15 +62,14 @@ fun NavGraph(
         composable<Screen.Home> {
             val viewModel: HomeViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
             HomeScreen(
                 uiState = uiState,
+                uiEffect = uiEffect,
                 onAction = viewModel::onAction,
-                modifier =
-                    Modifier
-                        .padding(start = 24.dp, end = 24.dp),
             )
         }
-        composable<Screen.Settings> { }
+        composable<Screen.Settings> {}
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
         composable<Screen.Calendar> { }
@@ -95,6 +96,7 @@ private fun NavigationEffectController(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun ToDoApp() {
@@ -103,19 +105,19 @@ fun ToDoApp() {
     val destination = navBackStackEntry?.destination
     val isOnboarding = destination?.hasRoute<Screen.Onboarding>() == true
     val showTopBar = !isOnboarding
+
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(TDTheme.colors.white),
         topBar = { ShowTopBar(showTopBar, navController) },
         bottomBar = { TDBottomBar(navController) },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
         NavGraph(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .consumeWindowInsets(padding),
             navController = navController,
+            modifier = Modifier.padding(padding),
         )
     }
 }
@@ -129,7 +131,7 @@ private fun ShowTopBar(
         TDTopBar(
             state =
                 TopBarState(
-                    title = "Home",
+                    title = stringResource(com.todoapp.mobile.R.string.home),
                     navigationIcon = R.drawable.ic_settings,
                     onNavigationClick = { navController.navigate(Screen.Settings) },
                     actions =
@@ -161,7 +163,7 @@ fun TopBar(modifier: Modifier = Modifier) {
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_settings),
-                    contentDescription = "settings",
+                    contentDescription = stringResource(com.todoapp.mobile.R.string.settings),
                 )
             }
             Spacer(Modifier.weight(1f))
@@ -170,7 +172,7 @@ fun TopBar(modifier: Modifier = Modifier) {
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_search),
-                    contentDescription = "settings",
+                    contentDescription = stringResource(com.todoapp.mobile.R.string.search),
                 )
             }
             IconButton(
@@ -178,7 +180,7 @@ fun TopBar(modifier: Modifier = Modifier) {
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_notification),
-                    contentDescription = "settings",
+                    contentDescription = stringResource(com.todoapp.mobile.R.string.notification),
                 )
             }
         },
