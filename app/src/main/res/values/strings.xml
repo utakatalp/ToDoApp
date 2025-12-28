@@ -5,6 +5,11 @@
     <string name="onboarding_get_started">Get Started</string>
     <string name="onboarding_login_span">Already have an account? Login</string>
     <string name="onboarding_login_text_span">Login</string>
+    <string name="navbar_home_screen_page_name">Home</string>
+    <string name="navbar_statistic_screen_page_name">Statistic</string>
+    <string name="navbar_calendar_screen_page_name">Calendar</string>
+    <string name="home_screen_task_completed_text">Task Completed</string>
+    <string name="home_screen_task_pending_text">Task Pending</string>
     <string name="task_complete">Task Complete</string>
     <string name="task_pending">Task Pending</string>
     <string name="tasks_today">Tasks Today</string>

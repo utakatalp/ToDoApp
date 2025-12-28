@@ -72,6 +72,9 @@ fun NavGraph(
         composable<Screen.Settings> {}
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
+        composable<Screen.Calendar> { }
+        composable<Screen.Statistic> { }
+        composable<Screen.Profile> { }
     }
 }
 
@@ -109,6 +112,7 @@ fun ToDoApp() {
                 .fillMaxSize()
                 .background(TDTheme.colors.white),
         topBar = { ShowTopBar(showTopBar, navController) },
+        bottomBar = { TDBottomBar(navController) },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
         NavGraph(

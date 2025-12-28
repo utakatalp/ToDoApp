@@ -15,6 +15,12 @@ internal fun lightColors(
     statusCardGray: Color = Color(0xFF6E7180),
     bgColorPurple: Color = Color(0xFFEFF2FF),
     bgColor: Color = Color.White,
+    background: Color = bgColor,
+    onBackground: Color = Color(0xFF090E23),
+    surface: Color = Color(0xFFFFFAF0),
+    onSurface: Color = Color(0xFF090E23),
+    primary: Color = Color(0xFF4566EC),
+    onPrimary: Color = Color(0xFFFFFAF0),
     lightPurple: Color = Color(0xFFA9BAFF),
     gray: Color = Color(0xFF717171),
     darkPurple: Color = Color(0xFF1C3082),
@@ -38,6 +44,12 @@ internal fun lightColors(
         statusCardGray = statusCardGray,
         bgColorPurple = bgColorPurple,
         bgColor = bgColor,
+        background = background,
+        onBackground = onBackground,
+        surface = surface,
+        onSurface = onSurface,
+        primary = primary,
+        onPrimary = onPrimary,
         gray = gray,
         black = black,
         darkPurple = darkPurple,
@@ -56,12 +68,18 @@ internal fun lightColors(
         lightPurple = lightPurple,
     )
 
-internal fun darkColors( // will be changed
+internal fun darkColors(
     red: Color = Color(0xFFFFB1B5),
     crossRed: Color = Color(0xFFB2282D),
     statusCardGray: Color = Color(0xFF6E7180),
     bgColorPurple: Color = Color(0xFFEFF2FF),
     bgColor: Color = Color.Black,
+    background: Color = bgColor,
+    onBackground: Color = Color(0xFFFFFAF0),
+    surface: Color = Color.Black,
+    onSurface: Color = Color(0xFFFFFAF0),
+    primary: Color = Color(0xFF4566EC),
+    onPrimary: Color = Color(0xFFFFFAF0),
     lightPurple: Color = Color(0xFFA9BAFF),
     gray: Color = Color(0xFF717171),
     darkPurple: Color = Color(0xFF1C3082),
@@ -85,6 +103,12 @@ internal fun darkColors( // will be changed
         statusCardGray = statusCardGray,
         bgColorPurple = bgColorPurple,
         bgColor = bgColor,
+        background = background,
+        onBackground = onBackground,
+        surface = surface,
+        onSurface = onSurface,
+        primary = primary,
+        onPrimary = onPrimary,
         gray = gray,
         black = black,
         purple = purple,
@@ -109,6 +133,12 @@ class TDColor(
     statusCardGray: Color,
     bgColorPurple: Color,
     bgColor: Color,
+    background: Color,
+    onBackground: Color,
+    surface: Color,
+    onSurface: Color,
+    primary: Color,
+    onPrimary: Color,
     lightPurple: Color,
     gray: Color,
     black: Color,
@@ -178,4 +208,22 @@ class TDColor(
 
     private var _softPink: Color by mutableStateOf(softPink)
     val softPink: Color = _softPink
+
+    private var _background: Color by mutableStateOf(background)
+    val background: Color = _background
+
+    private var _onBackground: Color by mutableStateOf(onBackground)
+    val onBackground: Color = _onBackground
+
+    private var _surface: Color by mutableStateOf(surface)
+    val surface: Color = _surface
+
+    private var _onSurface: Color by mutableStateOf(onSurface)
+    val onSurface: Color = _onSurface
+
+    private var _primary: Color by mutableStateOf(primary)
+    val primary: Color = _primary
+
+    private var _onPrimary: Color by mutableStateOf(onPrimary)
+    val onPrimary: Color = _onPrimary
 }
