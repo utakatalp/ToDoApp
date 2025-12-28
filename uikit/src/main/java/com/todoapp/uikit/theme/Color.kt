@@ -10,6 +10,7 @@ internal val LocalLightColors = staticCompositionLocalOf { lightColors() }
 internal val LocalDarkColors = staticCompositionLocalOf { darkColors() }
 
 internal fun lightColors(
+    lightRed: Color = Color(0xFFFFE6E7),
     red: Color = Color(0xFFFFB1B5),
     crossRed: Color = Color(0xFFB2282D),
     statusCardGray: Color = Color(0xFF6E7180),
@@ -39,6 +40,7 @@ internal fun lightColors(
     lightGray: Color = Color(0xFFC0C0C0),
 ): TDColor =
     TDColor(
+        lightRed = lightRed,
         red = red,
         crossRed = crossRed,
         statusCardGray = statusCardGray,
@@ -69,6 +71,7 @@ internal fun lightColors(
     )
 
 internal fun darkColors(
+    lightRed: Color = Color(0xFFFFE6E7),
     red: Color = Color(0xFFFFB1B5),
     crossRed: Color = Color(0xFFB2282D),
     statusCardGray: Color = Color(0xFF6E7180),
@@ -98,6 +101,7 @@ internal fun darkColors(
     lightGray: Color = Color(0xFFC0C0C0),
 ): TDColor =
     TDColor(
+        lightRed = lightRed,
         red = red,
         crossRed = crossRed,
         statusCardGray = statusCardGray,
@@ -128,6 +132,7 @@ internal fun darkColors(
     )
 
 class TDColor(
+    lightRed: Color,
     red: Color,
     crossRed: Color,
     statusCardGray: Color,
@@ -156,6 +161,8 @@ class TDColor(
     softPink: Color,
     lightGray: Color,
 ) {
+    private var _lightRed: Color by mutableStateOf(lightRed)
+    val lightRed: Color = _lightRed
     private var _red: Color by mutableStateOf(red)
     val red: Color = _red
     private var _crossRed: Color by mutableStateOf(crossRed)

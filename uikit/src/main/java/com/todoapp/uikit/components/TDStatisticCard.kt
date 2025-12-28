@@ -75,7 +75,7 @@ fun TDStatisticCard(
             modifier =
                 modifier
                     .size(width = 162.dp, height = 96.dp)
-                    .background(TDTheme.colors.red),
+                    .background(TDTheme.colors.lightRed),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
