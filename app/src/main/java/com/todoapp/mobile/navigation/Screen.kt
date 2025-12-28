@@ -19,11 +19,11 @@ interface Screen {
     data object Search : Screen
 
     @Serializable
+    data object Calendar : Screen
+
+    @Serializable
     data object Statistic : Screen
 
     @Serializable
     data object Profile : Screen
-
-    @Serializable
-    data object Calendar : Screen
 }
