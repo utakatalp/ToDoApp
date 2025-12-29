@@ -169,7 +169,7 @@ fun TDDatePicker(
                                     isFromCurrentMonth,
                                     isCurrentDateInRange,
                                 ),
-                            style = TDTheme.typography.subheeading4,
+                            style = TDTheme.typography.subheading4,
                         )
                     }
                 }
@@ -284,7 +284,7 @@ fun TDDatePickerSingleInput(
                                     isSelected -> Color.White
                                     else -> TDTheme.colors.gray
                                 },
-                            style = TDTheme.typography.subheeading4,
+                            style = TDTheme.typography.subheading4,
                         )
                     }
                 }
