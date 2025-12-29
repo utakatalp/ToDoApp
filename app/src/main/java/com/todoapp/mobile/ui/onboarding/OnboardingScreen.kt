@@ -42,6 +42,7 @@ import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDText
+import com.todoapp.uikit.components.TDTextWithSpan
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -148,7 +149,7 @@ fun OnboardingScreen(
                     },
                 )
 
-                TDText(
+                TDTextWithSpan(
                     modifier =
                         Modifier
                             .clickable { onAction(UiAction.OnLoginClick) }
@@ -276,7 +277,7 @@ fun OnboardingScreen(
                     },
                 )
 
-                TDText(
+                TDTextWithSpan(
                     modifier =
                         Modifier
                             .clickable { onAction(UiAction.OnLoginClick) }
