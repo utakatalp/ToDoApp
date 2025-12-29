@@ -2,4 +2,9 @@
     <string name="app_name">UIKit</string>
     <string name="pick_a_date">Pick a date</string>
     <string name="ok">Ok</string>
+    <string name="activity_screen_circular_progress_indicator_dummy_progress_text">65%</string>
+    <string name="activity_screen_weekly_progress_text">Weekly Progress</string>
+    <string name="activity_screen_weekly_progress_legend_complete_text">Complete</string>
+    <string name="activity_screen_weekly_progress_legend_in_progress_text">In Progress</string>
+    <string name="activity_screen_weekly_progress_legend_not_started_text">Not Started</string>
 </resources>
