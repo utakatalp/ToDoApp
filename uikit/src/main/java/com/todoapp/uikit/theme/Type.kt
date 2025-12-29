@@ -189,7 +189,7 @@ class TDTypography {
                     ),
                 color = TDTheme.colors.black,
             )
-    val subheeading4: TextStyle
+    val subheading4: TextStyle
         @Composable
         get() =
             TextStyle(
