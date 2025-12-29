@@ -93,21 +93,21 @@ fun TDWeeklyCircularProgressIndicator(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            LegendItem(
+            LegendColoredBoxItem(
                 color = TDTheme.colors.purple,
                 text = stringResource(id = R.string.activity_screen_weekly_progress_legend_complete_text),
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            LegendItem(
+            LegendColoredBoxItem(
                 color = TDTheme.colors.lightPurple,
                 text = stringResource(id = R.string.activity_screen_weekly_progress_legend_in_progress_text),
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            LegendItem(
+            LegendColoredBoxItem(
                 color = TDTheme.colors.gray,
                 text = stringResource(id = R.string.activity_screen_weekly_progress_legend_not_started_text),
             )
@@ -116,7 +116,7 @@ fun TDWeeklyCircularProgressIndicator(
 }
 
 @Composable
-fun LegendItem(
+fun LegendColoredBoxItem(
     color: Color,
     text: String,
 ) {
