@@ -34,7 +34,7 @@ fun TDTaskCardListByDay(
                         .take(3) // Thu
                         .lowercase()
                         .replaceFirstChar { it.uppercase() },
-                style = TDTheme.typography.subheeading4,
+                style = TDTheme.typography.subheading4,
                 color = TDTheme.colors.gray,
             )
             TDText(text = date.dayOfMonth.toString(), style = TDTheme.typography.heading3)
