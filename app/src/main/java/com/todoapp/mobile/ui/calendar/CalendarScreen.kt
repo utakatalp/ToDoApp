@@ -82,17 +82,11 @@ private fun CalendarContentPreview() {
                             ),
                             TaskDayItem(
                                 date = LocalDate.of(2025, 1, 13),
-                                tasks =
-                                    listOf(
-                                        TaskCardItem("Study Kotlin", "10:00", "12:00"),
-                                    ),
+                                tasks = listOf(TaskCardItem("Study Kotlin", "10:00", "12:00")),
                             ),
                             TaskDayItem(
                                 date = LocalDate.of(2025, 1, 14),
-                                tasks =
-                                    listOf(
-                                        TaskCardItem("Project Review", "16:30", "17:30"),
-                                    ),
+                                tasks = listOf(TaskCardItem("Project Review", "16:30", "17:30")),
                             ),
                         ),
                 ),

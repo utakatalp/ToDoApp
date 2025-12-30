@@ -92,8 +92,7 @@ fun OnboardingScreen(
             ) { idx ->
                 Image(
                     modifier =
-                        Modifier
-                            .fillMaxWidth(),
+                        Modifier.fillMaxWidth(),
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.Center,
                     painter = painterResource(id = bgImages[idx]),
@@ -109,9 +108,7 @@ fun OnboardingScreen(
                         .navigationBarsPadding(),
             ) {
                 TDText(
-                    modifier =
-                        Modifier
-                            .padding(top = 36.dp, start = 24.dp),
+                    modifier = Modifier.padding(top = 36.dp, start = 24.dp),
                     textAlign = TextAlign.Start,
                     color = TDTheme.colors.onBackground,
                     style = TDTheme.typography.heading1,
@@ -122,8 +119,12 @@ fun OnboardingScreen(
 
                 TDText(
                     modifier =
-                        Modifier
-                            .padding(bottom = 24.dp, start = 24.dp, end = 24.dp, top = 4.dp),
+                        Modifier.padding(
+                            bottom = 24.dp,
+                            start = 24.dp,
+                            end = 24.dp,
+                            top = 4.dp,
+                        ),
                     textAlign = TextAlign.Start,
                     color = TDTheme.colors.onBackground,
                     style = TDTheme.typography.regularTextStyle,
@@ -142,9 +143,7 @@ fun OnboardingScreen(
                     type = TDButtonType.PRIMARY,
                     size = TDButtonSize.MEDIUM,
                     icon = null,
-                    onClick = {
-                        onAction(UiAction.OnRegisterClick)
-                    },
+                    onClick = { onAction(UiAction.OnRegisterClick) },
                 )
 
                 TDText(
@@ -156,9 +155,7 @@ fun OnboardingScreen(
                     fullText = stringResource(id = R.string.onboarding_login_span),
                     spanText = stringResource(id = R.string.onboarding_login_text_span),
                     style =
-                        TDTheme.typography.regularTextStyle.copy(
-                            color = TDTheme.colors.onBackground,
-                        ),
+                        TDTheme.typography.regularTextStyle.copy(color = TDTheme.colors.onBackground),
                     spanStyle =
                         SpanStyle(
                             color = TDTheme.colors.purple,
@@ -283,10 +280,7 @@ fun OnboardingScreen(
                             .align(alignment = Alignment.CenterHorizontally),
                     fullText = stringResource(id = R.string.onboarding_login_span),
                     spanText = stringResource(id = R.string.onboarding_login_text_span),
-                    style =
-                        TDTheme.typography.regularTextStyle.copy(
-                            color = TDTheme.colors.onBackground,
-                        ),
+                    style = TDTheme.typography.regularTextStyle.copy(color = TDTheme.colors.onBackground),
                     spanStyle =
                         SpanStyle(
                             color = TDTheme.colors.purple,
