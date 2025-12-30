@@ -107,8 +107,7 @@ fun OnboardingScreen(
                         .fillMaxWidth()
                         .background(TDTheme.colors.background)
                         .navigationBarsPadding(),
-
-                ) {
+            ) {
                 TDText(
                     modifier =
                         Modifier
@@ -156,9 +155,10 @@ fun OnboardingScreen(
                             .align(alignment = Alignment.CenterHorizontally),
                     fullText = stringResource(id = R.string.onboarding_login_span),
                     spanText = stringResource(id = R.string.onboarding_login_text_span),
-                    style = TDTheme.typography.regularTextStyle.copy(
-                        color = TDTheme.colors.onBackground
-                    ),
+                    style =
+                        TDTheme.typography.regularTextStyle.copy(
+                            color = TDTheme.colors.onBackground,
+                        ),
                     spanStyle =
                         SpanStyle(
                             color = TDTheme.colors.purple,
@@ -232,9 +232,8 @@ fun OnboardingScreen(
                     Modifier
                         .fillMaxHeight()
                         .background(
-                            TDTheme.colors.background
-                        )
-                        .weight(1f),
+                            TDTheme.colors.background,
+                        ).weight(1f),
                 verticalArrangement = Arrangement.Center,
             ) {
                 TDText(
@@ -284,9 +283,10 @@ fun OnboardingScreen(
                             .align(alignment = Alignment.CenterHorizontally),
                     fullText = stringResource(id = R.string.onboarding_login_span),
                     spanText = stringResource(id = R.string.onboarding_login_text_span),
-                    style = TDTheme.typography.regularTextStyle.copy(
-                        color = TDTheme.colors.onBackground
-                    ),
+                    style =
+                        TDTheme.typography.regularTextStyle.copy(
+                            color = TDTheme.colors.onBackground,
+                        ),
                     spanStyle =
                         SpanStyle(
                             color = TDTheme.colors.purple,
