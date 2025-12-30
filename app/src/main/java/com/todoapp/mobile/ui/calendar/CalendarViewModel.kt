@@ -6,7 +6,6 @@ import com.todoapp.mobile.ui.calendar.CalendarContract.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlin.getValue
 
 class CalendarViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
