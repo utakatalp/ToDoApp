@@ -17,35 +17,36 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun TDBottomBar(
-    navController: NavHostController,
-) {
+fun TDBottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val items = AppDestination.bottomBarItems
     val topLevelRoutes = items.map { it.route }.toSet()
-    val showBottomBar = currentDestination?.hierarchy?.any { dest ->
-        dest.route in topLevelRoutes
-    } == true
+    val showBottomBar =
+        currentDestination?.hierarchy?.any { dest ->
+            dest.route in topLevelRoutes
+        } == true
 
     if (!showBottomBar) return
 
     NavigationBar(
-        containerColor = TDTheme.colors.background
+        containerColor = TDTheme.colors.background,
     ) {
         items.forEach { screen ->
             val screenRoute = screen.route
-            val selected = currentDestination?.hierarchy?.any { dest ->
-                dest.route == screenRoute
-            } == true
+            val selected =
+                currentDestination?.hierarchy?.any { dest ->
+                    dest.route == screenRoute
+                } == true
 
             NavigationBarItem(
                 selected = selected,
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = TDTheme.colors.purple,
-                    selectedTextColor = TDTheme.colors.purple,
-                    indicatorColor = TDTheme.colors.purple.copy(alpha = 0.2f)
-                ),
+                colors =
+                    NavigationBarItemDefaults.colors(
+                        selectedIconColor = TDTheme.colors.purple,
+                        selectedTextColor = TDTheme.colors.purple,
+                        indicatorColor = TDTheme.colors.purple.copy(alpha = 0.2f),
+                    ),
                 onClick = {
                     if (selected) return@NavigationBarItem
                     navController.navigate(screenRoute) {
@@ -61,11 +62,11 @@ fun TDBottomBar(
                     Icon(
                         painter = painterResource(id = iconId),
                         contentDescription = stringResource(screen.title),
-                        tint = Color.Unspecified
+                        tint = Color.Unspecified,
                     )
                 },
                 label = { Text(text = stringResource(id = screen.title)) },
-                alwaysShowLabel = false
+                alwaysShowLabel = false,
             )
         }
     }
