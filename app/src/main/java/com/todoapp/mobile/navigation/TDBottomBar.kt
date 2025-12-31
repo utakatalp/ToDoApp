@@ -22,10 +22,9 @@ fun TDBottomBar(navController: NavHostController) {
     val currentDestination = navBackStackEntry?.destination
     val items = AppDestination.bottomBarItems
     val topLevelRoutes = items.map { it.route }.toSet()
-    val showBottomBar =
-        currentDestination?.hierarchy?.any { dest ->
-            dest.route in topLevelRoutes
-        } == true
+    val showBottomBar = currentDestination?.hierarchy?.any { dest ->
+        dest.route in topLevelRoutes
+    } == true
 
     if (!showBottomBar) return
 
@@ -35,18 +34,17 @@ fun TDBottomBar(navController: NavHostController) {
         items.forEach { screen ->
             val screenRoute = screen.route
             val selected =
-                currentDestination?.hierarchy?.any { dest ->
+                currentDestination.hierarchy.any { dest ->
                     dest.route == screenRoute
-                } == true
+                }
 
             NavigationBarItem(
                 selected = selected,
-                colors =
-                    NavigationBarItemDefaults.colors(
-                        selectedIconColor = TDTheme.colors.purple,
-                        selectedTextColor = TDTheme.colors.purple,
-                        indicatorColor = TDTheme.colors.purple.copy(alpha = 0.2f),
-                    ),
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = TDTheme.colors.purple,
+                    selectedTextColor = TDTheme.colors.purple,
+                    indicatorColor = TDTheme.colors.purple.copy(alpha = 0.2f)
+                ),
                 onClick = {
                     if (selected) return@NavigationBarItem
                     navController.navigate(screenRoute) {

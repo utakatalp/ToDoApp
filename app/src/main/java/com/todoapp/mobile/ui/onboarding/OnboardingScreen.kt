@@ -154,8 +154,7 @@ fun OnboardingScreen(
                             .align(alignment = Alignment.CenterHorizontally),
                     fullText = stringResource(id = R.string.onboarding_login_span),
                     spanText = stringResource(id = R.string.onboarding_login_text_span),
-                    style =
-                        TDTheme.typography.regularTextStyle.copy(color = TDTheme.colors.onBackground),
+                    style = TDTheme.typography.regularTextStyle.copy(color = TDTheme.colors.onBackground),
                     spanStyle =
                         SpanStyle(
                             color = TDTheme.colors.purple,

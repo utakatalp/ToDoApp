@@ -1,30 +1,21 @@
 package com.todoapp.mobile.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.uikit.R
 import com.todoapp.mobile.common.CollectWithLifecycle
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
@@ -33,9 +24,6 @@ import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
-import com.todoapp.uikit.components.TDTopBar
-import com.todoapp.uikit.components.TopBarAction
-import com.todoapp.uikit.components.TopBarState
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
@@ -90,6 +78,27 @@ fun NavGraph(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+fun ToDoApp() {
+    val navController = rememberNavController()
+    Scaffold(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(TDTheme.colors.white),
+        topBar = { ShowTopBar(navController) },
+        bottomBar = { TDBottomBar(navController) },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+    ) { padding ->
+        NavGraph(
+            navController = navController,
+            modifier = Modifier.padding(padding),
+        )
+    }
+}
+
 @Composable
 private fun NavigationEffectController(
     uiEffect: Flow<UiEffect>,
@@ -106,95 +115,4 @@ private fun NavigationEffectController(
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun ToDoApp() {
-    val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val destination = navBackStackEntry?.destination
-    val isOnboarding = destination?.hasRoute<Screen.Onboarding>() == true
-    val showTopBar = !isOnboarding
-
-    Scaffold(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(TDTheme.colors.white),
-        topBar = { ShowTopBar(showTopBar, navController) },
-        bottomBar = { TDBottomBar(navController) },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-    ) { padding ->
-        NavGraph(
-            navController = navController,
-            modifier = Modifier.padding(padding),
-        )
-    }
-}
-
-@Composable
-private fun ShowTopBar(
-    showTopBar: Boolean,
-    navController: NavHostController,
-) {
-    if (showTopBar) {
-        TDTopBar(
-            state =
-                TopBarState(
-                    title = stringResource(com.todoapp.mobile.R.string.home),
-                    navigationIcon = R.drawable.ic_settings,
-                    onNavigationClick = { navController.navigate(Screen.Settings) },
-                    actions =
-                        listOf(
-                            TopBarAction(
-                                icon = R.drawable.ic_search,
-                                onClick = { navController.navigate(Screen.Search) },
-                            ),
-                            TopBarAction(
-                                icon = R.drawable.ic_notification,
-                                onClick = { navController.navigate(Screen.Notifications) },
-                            ),
-                        ),
-                ),
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun TopBar(modifier: Modifier = Modifier) {
-    CenterAlignedTopAppBar(
-        modifier = modifier,
-        title = {},
-        actions = {
-            IconButton(
-                onClick = {},
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_settings),
-                    contentDescription = stringResource(com.todoapp.mobile.R.string.settings),
-                )
-            }
-            Spacer(Modifier.weight(1f))
-            IconButton(
-                onClick = {},
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_search),
-                    contentDescription = stringResource(com.todoapp.mobile.R.string.search),
-                )
-            }
-            IconButton(
-                onClick = {},
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_notification),
-                    contentDescription = stringResource(com.todoapp.mobile.R.string.notification),
-                )
-            }
-        },
-    )
 }
