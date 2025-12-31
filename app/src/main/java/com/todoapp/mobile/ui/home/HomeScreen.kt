@@ -1,7 +1,9 @@
 package com.todoapp.mobile.ui.home
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,14 +13,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +50,8 @@ import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.components.TDWeeklyDatePicker
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -55,7 +68,7 @@ fun HomeScreen(
         sheetContent = {
             AddTaskSheet(
                 uiState = uiState,
-                onClick = { onAction(UiAction.OnDismissBottomSheet) },
+                onClick = { onAction(UiAction.OnTaskCreate) },
                 onAction = onAction,
             )
         },
@@ -65,7 +78,6 @@ fun HomeScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(color = TDTheme.colors.white)
                     .padding(horizontal = 16.dp),
             uiState = uiState,
             onAction = onAction,
@@ -79,9 +91,14 @@ fun HomeContent(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
 ) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-    ) {
+    val hapticFeedback = LocalHapticFeedback.current
+    val lazyListState = rememberLazyListState()
+    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        onAction(UiAction.OnMoveTask(from.index, to.index))
+
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+    }
+    Column(modifier = modifier.fillMaxSize()) {
         TDWeeklyDatePicker(
             modifier = Modifier,
             selectedDate = uiState.selectedDate,
@@ -106,24 +123,77 @@ fun HomeContent(
         Spacer(Modifier.height(32.dp))
         TDText(text = stringResource(com.todoapp.mobile.R.string.tasks_today), style = TDTheme.typography.heading3)
         Spacer(Modifier.height(16.dp))
-        uiState.tasks.forEach { task ->
-            TDTaskCardWithCheckbox(
-                modifier = Modifier.height(60.dp),
-                taskText = task.text,
-                isChecked = task.isDone,
-                onCheckBoxClick = { onAction(UiAction.OnTaskClick(task)) },
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = lazyListState,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(
+                    items = uiState.tasks,
+                    key = { task -> task.id }
+                ) { task ->
+                    ReorderableItem(
+                        state = reorderableLazyListState,
+                        key = task.id
+                    ) { isDragging ->
+                        val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                        Surface(
+                            shadowElevation = elevation,
+                            color = TDTheme.colors.background
+                        ) {
+                            TDTaskCardWithCheckbox(
+                                modifier = Modifier
+                                    .combinedClickable(
+                                        onLongClick = { onAction(UiAction.OnTaskLongPress(task)) },
+                                        onClick = { onAction(UiAction.OnTaskClick(task)) }
+                                    )
+                                    .draggableHandle(
+                                        onDragStarted = {
+                                            hapticFeedback.performHapticFeedback(
+                                                HapticFeedbackType.GestureThresholdActivate
+                                            )
+                                        },
+                                        onDragStopped = {
+                                            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                                        }
+                                    ),
+                                taskText = task.title,
+                                isChecked = task.isCompleted,
+                                onCheckBoxClick = {
+                                    onAction(UiAction.OnTaskClick(task))
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            TDAddTaskButton(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(56.dp),
+                onClick = {
+                    onAction(UiAction.OnShowBottomSheet)
+                }
             )
+            if (uiState.isDeleteDialogOpen) {
+                AlertDialog(
+                    onDismissRequest = { onAction(UiAction.OnDeleteDialogDismiss) },
+                    title = { Text("Delete task?") },
+                    text = { Text("Do you want to delete the task?") },
+                    confirmButton = {
+                        TextButton(onClick = { onAction(UiAction.OnDeleteDialogConfirm) }) {
+                            Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { onAction(UiAction.OnDeleteDialogDismiss) }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
         }
-        Spacer(Modifier.weight(1f))
-        TDAddTaskButton(
-            modifier =
-                Modifier
-                    .size(96.dp)
-                    .align(Alignment.End),
-            onClick = {
-                onAction(UiAction.OnShowBottomSheet)
-            },
-        )
     }
 }
 
@@ -135,13 +205,38 @@ private fun HomeContentPreview() {
             selectedDate = LocalDate.now(),
             tasks =
                 listOf(
-                    Task("1", "Design the main screen", false, LocalDate.now()),
-                    Task("2", "Develop the API client", true, LocalDate.now().minusDays(1)),
-                    Task("3", "Fix the login bug", false, LocalDate.now()),
+                    Task(
+                        id = 1L,
+                        title = "Design the main screen",
+                        description = "Draft layout & components",
+                        date = LocalDate.now(),
+                        timeStart = LocalTime.of(9, 30),
+                        timeEnd = LocalTime.of(10, 15),
+                        isCompleted = false,
+                    ),
+                    Task(
+                        id = 2L,
+                        title = "Develop the API client",
+                        description = "Retrofit + serialization setup",
+                        date = LocalDate.now().minusDays(1),
+                        timeStart = LocalTime.of(11, 0),
+                        timeEnd = LocalTime.of(12, 0),
+                        isCompleted = true,
+                    ),
+                    Task(
+                        id = 3L,
+                        title = "Fix the login bug",
+                        description = null,
+                        date = LocalDate.now(),
+                        timeStart = LocalTime.of(14, 0),
+                        timeEnd = LocalTime.of(14, 30),
+                        isCompleted = false,
+                    ),
                 ),
             completedTaskCountThisWeek = 5,
             pendingTaskCountThisWeek = 8,
         )
+
     HomeContent(
         uiState = fakeUiState,
         onAction = {},
@@ -169,7 +264,7 @@ fun AddTaskSheet(
         ) {
             TDText(text = stringResource(com.todoapp.mobile.R.string.add_new_task))
             IconButton(
-                onClick = onClick,
+                onClick = { onAction(UiAction.OnDismissBottomSheet) },
             ) {
                 Icon(
                     painterResource(R.drawable.ic_close),
@@ -185,9 +280,9 @@ fun AddTaskSheet(
         )
         Spacer(Modifier.height(12.dp))
         TDDatePickerDialog(
-            selectedDate = uiState.selectedDate,
-            onDateSelect = { onAction(UiAction.OnDateSelect(it)) },
-            onDateDeselect = { onAction(UiAction.OnDateDeselect) },
+            selectedDate = uiState.dialogSelectedDate,
+            onDateSelect = { onAction(UiAction.OnDialogDateSelect(it)) },
+            onDateDeselect = { onAction(UiAction.OnDialogDateDeselect) },
         )
         Spacer(Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth()) {

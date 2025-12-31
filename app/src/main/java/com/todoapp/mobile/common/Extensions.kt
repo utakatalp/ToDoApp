@@ -18,3 +18,9 @@ fun <T> Flow<T>.CollectWithLifecycle(collect: suspend (T) -> Unit) {
         }
     }
 }
+
+fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
+    if (fromIndex == toIndex) return
+    val item = removeAt(fromIndex)
+    add(toIndex, item)
+}
