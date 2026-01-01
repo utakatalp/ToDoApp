@@ -62,10 +62,8 @@ fun NavGraph(
         composable<Screen.Calendar> {
             val viewModel: CalendarViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val uiEffect = viewModel.uiEffect
             CalendarScreen(
                 uiState = uiState,
-                uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
         }
