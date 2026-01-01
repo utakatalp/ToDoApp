@@ -1,5 +1,6 @@
 package com.todoapp.uikit.components
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -60,7 +61,7 @@ fun TDWeeklyCircularProgressIndicator(
         ) {
             TDText(
                 text = "%${(100 * progress).roundToInt()}",
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
                 style = TDTheme.typography.heading7,
                 textAlign = TextAlign.Center,
             )
@@ -134,6 +135,7 @@ fun LegendColoredBoxItem(
 
         TDText(
             text = text,
+            color = TDTheme.colors.onBackground,
             style = TDTheme.typography.subheading1,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -141,9 +143,34 @@ fun LegendColoredBoxItem(
     }
 }
 
-@Preview(showBackground = true)
+@Preview("Light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
-fun TDWeeklyCircularProgressIndicatorPreview(
+fun TDWeeklyCircularProgressIndicatorPreviewLight(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+    ) {
+        TDTheme {
+            TDWeeklyCircularProgressIndicator(
+                modifier = modifier.size(100.dp),
+                progress = 0.65f,
+                color = TDTheme.colors.purple,
+                trackColor = TDTheme.colors.lightPurple,
+                strokeWidth = 14.dp,
+                strokeCap = Butt,
+                gapSize = 0.dp,
+            )
+        }
+    }
+}
+
+@Preview("Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+fun TDWeeklyCircularProgressIndicatorPreviewDark(
     modifier: Modifier = Modifier,
 ) {
     Column(
