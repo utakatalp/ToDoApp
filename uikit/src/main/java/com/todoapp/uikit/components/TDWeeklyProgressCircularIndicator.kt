@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
 import com.todoapp.uikit.theme.TDTheme
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +59,7 @@ fun TDWeeklyCircularProgressIndicator(
             contentAlignment = Alignment.Center,
         ) {
             TDText(
-                text = stringResource(id = R.string.activity_screen_circular_progress_indicator_dummy_progress_text),
+                text = "%${(100 * progress).roundToInt()}",
                 color = TDTheme.colors.black,
                 style = TDTheme.typography.heading7,
                 textAlign = TextAlign.Center,
