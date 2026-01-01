@@ -25,4 +25,12 @@
     <string name="settings">settings</string>
     <string name="search">search</string>
     <string name="notification">notification</string>
+    <string name="activity_screen_bar_chart_component_title_text">Task</string>
+    <string name="activity_screen_bar_chart_component_days_mon">Mo</string>
+    <string name="activity_screen_bar_chart_component_days_tue">Tu</string>
+    <string name="activity_screen_bar_chart_component_days_wed">We</string>
+    <string name="activity_screen_bar_chart_component_days_thu">Th</string>
+    <string name="activity_screen_bar_chart_component_days_fri">Fr</string>
+    <string name="activity_screen_bar_chart_component_days_sat">Sa</string>
+    <string name="activity_screen_bar_chart_component_days_sun">Su</string>
 </resources>
