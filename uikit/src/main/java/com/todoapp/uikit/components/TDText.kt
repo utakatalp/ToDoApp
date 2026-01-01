@@ -38,7 +38,7 @@ fun TDText(
 }
 
 @Composable
-fun TDTextWithSpan(
+fun TDSpannableText(
     modifier: Modifier = Modifier,
     fullText: String,
     spanText: String,
@@ -81,7 +81,7 @@ private fun TDTextExample() {
 @Preview(showBackground = true)
 @Composable
 private fun TDAnnotatedTextExample() {
-    TDTextWithSpan(
+    TDSpannableText(
         fullText = "This should be a text.",
         spanText = "should",
         spanStyle =
