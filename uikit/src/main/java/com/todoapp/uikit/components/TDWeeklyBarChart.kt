@@ -50,12 +50,12 @@ fun TDWeeklyBarChart(
     height: Dp,
     autoScaleHeightToMaxY: Boolean = true,
     minGridStep: Dp = 24.dp,
-    barWidth: Dp,
-    barColor: Color,
-    gridColor: Color,
 ) {
     if (values.size != days.size) return
 
+    val barWidth = 24.dp
+    val barColor = TDTheme.colors.purple
+    val gridColor = TDTheme.colors.gray
     val xAxisHeight = 36.dp
     val yLabelWidth = 24.dp
     val leftGapToPlot = 2.dp
@@ -237,9 +237,6 @@ fun TDWeeklyBarChartPreviewLight() {
             maxY = 7,
             yLabelColor = TDTheme.colors.onBackground,
             height = 220.dp,
-            barWidth = 26.dp,
-            barColor = TDTheme.colors.purple,
-            gridColor = TDTheme.colors.gray
         )
     }
 }
@@ -261,9 +258,6 @@ fun TDWeeklyBarChartPreviewDark() {
             maxY = 30,
             yLabelColor = TDTheme.colors.onBackground,
             height = 220.dp,
-            barWidth = 26.dp,
-            barColor = TDTheme.colors.purple,
-            gridColor = TDTheme.colors.onBackground
         )
     }
 }
