@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 interface TaskRepository {
     fun observeAll(): Flow<List<Task>>
-    fun observeRange(startDate: LocalDate, endDate: LocalDate): Flow<List<Task>>
+    suspend fun observeRange(startDate: LocalDate, endDate: LocalDate): Flow<List<Task>>
     fun observeTasksByDate(date: LocalDate): Flow<List<Task>>
     fun observeCompletedTasksInAWeek(date: LocalDate): Flow<Int>
     fun observePendingTasksInAWeek(date: LocalDate): Flow<Int>
