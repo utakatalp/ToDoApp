@@ -1,8 +1,10 @@
 package com.todoapp.uikit.components
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,8 +17,14 @@ fun TDTaskCardList(
     modifier: Modifier = Modifier,
     tasks: List<TaskDayItem>,
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        tasks.forEach { item ->
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(
+            items = tasks,
+            key = { it.date }, // stable key
+        ) { item ->
             TDTaskCardListByDay(
                 date = item.date,
                 tasks = item.tasks,
@@ -46,11 +54,6 @@ private fun TDTaskCardListPreview() {
                                     taskTitle = "Read Book",
                                     taskTimeStart = "09:30",
                                     taskTimeEnd = "10:15",
-                                ),
-                                TaskCardItem(
-                                    taskTitle = "Gym",
-                                    taskTimeStart = "18:00",
-                                    taskTimeEnd = "19:00",
                                 ),
                             ),
                     ),

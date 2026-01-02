@@ -49,8 +49,3 @@ formatting:
     active: true
   Indentation:
     active: false
-  ArgumentListWrapping:
-    active: true
-    indentSize: 4
-    maxLineLength: 120
-    ignoreWhenParameterCountLessThan: 2

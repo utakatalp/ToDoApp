@@ -22,7 +22,7 @@ sealed class AppDestination(
         selectedIcon = R.drawable.ic_selected_calendar,
     )
 
-    data object Statistic : AppDestination(
+    data object Activity : AppDestination(
         title = R.string.navbar_statistic_screen_page_name,
         route = Screen.Statistic::class.qualifiedName!!,
         icon = R.drawable.ic_statistic,
@@ -30,6 +30,8 @@ sealed class AppDestination(
     )
 
     companion object {
-        val bottomBarItems = listOf(Home, Calendar, Statistic)
+        val bottomBarItems = listOf(Home, Calendar, Activity)
     }
 }
+
+fun appDestinationFromRoute(route: String?) = AppDestination.bottomBarItems.firstOrNull { it.route == route }

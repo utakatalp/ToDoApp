@@ -17,9 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun TDBottomBar(
-    navController: NavHostController,
-) {
+fun TDBottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val items = AppDestination.bottomBarItems
@@ -31,13 +29,14 @@ fun TDBottomBar(
     if (!showBottomBar) return
 
     NavigationBar(
-        containerColor = TDTheme.colors.background
+        containerColor = TDTheme.colors.background,
     ) {
         items.forEach { screen ->
             val screenRoute = screen.route
-            val selected = currentDestination?.hierarchy?.any { dest ->
-                dest.route == screenRoute
-            } == true
+            val selected =
+                currentDestination.hierarchy.any { dest ->
+                    dest.route == screenRoute
+                }
 
             NavigationBarItem(
                 selected = selected,
@@ -61,11 +60,11 @@ fun TDBottomBar(
                     Icon(
                         painter = painterResource(id = iconId),
                         contentDescription = stringResource(screen.title),
-                        tint = Color.Unspecified
+                        tint = Color.Unspecified,
                     )
                 },
                 label = { Text(text = stringResource(id = screen.title)) },
-                alwaysShowLabel = false
+                alwaysShowLabel = false,
             )
         }
     }

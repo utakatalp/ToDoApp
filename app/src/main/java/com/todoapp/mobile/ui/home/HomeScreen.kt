@@ -40,6 +40,8 @@ import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
 import com.todoapp.uikit.components.TDAddTaskButton
+import com.todoapp.uikit.components.TDButton
+import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
 import com.todoapp.uikit.components.TDScreenWithSheet
@@ -307,13 +309,15 @@ fun AddTaskSheet(
             label = stringResource(com.todoapp.mobile.R.string.description),
             value = uiState.taskDescription,
             onValueChange = { onAction(UiAction.OnTaskDescriptionChange(it)) },
+            singleLine = false,
         )
         Spacer(Modifier.height(12.dp))
-        Button(
+        TDButton(
+            text = stringResource(com.todoapp.mobile.R.string.create_task),
             onClick = onClick,
-        ) {
-            Text(stringResource(com.todoapp.mobile.R.string.create_task))
-        }
+            size = TDButtonSize.SMALL,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 

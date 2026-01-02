@@ -17,6 +17,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,16 +38,15 @@ import java.util.Locale
 
 @Composable
 fun TDDatePicker(
-    selectedMonth: YearMonth,
     modifier: Modifier = Modifier,
-    onMonthForwarded: () -> Unit = {},
-    onMonthBacked: () -> Unit = {},
     selectedFirstDate: LocalDate? = null,
     selectedSecondDate: LocalDate? = null,
-    onDaySelected: (LocalDate) -> Unit,
+    onFirstDaySelect: (LocalDate) -> Unit,
+    onSecondDaySelect: (LocalDate) -> Unit,
     onFirstDayDeselect: () -> Unit,
     onSecondDayDeselect: () -> Unit,
 ) {
+    var selectedMonth by rememberSaveable { mutableStateOf(YearMonth.now()) }
     val daysOfWeekEntries = DayOfWeek.entries
     val days =
         daysOfWeekEntries.map {
@@ -73,7 +76,7 @@ fun TDDatePicker(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(
-                onClick = onMonthBacked,
+                onClick = { selectedMonth = selectedMonth.minusMonths(1) },
                 modifier = Modifier.size(40.dp),
             ) {
                 Icon(
@@ -91,12 +94,12 @@ fun TDDatePicker(
             )
             Spacer(Modifier.weight(1f))
             IconButton(
-                onClick = onMonthForwarded,
+                onClick = { selectedMonth = selectedMonth.plusMonths(1) },
                 modifier = Modifier.size(40.dp),
             ) {
                 Icon(
                     painterResource(R.drawable.ic_arrow_forward),
-                    contentDescription = "Previous Month",
+                    contentDescription = "Next Month",
                 )
             }
         }
@@ -149,12 +152,30 @@ fun TDDatePicker(
                                         ),
                                 ).padding(horizontal = 6.dp)
                                 .clickable {
-                                    if (selectedFirstDate == currentDate) {
-                                        onFirstDayDeselect()
-                                    } else if (selectedSecondDate == currentDate) {
-                                        onSecondDayDeselect()
-                                    } else {
-                                        onDaySelected(currentDate)
+                                    when {
+                                        currentDate == selectedFirstDate -> {
+                                            onFirstDayDeselect()
+                                        }
+                                        currentDate == selectedSecondDate -> {
+                                            onSecondDayDeselect()
+                                        }
+                                        selectedFirstDate == null -> {
+                                            onFirstDaySelect(currentDate)
+                                        }
+                                        selectedSecondDate == null -> {
+                                            if (currentDate < selectedFirstDate) {
+                                                onFirstDaySelect(currentDate)
+                                            } else {
+                                                onSecondDaySelect(currentDate)
+                                            }
+                                        }
+                                        else -> {
+                                            if (currentDate < selectedFirstDate) {
+                                                onFirstDaySelect(currentDate)
+                                            } else if (currentDate > selectedFirstDate) {
+                                                onSecondDaySelect(currentDate)
+                                            }
+                                        }
                                     }
                                 },
                         contentAlignment = Alignment.Center,
@@ -197,11 +218,17 @@ fun TDDatePickerSingleInput(
         firstDayOfMonth.minusDays((firstDayOfMonth.dayOfWeek.value - 1).toLong())
 
     Column(
-        modifier = modifier.fillMaxWidth().padding(top = 16.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -236,7 +263,10 @@ fun TDDatePickerSingleInput(
         Spacer(Modifier.height(16.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
         ) {
             daysOfWeek.forEach { day ->
                 TDText(
@@ -252,7 +282,10 @@ fun TDDatePickerSingleInput(
 
         for (week in 0 until 5) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
             ) {
                 for (day in 0 until 7) {
                     val currentDate = calendarStartDate.plusDays((week * 7 + day).toLong())
@@ -268,7 +301,6 @@ fun TDDatePickerSingleInput(
                                 .weight(1f)
                                 .padding(horizontal = 6.dp)
                                 .background(
-                                    // ✅ sadece seçili gün vurgusu
                                     color = if (isSelected) TDTheme.colors.purple else Color.Transparent,
                                     shape = RoundedCornerShape(8.dp),
                                 ).clickable {
@@ -358,13 +390,11 @@ private fun specifyColorBetweenRange(
 @Preview(showBackground = true, name = "Date Picker Preview")
 @Composable
 private fun TDDatePickerPreview() {
-    val currentMonth = YearMonth.now()
     Column {
         TDDatePicker(
-            selectedMonth = currentMonth.plusMonths(2),
-            onDaySelected = {},
+            onFirstDaySelect = {},
+            onSecondDaySelect = {},
             onFirstDayDeselect = {},
-            onSecondDayDeselect = {},
-        )
+        ) {}
     }
 }
