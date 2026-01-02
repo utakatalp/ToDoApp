@@ -39,7 +39,7 @@ fun TDTaskCardWithCheckbox(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TDCheckBox(isChecked = isChecked, onCheckBoxClick = onCheckBoxClick)
-            Spacer(Modifier.weight(0.1f))
+            Spacer(Modifier.weight(0.15f))
             TDText(
                 text = taskText,
                 style =

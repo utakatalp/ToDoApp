@@ -12,6 +12,9 @@ complexity:
   TooManyFunctions:
     active: true
     ignorePrivate: true
+  CyclomaticComplexMethod:
+    active: true
+    ignoreSingleWhenExpression: true
 
 
 naming:
@@ -42,5 +45,7 @@ style:
       - "**/theme/**"
 formatting:
   active: true
+  NoUnusedImports:
+    active: true
   Indentation:
     active: false

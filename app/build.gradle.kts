@@ -99,6 +99,7 @@ dependencies {
 
     // Dependency Injection (Hilt)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     // Network (Retrofit & Serialization)
@@ -116,4 +117,5 @@ dependencies {
     // Utils
     implementation(libs.timber)
     detektPlugins(libs.detekt.formatting)
+    implementation(libs.reorderable)
 }
