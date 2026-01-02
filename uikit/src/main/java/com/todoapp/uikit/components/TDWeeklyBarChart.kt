@@ -45,7 +45,6 @@ fun TDWeeklyBarChart(
     title: String,
     days: List<String>,
     values: List<Int>,
-    maxY: Int,
     yLabelColor: Color,
     height: Dp,
     autoScaleHeightToMaxY: Boolean = true,
@@ -62,6 +61,7 @@ fun TDWeeklyBarChart(
 
     val density = LocalDensity.current
 
+    val maxY = values.maxOrNull() ?: 0
     val safeMaxY = max(1, maxY)
 
     val requiredPlotHeight = (safeMaxY * minGridStep.value).dp
@@ -233,8 +233,7 @@ fun TDWeeklyBarChartPreviewLight() {
         TDWeeklyBarChart(
             title = "Task",
             days = listOf("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"),
-            values = listOf(3, 4, 5, 2, 2, 3, 4),
-            maxY = 7,
+            values = listOf(9, 4, 5, 2, 2, 3, 4),
             yLabelColor = TDTheme.colors.onBackground,
             height = 220.dp,
         )
@@ -255,7 +254,6 @@ fun TDWeeklyBarChartPreviewDark() {
             title = "Task",
             days = listOf("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"),
             values = listOf(17, 28, 30, 20, 17, 14, 21),
-            maxY = 30,
             yLabelColor = TDTheme.colors.onBackground,
             height = 220.dp,
         )
