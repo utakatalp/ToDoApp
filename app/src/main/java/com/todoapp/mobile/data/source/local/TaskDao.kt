@@ -1,24 +1,11 @@
-package com.todoapp.mobile.data.local.entity
+package com.todoapp.mobile.data.source.local
 
-import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Delete
-import androidx.room.Entity
 import androidx.room.Insert
-import androidx.room.PrimaryKey
 import androidx.room.Query
+import com.todoapp.mobile.data.model.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
-
-@Entity(tableName = "tasks")
-data class TaskEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0L,
-    @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "description") val description: String?,
-    @ColumnInfo(name = "date") val date: Long,
-    @ColumnInfo(name = "time_start") val timeStart: Long,
-    @ColumnInfo(name = "time_end") val timeEnd: Long,
-    @ColumnInfo(name = "is_completed") val isCompleted: Boolean,
-)
 
 @Dao
 interface TaskDao {

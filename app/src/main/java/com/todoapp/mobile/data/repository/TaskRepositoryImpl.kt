@@ -1,8 +1,8 @@
-package com.todoapp.mobile.data.local.repository
+package com.todoapp.mobile.data.repository
 
-import com.todoapp.mobile.data.local.entity.TaskDao
 import com.todoapp.mobile.data.mapper.toDomain
 import com.todoapp.mobile.data.mapper.toEntity
+import com.todoapp.mobile.data.source.local.TaskDao
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.TaskRepository
 import kotlinx.coroutines.Dispatchers

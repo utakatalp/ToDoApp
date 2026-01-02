@@ -1,6 +1,6 @@
 package com.todoapp.mobile.data.mapper
 
-import com.todoapp.mobile.data.local.entity.TaskEntity
+import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.domain.model.Task
 import java.time.LocalDate
 import java.time.LocalTime

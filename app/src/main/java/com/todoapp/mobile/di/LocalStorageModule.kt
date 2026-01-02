@@ -2,9 +2,9 @@ package com.todoapp.mobile.di
 
 import android.content.Context
 import androidx.room.Room
-import com.todoapp.mobile.data.local.AppDatabase
-import com.todoapp.mobile.data.local.entity.TaskDao
-import com.todoapp.mobile.data.local.repository.TaskRepositoryImpl
+import com.todoapp.mobile.data.repository.TaskRepositoryImpl
+import com.todoapp.mobile.data.source.local.AppDatabase
+import com.todoapp.mobile.data.source.local.TaskDao
 import com.todoapp.mobile.domain.repository.TaskRepository
 import dagger.Module
 import dagger.Provides

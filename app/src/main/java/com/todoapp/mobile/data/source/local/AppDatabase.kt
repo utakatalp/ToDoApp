@@ -1,9 +1,8 @@
-package com.todoapp.mobile.data.local
+package com.todoapp.mobile.data.source.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.todoapp.mobile.data.local.entity.TaskDao
-import com.todoapp.mobile.data.local.entity.TaskEntity
+import com.todoapp.mobile.data.model.entity.TaskEntity
 
 @Database(entities = [TaskEntity::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
