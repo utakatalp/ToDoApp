@@ -41,6 +41,7 @@ import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
+import com.todoapp.uikit.components.TDSpannableText
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
 
@@ -146,7 +147,7 @@ fun OnboardingScreen(
                     onClick = { onAction(UiAction.OnRegisterClick) },
                 )
 
-                TDText(
+                TDSpannableText(
                     modifier =
                         Modifier
                             .clickable { onAction(UiAction.OnLoginClick) }
@@ -271,7 +272,7 @@ fun OnboardingScreen(
                     },
                 )
 
-                TDText(
+                TDSpannableText(
                     modifier =
                         Modifier
                             .clickable { onAction(UiAction.OnLoginClick) }

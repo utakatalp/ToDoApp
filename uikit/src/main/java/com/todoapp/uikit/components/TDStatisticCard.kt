@@ -55,7 +55,7 @@ fun TDStatisticCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Spacer(Modifier.weight(1f))
-                TDText(
+                TDSpannableText(
                     fullText = "$taskAmount This Week",
                     spanText = "$taskAmount",
                     spanStyle =
@@ -94,7 +94,7 @@ fun TDStatisticCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Spacer(Modifier.weight(1f))
-                TDText(
+                TDSpannableText(
                     fullText = "$taskAmount This Week",
                     spanText = "$taskAmount",
                     spanStyle =
