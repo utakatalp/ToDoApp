@@ -26,6 +26,7 @@ class CalendarViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
+        // This is intentionally not wrapped to emphasize the single source of truth.
         viewModelScope.launch {
             uiState
                 .map { it.selectedFirstDate to it.selectedSecondDate }
