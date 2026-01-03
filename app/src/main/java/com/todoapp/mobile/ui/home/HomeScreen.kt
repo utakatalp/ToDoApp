@@ -1,6 +1,8 @@
 package com.todoapp.mobile.ui.home
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,8 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -80,6 +80,7 @@ fun HomeScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
+                    .background(TDTheme.colors.background)
                     .padding(horizontal = 16.dp),
             uiState = uiState,
             onAction = onAction,
@@ -97,7 +98,6 @@ fun HomeContent(
     val lazyListState = rememberLazyListState()
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
         onAction(UiAction.OnMoveTask(from.index, to.index))
-
         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
     }
     Column(modifier = modifier.fillMaxSize()) {
@@ -123,7 +123,11 @@ fun HomeContent(
             )
         }
         Spacer(Modifier.height(32.dp))
-        TDText(text = stringResource(com.todoapp.mobile.R.string.tasks_today), style = TDTheme.typography.heading3)
+        TDText(
+            text = stringResource(com.todoapp.mobile.R.string.tasks_today),
+            color = TDTheme.colors.onBackground,
+            style = TDTheme.typography.heading3
+        )
         Spacer(Modifier.height(16.dp))
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
@@ -182,6 +186,9 @@ fun HomeContent(
                 AlertDialog(
                     onDismissRequest = { onAction(UiAction.OnDeleteDialogDismiss) },
                     title = { Text("Delete task?") },
+                    titleContentColor = TDTheme.colors.onBackground,
+                    containerColor = TDTheme.colors.background,
+                    textContentColor = TDTheme.colors.onBackground,
                     text = { Text("Do you want to delete the task?") },
                     confirmButton = {
                         TextButton(onClick = { onAction(UiAction.OnDeleteDialogConfirm) }) {
@@ -247,7 +254,6 @@ private fun HomeContentPreview() {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun AddTaskSheet(
     uiState: UiState,
     onClick: () -> Unit,
@@ -264,12 +270,13 @@ fun AddTaskSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TDText(text = stringResource(com.todoapp.mobile.R.string.add_new_task))
+            TDText(text = stringResource(com.todoapp.mobile.R.string.add_new_task), color = TDTheme.colors.onBackground)
             IconButton(
                 onClick = { onAction(UiAction.OnDismissBottomSheet) },
             ) {
                 Icon(
                     painterResource(R.drawable.ic_close),
+                    tint = TDTheme.colors.onBackground,
                     contentDescription = stringResource(com.todoapp.mobile.R.string.close_button),
                 )
             }
@@ -321,6 +328,58 @@ fun AddTaskSheet(
     }
 }
 
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun HomeContentPreview_Dark() {
+    val fakeUiState =
+        UiState(
+            selectedDate = LocalDate.now(),
+            tasks =
+                listOf(
+                    Task(
+                        id = 1L,
+                        title = "Design the main screen",
+                        description = "Draft layout & components",
+                        date = LocalDate.now(),
+                        timeStart = LocalTime.of(9, 30),
+                        timeEnd = LocalTime.of(10, 15),
+                        isCompleted = false,
+                    ),
+                    Task(
+                        id = 2L,
+                        title = "Develop the API client",
+                        description = "Retrofit + serialization setup",
+                        date = LocalDate.now().minusDays(1),
+                        timeStart = LocalTime.of(11, 0),
+                        timeEnd = LocalTime.of(12, 0),
+                        isCompleted = true,
+                    ),
+                    Task(
+                        id = 3L,
+                        title = "Fix the login bug",
+                        description = null,
+                        date = LocalDate.now(),
+                        timeStart = LocalTime.of(14, 0),
+                        timeEnd = LocalTime.of(14, 30),
+                        isCompleted = false,
+                    ),
+                ),
+            completedTaskCountThisWeek = 5,
+            pendingTaskCountThisWeek = 8,
+        )
+
+    TDTheme(darkTheme = true) {
+        HomeContent(
+            uiState = fakeUiState,
+            onAction = {},
+            modifier = Modifier.padding(start = 24.dp, end = 24.dp),
+        )
+    }
+}
+
 @Preview(showBackground = true, widthDp = 360)
 @Composable
 private fun AddTaskSheetPreview() {
@@ -335,4 +394,26 @@ private fun AddTaskSheetPreview() {
         onClick = {},
         onAction = {},
     )
+}
+
+@Preview(
+    showBackground = true,
+    widthDp = 360,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun AddTaskSheetPreview_Dark() {
+    TDTheme(darkTheme = true) {
+        AddTaskSheet(
+            uiState =
+                UiState(
+                    selectedDate = LocalDate.of(2025, 12, 25),
+                    taskTitle = "Read 10 pages",
+                    taskTimeEnd = LocalTime.of(10, 15),
+                    taskDescription = "Focus mode on. No phone.",
+                ),
+            onClick = {},
+            onAction = {},
+        )
+    }
 }
