@@ -30,7 +30,7 @@ fun TDTaskCardWithCheckbox(
     taskText: String,
     onCheckBoxClick: (Boolean) -> Unit,
 ) {
-    Column {
+    Column(modifier.background(TDTheme.colors.background)) {
         Row(
             modifier =
                 modifier
@@ -42,6 +42,7 @@ fun TDTaskCardWithCheckbox(
             Spacer(Modifier.weight(0.15f))
             TDText(
                 text = taskText,
+                color = TDTheme.colors.onBackground,
                 style =
                     TDTheme.typography.regularTextStyle.copy(
                         textDecoration =
@@ -55,8 +56,8 @@ fun TDTaskCardWithCheckbox(
             Spacer(Modifier.weight(2f))
             Icon(
                 painter = painterResource(R.drawable.ic_drag),
+                tint = TDTheme.colors.onBackground,
                 contentDescription = "drag",
-                tint = TDTheme.colors.gray.copy(alpha = 0.4f),
             )
         }
         HorizontalDivider(
@@ -77,7 +78,7 @@ private fun TDCheckBox(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
-                .background(TDTheme.colors.lightGray)
+                .background(TDTheme.colors.onBackground)
                 .clickable(
                     onClick = { onCheckBoxClick(isChecked) },
                 ),
@@ -89,14 +90,15 @@ private fun TDCheckBox(
                     .border(width = 1.dp, color = TDTheme.colors.purple),
             painter = painterResource(id = R.drawable.ic_rectangle_sharp),
             contentDescription = "rectangle",
-            tint = TDTheme.colors.white,
+            tint = TDTheme.colors.darkPurple,
         )
         if (isChecked) {
             Icon(
                 modifier = Modifier.size(10.dp),
                 painter = painterResource(id = R.drawable.ic_check),
+                tint = TDTheme.colors.white,
                 contentDescription = "check",
-                tint = TDTheme.colors.purple,
+                // tint = TDTheme.colors.purple,
             )
         }
     }
@@ -131,5 +133,37 @@ private fun TDCheckBoxPreview() {
 @Preview
 @Composable
 private fun TDCheckBoxPreviewWithoutCheck() {
+    TDCheckBox(modifier = Modifier, isChecked = false, onCheckBoxClick = { })
+}
+
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun TDTaskCardWithCheckboxPreview_Dark() {
+    TDTaskCardWithCheckbox(
+        isChecked = true,
+        taskText = "Buy a cat food",
+        onCheckBoxClick = { },
+    )
+}
+
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun TDTaskCardWithoutCheckboxPreview_Dark() {
+    TDTaskCardWithCheckbox(
+        isChecked = false,
+        taskText = "Buy a cat food",
+        onCheckBoxClick = { },
+    )
+}
+
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun TDCheckBoxPreview_Dark() {
+    TDCheckBox(modifier = Modifier, isChecked = true, onCheckBoxClick = { })
+}
+
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun TDCheckBoxPreviewWithoutCheck_Dark() {
     TDCheckBox(modifier = Modifier, isChecked = false, onCheckBoxClick = { })
 }
