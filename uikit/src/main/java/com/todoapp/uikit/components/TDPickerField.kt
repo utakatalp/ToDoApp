@@ -27,7 +27,7 @@ fun TDPickerField(
         TDText(
             text = title,
             style = TDTheme.typography.regularTextStyle,
-            color = TDTheme.colors.gray,
+            color = TDTheme.colors.onBackground,
         )
 
         Spacer(Modifier.height(8.dp))
