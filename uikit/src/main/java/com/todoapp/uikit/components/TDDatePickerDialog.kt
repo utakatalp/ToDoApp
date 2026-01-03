@@ -1,5 +1,6 @@
 package com.todoapp.uikit.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.uikit.R
+import com.todoapp.uikit.theme.TDTheme
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -52,6 +54,7 @@ fun TDDatePickerDialog(
             trailingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_calendar2),
+                    tint = TDTheme.colors.onBackground,
                     contentDescription = null,
                 )
             },
@@ -69,7 +72,7 @@ fun TDDatePickerDialog(
                     shape = RoundedCornerShape(16.dp),
                     tonalElevation = 8.dp,
                 ) {
-                    Column {
+                    Column(Modifier.background(TDTheme.colors.background)) {
                         TDDatePickerSingleInput(
                             selectedMonth = selectedMonth,
                             selectedDate = selectedDate,
@@ -82,6 +85,7 @@ fun TDDatePickerDialog(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
+                                    .background(TDTheme.colors.background)
                                     .padding(horizontal = 8.dp),
                             horizontalArrangement = Arrangement.Center,
                         ) {
