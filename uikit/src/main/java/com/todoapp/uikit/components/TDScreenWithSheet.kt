@@ -25,7 +25,8 @@ fun <T> TDScreenWithSheet(
     collectEffect: ((T) -> Unit)? = null,
     isSheetOpen: Boolean = false,
     skipPartiallyExpanded: Boolean = true,
-    containerColor: Color = TDTheme.colors.white,
+    containerColor: Color = TDTheme.colors.background,
+    contentColor: Color = TDTheme.colors.onBackground,
     sheetContent: @Composable () -> Unit,
     onDismissSheet: () -> Unit,
     content: @Composable () -> Unit,
@@ -64,6 +65,7 @@ fun <T> TDScreenWithSheet(
             onDismissRequest = { onDismissSheet() },
             sheetState = bottomSheetState,
             containerColor = containerColor,
+            contentColor = contentColor,
             dragHandle = null,
         ) {
             sheetContent()
