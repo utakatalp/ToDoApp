@@ -71,11 +71,11 @@ internal fun lightColors(
     )
 
 internal fun darkColors(
-    lightRed: Color = Color(0xFFFFE6E7),
+    lightRed: Color = Color(0xFF7A1F2B),
     red: Color = Color(0xFFFFB1B5),
     crossRed: Color = Color(0xFFB2282D),
-    statusCardGray: Color = Color(0xFF6E7180),
-    bgColorPurple: Color = Color(0xFFEFF2FF),
+    statusCardGray: Color = Color(0xFF898DA1),
+    bgColorPurple: Color = Color(0xFF2B2F5E),
     bgColor: Color = Color.Black,
     background: Color = bgColor,
     onBackground: Color = Color(0xFFFFFAF0),
