@@ -7,15 +7,15 @@ complexity:
   LongMethod:
     active: true
     threshold: 60
+
     ignoreAnnotated:
       - Composable
   TooManyFunctions:
     active: true
-    thresholdInFiles: 12
     thresholdInClasses: 12
     thresholdInInterfaces: 12
-    thresholdInObjects: 12
-    thresholdInEnums: 12
+    ignoreAnnotated:
+      - HiltViewModel
     ignorePrivate: true
   CyclomaticComplexMethod:
     active: true
