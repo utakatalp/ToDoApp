@@ -11,6 +11,11 @@ complexity:
       - Composable
   TooManyFunctions:
     active: true
+    thresholdInFiles: 12
+    thresholdInClasses: 12
+    thresholdInInterfaces: 12
+    thresholdInObjects: 12
+    thresholdInEnums: 12
     ignorePrivate: true
   CyclomaticComplexMethod:
     active: true
