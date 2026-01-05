@@ -6,4 +6,11 @@
     <string name="activity_screen_weekly_progress_legend_complete_text">Complete</string>
     <string name="activity_screen_weekly_progress_legend_in_progress_text">In Progress</string>
     <string name="activity_screen_weekly_progress_legend_not_started_text">Not Started</string>
+    <string name="bar_chart_days_mon">Mo</string>
+    <string name="bar_chart_days_tue">Tu</string>
+    <string name="bar_chart_days_wed">We</string>
+    <string name="bar_chart_days_thu">Th</string>
+    <string name="bar_chart_days_fri">Fr</string>
+    <string name="bar_chart_days_sat">Sa</string>
+    <string name="bar_chart_days_sun">Su</string>
 </resources>
