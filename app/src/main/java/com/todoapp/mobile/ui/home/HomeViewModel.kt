@@ -1,10 +1,11 @@
 package com.todoapp.mobile.ui.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
+import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.domain.model.toAlarmItem
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
@@ -25,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
+    private val alarmScheduler: AlarmScheduler
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -114,15 +116,19 @@ class HomeViewModel @Inject constructor(
 
     private fun createTask() {
         viewModelScope.launch {
+            val task = Task(
+                title = uiState.value.taskTitle,
+                description = uiState.value.taskDescription,
+                date = uiState.value.dialogSelectedDate!!,
+                timeStart = uiState.value.taskTimeStart!!,
+                timeEnd = uiState.value.taskTimeEnd!!,
+                isCompleted = false,
+            )
             taskRepository.insert(
-                task = Task(
-                    title = uiState.value.taskTitle,
-                    description = uiState.value.taskDescription,
-                    date = uiState.value.dialogSelectedDate!!,
-                    timeStart = uiState.value.taskTimeStart!!,
-                    timeEnd = uiState.value.taskTimeEnd!!,
-                    isCompleted = false,
-                )
+                task = task
+            )
+            alarmScheduler.schedule(
+                task.toAlarmItem()
             )
             flush()
             dismissBottomSheet()
@@ -181,7 +187,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun changeSelectedDate(uiAction: UiAction.OnDateSelect) {
-        Log.d("HomeViewModel", "changeSelectedDate: ${uiAction.date}")
         _uiState.update { it.copy(selectedDate = uiAction.date) }
         fetchDailyTask(uiAction.date)
     }
