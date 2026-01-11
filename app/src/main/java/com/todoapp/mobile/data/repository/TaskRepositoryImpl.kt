@@ -22,17 +22,15 @@ class TaskRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun observeRange(
+    override fun observeRange(
         startDate: LocalDate,
         endDate: LocalDate
     ): Flow<List<Task>> {
-        return withContext(Dispatchers.IO) {
-            taskDao.loadTasksBetweenRange(
-                startDate.toEpochDay(),
-                endDate.toEpochDay()
-            ).map { list ->
-                list.map { it.toDomain() }
-            }
+        return taskDao.loadTasksBetweenRange(
+            startDate.toEpochDay(),
+            endDate.toEpochDay()
+        ).map { list ->
+            list.map { it.toDomain() }
         }
     }
 
