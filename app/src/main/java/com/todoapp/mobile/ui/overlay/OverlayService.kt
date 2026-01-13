@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.IBinder
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -22,20 +23,11 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.todoapp.mobile.MainActivity
-import com.todoapp.mobile.ui.overlay.OverlayServiceConstants.BOUND_MODE_NOT_SUPPORTED
-import com.todoapp.mobile.ui.overlay.OverlayServiceConstants.INTENT_EXTRA_COMMAND_HIDE_OVERLAY
-import com.todoapp.mobile.ui.overlay.OverlayServiceConstants.INTENT_EXTRA_COMMAND_SHOW_OVERLAY
 import com.todoapp.uikit.components.TDOverlayNotificationCard
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
-object OverlayServiceConstants {
-    const val INTENT_EXTRA_COMMAND_SHOW_OVERLAY = "INTENT_EXTRA_COMMAND_SHOW_OVERLAY"
-    const val INTENT_EXTRA_COMMAND_HIDE_OVERLAY = "INTENT_EXTRA_COMMAND_HIDE_OVERLAY"
-    const val HIDE_OVERLAY_ANIMATION_DELAY = 300L
-    const val BOUND_MODE_NOT_SUPPORTED = "Bound mode not supported"
-    const val WINDOW_MANAGER_LAYOUT_HEIGHT = 400
-}
-
+@AndroidEntryPoint
 class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     lateinit var windowManager: WindowManager
     private val _lifecycleRegistry = LifecycleRegistry(this)
@@ -47,6 +39,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     override fun onBind(intent: Intent?): IBinder {
         throw UnsupportedOperationException(BOUND_MODE_NOT_SUPPORTED)
     }
+
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -58,12 +51,14 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         if (intent.hasExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)) {
             val message = intent.getStringExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)
-            showOverlay(message!!)
+            val minutesBefore = intent.getLongExtra(INTENT_EXTRA_LONG, 0)
+            Log.d("onStart", minutesBefore.toString())
+            showOverlay(message!!, minutesBefore)
         } else if (intent.hasExtra(INTENT_EXTRA_COMMAND_HIDE_OVERLAY)) hideOverlay()
         return START_NOT_STICKY
     }
 
-    private fun showOverlay(message: String) {
+    private fun showOverlay(message: String, minutesBefore: Long) {
         if (overlayView != null) return
 
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
@@ -76,16 +71,18 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 var show by remember { mutableStateOf(true) }
                 LaunchedEffect(show) {
                     if (!show) {
-                        delay(OverlayServiceConstants.HIDE_OVERLAY_ANIMATION_DELAY)
+                        delay(HIDE_OVERLAY_ANIMATION_DELAY)
                         hideOverlay()
                     }
                 }
                 TDOverlayNotificationCard(
                     message = message,
+                    minutesBefore = minutesBefore,
                     show = show,
                     onDismissClick = { show = false },
                     onOpenClick = {
                         show = false
+
                         openApp()
                     }
                 )
@@ -105,7 +102,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private fun getLayoutParams(): WindowManager.LayoutParams {
         return WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
-            OverlayServiceConstants.WINDOW_MANAGER_LAYOUT_HEIGHT,
+            WINDOW_MANAGER_LAYOUT_HEIGHT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
@@ -119,5 +116,14 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         startActivity(intent)
+    }
+
+    companion object {
+        const val INTENT_EXTRA_COMMAND_SHOW_OVERLAY = "INTENT_EXTRA_COMMAND_SHOW_OVERLAY"
+        const val INTENT_EXTRA_COMMAND_HIDE_OVERLAY = "INTENT_EXTRA_COMMAND_HIDE_OVERLAY"
+        const val INTENT_EXTRA_LONG = "INTENT_EXTRA_LONG"
+        const val HIDE_OVERLAY_ANIMATION_DELAY = 300L
+        const val BOUND_MODE_NOT_SUPPORTED = "Bound mode not supported"
+        const val WINDOW_MANAGER_LAYOUT_HEIGHT = 600
     }
 }

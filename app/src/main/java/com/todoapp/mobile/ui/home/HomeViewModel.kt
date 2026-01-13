@@ -26,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
-    private val alarmScheduler: AlarmScheduler
+    private val alarmScheduler: AlarmScheduler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -124,14 +124,19 @@ class HomeViewModel @Inject constructor(
                 timeEnd = uiState.value.taskTimeEnd!!,
                 isCompleted = false,
             )
-            taskRepository.insert(
-                task = task
-            )
-            alarmScheduler.schedule(
-                task.toAlarmItem()
-            )
+            taskRepository.insert(task = task)
+            scheduleTaskReminders(task)
             flush()
             dismissBottomSheet()
+        }
+    }
+
+    private fun scheduleTaskReminders(
+        task: Task,
+        remindBeforeMinutes: List<Long> = DEFAULT_REMINDER_MINUTES,
+    ) {
+        remindBeforeMinutes.forEach { minutes ->
+            alarmScheduler.schedule(task.toAlarmItem(remindBeforeMinutes = minutes))
         }
     }
 
@@ -203,5 +208,14 @@ class HomeViewModel @Inject constructor(
 
     private fun dismissBottomSheet() {
         _uiState.update { it.copy(isSheetOpen = false) }
+    }
+    companion object {
+        private val DEFAULT_REMINDER_MINUTES = listOf(
+            0L, // at time
+            1L, // 1 min before
+            2L, // 2 min before
+            5L, // 5 min before
+            10L, // 10 min before
+        )
     }
 }

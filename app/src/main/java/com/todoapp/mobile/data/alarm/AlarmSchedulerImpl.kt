@@ -5,11 +5,13 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
+import android.util.Log
 import androidx.annotation.RequiresPermission
+import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.model.AlarmItem
 import com.todoapp.mobile.ui.overlay.OverlayService
-import com.todoapp.mobile.ui.overlay.OverlayServiceConstants
 import java.time.ZoneId
 
 class AlarmSchedulerImpl(
@@ -19,8 +21,17 @@ class AlarmSchedulerImpl(
 
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     override fun schedule(item: AlarmItem) {
-        val intent = Intent(context, OverlayService::class.java).apply {
-            putExtra(OverlayServiceConstants.INTENT_EXTRA_COMMAND_SHOW_OVERLAY, item.message)
+        val intent = if (Settings.canDrawOverlays(context)) {
+            Intent(context, OverlayService::class.java).apply {
+                putExtra(OverlayService.INTENT_EXTRA_COMMAND_SHOW_OVERLAY, item.message)
+                putExtra(OverlayService.INTENT_EXTRA_LONG, item.minutesBefore)
+            }
+        } else {
+            Intent(context, NotificationService::class.java).apply {
+                putExtra(NotificationService.INTENT_EXTRA_MESSAGE, item.message)
+                putExtra(NotificationService.INTENT_EXTRA_LONG, item.minutesBefore)
+                Log.d("Intent", item.minutesBefore.toString())
+            }
         }
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,

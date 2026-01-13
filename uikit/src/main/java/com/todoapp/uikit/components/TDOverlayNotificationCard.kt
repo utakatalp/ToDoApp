@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,12 +27,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.todoapp.uikit.theme.TDTheme
 
 @Composable
 fun TDOverlayNotificationCard(
     message: String,
     show: Boolean,
+    minutesBefore: Long = 0,
     modifier: Modifier = Modifier,
     onDismissClick: () -> Unit = {},
     onOpenClick: () -> Unit = {}
@@ -56,7 +56,8 @@ fun TDOverlayNotificationCard(
             NotificationCardContent(
                 message = message,
                 onDismissClick = onDismissClick,
-                onOpenClick = onOpenClick
+                onOpenClick = onOpenClick,
+                minutesBefore = minutesBefore
             )
         }
     }
@@ -65,6 +66,7 @@ fun TDOverlayNotificationCard(
 @Composable
 private fun NotificationCardContent(
     message: String,
+    minutesBefore: Long = 0,
     onDismissClick: () -> Unit = {},
     onOpenClick: () -> Unit = {}
 ) {
@@ -77,7 +79,7 @@ private fun NotificationCardContent(
             shape = RoundedCornerShape(20.dp),
             tonalElevation = 6.dp,
             shadowElevation = 10.dp,
-            color = Color(0xFF121826), // dark card
+            color = Color(0xFF121826),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -94,10 +96,10 @@ private fun NotificationCardContent(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF2D6BFF)), // accent
+                            .background(Color(0xFF2D6BFF)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("⏰", fontSize = 20.sp)
+                        TDText(text = "⏰", style = TDTheme.typography.heading1)
                     }
 
                     Spacer(Modifier.width(12.dp))
@@ -105,34 +107,30 @@ private fun NotificationCardContent(
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(
+                        TDText(
                             text = "Reminder",
-                            fontSize = 14.sp,
-                            color = Color(0xFFB7C0D8)
+                            style = TDTheme.typography.heading7,
+                            color = TDTheme.colors.purple
                         )
-                        Text(
+                        TDText(
                             text = message,
-                            fontSize = 18.sp,
-                            color = Color.White
+                            style = TDTheme.typography.heading3,
+                            color = TDTheme.colors.white
                         )
                         Spacer(Modifier.height(2.dp))
-                        Text(
+                        TDText(
                             text = "Tap an action below",
-                            fontSize = 12.sp,
-                            color = Color(0xFF8B95B3)
+                            style = TDTheme.typography.subheading4,
+                            color = TDTheme.colors.gray
                         )
                     }
-
-                    Text(
-                        text = "now",
-                        fontSize = 12.sp,
-                        color = Color(0xFF8B95B3)
+                    TDText(
+                        text = if (minutesBefore == 0L) "Now" else "$minutesBefore minutes before",
+                        style = TDTheme.typography.subheading4,
+                        color = TDTheme.colors.gray
                     )
                 }
-
                 Spacer(Modifier.height(14.dp))
-
-                // Actions
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -152,7 +150,7 @@ private fun NotificationCardContent(
                                     onDismissClick()
                                 }
                         ) {
-                            Text("Dismiss", color = Color(0xFFB7C0D8), fontSize = 14.sp)
+                            TDText(text = "Dismiss", color = TDTheme.colors.lightGray)
                         }
                     }
 
@@ -171,7 +169,7 @@ private fun NotificationCardContent(
                                     onOpenClick()
                                 }
                         ) {
-                            Text("Open", color = Color.White, fontSize = 14.sp)
+                            TDText(text = "Open", color = TDTheme.colors.white)
                         }
                     }
                 }
