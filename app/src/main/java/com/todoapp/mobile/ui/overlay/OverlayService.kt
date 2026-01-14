@@ -34,29 +34,6 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     override val lifecycle: Lifecycle = _lifecycleRegistry
     private var overlayView: View? = null
 
-    companion object {
-        private const val INTENT_EXTRA_COMMAND_SHOW_OVERLAY = "INTENT_EXTRA_COMMAND_SHOW_OVERLAY"
-        private const val INTENT_EXTRA_COMMAND_HIDE_OVERLAY = "INTENT_EXTRA_COMMAND_HIDE_OVERLAY"
-
-        private const val BOUND_MODE_NOT_SUPPORTED = "Bound mode not supported"
-
-        /*
-        internal fun showOverlay(context: Context) {
-            Log.d("overlay", "showOverlay")
-            val intent = Intent(context, ComposerOverlayService::class.java)
-            intent.putExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY, true)
-            context.startService(intent)
-        }
-
-        internal fun hideOverlay(context: Context) {
-            val intent = Intent(context, ComposerOverlayService::class.java)
-            intent.putExtra(INTENT_EXTRA_COMMAND_HIDE_OVERLAY, true)
-            context.startService(intent)
-        }
-
-         */
-    }
-
     override fun onBind(intent: Intent?): IBinder {
         throw UnsupportedOperationException(BOUND_MODE_NOT_SUPPORTED)
     }
@@ -77,6 +54,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
         return START_NOT_STICKY
     }
+
     private fun showOverlay() {
         if (overlayView != null) return
 
@@ -88,7 +66,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             setViewTreeSavedStateRegistryOwner(this@OverlayService)
             setContent {
                 Box(
-                    modifier = Modifier.size(400.dp).background(Color.Blue)
+                    modifier = Modifier
+                        .size(400.dp)
+                        .background(Color.Blue)
                 ) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -106,6 +86,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
         windowManager.addView(overlayView, getLayoutParams())
     }
+
     private fun hideOverlay() {
         if (overlayView == null) return
         windowManager.removeView(overlayView)
@@ -114,6 +95,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
     }
+
     private fun getLayoutParams(): WindowManager.LayoutParams {
         return WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -122,5 +104,11 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSLUCENT
         )
+    }
+
+    companion object {
+        private const val INTENT_EXTRA_COMMAND_SHOW_OVERLAY = "INTENT_EXTRA_COMMAND_SHOW_OVERLAY"
+        private const val INTENT_EXTRA_COMMAND_HIDE_OVERLAY = "INTENT_EXTRA_COMMAND_HIDE_OVERLAY"
+        private const val BOUND_MODE_NOT_SUPPORTED = "Bound mode not supported"
     }
 }
