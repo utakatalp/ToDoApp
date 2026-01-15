@@ -3,16 +3,10 @@ package com.todoapp.mobile.data.security.biometric
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import com.todoapp.mobile.domain.security.Authenticator
 import javax.inject.Inject
 
-interface BiometricAuthenticator {
-    fun authenticate(
-        activity: FragmentActivity,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
-    )
-}
-class AndroidBiometricAuthenticator @Inject constructor() : BiometricAuthenticator {
+class BiometricAuthenticator @Inject constructor() : Authenticator {
     override fun authenticate(
         activity: FragmentActivity,
         onSuccess: () -> Unit,
