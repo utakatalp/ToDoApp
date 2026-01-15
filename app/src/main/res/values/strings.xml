@@ -33,4 +33,6 @@
     <string name="bar_chart_days_fri">Fr</string>
     <string name="bar_chart_days_sat">Sa</string>
     <string name="bar_chart_days_sun">Su</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="secret_task">Secret Task</string>
 </resources>

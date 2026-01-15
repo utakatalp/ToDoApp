@@ -1,11 +1,14 @@
 package com.todoapp.mobile.ui.home
 
 import android.util.Log
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
+import com.todoapp.mobile.data.security.biometric.BiometricAuthenticator
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.navigation.NavEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
@@ -25,11 +28,14 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
+    private val biometricAuthenticator: BiometricAuthenticator
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
+    private val _navEffect = Channel<NavEffect>()
+    val navEffect: Flow<NavEffect> = _navEffect.receiveAsFlow()
     private lateinit var selectedTask: Task
 
     private var fetchJob: Job? = null
@@ -51,6 +57,25 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnDeleteDialogDismiss -> closeDialog()
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
+            is UiAction.OnTaskSecretChange -> _uiState.update {
+                it.copy(isTaskSecret = uiAction.isSecret)
+            }
+            is UiAction.OnToggleAdvancedSettings -> _uiState.update { state ->
+                state.copy(isAdvancedSettingsExpanded = !state.isAdvancedSettingsExpanded)
+            }
+            is UiAction.OnSecretTaskClick -> biometricAuthenticator.authenticate(
+                activity = uiAction.context as FragmentActivity,
+                onSuccess = {
+                    viewModelScope.launch {
+                        _navEffect.send(NavEffect.NavigateToSettings)
+                    }
+                },
+                onError = { message ->
+                    viewModelScope.launch {
+                        _uiEffect.send(UiEffect.ShowToast(message))
+                    }
+                }
+            )
         }
     }
 
@@ -122,6 +147,7 @@ class HomeViewModel @Inject constructor(
                     timeStart = uiState.value.taskTimeStart!!,
                     timeEnd = uiState.value.taskTimeEnd!!,
                     isCompleted = false,
+                    isSecret = uiState.value.isTaskSecret
                 )
             )
             flush()

@@ -44,14 +44,14 @@ fun NavGraph(
             val viewModel: OnboardingViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
-            NavigationEffectController(uiEffect, navController)
             OnboardingScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
+            NavigationEffectController(uiEffect, navController)
         }
         composable<Screen.Home> {
-           val viewModel: HomeViewModel = hiltViewModel()
+            val viewModel: HomeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
             HomeScreen(
@@ -59,6 +59,7 @@ fun NavGraph(
                 uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
+            NavigationEffectController2(viewModel.navEffect, navController)
         }
         composable<Screen.Calendar> {
             val viewModel: CalendarViewModel = viewModel()
@@ -68,7 +69,7 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
-        composable<Screen.Settings> {}
+        composable<Screen.Settings> { }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
         composable<Screen.Statistic> { }
@@ -114,4 +115,24 @@ private fun NavigationEffectController(
             }
         }
     }
+}
+
+@Composable
+private fun NavigationEffectController2(
+    navEffect: Flow<NavEffect>,
+    navController: NavHostController,
+) {
+    navEffect.CollectWithLifecycle { effect ->
+        when (effect) {
+            NavEffect.NavigateToLogin -> navController.navigate(Screen.Home)
+            NavEffect.NavigateToRegister -> navController.navigate(Screen.Home)
+            NavEffect.NavigateToSettings -> navController.navigate(Screen.Settings)
+        }
+    }
+}
+
+sealed interface NavEffect {
+    data object NavigateToLogin : NavEffect
+    data object NavigateToRegister : NavEffect
+    data object NavigateToSettings : NavEffect
 }

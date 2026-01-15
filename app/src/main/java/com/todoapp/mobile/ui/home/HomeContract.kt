@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.home
 
+import android.content.Context
 import com.todoapp.mobile.domain.model.Task
 import java.time.LocalDate
 import java.time.LocalTime
@@ -17,7 +18,9 @@ object HomeContract {
         val taskDate: LocalDate = LocalDate.now(),
         val taskDescription: String = "",
         val isSheetOpen: Boolean = false,
-        val isDeleteDialogOpen: Boolean = false
+        val isDeleteDialogOpen: Boolean = false,
+        val isAdvancedSettingsExpanded: Boolean = false,
+        val isTaskSecret: Boolean = false,
     )
 
     sealed interface UiAction {
@@ -40,7 +43,13 @@ object HomeContract {
             val from: Int,
             val to: Int
         ) : UiAction
+        object OnToggleAdvancedSettings : UiAction
+        data class OnTaskSecretChange(val isSecret: Boolean) : UiAction
+        data class OnSecretTaskClick(val context: Context) : UiAction
     }
 
-    sealed interface UiEffect
+    sealed interface UiEffect {
+        data class ShowToast(val message: String) : UiEffect
+        data object NavigateToSettings : UiEffect
+    }
 }
