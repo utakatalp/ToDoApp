@@ -35,4 +35,9 @@
     <string name="bar_chart_days_sun">Su</string>
     <string name="advanced_settings">Advanced Settings</string>
     <string name="secret_task">Secret Task</string>
+    <string name="authentication_failed">Authentication Failed</string>
+    <string name="biometric_authentication">Biometric Authentication</string>
+    <string name="log_in_using_your_biometric_credential">Log in using your biometric credential</string>
+    <string name="cancel">Cancel</string>
+
 </resources>

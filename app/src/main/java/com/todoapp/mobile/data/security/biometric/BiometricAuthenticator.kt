@@ -3,6 +3,7 @@ package com.todoapp.mobile.data.security.biometric
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.security.Authenticator
 import javax.inject.Inject
 
@@ -10,7 +11,6 @@ class BiometricAuthenticator @Inject constructor() : Authenticator {
     override fun authenticate(
         activity: FragmentActivity,
         onSuccess: () -> Unit,
-        onError: (String) -> Unit
     ) {
         val executor = ContextCompat.getMainExecutor(activity)
 
@@ -19,24 +19,14 @@ class BiometricAuthenticator @Inject constructor() : Authenticator {
                 super.onAuthenticationSucceeded(result)
                 onSuccess()
             }
-
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                super.onAuthenticationError(errorCode, errString)
-                onError(errString.toString())
-            }
-
-            override fun onAuthenticationFailed() {
-                super.onAuthenticationFailed()
-                onError("Authentication failed")
-            }
         }
 
         val biometricPrompt = BiometricPrompt(activity, executor, authCallback)
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Biometric Authentication")
-            .setSubtitle("Log in using your biometric credential")
-            .setNegativeButtonText("Cancel")
+            .setTitle(activity.getString(R.string.biometric_authentication))
+            .setSubtitle(activity.getString(R.string.log_in_using_your_biometric_credential))
+            .setNegativeButtonText(activity.getString(R.string.cancel))
             .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG)
             .build()
 

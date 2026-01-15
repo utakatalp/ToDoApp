@@ -6,6 +6,5 @@ interface Authenticator {
     fun authenticate(
         activity: FragmentActivity,
         onSuccess: () -> Unit,
-        onError: (String) -> Unit
     )
 }

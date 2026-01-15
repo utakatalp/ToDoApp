@@ -77,9 +77,6 @@ fun HomeScreen(
                 is UiEffect.ShowToast -> {
                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
                 }
-                UiEffect.NavigateToSettings -> {
-                    TODO()
-                }
             }
         }
     }

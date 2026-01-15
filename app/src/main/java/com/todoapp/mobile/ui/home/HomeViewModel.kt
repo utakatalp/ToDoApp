@@ -57,25 +57,34 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnDeleteDialogDismiss -> closeDialog()
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
-            is UiAction.OnTaskSecretChange -> _uiState.update {
-                it.copy(isTaskSecret = uiAction.isSecret)
-            }
-            is UiAction.OnToggleAdvancedSettings -> _uiState.update { state ->
-                state.copy(isAdvancedSettingsExpanded = !state.isAdvancedSettingsExpanded)
-            }
-            is UiAction.OnSecretTaskClick -> biometricAuthenticator.authenticate(
-                activity = uiAction.context as FragmentActivity,
-                onSuccess = {
-                    viewModelScope.launch {
-                        _navEffect.send(NavEffect.NavigateToSettings)
-                    }
-                },
-                onError = { message ->
-                    viewModelScope.launch {
-                        _uiEffect.send(UiEffect.ShowToast(message))
-                    }
+            is UiAction.OnTaskSecretChange -> toggleTaskSecret(uiAction)
+            is UiAction.OnToggleAdvancedSettings -> toggleAdvancedSettings()
+            is UiAction.OnSecretTaskClick -> openSecretTaskDetail(uiAction)
+        }
+    }
+
+    private fun openSecretTaskDetail(uiAction: UiAction.OnSecretTaskClick) {
+        biometricAuthenticator.authenticate(
+            activity = uiAction.context as FragmentActivity,
+            onSuccess = {
+                viewModelScope.launch {
+                    _navEffect.send(NavEffect.NavigateToSettings)
+                    // TODO() Task Detail ekranı henüz yapılmadı, oraya navigate edecek.
+                    //  geçici olarak Settings'e navigate ediyor
                 }
-            )
+            }
+        )
+    }
+
+    private fun toggleAdvancedSettings() {
+        _uiState.update { state ->
+            state.copy(isAdvancedSettingsExpanded = !state.isAdvancedSettingsExpanded)
+        }
+    }
+
+    private fun toggleTaskSecret(uiAction: UiAction.OnTaskSecretChange) {
+        _uiState.update {
+            it.copy(isTaskSecret = uiAction.isSecret)
         }
     }
 

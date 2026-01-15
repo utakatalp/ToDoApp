@@ -50,6 +50,5 @@ object HomeContract {
 
     sealed interface UiEffect {
         data class ShowToast(val message: String) : UiEffect
-        data object NavigateToSettings : UiEffect
     }
 }

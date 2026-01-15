@@ -22,7 +22,6 @@ import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
-import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.uikit.theme.TDTheme
@@ -43,23 +42,24 @@ fun NavGraph(
         composable<Screen.Onboarding> {
             val viewModel: OnboardingViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val uiEffect = viewModel.uiEffect
+            val navEffect = viewModel.navEffect
             OnboardingScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
-            NavigationEffectController(uiEffect, navController)
+            NavigationEffectController(navEffect, navController)
         }
         composable<Screen.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
+            val navEffect = viewModel.navEffect
             HomeScreen(
                 uiState = uiState,
                 uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
-            NavigationEffectController2(viewModel.navEffect, navController)
+            NavigationEffectController(navEffect, navController)
         }
         composable<Screen.Calendar> {
             val viewModel: CalendarViewModel = viewModel()
@@ -101,24 +101,6 @@ fun ToDoApp() {
 
 @Composable
 private fun NavigationEffectController(
-    uiEffect: Flow<UiEffect>,
-    navController: NavHostController,
-) {
-    uiEffect.CollectWithLifecycle { effect ->
-        when (effect) {
-            UiEffect.NavigateToLogin -> {
-                navController.navigate(Screen.Home)
-            }
-
-            UiEffect.NavigateToRegister -> {
-                navController.navigate(Screen.Home)
-            }
-        }
-    }
-}
-
-@Composable
-private fun NavigationEffectController2(
     navEffect: Flow<NavEffect>,
     navController: NavHostController,
 ) {
