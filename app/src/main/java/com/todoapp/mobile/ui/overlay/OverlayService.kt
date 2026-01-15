@@ -98,7 +98,6 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         if (overlayView == null) return
         windowManager.removeView(overlayView)
         overlayView = null
-        _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
     }
 

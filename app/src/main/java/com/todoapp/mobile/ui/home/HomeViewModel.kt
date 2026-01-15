@@ -1,6 +1,5 @@
 package com.todoapp.mobile.ui.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
@@ -15,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -119,37 +119,72 @@ class HomeViewModel @Inject constructor(
 
         when {
             state.taskTitle.isBlank() -> {
-                viewModelScope.launch { _uiEffect.send(UiEffect.ShowError("Title cannot be empty")) }
-                Log.d("effect", "Title cannot be empty")
+                showTitleError()
                 return
             }
+
             state.dialogSelectedDate == null -> {
-                viewModelScope.launch { _uiEffect.send(UiEffect.ShowError("Please select a date")) }
+                showDateError()
                 return
             }
+
             state.taskTimeStart == null || state.taskTimeEnd == null -> {
-                viewModelScope.launch { _uiEffect.send(UiEffect.ShowError("Please select start and end times")) }
+                showTimeError()
                 return
             }
+
             state.taskTimeStart.isAfter(state.taskTimeEnd) -> {
-                viewModelScope.launch { _uiEffect.send(UiEffect.ShowError("Start time cannot be after end time")) }
+                showTimeError()
                 return
             }
         }
 
+        val task = Task(
+            title = state.taskTitle,
+            description = state.taskDescription,
+            date = state.dialogSelectedDate,
+            timeStart = state.taskTimeStart,
+            timeEnd = state.taskTimeEnd,
+            isCompleted = false,
+        )
+
         viewModelScope.launch {
-                val task = Task(
-                    title = state.taskTitle,
-                    description = state.taskDescription,
-                    date = state.dialogSelectedDate,
-                    timeStart = state.taskTimeStart,
-                    timeEnd = state.taskTimeEnd,
-                    isCompleted = false,
-                )
-                taskRepository.insert(task = task)
-                alarmScheduler.schedule(task.toAlarmItem())
-                flush()
-                dismissBottomSheet()
+            taskRepository.insert(task = task)
+            alarmScheduler.schedule(task.toAlarmItem())
+            flush()
+            dismissBottomSheet()
+        }
+    }
+
+    private fun showTitleError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isTitleError = value) },
+        )
+    }
+
+    private fun showDateError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isDateError = value) },
+        )
+    }
+
+    private fun showTimeError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isTimeError = value) },
+        )
+    }
+
+    private fun showTransientError(
+        durationMs: Long,
+        setFlag: (UiState, Boolean) -> UiState,
+    ) {
+        viewModelScope.launch {
+            _uiState.update { current -> setFlag(current, true) }
+            delay(durationMs)
+            _uiState.update { current -> setFlag(current, false) }
         }
     }
 

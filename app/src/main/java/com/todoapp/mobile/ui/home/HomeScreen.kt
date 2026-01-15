@@ -295,12 +295,14 @@ fun AddTaskSheet(
             label = stringResource(com.todoapp.mobile.R.string.task_title),
             value = uiState.taskTitle,
             onValueChange = { onAction(UiAction.OnTaskTitleChange(it)) },
+            isError = uiState.isTitleError
         )
         Spacer(Modifier.height(12.dp))
         TDDatePickerDialog(
             selectedDate = uiState.dialogSelectedDate,
             onDateSelect = { onAction(UiAction.OnDialogDateSelect(it)) },
             onDateDeselect = { onAction(UiAction.OnDialogDateDeselect) },
+            isError = uiState.isDateError
         )
         Spacer(Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -310,6 +312,7 @@ fun AddTaskSheet(
                 placeholder = stringResource(com.todoapp.mobile.R.string.starts),
                 selectedTime = uiState.taskTimeStart,
                 onTimeChange = { onAction(UiAction.OnTaskTimeStartChange(it)) },
+                isError = uiState.isTimeError
             )
             Spacer(Modifier.width(12.dp))
             TDTimePickerDialog(
@@ -318,6 +321,7 @@ fun AddTaskSheet(
                 placeholder = stringResource(com.todoapp.mobile.R.string.ends),
                 selectedTime = uiState.taskTimeEnd,
                 onTimeChange = { onAction(UiAction.OnTaskTimeEndChange(it)) },
+                isError = uiState.isTimeError
             )
         }
         Spacer(Modifier.height(12.dp))

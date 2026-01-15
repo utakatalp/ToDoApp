@@ -41,6 +41,7 @@ fun TDTimePickerDialog(
     placeholder: String,
     selectedTime: LocalTime?,
     onTimeChange: (LocalTime) -> Unit,
+    isError: Boolean = false,
 ) {
     var isPickerOpen by rememberSaveable { mutableStateOf(false) }
     val currentTime = Calendar.getInstance()
@@ -71,6 +72,7 @@ fun TDTimePickerDialog(
                     modifier = Modifier.size(24.dp),
                 )
             },
+            isError = isError
         )
         if (isPickerOpen) {
             Dialog(

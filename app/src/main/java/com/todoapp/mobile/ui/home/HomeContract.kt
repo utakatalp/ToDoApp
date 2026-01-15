@@ -17,7 +17,10 @@ object HomeContract {
         val taskDate: LocalDate = LocalDate.now(),
         val taskDescription: String = "",
         val isSheetOpen: Boolean = false,
-        val isDeleteDialogOpen: Boolean = false
+        val isDeleteDialogOpen: Boolean = false,
+        val isTitleError: Boolean = false,
+        val isTimeError: Boolean = false,
+        val isDateError: Boolean = false,
     )
 
     sealed interface UiAction {

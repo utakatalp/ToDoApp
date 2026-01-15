@@ -35,6 +35,7 @@ fun TDDatePickerDialog(
     selectedDate: LocalDate? = LocalDate.now(),
     onDateSelect: (LocalDate) -> Unit,
     onDateDeselect: () -> Unit,
+    isError: Boolean = false,
 ) {
     var selectedMonth by rememberSaveable { mutableStateOf(YearMonth.now()) }
     var isPickerOpen by rememberSaveable { mutableStateOf(false) }
@@ -59,6 +60,7 @@ fun TDDatePickerDialog(
                 )
             },
             modifier = Modifier.fillMaxWidth(),
+            isError = isError
         )
         if (isPickerOpen) {
             Dialog(
