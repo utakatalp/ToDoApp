@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
@@ -33,7 +34,6 @@ class HomeViewModel @Inject constructor(
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
     private lateinit var selectedTask: Task
-
     private var fetchJob: Job? = null
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
@@ -115,23 +115,41 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun createTask() {
+        val state = uiState.value
+
+        when {
+            state.taskTitle.isBlank() -> {
+                viewModelScope.launch { _uiEffect.send(UiEffect.ShowError("Title cannot be empty")) }
+                Log.d("effect", "Title cannot be empty")
+                return
+            }
+            state.dialogSelectedDate == null -> {
+                viewModelScope.launch { _uiEffect.send(UiEffect.ShowError("Please select a date")) }
+                return
+            }
+            state.taskTimeStart == null || state.taskTimeEnd == null -> {
+                viewModelScope.launch { _uiEffect.send(UiEffect.ShowError("Please select start and end times")) }
+                return
+            }
+            state.taskTimeStart.isAfter(state.taskTimeEnd) -> {
+                viewModelScope.launch { _uiEffect.send(UiEffect.ShowError("Start time cannot be after end time")) }
+                return
+            }
+        }
+
         viewModelScope.launch {
-            val task = Task(
-                title = uiState.value.taskTitle,
-                description = uiState.value.taskDescription,
-                date = uiState.value.dialogSelectedDate!!,
-                timeStart = uiState.value.taskTimeStart!!,
-                timeEnd = uiState.value.taskTimeEnd!!,
-                isCompleted = false,
-            )
-            taskRepository.insert(
-                task = task
-            )
-            alarmScheduler.schedule(
-                task.toAlarmItem()
-            )
-            flush()
-            dismissBottomSheet()
+                val task = Task(
+                    title = state.taskTitle,
+                    description = state.taskDescription,
+                    date = state.dialogSelectedDate,
+                    timeStart = state.taskTimeStart,
+                    timeEnd = state.taskTimeEnd,
+                    isCompleted = false,
+                )
+                taskRepository.insert(task = task)
+                alarmScheduler.schedule(task.toAlarmItem())
+                flush()
+                dismissBottomSheet()
         }
     }
 

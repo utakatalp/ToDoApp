@@ -71,7 +71,7 @@ fun NavGraph(
             )
         }
         composable<Screen.Settings> {
-                TDOverlayPermissionItem(LocalContext.current)
+            TDOverlayPermissionItem(LocalContext.current)
         }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }

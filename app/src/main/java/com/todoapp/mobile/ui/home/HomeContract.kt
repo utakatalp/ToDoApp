@@ -42,5 +42,7 @@ object HomeContract {
         ) : UiAction
     }
 
-    sealed interface UiEffect
+    sealed interface UiEffect {
+        data class ShowError(val message: String) : UiEffect
+    }
 }
