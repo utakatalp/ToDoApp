@@ -12,11 +12,10 @@ import com.todoapp.mobile.ui.home.HomeContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -28,8 +27,8 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
-    private val _uiEffect by lazy { Channel<UiEffect>() }
-    val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
+    private val _uiEffect = MutableSharedFlow<UiEffect>(extraBufferCapacity = 1)
+    val uiEffect = _uiEffect.asSharedFlow()
     private lateinit var selectedTask: Task
 
     private var fetchJob: Job? = null
@@ -51,6 +50,9 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnDeleteDialogDismiss -> closeDialog()
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
+            is UiAction.OnEditClick -> viewModelScope.launch {
+                _uiEffect.emit(UiEffect.NavigateToEdit(uiAction.task.id))
+            }
         }
     }
 
@@ -188,7 +190,7 @@ class HomeViewModel @Inject constructor(
 
     private fun checkTask(uiAction: UiAction.OnTaskClick) {
         viewModelScope.launch(Dispatchers.IO) {
-            taskRepository.updateTask(uiAction.task.id, isCompleted = !uiAction.task.isCompleted)
+            taskRepository.updateTaskCompletion(uiAction.task.id, isCompleted = !uiAction.task.isCompleted)
         }
     }
 
