@@ -14,7 +14,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 class TaskRepositoryImpl @Inject constructor(
-    private val taskDao: TaskDao
+    private val taskDao: TaskDao,
 ) : TaskRepository {
     override fun observeAll(): Flow<List<Task>> {
         return taskDao.getAllTasks().map { list ->
@@ -24,7 +24,7 @@ class TaskRepositoryImpl @Inject constructor(
 
     override fun observeRange(
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): Flow<List<Task>> {
         return taskDao.loadTasksBetweenRange(
             startDate.toEpochDay(),
@@ -41,14 +41,14 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override fun observeCompletedTasksInAWeek(
-        date: LocalDate
+        date: LocalDate,
     ): Flow<Int> {
         val prevMonday = date.with(DayOfWeek.MONDAY)
         return taskDao.getCompletedTaskAmountInAWeek(prevMonday.toEpochDay(), date.toEpochDay())
     }
 
     override fun observePendingTasksInAWeek(
-        date: LocalDate
+        date: LocalDate,
     ): Flow<Int> {
         val prevMonday = date.with(DayOfWeek.MONDAY)
         return taskDao.getPendingTaskAmountInAWeek(prevMonday.toEpochDay(), date.toEpochDay())
@@ -62,10 +62,15 @@ class TaskRepositoryImpl @Inject constructor(
         taskDao.delete(task.toEntity())
     }
 
-    override suspend fun updateTask(
-        id: Long,
-        isCompleted: Boolean
-    ) = withContext(Dispatchers.IO) {
+    override suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean) = withContext(Dispatchers.IO) {
         taskDao.updateTask(id, isCompleted)
+    }
+
+    override suspend fun getTaskById(id: Long): Task? = withContext(Dispatchers.IO) {
+        taskDao.getTaskById(id)?.toDomain()
+    }
+
+    override suspend fun update(task: Task) = withContext(Dispatchers.IO) {
+        taskDao.update(task.toEntity())
     }
 }
