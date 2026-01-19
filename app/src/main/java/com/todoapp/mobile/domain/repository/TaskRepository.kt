@@ -12,5 +12,7 @@ interface TaskRepository {
     fun observePendingTasksInAWeek(date: LocalDate): Flow<Int>
     suspend fun insert(task: Task)
     suspend fun delete(task: Task)
-    suspend fun updateTask(id: Long, isCompleted: Boolean)
+    suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean)
+    suspend fun getTaskById(id: Long): Task?
+    suspend fun update(task: Task)
 }
