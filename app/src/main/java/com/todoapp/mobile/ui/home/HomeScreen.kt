@@ -168,7 +168,8 @@ fun HomeContent(
                                 isChecked = task.isCompleted,
                                 onCheckBoxClick = {
                                     onAction(UiAction.OnTaskClick(task))
-                                }
+                                },
+                                onEditClick = { onAction(UiAction.OnEditClick(task)) }
                             )
                         }
                     }
