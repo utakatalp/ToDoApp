@@ -36,11 +36,14 @@ object HomeContract {
         data object OnDeleteDialogDismiss : UiAction
         data object OnDeleteDialogConfirm : UiAction
         data class OnDialogDateSelect(val date: LocalDate) : UiAction
+        data class OnEditClick(val task: Task) : UiAction
         data class OnMoveTask(
             val from: Int,
             val to: Int
         ) : UiAction
     }
 
-    sealed interface UiEffect
+    sealed interface UiEffect {
+        data class NavigateToEdit(val taskId: Long) : UiEffect
+    }
 }
