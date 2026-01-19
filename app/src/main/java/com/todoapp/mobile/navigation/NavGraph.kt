@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,15 +20,18 @@ import androidx.navigation.compose.rememberNavController
 import com.todoapp.mobile.common.CollectWithLifecycle
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
+import com.todoapp.mobile.ui.edit.EditContract
+import com.todoapp.mobile.ui.edit.EditRoute
+import com.todoapp.mobile.ui.edit.EditViewModel
+import com.todoapp.mobile.ui.home.HomeContract
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
-import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
+import com.todoapp.mobile.ui.onboarding.OnboardingContract
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
@@ -44,16 +47,39 @@ fun NavGraph(
             val viewModel: OnboardingViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
-            NavigationEffectController(uiEffect, navController)
+            NavigationEffectController(
+                uiEffect = uiEffect,
+                navController = navController,
+            ) { effect, controller ->
+                when (effect) {
+                    is OnboardingContract.UiEffect.NavigateToLogin -> {
+                        controller.navigate(Screen.Home)
+                    }
+
+                    is OnboardingContract.UiEffect.NavigateToRegister -> {
+                        controller.navigate(Screen.Home)
+                    }
+                }
+            }
             OnboardingScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
         }
         composable<Screen.Home> {
-           val viewModel: HomeViewModel = hiltViewModel()
+            val viewModel: HomeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
+            NavigationEffectController(
+                uiEffect = uiEffect,
+                navController = navController,
+            ) { effect, controller ->
+                when (effect) {
+                    is HomeContract.UiEffect.NavigateToEdit -> {
+                        controller.navigate(Screen.Edit(taskId = effect.taskId))
+                    }
+                }
+            }
             HomeScreen(
                 uiState = uiState,
                 uiEffect = uiEffect,
@@ -68,16 +94,38 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
+
+        composable<Screen.Edit> {
+            val viewModel: EditViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(
+                uiEffect = uiEffect,
+                navController = navController,
+            ) { effect, controller ->
+                when (effect) {
+                    is EditContract.UiEffect.NavigateBack -> {
+                        controller.popBackStack()
+                    }
+
+                    else -> Unit
+                }
+            }
+            EditRoute(
+                uiState = uiState,
+                uiEffect = uiEffect,
+                onAction = viewModel::onAction,
+            )
+        }
+
         composable<Screen.Settings> {}
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
-        composable<Screen.Statistic> { }
         composable<Screen.Profile> { }
         composable<Screen.Task> { }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun ToDoApp() {
@@ -99,19 +147,12 @@ fun ToDoApp() {
 }
 
 @Composable
-private fun NavigationEffectController(
-    uiEffect: Flow<UiEffect>,
+private fun <T> NavigationEffectController(
+    uiEffect: Flow<T>,
     navController: NavHostController,
+    onEffect: (T, NavController) -> Unit,
 ) {
     uiEffect.CollectWithLifecycle { effect ->
-        when (effect) {
-            UiEffect.NavigateToLogin -> {
-                navController.navigate(Screen.Home)
-            }
-
-            UiEffect.NavigateToRegister -> {
-                navController.navigate(Screen.Home)
-            }
-        }
+        onEffect(effect, navController)
     }
 }
