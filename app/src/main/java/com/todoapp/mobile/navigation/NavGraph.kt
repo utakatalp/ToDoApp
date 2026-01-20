@@ -104,10 +104,7 @@ fun NavGraph(
                 navController = navController,
             ) { effect, controller ->
                 when (effect) {
-                    is EditContract.UiEffect.NavigateBack -> {
-                        controller.popBackStack()
-                    }
-
+                    is EditContract.UiEffect.NavigateBack -> { controller.popBackStack() }
                     else -> Unit
                 }
             }
