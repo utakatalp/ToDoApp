@@ -139,15 +139,6 @@ class HomeViewModel @Inject constructor(
             }
         }
 
-        val task = Task(
-            title = state.taskTitle,
-            description = state.taskDescription,
-            date = state.dialogSelectedDate,
-            timeStart = state.taskTimeStart,
-            timeEnd = state.taskTimeEnd,
-            isCompleted = false,
-        )
-
         viewModelScope.launch {
             val task = Task(
                 title = uiState.value.taskTitle,
@@ -170,6 +161,9 @@ class HomeViewModel @Inject constructor(
     ) {
         remindBeforeMinutes.forEach { minutes ->
             alarmScheduler.schedule(task.toAlarmItem(remindBeforeMinutes = minutes))
+        }
+    }
+
     private fun showTitleError(durationMs: Long = 2000L) {
         showTransientError(
             durationMs = durationMs,
@@ -271,6 +265,7 @@ class HomeViewModel @Inject constructor(
     private fun dismissBottomSheet() {
         _uiState.update { it.copy(isSheetOpen = false) }
     }
+
     companion object {
         private val DEFAULT_REMINDER_MINUTES = listOf(
             0L, // at time
