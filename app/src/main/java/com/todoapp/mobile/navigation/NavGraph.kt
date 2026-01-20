@@ -9,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +26,7 @@ import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
+import com.todoapp.uikit.components.TDOverlayPermissionItem
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
@@ -51,7 +53,7 @@ fun NavGraph(
             )
         }
         composable<Screen.Home> {
-           val viewModel: HomeViewModel = hiltViewModel()
+            val viewModel: HomeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
             HomeScreen(
@@ -68,7 +70,9 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
-        composable<Screen.Settings> {}
+        composable<Screen.Settings> {
+            TDOverlayPermissionItem(LocalContext.current)
+        }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
         composable<Screen.Statistic> { }

@@ -6,4 +6,7 @@
     <string name="activity_screen_weekly_progress_legend_complete_text">Complete</string>
     <string name="activity_screen_weekly_progress_legend_in_progress_text">In Progress</string>
     <string name="activity_screen_weekly_progress_legend_not_started_text">Not Started</string>
+    <string name="allows_the_app_to_display_content_over_other_applications">Allows the app to display content over other applications.</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="overlay_permission">Overlay Permission</string>
 </resources>
