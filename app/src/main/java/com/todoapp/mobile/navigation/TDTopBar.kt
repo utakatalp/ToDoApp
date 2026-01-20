@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -26,23 +27,24 @@ fun TDTopBar(state: TDTopBarState) {
                 text = state.title,
                 textAlign = TextAlign.Center,
                 style = TDTheme.typography.heading4,
+                color = TDTheme.colors.onBackground
             )
         },
         navigationIcon = {
             state.navigationIcon.let {
                 IconButton(onClick = state.onNavigationClick!!) {
-                    Icon(painterResource(it), contentDescription = null)
+                    Icon(painterResource(it), tint = TDTheme.colors.onBackground, contentDescription = null)
                 }
             }
         },
         actions = {
             state.actions.forEach {
                 IconButton(onClick = it.onClick) {
-                    Icon(painterResource(it.icon), contentDescription = null)
+                    Icon(painterResource(it.icon), tint = TDTheme.colors.onBackground, contentDescription = null)
                 }
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = TDTheme.colors.white,),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = TDTheme.colors.background),
     )
 }
 
@@ -57,39 +59,39 @@ fun ShowTopBar(navController: NavHostController) {
     val destination = appDestinationFromRoute(route) ?: return
     val titleText = stringResource(destination.title)
     val state = when (appDestinationFromRoute(route)) {
-            AppDestination.Home ->
-                TDTopBarState(
-                    title = titleText,
-                    onNavigationClick = { navController.navigate(Screen.Settings) },
-                    navigationIcon = R.drawable.ic_settings,
-                    actions =
-                        listOf(
-                            TDTopBarAction(
-                                icon = R.drawable.ic_notification,
-                                onClick = { navController.navigate(Screen.Notifications) },
-                            ),
-                            TDTopBarAction(
-                                icon = R.drawable.ic_hamburger,
-                                onClick = { /* there is no hamburger menu yet */ },
-                            ),
+        AppDestination.Home ->
+            TDTopBarState(
+                title = titleText,
+                onNavigationClick = { navController.navigate(Screen.Settings) },
+                navigationIcon = R.drawable.ic_settings,
+                actions =
+                    listOf(
+                        TDTopBarAction(
+                            icon = R.drawable.ic_notification,
+                            onClick = { navController.navigate(Screen.Notifications) },
                         ),
-                )
+                        TDTopBarAction(
+                            icon = R.drawable.ic_hamburger,
+                            onClick = { /* there is no hamburger menu yet */ },
+                        ),
+                    ),
+            )
 
-            else -> {
-                TDTopBarState(
-                    title = titleText,
-                    onNavigationClick = { navController.popBackStack() },
-                    navigationIcon = R.drawable.ic_arrow_back,
-                    actions =
-                        listOf(
-                            TDTopBarAction(
-                                icon = R.drawable.ic_hamburger,
-                                onClick = { /* there is no hamburger menu yet */ },
-                            ),
+        else -> {
+            TDTopBarState(
+                title = titleText,
+                onNavigationClick = { navController.popBackStack() },
+                navigationIcon = R.drawable.ic_arrow_back,
+                actions =
+                    listOf(
+                        TDTopBarAction(
+                            icon = R.drawable.ic_hamburger,
+                            onClick = { /* there is no hamburger menu yet */ },
                         ),
-                )
-            }
+                    ),
+            )
         }
+    }
 
     TDTopBar(state = state)
 }
@@ -106,7 +108,7 @@ data class TDTopBarAction(
     val onClick: () -> Unit,
 )
 
-@Preview(showBackground = true, widthDp = 360)
+@Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, widthDp = 360)
 @Composable
 private fun TDTopBarPreview_Home() {
     TDTheme {
@@ -132,7 +134,7 @@ private fun TDTopBarPreview_Home() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 360)
+@Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, widthDp = 360)
 @Composable
 private fun TDTopBarPreview_Calendar() {
     TDTheme {

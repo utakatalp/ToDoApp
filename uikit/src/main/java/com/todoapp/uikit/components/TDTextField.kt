@@ -1,5 +1,6 @@
 package com.todoapp.uikit.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -175,10 +176,10 @@ fun TDLabeledTextField(
             colors = textFieldColors(),
             visualTransformation = visualTransformation,
             placeholder = {
-                if (placeholder != null) TDText(text = placeholder, color = TDTheme.colors.gray)
+                if (placeholder != null) TDText(text = placeholder, color = TDTheme.colors.onBackground)
             },
             textStyle = TDTheme.typography.regularTextStyle,
-        )
+            )
     }
 }
 
@@ -194,7 +195,7 @@ fun TDCompactOutlinedTextField(
     singleLine: Boolean = true,
     style: TextStyle = TDTheme.typography.regularTextStyle,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    color: Color = TDTheme.colors.gray,
+    color: Color = TDTheme.colors.onBackground,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) {
@@ -209,7 +210,7 @@ fun TDCompactOutlinedTextField(
         when {
             !enabled -> TDTheme.colors.gray.copy(alpha = 0.3f)
             isError -> TDTheme.colors.red
-            else -> TDTheme.colors.gray
+            else -> TDTheme.colors.onBackground
         }
 
     Column {
@@ -221,10 +222,12 @@ fun TDCompactOutlinedTextField(
             contentAlignment = Alignment.CenterStart,
         ) {
             if (value.isEmpty() && placeholder != null) {
-                TDText(text = placeholder, color = TDTheme.colors.gray)
+                TDText(text = placeholder, color = TDTheme.colors.background)
             }
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 leadingIcon?.invoke()
@@ -236,14 +239,15 @@ fun TDCompactOutlinedTextField(
                     visualTransformation = visualTransformation,
                     textStyle =
                         TDTheme.typography.regularTextStyle.copy(
-                            color = TDTheme.colors.black,
+                            color = TDTheme.colors.onBackground,
                         ),
                     modifier =
                         Modifier
                             .padding(
                                 vertical = 8.dp,
                                 horizontal = 12.dp,
-                            ).weight(1f),
+                            )
+                            .weight(1f),
                 )
                 trailingIcon?.invoke()
             }
@@ -351,6 +355,132 @@ private fun TDCompactOutlinedTextFieldPreview_Filled_Error() {
                         modifier =
                             Modifier
                                 .padding(end = 8.dp),
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = null,
+                        tint = TDTheme.colors.gray,
+                        modifier =
+                            Modifier
+                                .padding(start = 8.dp)
+                                .size(24.dp),
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun TextFieldPreview_Dark() {
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    TDTheme {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .padding(top = 24.dp, start = 16.dp, end = 16.dp),
+        ) {
+            TDTextField(
+                value = "john",
+                onValueChange = {},
+                label = "First Name",
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_name),
+                        contentDescription = null,
+                    )
+                },
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            TDTextField(
+                value = "Doing Homework",
+                onValueChange = {},
+                label = "",
+                leadingIcon = null,
+            )
+
+            TDTextField(
+                value = "johndoe@hotmail.com",
+                onValueChange = {},
+                label = "",
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_mail),
+                        contentDescription = null,
+                    )
+                },
+            )
+
+            TDTextField(
+                value = "Example Password",
+                supportingText = "Example Error",
+                onValueChange = {},
+                label = "Password",
+                isError = true,
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_password),
+                        contentDescription = null,
+                    )
+                },
+                passwordVisible = passwordVisible,
+                onTogglePasswordVisible = { passwordVisible = !passwordVisible },
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TDLabeledTextField(
+                title = "Title",
+                value = "Doing Homework",
+                onValueChange = {},
+                placeholder = "Placeholder",
+                isError = true,
+                enabled = false,
+                singleLine = false,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TDCompactOutlinedTextField(
+                value = "CompactOutlinedTextField",
+                onValueChange = { },
+                placeholder = "Task Title",
+                isError = false,
+                label = "Task title",
+            )
+        }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun TDCompactOutlinedTextFieldPreview_Filled_Error_Dark() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDCompactOutlinedTextField(
+                value = "Read 10 pages",
+                label = "Task Title",
+                isError = true,
+                onValueChange = {},
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = null,
+                        tint = TDTheme.colors.gray,
+                        modifier = Modifier.padding(end = 8.dp),
                     )
                 },
                 leadingIcon = {

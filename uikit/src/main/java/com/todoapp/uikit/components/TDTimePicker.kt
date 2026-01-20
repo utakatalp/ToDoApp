@@ -1,5 +1,6 @@
 package com.todoapp.uikit.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,6 +66,7 @@ fun TDTimePickerDialog(
             leadingIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_clock),
+                    tint = TDTheme.colors.onBackground,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                 )
@@ -78,6 +80,8 @@ fun TDTimePickerDialog(
                     modifier = Modifier.padding(16.dp),
                     shape = RoundedCornerShape(16.dp),
                     tonalElevation = 8.dp,
+                    contentColor = TDTheme.colors.onBackground,
+                    color = TDTheme.colors.background,
                 ) {
                     TDTimePicker(
                         timePickerState = timePickerState,
@@ -100,7 +104,9 @@ fun TDTimePicker(
     timePickerState: TimePickerState,
 ) {
     Column(
-        modifier = modifier.widthIn(max = 300.dp).padding(32.dp),
+        modifier = modifier
+            .widthIn(max = 300.dp)
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -118,13 +124,11 @@ fun TDTimePicker(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFFFFFFFF,
 )
 @Composable
-fun TDTimePickerDialogPreview() {
+fun TDTimePickerPreview() {
     TDTheme {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -137,6 +141,91 @@ fun TDTimePickerDialogPreview() {
                 selectedTime = LocalTime.now(),
                 onTimeChange = { },
             )
+        }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+fun TDTimePickerPreview_Dark() {
+    TDTheme {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            TDTimePickerDialog(
+                title = "Set Time",
+                placeholder = "HH:MM",
+                selectedTime = LocalTime.now(),
+                onTimeChange = { },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(
+    showBackground = true,
+    name = "Time Picker Dialog (Open) – Light",
+)
+@Composable
+fun TDTimePickerDialogOpenPreview_Light() {
+    TDTheme {
+        val timePickerState = rememberTimePickerState(
+            initialHour = 10,
+            initialMinute = 15,
+            is24Hour = true,
+        )
+
+        Dialog(onDismissRequest = {}) {
+            Surface(
+                modifier = Modifier.padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+                tonalElevation = 8.dp,
+                contentColor = TDTheme.colors.onBackground,
+                color = TDTheme.colors.background,
+            ) {
+                TDTimePicker(
+                    timePickerState = timePickerState,
+                    onConfirm = {},
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    name = "Time Picker Dialog (Open) – Dark",
+)
+@Composable
+fun TDTimePickerDialogOpenPreview_Dark() {
+    TDTheme {
+        val timePickerState = rememberTimePickerState(
+            initialHour = 10,
+            initialMinute = 15,
+            is24Hour = true,
+        )
+
+        Dialog(onDismissRequest = {}) {
+            Surface(
+                modifier = Modifier.padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+                tonalElevation = 8.dp,
+                contentColor = TDTheme.colors.onBackground,
+                color = TDTheme.colors.background,
+            ) {
+                TDTimePicker(
+                    timePickerState = timePickerState,
+                    onConfirm = {},
+                )
+            }
         }
     }
 }

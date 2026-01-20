@@ -1,5 +1,6 @@
 package com.todoapp.uikit.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -81,6 +82,7 @@ fun TDDatePicker(
             ) {
                 Icon(
                     painterResource(R.drawable.ic_arrow_back),
+                    tint = TDTheme.colors.onBackground,
                     contentDescription = "Previous Month",
                 )
             }
@@ -91,6 +93,7 @@ fun TDDatePicker(
                         .replaceFirstChar { it.uppercase() }
                 } ${selectedMonth.year}",
                 style = TDTheme.typography.heading5,
+                color = TDTheme.colors.onBackground,
             )
             Spacer(Modifier.weight(1f))
             IconButton(
@@ -99,6 +102,7 @@ fun TDDatePicker(
             ) {
                 Icon(
                     painterResource(R.drawable.ic_arrow_forward),
+                    tint = TDTheme.colors.onBackground,
                     contentDescription = "Next Month",
                 )
             }
@@ -117,6 +121,7 @@ fun TDDatePicker(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = TDTheme.typography.dayOfTheCalendar,
+                    color = TDTheme.colors.onBackground
                 )
             }
         }
@@ -150,18 +155,22 @@ fun TDDatePicker(
                                             selectedSecondDate = selectedSecondDate,
                                             currentDate = currentDate,
                                         ),
-                                ).padding(horizontal = 6.dp)
+                                )
+                                .padding(horizontal = 6.dp)
                                 .clickable {
                                     when {
                                         currentDate == selectedFirstDate -> {
                                             onFirstDayDeselect()
                                         }
+
                                         currentDate == selectedSecondDate -> {
                                             onSecondDayDeselect()
                                         }
+
                                         selectedFirstDate == null -> {
                                             onFirstDaySelect(currentDate)
                                         }
+
                                         selectedSecondDate == null -> {
                                             if (currentDate < selectedFirstDate) {
                                                 onFirstDaySelect(currentDate)
@@ -169,6 +178,7 @@ fun TDDatePicker(
                                                 onSecondDaySelect(currentDate)
                                             }
                                         }
+
                                         else -> {
                                             if (currentDate < selectedFirstDate) {
                                                 onFirstDaySelect(currentDate)
@@ -190,7 +200,7 @@ fun TDDatePicker(
                                     isFromCurrentMonth,
                                     isCurrentDateInRange,
                                 ),
-                            style = TDTheme.typography.subheeading4,
+                            style = TDTheme.typography.subheading4,
                         )
                     }
                 }
@@ -221,6 +231,7 @@ fun TDDatePickerSingleInput(
         modifier =
             modifier
                 .fillMaxWidth()
+                .background(TDTheme.colors.background)
                 .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -235,6 +246,7 @@ fun TDDatePickerSingleInput(
             IconButton(onClick = onMonthBack, modifier = Modifier.size(40.dp)) {
                 Icon(
                     painterResource(R.drawable.ic_arrow_back),
+                    tint = TDTheme.colors.onBackground,
                     contentDescription = "Previous Month",
                 )
             }
@@ -248,6 +260,7 @@ fun TDDatePickerSingleInput(
                         .replaceFirstChar { it.uppercase() }
                 } ${selectedMonth.year}",
                 style = TDTheme.typography.heading5,
+                color = TDTheme.colors.onBackground
             )
 
             Spacer(Modifier.weight(1f))
@@ -255,6 +268,7 @@ fun TDDatePickerSingleInput(
             IconButton(onClick = onMonthForward, modifier = Modifier.size(40.dp)) {
                 Icon(
                     painterResource(R.drawable.ic_arrow_forward),
+                    tint = TDTheme.colors.onBackground,
                     contentDescription = "Next Month",
                 )
             }
@@ -271,6 +285,7 @@ fun TDDatePickerSingleInput(
             daysOfWeek.forEach { day ->
                 TDText(
                     text = day,
+                    color = TDTheme.colors.onBackground,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = TDTheme.typography.dayOfTheCalendar,
@@ -303,7 +318,8 @@ fun TDDatePickerSingleInput(
                                 .background(
                                     color = if (isSelected) TDTheme.colors.purple else Color.Transparent,
                                     shape = RoundedCornerShape(8.dp),
-                                ).clickable {
+                                )
+                                .clickable {
                                     if (isSelected) onDayDeselect() else onDaySelect(currentDate)
                                 },
                         contentAlignment = Alignment.Center,
@@ -316,7 +332,7 @@ fun TDDatePickerSingleInput(
                                     isSelected -> Color.White
                                     else -> TDTheme.colors.gray
                                 },
-                            style = TDTheme.typography.subheeading4,
+                            style = TDTheme.typography.subheading4,
                         )
                     }
                 }
@@ -334,11 +350,11 @@ private fun specifyTextColor(
     isCurrentDateInRange: Boolean,
 ): Color =
     if (currentDate == selectedFirstDate || currentDate == selectedSecondDate) {
-        TDTheme.colors.white
+        TDTheme.colors.onBackground
     } else if (isFromCurrentMonth) {
-        TDTheme.colors.black
+        TDTheme.colors.onBackground
     } else if (isCurrentDateInRange) {
-        TDTheme.colors.black
+        TDTheme.colors.onBackground
     } else {
         TDTheme.colors.lightGray
     }
@@ -370,19 +386,19 @@ private fun specifyColorBetweenRange(
         currentDate == selectedFirstDate || currentDate == selectedSecondDate -> TDTheme.colors.purple
 
         selectedFirstDate != null &&
-            selectedSecondDate != null &&
-            currentDate.isAfter(
-                minOf(
-                    selectedFirstDate,
-                    selectedSecondDate,
-                ),
-            ) &&
-            currentDate.isBefore(
-                maxOf(
-                    selectedFirstDate,
-                    selectedSecondDate,
-                ),
-            ) -> TDTheme.colors.lightPurple
+                selectedSecondDate != null &&
+                currentDate.isAfter(
+                    minOf(
+                        selectedFirstDate,
+                        selectedSecondDate,
+                    ),
+                ) &&
+                currentDate.isBefore(
+                    maxOf(
+                        selectedFirstDate,
+                        selectedSecondDate,
+                    ),
+                ) -> TDTheme.colors.lightPurple
 
         else -> Color.Transparent
     }
@@ -390,6 +406,18 @@ private fun specifyColorBetweenRange(
 @Preview(showBackground = true, name = "Date Picker Preview")
 @Composable
 private fun TDDatePickerPreview() {
+    Column {
+        TDDatePicker(
+            onFirstDaySelect = {},
+            onSecondDaySelect = {},
+            onFirstDayDeselect = {},
+        ) {}
+    }
+}
+
+@Preview(showBackground = true, name = "Date Picker Preview Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun TDDatePickerPreviewDark() {
     Column {
         TDDatePicker(
             onFirstDaySelect = {},

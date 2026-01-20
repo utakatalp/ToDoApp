@@ -47,7 +47,7 @@ fun TDStatisticCard(
                 Spacer(Modifier.width(10.dp))
                 TDText(
                     text = text,
-                    color = TDTheme.colors.black,
+                    color = TDTheme.colors.onBackground,
                     style = TDTheme.typography.subheading1,
                 )
             }
@@ -55,12 +55,12 @@ fun TDStatisticCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Spacer(Modifier.weight(1f))
-                TDText(
+                TDSpannableText(
                     fullText = "$taskAmount This Week",
                     spanText = "$taskAmount",
                     spanStyle =
                         SpanStyle(
-                            color = TDTheme.colors.black,
+                            color = TDTheme.colors.onBackground,
                             fontWeight = FontWeight.Bold,
                             fontSize = 22.sp,
                         ),
@@ -87,6 +87,7 @@ fun TDStatisticCard(
                 Spacer(Modifier.width(10.dp))
                 TDText(
                     text = text,
+                    color = TDTheme.colors.onBackground,
                     style = TDTheme.typography.subheading1,
                 )
             }
@@ -94,12 +95,12 @@ fun TDStatisticCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Spacer(Modifier.weight(1f))
-                TDText(
+                TDSpannableText(
                     fullText = "$taskAmount This Week",
                     spanText = "$taskAmount",
                     spanStyle =
                         SpanStyle(
-                            color = TDTheme.colors.black,
+                            color = TDTheme.colors.onBackground,
                             fontWeight = FontWeight.Bold,
                             fontSize = 22.sp,
                         ),
