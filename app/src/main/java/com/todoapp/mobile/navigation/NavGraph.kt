@@ -24,6 +24,8 @@ import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
+import com.todoapp.mobile.ui.settings.SettingsScreen
+import com.todoapp.mobile.ui.settings.SettingsViewModel
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
@@ -69,7 +71,14 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
-        composable<Screen.Settings> { }
+        composable<Screen.Settings> {
+            val viewModel: SettingsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            SettingsScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction,
+            )
+        }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
         composable<Screen.Statistic> { }
