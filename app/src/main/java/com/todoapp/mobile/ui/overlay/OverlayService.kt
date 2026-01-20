@@ -52,8 +52,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         if (intent.hasExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)) {
             val message = intent.getStringExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)
             val minutesBefore = intent.getLongExtra(INTENT_EXTRA_LONG, 0)
-            Log.d("onStart", minutesBefore.toString())
-            showOverlay(message!!, minutesBefore)
+            showOverlay(message.orEmpty(), minutesBefore)
         } else if (intent.hasExtra(INTENT_EXTRA_COMMAND_HIDE_OVERLAY)) hideOverlay()
         return START_NOT_STICKY
     }
@@ -95,7 +94,6 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         if (overlayView == null) return
         windowManager.removeView(overlayView)
         overlayView = null
-        _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
     }
 

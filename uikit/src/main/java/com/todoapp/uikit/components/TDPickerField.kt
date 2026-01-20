@@ -6,9 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.uikit.R
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -49,5 +53,31 @@ fun TDPickerField(
                 isError = isError,
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TDPickerFieldErrorPreview() {
+    TDTheme {
+        TDPickerField(
+            title = "Pick a date",
+            value = "",
+            onClick = {},
+            isError = true,
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_calendar2),
+                    contentDescription = null,
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_close),
+                    contentDescription = null,
+                )
+            }
+        )
     }
 }

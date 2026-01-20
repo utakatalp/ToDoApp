@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,7 +34,6 @@ class HomeViewModel @Inject constructor(
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
     private lateinit var selectedTask: Task
-
     private var fetchJob: Job? = null
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
@@ -115,6 +115,39 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun createTask() {
+        val state = uiState.value
+
+        when {
+            state.taskTitle.isBlank() -> {
+                showTitleError()
+                return
+            }
+
+            state.dialogSelectedDate == null -> {
+                showDateError()
+                return
+            }
+
+            state.taskTimeStart == null || state.taskTimeEnd == null -> {
+                showTimeError()
+                return
+            }
+
+            state.taskTimeStart.isAfter(state.taskTimeEnd) -> {
+                showTimeError()
+                return
+            }
+        }
+
+        val task = Task(
+            title = state.taskTitle,
+            description = state.taskDescription,
+            date = state.dialogSelectedDate,
+            timeStart = state.taskTimeStart,
+            timeEnd = state.taskTimeEnd,
+            isCompleted = false,
+        )
+
         viewModelScope.launch {
             val task = Task(
                 title = uiState.value.taskTitle,
@@ -137,6 +170,35 @@ class HomeViewModel @Inject constructor(
     ) {
         remindBeforeMinutes.forEach { minutes ->
             alarmScheduler.schedule(task.toAlarmItem(remindBeforeMinutes = minutes))
+    private fun showTitleError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isTitleError = value) },
+        )
+    }
+
+    private fun showDateError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isDateError = value) },
+        )
+    }
+
+    private fun showTimeError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isTimeError = value) },
+        )
+    }
+
+    private fun showTransientError(
+        durationMs: Long,
+        setFlag: (UiState, Boolean) -> UiState,
+    ) {
+        viewModelScope.launch {
+            _uiState.update { current -> setFlag(current, true) }
+            delay(durationMs)
+            _uiState.update { current -> setFlag(current, false) }
         }
     }
 
