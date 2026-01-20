@@ -32,25 +32,6 @@ class EditViewModel @Inject constructor(
     private val _uiEffect by lazy { Channel<UiEffect>(Channel.BUFFERED) }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
-    private fun computeIsDirty(state: UiState): Boolean {
-        val original = state.task ?: return false
-        val candidateTask = original.copy(
-            title = state.taskTitle,
-            description = state.taskDescription.ifBlank { null },
-            date = state.taskDate,
-            timeStart = state.taskTimeStart ?: original.timeStart,
-            timeEnd = state.taskTimeEnd ?: original.timeEnd
-        )
-        return candidateTask != original
-    }
-
-    private inline fun updateState(block: (UiState) -> UiState) {
-        _uiState.update { current ->
-            val updated = block(current)
-            updated.copy(isDirty = computeIsDirty(updated))
-        }
-    }
-
     init {
         savedStateHandle.get<Long>("taskId")?.let { loadTask(it) }
     }
@@ -68,6 +49,18 @@ class EditViewModel @Inject constructor(
             UiAction.OnSaveChanges -> saveChanges()
             UiAction.OnCancelClick -> cancelChanges()
         }
+    }
+
+    private fun computeIsDirty(state: UiState): Boolean {
+        val original = state.task ?: return false
+        val candidateTask = original.copy(
+            title = state.taskTitle,
+            description = state.taskDescription.ifBlank { null },
+            date = state.taskDate,
+            timeStart = state.taskTimeStart ?: original.timeStart,
+            timeEnd = state.taskTimeEnd ?: original.timeEnd
+        )
+        return candidateTask != original
     }
 
     private fun goToHome() {
@@ -181,6 +174,13 @@ class EditViewModel @Inject constructor(
                     isDirty = false,
                 )
             }
+        }
+    }
+
+    private inline fun updateState(block: (UiState) -> UiState) {
+        _uiState.update { current ->
+            val updated = block(current)
+            updated.copy(isDirty = computeIsDirty(updated))
         }
     }
 }
