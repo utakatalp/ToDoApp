@@ -27,6 +27,9 @@
             </intent-filter>
         </activity>
         <service android:name=".ui.overlay.OverlayService"/>
+        <service
+            android:name=".data.notification.NotificationService"
+            android:exported="false" />
     </application>
 
 </manifest>
