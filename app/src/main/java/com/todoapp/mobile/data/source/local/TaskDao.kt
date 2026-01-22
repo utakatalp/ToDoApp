@@ -34,7 +34,7 @@ interface TaskDao {
 
     @Query(
         """
-        SELECT date AS date, COUNT(*) AS count
+        SELECT date, COUNT(*) AS count
         FROM tasks
         WHERE date BETWEEN :startDate AND :endDate
           AND is_completed = 1
@@ -47,28 +47,11 @@ interface TaskDao {
         endDate: Long,
     ): Flow<List<DayCount>>
 
-    @Query("SELECT COUNT(*) FROM tasks WHERE date BETWEEN :startDate AND :endDate AND is_completed = 1")
-    fun getCompletedTaskAmountInAWeek(
+    @Query("""SELECT COUNT(*) FROM tasks WHERE date BETWEEN :startDate AND :endDate AND is_completed = :isCompleted""")
+    fun getTaskCountInRange(
         startDate: Long,
         endDate: Long,
-    ): Flow<Int>
-
-    @Query("SELECT COUNT(*) FROM tasks WHERE date BETWEEN :startDate AND :endDate AND is_completed = 1")
-    fun getCompletedTaskAmountYearToDate(
-        startDate: Long,
-        endDate: Long,
-    ): Flow<Int>
-
-    @Query("SELECT COUNT(*) FROM tasks WHERE date BETWEEN :startDate AND :endDate AND is_completed = 0")
-    fun getPendingTaskAmountInAWeek(
-        startDate: Long,
-        endDate: Long,
-    ): Flow<Int>
-
-    @Query("SELECT COUNT(*) FROM tasks WHERE date BETWEEN :startDate AND :endDate AND is_completed = 0")
-    fun getPendingTaskAmountYearToDate(
-        startDate: Long,
-        endDate: Long,
+        isCompleted: Boolean,
     ): Flow<Int>
 
     @Delete

@@ -10,16 +10,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.DayOfWeek
 import java.time.LocalDate
 import javax.inject.Inject
 
-private const val DAYS_IN_WEEK = 7
-private val daysRange = 0 until DAYS_IN_WEEK
-
 @HiltViewModel
 class ActivityViewModel @Inject constructor(
-    private val taskRepository: TaskRepository,
+    private val taskRepository: TaskRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -32,10 +28,11 @@ class ActivityViewModel @Inject constructor(
 
     private fun updateWeeklyProgress(date: LocalDate) {
         viewModelScope.launch {
-            val pendingFLow = taskRepository.observePendingTasksInAWeek(date)
-            val completedFlow = taskRepository.observeCompletedTasksInAWeek(date)
-
-            combine(pendingFLow, completedFlow) { pendingCount, completedCount ->
+            val selectedDate = _uiState.value.selectedDate
+            combine(
+                taskRepository.observePendingTasksInAWeek(selectedDate),
+                taskRepository.countCompletedTasksInAWeek(selectedDate)
+            ) { pendingCount, completedCount ->
                 val total = pendingCount + completedCount
                 if (total <= 0) {
                     0f to 0f
@@ -53,14 +50,9 @@ class ActivityViewModel @Inject constructor(
                 }
             }
         }
+
         viewModelScope.launch {
-            val weekStart = date.with(DayOfWeek.MONDAY)
-            taskRepository.observeCompletedCountsByDayInAWeek(date).collect { pairs ->
-                val map = pairs.toMap()
-                val values = (daysRange).map { dayOffset ->
-                    val d = weekStart.plusDays(dayOffset.toLong())
-                    map[d] ?: 0
-                }
+            taskRepository.observeCompletedCountsByDayInAWeek(date).collect { values ->
                 _uiState.update { it.copy(weeklyBarValues = values) }
             }
         }
@@ -69,7 +61,7 @@ class ActivityViewModel @Inject constructor(
     private fun updateYearlyProgress(date: LocalDate) {
         viewModelScope.launch {
             val pendingFlow = taskRepository.observePendingTasksYearToDate(date)
-            val completedFlow = taskRepository.observeCompletedTasksYearToDate(date)
+            val completedFlow = taskRepository.countCompletedTasksYearToDate(date)
 
             combine(pendingFlow, completedFlow) { pendingCount, completedCount ->
                 val total = pendingCount + completedCount
