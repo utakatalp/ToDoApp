@@ -41,5 +41,6 @@
     <string name="cancel">Cancel</string>
     <string name="privacy_security"><![CDATA[Privacy & Security]]></string>
     <string name="the_time_of_reopening_for_secret_mode">The time of reopening for secret mode</string>
+    <string name="save">Save</string>
 
 </resources>

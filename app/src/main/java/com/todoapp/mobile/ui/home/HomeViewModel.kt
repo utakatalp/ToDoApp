@@ -1,11 +1,13 @@
 package com.todoapp.mobile.ui.home
 
+import android.content.Context
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.security.Authenticator
 import com.todoapp.mobile.navigation.NavEffect
@@ -28,7 +30,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
-    private val biometricAuthenticator: Authenticator
+    private val biometricAuthenticator: Authenticator,
+    private val secretModePreferences: SecretPreferences
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -41,7 +44,7 @@ class HomeViewModel @Inject constructor(
     private var fetchJob: Job? = null
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
-            is UiAction.OnTaskClick -> checkTask(uiAction)
+            is UiAction.OnTaskCheck -> checkTask(uiAction)
             is UiAction.OnDateSelect -> changeSelectedDate(uiAction)
             is UiAction.OnTaskDateChange -> changeTaskDate(uiAction)
             is UiAction.OnTaskDescriptionChange -> changeTaskDescription(uiAction)
@@ -59,19 +62,44 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
             is UiAction.OnTaskSecretChange -> toggleTaskSecret(uiAction)
             is UiAction.OnToggleAdvancedSettings -> toggleAdvancedSettings()
-            is UiAction.OnSecretTaskClick -> openSecretTaskDetail(uiAction)
+            is UiAction.OnTaskClick -> openTaskDetail(uiAction.task, uiAction.context)
+        }
+    }
+    init {
+        fetchDailyTask(uiState.value.selectedDate)
+        updatePendingTaskAmount(uiState.value.selectedDate)
+        updateCompletedTaskAmount(uiState.value.selectedDate)
+    }
+
+    private fun openTaskDetail(task: Task, context: Context) {
+        if (task.isSecret) {
+            if (secretModePreferences.isSecretModeEnabled()) {
+                navigateToTaskDetail()
+            } else {
+                authenticate(context) { navigateToTaskDetail() }
+            }
+            return
+        } else {
+            navigateToTaskDetail()
+            return
         }
     }
 
-    private fun openSecretTaskDetail(uiAction: UiAction.OnSecretTaskClick) {
+    private fun navigateToTaskDetail() {
+        // taskId argümanı geçilecek Task Detail ekranı bitince
+
+        viewModelScope.launch {
+            _navEffect.send(NavEffect.NavigateToSettings)
+            // TODO() Task Detail ekranı henüz yapılmadı, oraya navigate edecek.
+            //  geçici olarak Settings'e navigate ediyor
+        }
+    }
+    private fun authenticate(context: Context, onSuccess: () -> Unit) {
         biometricAuthenticator.authenticate(
-            activity = uiAction.context as FragmentActivity,
+            activity = context as FragmentActivity,
             onSuccess = {
-                viewModelScope.launch {
-                    _navEffect.send(NavEffect.NavigateToSettings)
-                    // TODO() Task Detail ekranı henüz yapılmadı, oraya navigate edecek.
-                    //  geçici olarak Settings'e navigate ediyor
-                }
+                secretModePreferences.setSecretModeEnabledUntil()
+                onSuccess()
             }
         )
     }
@@ -86,12 +114,6 @@ class HomeViewModel @Inject constructor(
         _uiState.update {
             it.copy(isTaskSecret = uiAction.isSecret)
         }
-    }
-
-    init {
-        fetchDailyTask(uiState.value.selectedDate)
-        updatePendingTaskAmount(uiState.value.selectedDate)
-        updateCompletedTaskAmount(uiState.value.selectedDate)
     }
 
     private fun updateTaskIndices(uiAction: UiAction.OnMoveTask) {
@@ -221,7 +243,7 @@ class HomeViewModel @Inject constructor(
         fetchDailyTask(uiAction.date)
     }
 
-    private fun checkTask(uiAction: UiAction.OnTaskClick) {
+    private fun checkTask(uiAction: UiAction.OnTaskCheck) {
         viewModelScope.launch(Dispatchers.IO) {
             taskRepository.updateTask(uiAction.task.id, isCompleted = !uiAction.task.isCompleted)
         }

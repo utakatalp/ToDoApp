@@ -71,6 +71,7 @@ fun HomeScreen(
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
+
     LaunchedEffect(uiEffect) {
         uiEffect.collect {
             when (it) {
@@ -170,7 +171,7 @@ fun HomeContent(
                                 modifier = Modifier
                                     .combinedClickable(
                                         onLongClick = { onAction(UiAction.OnTaskLongPress(task)) },
-                                        onClick = { onAction(UiAction.OnSecretTaskClick(context)) }
+                                        onClick = { onAction(UiAction.OnTaskClick(context, task)) }
                                     )
                                     .draggableHandle(
                                         onDragStarted = {
@@ -185,7 +186,7 @@ fun HomeContent(
                                 taskText = if (task.isSecret) maskTitle(task.title) else task.title,
                                 isChecked = task.isCompleted,
                                 onCheckBoxClick = {
-                                    onAction(UiAction.OnTaskClick(task))
+                                    onAction(UiAction.OnTaskCheck(task))
                                 }
                             )
                         }

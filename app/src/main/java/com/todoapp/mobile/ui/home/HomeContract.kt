@@ -21,12 +21,13 @@ object HomeContract {
         val isDeleteDialogOpen: Boolean = false,
         val isAdvancedSettingsExpanded: Boolean = false,
         val isTaskSecret: Boolean = false,
+        val isSecretModeEnabled: Boolean = true,
     )
 
     sealed interface UiAction {
         data class OnDateSelect(val date: LocalDate) : UiAction
         data object OnDialogDateDeselect : UiAction
-        data class OnTaskClick(val task: Task) : UiAction
+        data class OnTaskCheck(val task: Task) : UiAction
         data class OnTaskTitleChange(val title: String) : UiAction
         data class OnTaskTimeStartChange(val time: LocalTime) : UiAction
         data class OnTaskTimeEndChange(val time: LocalTime) : UiAction
@@ -45,7 +46,7 @@ object HomeContract {
         ) : UiAction
         object OnToggleAdvancedSettings : UiAction
         data class OnTaskSecretChange(val isSecret: Boolean) : UiAction
-        data class OnSecretTaskClick(val context: Context) : UiAction
+        data class OnTaskClick(val context: Context, val task: Task) : UiAction
     }
 
     sealed interface UiEffect {

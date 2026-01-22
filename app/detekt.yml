@@ -43,6 +43,9 @@ style:
     excludes:
       - "**/ui/theme/**"
       - "**/theme/**"
+  ReturnCount:
+    active: true
+    max: 4
 formatting:
   active: true
   NoUnusedImports:

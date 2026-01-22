@@ -1,7 +1,11 @@
 package com.todoapp.mobile.ui.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.DropdownMenuItem
@@ -19,10 +23,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
+import com.todoapp.mobile.domain.security.SecretModeReopenOption
 import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
+import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTextField
+import com.todoapp.uikit.theme.TDTheme
 
 @Composable
 fun SettingsScreen(
@@ -44,15 +51,41 @@ private fun SettingsContent(
 ) {
     Column(
         modifier = modifier
-        .fillMaxSize()
-        .statusBarsPadding()
-        .padding(horizontal = 16.dp)
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        TDText(text = stringResource(R.string.privacy_security))
+        TDText(
+            text = stringResource(R.string.privacy_security),
+            style = TDTheme.typography.heading1
+        )
+
+        TDText(
+            text = stringResource(R.string.the_time_of_reopening_for_secret_mode),
+            style = TDTheme.typography.heading3
+        )
+
         ReopenSecretModeDropdown(
             selected = uiState.selectedSecretMode.label,
-            onSelected = { onAction(UiAction.onSelectedSecretModeChange(it)) }
+            onSelected = { onAction(UiAction.OnSelectedSecretModeChange(it)) }
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TDButton(
+            text = stringResource(R.string.save),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            onAction(UiAction.OnSettingsSave)
+        }
+
+        if (uiState.remainedSecretModeTime.isNotBlank()) {
+            TDText(
+                text = uiState.remainedSecretModeTime,
+                style = TDTheme.typography.heading6
+            )
+        }
     }
 }
 
@@ -60,9 +93,9 @@ private fun SettingsContent(
 @Composable
 fun ReopenSecretModeDropdown(
     selected: String,
-    onSelected: (ReopenSecretMode) -> Unit,
+    onSelected: (SecretModeReopenOption) -> Unit,
 ) {
-    val options = ReopenSecretMode.entries
+    val options = SecretModeReopenOption.entries
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
@@ -99,21 +132,7 @@ fun ReopenSecretModeDropdown(
 private fun SettingsContentPreview() {
     SettingsContent(
         modifier = Modifier.padding(16.dp),
-        uiState = UiState(secretMode = true, ReopenSecretMode.IMMEDIATE),
+        uiState = UiState(secretMode = true, SecretModeReopenOption.IMMEDIATE),
         onAction = {},
     )
-}
-
-@Suppress("MagicNumber")
-enum class ReopenSecretMode(
-    val minutes: Long,
-    val label: String
-) {
-    IMMEDIATE(0, "Now"),
-    ONE_MIN(1, "1 Minute"),
-    THREE_MIN(3, "3 Minutes"),
-    FIVE_MIN(5, "5 Minutes"),
-    TEN_MIN(10, "10 Minutes"),
-    FIFTEEN_MIN(15, "15 Minutes"),
-    UNTIL_APP_CLOSED(-1, "Until the app closed")
 }
