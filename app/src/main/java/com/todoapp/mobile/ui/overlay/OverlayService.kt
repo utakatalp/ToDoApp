@@ -4,18 +4,15 @@ import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.IBinder
+import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -24,12 +21,16 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.todoapp.mobile.MainActivity
+import com.todoapp.uikit.components.TDOverlayNotificationCard
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 
+@AndroidEntryPoint
 class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     lateinit var windowManager: WindowManager
     private val _lifecycleRegistry = LifecycleRegistry(this)
     private val _savedStateRegistryController: SavedStateRegistryController = SavedStateRegistryController.create(this)
-
     override val savedStateRegistry: SavedStateRegistry = _savedStateRegistryController.savedStateRegistry
     override val lifecycle: Lifecycle = _lifecycleRegistry
     private var overlayView: View? = null
@@ -48,14 +49,14 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         if (intent.hasExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)) {
-            showOverlay()
-        } else if (intent.hasExtra(INTENT_EXTRA_COMMAND_HIDE_OVERLAY)) {
-            hideOverlay()
-        }
+            val message = intent.getStringExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)
+            val minutesBefore = intent.getLongExtra(INTENT_EXTRA_LONG, 0)
+            showOverlay(message.orEmpty(), minutesBefore)
+        } else if (intent.hasExtra(INTENT_EXTRA_COMMAND_HIDE_OVERLAY)) hideOverlay()
         return START_NOT_STICKY
     }
 
-    private fun showOverlay() {
+    private fun showOverlay(message: String, minutesBefore: Long) {
         if (overlayView != null) return
 
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
@@ -65,23 +66,24 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             setViewTreeLifecycleOwner(this@OverlayService)
             setViewTreeSavedStateRegistryOwner(this@OverlayService)
             setContent {
-                Box(
-                    modifier = Modifier
-                        .size(400.dp)
-                        .background(Color.Blue)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        /* will be refactored after the alarm manager is implemented
-                        Text("sago kafkef")
-                        Text("yerli plaka")
-                        Text("medcezir")
-
-                         */
+                var show by remember { mutableStateOf(true) }
+                LaunchedEffect(show) {
+                    if (!show) {
+                        delay(HIDE_OVERLAY_ANIMATION_DELAY)
+                        hideOverlay()
                     }
                 }
+                TDOverlayNotificationCard(
+                    message = message,
+                    minutesBefore = minutesBefore,
+                    show = show,
+                    onDismissClick = { show = false },
+                    onOpenClick = {
+                        show = false
+
+                        openApp()
+                    }
+                )
             }
         }
         windowManager.addView(overlayView, getLayoutParams())
@@ -91,19 +93,35 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         if (overlayView == null) return
         windowManager.removeView(overlayView)
         overlayView = null
-
-        _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
     }
 
     private fun getLayoutParams(): WindowManager.LayoutParams {
         return WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
+            WINDOW_MANAGER_LAYOUT_HEIGHT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
-        )
+        ).apply {
+            gravity = Gravity.TOP
+        }
+    }
+
+    private fun openApp() {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        startActivity(intent)
+    }
+
+    companion object {
+        const val INTENT_EXTRA_COMMAND_SHOW_OVERLAY = "INTENT_EXTRA_COMMAND_SHOW_OVERLAY"
+        const val INTENT_EXTRA_COMMAND_HIDE_OVERLAY = "INTENT_EXTRA_COMMAND_HIDE_OVERLAY"
+        const val INTENT_EXTRA_LONG = "INTENT_EXTRA_LONG"
+        const val HIDE_OVERLAY_ANIMATION_DELAY = 300L
+        const val BOUND_MODE_NOT_SUPPORTED = "Bound mode not supported"
+        const val WINDOW_MANAGER_LAYOUT_HEIGHT = 600
     }
 
     companion object {
