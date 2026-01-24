@@ -2,6 +2,8 @@ package com.todoapp.mobile.ui.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiAction
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiState
@@ -24,6 +26,9 @@ class OnboardingViewModel : ViewModel() {
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
+    private val _navEffect by lazy { Channel<NavigationEffect>() }
+    val navEffect by lazy { _navEffect.receiveAsFlow() }
+
     init {
         viewModelScope.launch {
             while (true) {
@@ -37,8 +42,8 @@ class OnboardingViewModel : ViewModel() {
 
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
-            is UiAction.OnLoginClick -> _uiEffect.trySend(UiEffect.NavigateToLogin)
-            is UiAction.OnRegisterClick -> _uiEffect.trySend(UiEffect.NavigateToRegister)
+            is UiAction.OnLoginClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Home))
+            is UiAction.OnRegisterClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Home))
         }
     }
 }

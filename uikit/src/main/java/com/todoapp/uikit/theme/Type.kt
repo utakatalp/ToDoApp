@@ -21,6 +21,20 @@ val Poppins =
     )
 
 class TDTypography {
+    val pomodoro: TextStyle
+        @Composable
+        get() =
+            TextStyle(
+                fontFamily = Poppins,
+                fontSize = 96.sp,
+                fontWeight = FontWeight.W800,
+                lineHeightStyle =
+                    LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.None,
+                    ),
+                color = TDTheme.colors.primary,
+            )
     val heading1: TextStyle
         @Composable
         get() =

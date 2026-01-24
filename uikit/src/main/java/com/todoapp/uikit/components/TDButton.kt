@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.example.uikit.R
 import com.todoapp.uikit.theme.TDTheme
 
-enum class TDButtonType { PRIMARY, SECONDARY }
+enum class TDButtonType { PRIMARY, SECONDARY, CANCEL }
 
 enum class TDButtonSize { SMALL, MEDIUM }
 
@@ -156,6 +156,41 @@ fun TDButton(
                 )
             }
         }
+        TDButtonType.CANCEL -> {
+            Button(
+                modifier =
+                    Modifier
+                        .height(height)
+                        .then(modifier)
+                        .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.width(width)),
+                onClick = onClick,
+                enabled = isEnable,
+                contentPadding = paddingValues,
+                shape = RoundedCornerShape(6.dp),
+                colors =
+                    ButtonColors(
+                        containerColor = TDTheme.colors.red,
+                        contentColor = TDTheme.colors.purple,
+                        disabledContainerColor = TDTheme.colors.white.copy(alpha = 0.8f),
+                        disabledContentColor = TDTheme.colors.purple.copy(alpha = 0.8f),
+                    ),
+            ) {
+                icon?.let {
+                    Icon(
+                        modifier = Modifier.size(14.dp),
+                        imageVector = icon,
+                        contentDescription = text,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                TDText(
+                    text = text,
+                    style = textStyle,
+                    color = TDTheme.colors.black,
+                )
+            }
+        }
     }
 }
 
@@ -196,6 +231,25 @@ private fun TDButtonPreview() {
             text = "Secondary Button2",
             onClick = {},
             type = TDButtonType.SECONDARY,
+            size = TDButtonSize.MEDIUM,
+            fullWidth = true,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TDButton(
+            text = "Cancel Button",
+            onClick = {},
+            type = TDButtonType.CANCEL,
+            size = TDButtonSize.SMALL,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TDButton(
+            text = "Cancel Button2",
+            onClick = {},
+            type = TDButtonType.CANCEL,
             size = TDButtonSize.MEDIUM,
             fullWidth = true,
         )

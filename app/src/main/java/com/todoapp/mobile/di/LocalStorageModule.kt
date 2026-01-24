@@ -2,9 +2,13 @@ package com.todoapp.mobile.di
 
 import android.content.Context
 import androidx.room.Room
+import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
+import com.todoapp.mobile.data.source.local.MIGRATION_1_2
+import com.todoapp.mobile.data.source.local.PomodoroDao
 import com.todoapp.mobile.data.source.local.TaskDao
+import com.todoapp.mobile.domain.repository.PomodoroRepository
 import com.todoapp.mobile.domain.repository.TaskRepository
 import dagger.Module
 import dagger.Provides
@@ -28,9 +32,15 @@ object LocalStorageModule {
             AppDatabase::class.java,
             DB_NAME
         )
-            .fallbackToDestructiveMigrationOnDowngrade(false)
+            .addMigrations(MIGRATION_1_2)
             .build()
     }
+
+    @Provides
+    fun providePomodoroDao(database: AppDatabase): PomodoroDao = database.pomodoroDao()
+
+    @Provides
+    fun providePomodoroRepository(pomodoroDao: PomodoroDao): PomodoroRepository = PomodoroRepositoryImpl(pomodoroDao)
 
     @Provides
     fun provideTaskDao(database: AppDatabase): TaskDao = database.taskDao()

@@ -18,15 +18,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.todoapp.mobile.common.CollectWithLifecycle
+import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerScreen
+import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
-import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
+import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
+import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
 import com.todoapp.uikit.components.TDOverlayPermissionItem
+import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
@@ -45,8 +48,8 @@ fun NavGraph(
         composable<Screen.Onboarding> {
             val viewModel: OnboardingViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val uiEffect = viewModel.uiEffect
-            NavigationEffectController(uiEffect, navController)
+            // val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
             OnboardingScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
@@ -56,6 +59,7 @@ fun NavGraph(
             val viewModel: HomeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
             HomeScreen(
                 uiState = uiState,
                 uiEffect = uiEffect,
@@ -72,6 +76,27 @@ fun NavGraph(
         }
         composable<Screen.Settings> {
             TDOverlayPermissionItem(LocalContext.current)
+        }
+        composable<Screen.AddPomodoroTimer> {
+            val viewModel: AddPomodoroTimerViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
+            AddPomodoroTimerScreen(
+                uiState,
+                viewModel::onAction
+            )
+        }
+        composable<Screen.Pomodoro> {
+            val viewModel: PomodoroViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
+            PomodoroScreen(
+                uiState,
+                uiEffect,
+                viewModel::onAction
+            )
         }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
@@ -101,21 +126,20 @@ fun ToDoApp() {
         )
     }
 }
+sealed interface NavigationEffect {
+    data class Navigate(val route: Screen) : NavigationEffect
+    data object Back : NavigationEffect
+}
 
 @Composable
 private fun NavigationEffectController(
-    uiEffect: Flow<UiEffect>,
     navController: NavHostController,
+    navEffect: Flow<NavigationEffect>,
 ) {
-    uiEffect.CollectWithLifecycle { effect ->
+    navEffect.collectWithLifecycle { effect ->
         when (effect) {
-            UiEffect.NavigateToLogin -> {
-                navController.navigate(Screen.Home)
-            }
-
-            UiEffect.NavigateToRegister -> {
-                navController.navigate(Screen.Home)
-            }
+            is NavigationEffect.Navigate -> { navController.navigate(effect.route) }
+            is NavigationEffect.Back -> { navController.popBackStack() }
         }
     }
 }

@@ -43,6 +43,7 @@ object HomeContract {
             val from: Int,
             val to: Int
         ) : UiAction
+        data object OnPomodoroTap : UiAction
     }
 
     sealed interface UiEffect {

@@ -33,4 +33,10 @@
     <string name="bar_chart_days_fri">Fr</string>
     <string name="bar_chart_days_sat">Sa</string>
     <string name="bar_chart_days_sun">Su</string>
+    <string name = "add_timer">Add Timer</string>
+    <string name="more">More</string>
+    <string name="next">Next</string>
+    <string name="pause">Pause</string>
+    <string name="start">Start</string>
+    <string name="skip">Skip</string>
 </resources>

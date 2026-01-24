@@ -7,6 +7,8 @@ import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toAlarmItem
 import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
@@ -33,6 +35,8 @@ class HomeViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
+    private val _navEffect by lazy { Channel<NavigationEffect>() }
+    val navEffect by lazy { _navEffect.receiveAsFlow() }
     private lateinit var selectedTask: Task
     private var fetchJob: Job? = null
     fun onAction(uiAction: UiAction) {
@@ -53,7 +57,12 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnDeleteDialogDismiss -> closeDialog()
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
+            is UiAction.OnPomodoroTap -> navigateToPomodoro()
         }
+    }
+
+    private fun navigateToPomodoro() {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
     }
 
     init {

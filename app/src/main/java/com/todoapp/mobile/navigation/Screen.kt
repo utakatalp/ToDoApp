@@ -7,6 +7,12 @@ interface Screen {
     data object Onboarding : Screen
 
     @Serializable
+    data object AddPomodoroTimer : Screen
+
+    @Serializable
+    data object Pomodoro : Screen
+
+    @Serializable
     data object Home : Screen
 
     @Serializable
