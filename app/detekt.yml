@@ -21,6 +21,7 @@ complexity:
     ignoreSingleWhenExpression: true
 
 
+
 naming:
   ClassNaming:
     excludes: &testFolders
@@ -47,6 +48,9 @@ style:
     excludes:
       - "**/ui/theme/**"
       - "**/theme/**"
+  ReturnCount:
+    active: true
+    max: 5
 formatting:
   active: true
   NoUnusedImports:

@@ -27,7 +27,9 @@ object LocalStorageModule {
             context,
             AppDatabase::class.java,
             DB_NAME
-        ).build()
+        )
+            .fallbackToDestructiveMigrationOnDowngrade(false)
+            .build()
     }
 
     @Provides

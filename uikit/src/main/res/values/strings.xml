@@ -13,4 +13,7 @@
     <string name="bar_chart_days_fri">Fr</string>
     <string name="bar_chart_days_sat">Sa</string>
     <string name="bar_chart_days_sun">Su</string>
+    <string name="allows_the_app_to_display_content_over_other_applications">Allows the app to display content over other applications.</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="overlay_permission">Overlay Permission</string>
 </resources>

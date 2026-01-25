@@ -12,17 +12,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T> TDScreenWithSheet(
+fun TDScreenWithSheet(
     isLoading: Boolean = false,
-    uiEffect: Flow<T>? = null,
-    collectEffect: ((T) -> Unit)? = null,
     isSheetOpen: Boolean = false,
     skipPartiallyExpanded: Boolean = true,
     containerColor: Color = TDTheme.colors.background,
@@ -31,10 +27,6 @@ fun <T> TDScreenWithSheet(
     onDismissSheet: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    uiEffect?.collectWithLifecycle {
-        collectEffect?.invoke(it)
-    }
-
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val bottomSheetState =
         rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)

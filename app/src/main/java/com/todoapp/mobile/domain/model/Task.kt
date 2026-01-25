@@ -1,6 +1,7 @@
 package com.todoapp.mobile.domain.model
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 data class Task(
@@ -12,3 +13,10 @@ data class Task(
     val timeEnd: LocalTime,
     val isCompleted: Boolean,
 )
+fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem {
+    return AlarmItem(
+        time = LocalDateTime.of(date, timeStart.minusMinutes(remindBeforeMinutes)),
+        message = title,
+        minutesBefore = remindBeforeMinutes,
+    )
+}

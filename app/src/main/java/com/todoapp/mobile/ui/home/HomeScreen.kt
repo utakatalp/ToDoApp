@@ -1,6 +1,7 @@
 package com.todoapp.mobile.ui.home
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +52,7 @@ import com.todoapp.uikit.components.TDTaskCardWithCheckbox
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.components.TDWeeklyDatePicker
+import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
@@ -63,9 +66,15 @@ fun HomeScreen(
     uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
+    val context = LocalContext.current
+
+    uiEffect.collectWithLifecycle {
+        when (it) {
+            is UiEffect.ShowError -> Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+        }
+    }
     TDScreenWithSheet(
         isSheetOpen = uiState.isSheetOpen,
-        uiEffect = uiEffect,
         isLoading = false,
         sheetContent = {
             AddTaskSheet(
@@ -286,12 +295,14 @@ fun AddTaskSheet(
             label = stringResource(com.todoapp.mobile.R.string.task_title),
             value = uiState.taskTitle,
             onValueChange = { onAction(UiAction.OnTaskTitleChange(it)) },
+            isError = uiState.isTitleError
         )
         Spacer(Modifier.height(12.dp))
         TDDatePickerDialog(
             selectedDate = uiState.dialogSelectedDate,
             onDateSelect = { onAction(UiAction.OnDialogDateSelect(it)) },
             onDateDeselect = { onAction(UiAction.OnDialogDateDeselect) },
+            isError = uiState.isDateError
         )
         Spacer(Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -301,6 +312,7 @@ fun AddTaskSheet(
                 placeholder = stringResource(com.todoapp.mobile.R.string.starts),
                 selectedTime = uiState.taskTimeStart,
                 onTimeChange = { onAction(UiAction.OnTaskTimeStartChange(it)) },
+                isError = uiState.isTimeError
             )
             Spacer(Modifier.width(12.dp))
             TDTimePickerDialog(
@@ -309,6 +321,7 @@ fun AddTaskSheet(
                 placeholder = stringResource(com.todoapp.mobile.R.string.ends),
                 selectedTime = uiState.taskTimeEnd,
                 onTimeChange = { onAction(UiAction.OnTaskTimeEndChange(it)) },
+                isError = uiState.isTimeError
             )
         }
         Spacer(Modifier.height(12.dp))
