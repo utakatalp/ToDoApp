@@ -19,6 +19,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.todoapp.mobile.common.CollectWithLifecycle
+import com.todoapp.mobile.ui.activity.ActivityScreen
+import com.todoapp.mobile.ui.activity.ActivityViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
@@ -30,7 +32,6 @@ import com.todoapp.uikit.components.TDOverlayPermissionItem
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
@@ -70,12 +71,20 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
+
+        composable<Screen.Activity> {
+            val viewModel: ActivityViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            ActivityScreen(
+                uiState = uiState,
+            )
+        }
+        
         composable<Screen.Settings> {
             TDOverlayPermissionItem(LocalContext.current)
         }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
-        composable<Screen.Statistic> { }
         composable<Screen.Profile> { }
         composable<Screen.Task> { }
     }
