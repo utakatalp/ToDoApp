@@ -1,6 +1,5 @@
 package com.todoapp.mobile.ui.edit
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,10 +18,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,33 +37,6 @@ import com.todoapp.uikit.components.TDDatePickerDialog
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.theme.TDTheme
-import kotlinx.coroutines.flow.Flow
-
-@Composable
-fun EditRoute(
-    uiState: UiState,
-    uiEffect: Flow<EditContract.UiEffect>,
-    onAction: (UiAction) -> Unit,
-) {
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        uiEffect.collect { effect ->
-            when (effect) {
-                is EditContract.UiEffect.ShowToast -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                }
-
-                else -> Unit
-            }
-        }
-    }
-
-    EditScreen(
-        uiState = uiState,
-        onAction = onAction,
-    )
-}
 
 @Composable
 fun EditScreen(
@@ -126,6 +96,8 @@ fun EditScreen(
                     label = stringResource(R.string.task_title),
                     value = uiState.taskTitle,
                     onValueChange = { onAction(UiAction.OnTaskTitleEdit(it)) },
+                    isError = uiState.titleError != null,
+                    supportingText = uiState.titleError?.let { stringResource(it) },
                 )
 
                 Spacer(Modifier.height(12.dp))
@@ -179,8 +151,6 @@ fun EditScreen(
                         onClick = { onAction(UiAction.OnCancelClick) },
                         size = TDButtonSize.SMALL,
                         type = TDButtonType.SECONDARY,
-                        isEnable = uiState.isDirty
-
                     )
                 }
                 Spacer(Modifier.height(16.dp))

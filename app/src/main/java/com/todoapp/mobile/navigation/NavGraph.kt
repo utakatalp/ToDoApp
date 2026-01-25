@@ -1,5 +1,6 @@
 package com.todoapp.mobile.navigation
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,7 +23,7 @@ import com.todoapp.mobile.common.CollectWithLifecycle
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.edit.EditContract
-import com.todoapp.mobile.ui.edit.EditRoute
+import com.todoapp.mobile.ui.edit.EditScreen
 import com.todoapp.mobile.ui.edit.EditViewModel
 import com.todoapp.mobile.ui.home.HomeContract
 import com.todoapp.mobile.ui.home.HomeScreen
@@ -47,8 +49,8 @@ fun NavGraph(
             val viewModel: OnboardingViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
-            NavigationEffectController(
-                uiEffect = uiEffect,
+            NavigationEffectHandler(
+                effect = uiEffect,
                 navController = navController,
             ) { effect, controller ->
                 when (effect) {
@@ -69,20 +71,19 @@ fun NavGraph(
         composable<Screen.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val uiEffect = viewModel.uiEffect
-            NavigationEffectController(
-                uiEffect = uiEffect,
+            val navigationEffect = viewModel.navigationEffect
+            NavigationEffectHandler(
+                effect = navigationEffect,
                 navController = navController,
             ) { effect, controller ->
                 when (effect) {
-                    is HomeContract.UiEffect.NavigateToEdit -> {
+                    is HomeContract.NavigationEffect.NavigateToEdit -> {
                         controller.navigate(Screen.Edit(taskId = effect.taskId))
                     }
                 }
             }
             HomeScreen(
                 uiState = uiState,
-                uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
         }
@@ -98,19 +99,30 @@ fun NavGraph(
         composable<Screen.Edit> {
             val viewModel: EditViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val uiEffect = viewModel.uiEffect
-            NavigationEffectController(
-                uiEffect = uiEffect,
+            val navigationEffect = viewModel.navigationEffect
+            val context = LocalContext.current
+
+            NavigationEffectHandler(
+                effect = navigationEffect,
                 navController = navController,
             ) { effect, controller ->
                 when (effect) {
-                    is EditContract.UiEffect.NavigateBack -> { controller.popBackStack() }
-                    else -> Unit
+                    EditContract.NavigationEffect.NavigateBack -> {
+                        controller.popBackStack()
+                    }
                 }
             }
-            EditRoute(
+
+            viewModel.uiEffect.CollectWithLifecycle { effect ->
+                when (effect) {
+                    is EditContract.UiEffect.ShowToast -> {
+                        Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            EditScreen(
                 uiState = uiState,
-                uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
         }
@@ -144,12 +156,12 @@ fun ToDoApp() {
 }
 
 @Composable
-private fun <T> NavigationEffectController(
-    uiEffect: Flow<T>,
+private fun <T> NavigationEffectHandler(
+    effect: Flow<T>,
     navController: NavHostController,
     onEffect: (T, NavController) -> Unit,
 ) {
-    uiEffect.CollectWithLifecycle { effect ->
-        onEffect(effect, navController)
+    effect.CollectWithLifecycle { navEffect ->
+        onEffect(navEffect, navController)
     }
 }

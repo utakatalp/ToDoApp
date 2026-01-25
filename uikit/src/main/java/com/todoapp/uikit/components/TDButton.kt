@@ -103,8 +103,8 @@ fun TDButton(
                     ButtonColors(
                         containerColor = TDTheme.colors.purple,
                         contentColor = TDTheme.colors.white,
-                        disabledContainerColor = TDTheme.colors.purple.copy(alpha = 0.8f),
-                        disabledContentColor = TDTheme.colors.white.copy(alpha = 0.8f),
+                        disabledContainerColor = TDTheme.colors.purple.copy(alpha = 0.4f),
+                        disabledContentColor = TDTheme.colors.white.copy(alpha = 0.5f),
                     ),
             ) {
                 icon?.let {

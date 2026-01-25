@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.example.uikit.R
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
-import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
 import com.todoapp.uikit.components.TDAddTaskButton
 import com.todoapp.uikit.components.TDButton
@@ -51,7 +50,6 @@ import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.components.TDWeeklyDatePicker
 import com.todoapp.uikit.theme.TDTheme
-import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.time.LocalDate
@@ -60,12 +58,10 @@ import java.time.LocalTime
 @Composable
 fun HomeScreen(
     uiState: UiState,
-    uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
     TDScreenWithSheet(
         isSheetOpen = uiState.isSheetOpen,
-        uiEffect = uiEffect,
         isLoading = false,
         sheetContent = {
             AddTaskSheet(

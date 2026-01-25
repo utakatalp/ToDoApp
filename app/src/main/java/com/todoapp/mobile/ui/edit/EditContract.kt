@@ -1,13 +1,11 @@
 package com.todoapp.mobile.ui.edit
 
 import androidx.annotation.StringRes
-import com.todoapp.mobile.domain.model.Task
 import java.time.LocalDate
 import java.time.LocalTime
 
 object EditContract {
     data class UiState(
-        val task: Task? = null,
         val isDirty: Boolean = false,
         val taskTitle: String = "",
         val taskTimeStart: LocalTime? = null,
@@ -15,6 +13,7 @@ object EditContract {
         val taskDate: LocalDate = LocalDate.now(),
         val taskDescription: String = "",
         val dialogSelectedDate: LocalDate? = null,
+        val titleError: Int? = null,
     )
 
     sealed interface UiAction {
@@ -31,7 +30,10 @@ object EditContract {
     }
 
     sealed interface UiEffect {
-        data object NavigateBack : UiEffect
         data class ShowToast(@StringRes val message: Int) : UiEffect
+    }
+
+    sealed interface NavigationEffect {
+        data object NavigateBack : NavigationEffect
     }
 }

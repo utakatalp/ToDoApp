@@ -12,10 +12,10 @@ import com.todoapp.mobile.ui.home.HomeContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -27,9 +27,14 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
-    private val _uiEffect = MutableSharedFlow<UiEffect>(extraBufferCapacity = 1)
-    val uiEffect = _uiEffect.asSharedFlow()
-    private lateinit var selectedTask: Task
+
+    private val _uiEffect = Channel<UiEffect>(Channel.BUFFERED)
+    val uiEffect = _uiEffect.receiveAsFlow()
+
+    private val _navigationEffect = Channel<HomeContract.NavigationEffect>(Channel.BUFFERED)
+    val navigationEffect = _navigationEffect.receiveAsFlow()
+
+    private var selectedTask: Task? = null
 
     private var fetchJob: Job? = null
     fun onAction(uiAction: UiAction) {
@@ -50,9 +55,7 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnDeleteDialogDismiss -> closeDialog()
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
-            is UiAction.OnEditClick -> viewModelScope.launch {
-                _uiEffect.emit(UiEffect.NavigateToEdit(uiAction.task.id))
-            }
+            is UiAction.OnEditClick -> navigateToEdit(uiAction.task.id)
         }
     }
 
@@ -60,6 +63,12 @@ class HomeViewModel @Inject constructor(
         fetchDailyTask(uiState.value.selectedDate)
         updatePendingTaskAmount(uiState.value.selectedDate)
         updateCompletedTaskAmount(uiState.value.selectedDate)
+    }
+
+    private fun navigateToEdit(taskId: Long) {
+        viewModelScope.launch {
+            _navigationEffect.send(HomeContract.NavigationEffect.NavigateToEdit(taskId))
+        }
     }
 
     private fun updateTaskIndices(uiAction: UiAction.OnMoveTask) {
@@ -89,7 +98,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onDeleteDialogConfirmed() {
-        deleteTask(selectedTask)
+        selectedTask?.let { deleteTask(it) }
         closeDialog()
     }
 

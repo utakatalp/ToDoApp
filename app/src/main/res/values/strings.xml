@@ -36,7 +36,9 @@
     <string name="bar_chart_days_fri">Fr</string>
     <string name="bar_chart_days_sat">Sa</string>
     <string name="bar_chart_days_sun">Su</string>
-    <string name="changes_saved">Changes Saved</string>
+    <string name="changes_saved">Saved Successfully</string>
     <string name="changes_not_saved">Changes Not Saved</string>
-    <string name="changes_cancelled">Changes Cancelled</string>
+    <string name="changes_cancelled">Changes Discarded</string>
+    <string name="error_title_required">Title is required</string>
+    <string name="error_title_too_short">Title is too short</string>
 </resources>

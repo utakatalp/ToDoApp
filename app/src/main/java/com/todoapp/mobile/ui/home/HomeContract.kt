@@ -17,7 +17,7 @@ object HomeContract {
         val taskDate: LocalDate = LocalDate.now(),
         val taskDescription: String = "",
         val isSheetOpen: Boolean = false,
-        val isDeleteDialogOpen: Boolean = false
+        val isDeleteDialogOpen: Boolean = false,
     )
 
     sealed interface UiAction {
@@ -39,11 +39,13 @@ object HomeContract {
         data class OnEditClick(val task: Task) : UiAction
         data class OnMoveTask(
             val from: Int,
-            val to: Int
+            val to: Int,
         ) : UiAction
     }
 
-    sealed interface UiEffect {
-        data class NavigateToEdit(val taskId: Long) : UiEffect
+    sealed interface UiEffect
+
+    sealed interface NavigationEffect {
+        data class NavigateToEdit(val taskId: Long) : NavigationEffect
     }
 }
