@@ -28,7 +28,7 @@ interface Screen {
     data object Calendar : Screen
 
     @Serializable
-    data object Statistic : Screen
+    data object Activity : Screen
 
     @Serializable
     data object Profile : Screen

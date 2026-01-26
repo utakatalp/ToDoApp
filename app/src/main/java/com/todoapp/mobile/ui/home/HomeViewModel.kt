@@ -87,7 +87,7 @@ class HomeViewModel @Inject constructor(
 
     private fun updateCompletedTaskAmount(date: LocalDate) {
         viewModelScope.launch {
-            taskRepository.observeCompletedTasksInAWeek(date).collect { amount ->
+            taskRepository.countCompletedTasksInAWeek(date).collect { amount ->
                 _uiState.update { it.copy(completedTaskCountThisWeek = amount) }
             }
         }

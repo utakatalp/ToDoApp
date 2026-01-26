@@ -25,7 +25,7 @@ sealed class AppDestination(
 
     data object Activity : AppDestination(
         title = R.string.navbar_statistic_screen_page_name,
-        route = Screen.Statistic::class.qualifiedName!!,
+        route = Screen.Activity::class.qualifiedName!!,
         icon = R.drawable.ic_statistic,
         selectedIcon = R.drawable.ic_selected_statistic,
     )

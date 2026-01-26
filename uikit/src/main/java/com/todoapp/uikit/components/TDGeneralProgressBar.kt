@@ -21,7 +21,7 @@ fun TDGeneralProgressBar(
 ) {
     val height = 32.dp
     val barColor = TDTheme.colors.lightPurple
-    val progressColor = TDTheme.colors.darkPurple
+    val progressColor = TDTheme.colors.purple
     val p = progress.coerceIn(0f, 1f)
     val animatedP by animateFloatAsState(
         targetValue = p,
