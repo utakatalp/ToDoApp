@@ -1,5 +1,7 @@
 package com.todoapp.uikit.components
 
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,37 +40,66 @@ data class TaskDayItem(
     val tasks: List<TaskCardItem>,
 )
 
-@Preview(showBackground = true, widthDp = 360)
+@Preview("Light", showBackground = true, widthDp = 360, uiMode = UI_MODE_NIGHT_NO)
 @Composable
-private fun TDTaskCardListPreview() {
+private fun TDTaskCardListPreview_Light() {
     TDTheme {
         TDTaskCardList(
             modifier = Modifier.padding(16.dp),
-            tasks =
-                listOf(
-                    TaskDayItem(
-                        date = LocalDate.of(2025, 1, 12),
-                        tasks =
-                            listOf(
-                                TaskCardItem(
-                                    taskTitle = "Read Book",
-                                    taskTimeStart = "09:30",
-                                    taskTimeEnd = "10:15",
-                                ),
-                            ),
-                    ),
-                    TaskDayItem(
-                        date = LocalDate.of(2025, 1, 13),
-                        tasks =
-                            listOf(
-                                TaskCardItem(
-                                    taskTitle = "Study Kotlin",
-                                    taskTimeStart = "10:00",
-                                    taskTimeEnd = "12:00",
-                                ),
-                            ),
+            tasks = listOf(
+                TaskDayItem(
+                    date = LocalDate.of(2025, 1, 12),
+                    tasks = listOf(
+                        TaskCardItem(
+                            taskTitle = "Read Book",
+                            taskTimeStart = "09:30",
+                            taskTimeEnd = "10:15",
+                        ),
                     ),
                 ),
+                TaskDayItem(
+                    date = LocalDate.of(2025, 1, 13),
+                    tasks = listOf(
+                        TaskCardItem(
+                            taskTitle = "Study Kotlin",
+                            taskTimeStart = "10:00",
+                            taskTimeEnd = "12:00",
+                        ),
+                    ),
+                ),
+            ),
+        )
+    }
+}
+
+@Preview("Dark", showBackground = true, widthDp = 360, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun TDTaskCardListPreview_Dark() {
+    TDTheme {
+        TDTaskCardList(
+            modifier = Modifier.padding(16.dp),
+            tasks = listOf(
+                TaskDayItem(
+                    date = LocalDate.of(2025, 1, 12),
+                    tasks = listOf(
+                        TaskCardItem(
+                            taskTitle = "Read Book",
+                            taskTimeStart = "09:30",
+                            taskTimeEnd = "10:15",
+                        ),
+                    ),
+                ),
+                TaskDayItem(
+                    date = LocalDate.of(2025, 1, 13),
+                    tasks = listOf(
+                        TaskCardItem(
+                            taskTitle = "Study Kotlin",
+                            taskTimeStart = "10:00",
+                            taskTimeEnd = "12:00",
+                        ),
+                    ),
+                ),
+            ),
         )
     }
 }
