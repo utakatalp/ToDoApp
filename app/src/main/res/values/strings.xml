@@ -36,4 +36,6 @@
     <string name="bar_chart_days_fri">Fr</string>
     <string name="bar_chart_days_sat">Sa</string>
     <string name="bar_chart_days_sun">Su</string>
+    <string name="settings_title">Settings</string>
+    <string name="app_theme">Change App Theme</string>
 </resources>
