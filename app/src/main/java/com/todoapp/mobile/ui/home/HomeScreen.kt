@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.home
 
+import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -41,11 +42,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
+import com.todoapp.mobile.ui.security.biometric.BiometricAuthenticator
 import com.todoapp.uikit.components.TDAddTaskButton
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
@@ -72,18 +75,22 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
 
-    LaunchedEffect(uiEffect) {
+    LaunchedEffect(Unit) {
         uiEffect.collect {
             when (it) {
                 is UiEffect.ShowToast -> {
                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                }
+                UiEffect.ShowBiometricAuthenticator -> {
+                    handleBiometricAuthentication(context) {
+                        onAction(UiAction.OnSuccessfulBiometricAuthenticationHandle)
+                    }
                 }
             }
         }
     }
     TDScreenWithSheet(
         isSheetOpen = uiState.isSheetOpen,
-        uiEffect = uiEffect,
         isLoading = false,
         sheetContent = {
             AddTaskSheet(
@@ -112,7 +119,6 @@ fun HomeContent(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
 ) {
-    val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
@@ -171,7 +177,7 @@ fun HomeContent(
                                 modifier = Modifier
                                     .combinedClickable(
                                         onLongClick = { onAction(UiAction.OnTaskLongPress(task)) },
-                                        onClick = { onAction(UiAction.OnTaskClick(context, task)) }
+                                        onClick = { onAction(UiAction.OnTaskClick(task)) }
                                     )
                                     .draggableHandle(
                                         onDragStarted = {
@@ -371,6 +377,16 @@ private fun AddTaskSheet(
 
 private fun maskTitle(title: String): String {
     return title.first() + "*".repeat(title.length - 1)
+}
+
+private suspend fun handleBiometricAuthentication(
+    context: Context,
+    onSuccess: () -> Unit,
+) {
+    val activity = context as? FragmentActivity ?: return
+
+    val isAuthenticated = BiometricAuthenticator.authenticate(activity)
+    if (isAuthenticated) onSuccess()
 }
 
 @Preview(showBackground = true)

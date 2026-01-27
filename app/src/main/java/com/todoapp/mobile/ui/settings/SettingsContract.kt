@@ -1,17 +1,19 @@
 package com.todoapp.mobile.ui.settings
 
 import com.todoapp.mobile.domain.security.SecretModeReopenOption
+import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 
 object SettingsContract {
     data class UiState(
-        val secretMode: Boolean = false,
-        val selectedSecretMode: SecretModeReopenOption = SecretModeReopenOption.IMMEDIATE,
+        val selectedSecretMode: SecretModeReopenOption = SecretModeReopenOptions.Immediate,
         val remainedSecretModeTime: String = "",
+        val isSecretModeActive: Boolean = false
     )
 
     sealed interface UiAction {
         data class OnSelectedSecretModeChange(val label: SecretModeReopenOption) : UiAction
         data object OnSettingsSave : UiAction
+        data object OnDisableSecretModeTap : UiAction
     }
 
     sealed interface UiEffect

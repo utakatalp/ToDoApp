@@ -1,15 +1,14 @@
 package com.todoapp.mobile.ui.home
 
-import android.content.Context
 import android.util.Log
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
-import com.todoapp.mobile.domain.security.Authenticator
+import com.todoapp.mobile.domain.security.SecretModeConditionFactory
+import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.navigation.NavEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
@@ -24,13 +23,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
-    private val biometricAuthenticator: Authenticator,
     private val secretModePreferences: SecretPreferences
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
@@ -62,46 +61,54 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
             is UiAction.OnTaskSecretChange -> toggleTaskSecret(uiAction)
             is UiAction.OnToggleAdvancedSettings -> toggleAdvancedSettings()
-            is UiAction.OnTaskClick -> openTaskDetail(uiAction.task, uiAction.context)
+            is UiAction.OnTaskClick -> openTaskDetail(uiAction.task)
+            is UiAction.OnSuccessfulBiometricAuthenticationHandle -> handleSuccessfulBiometricAuthentication()
         }
     }
+
     init {
         fetchDailyTask(uiState.value.selectedDate)
         updatePendingTaskAmount(uiState.value.selectedDate)
         updateCompletedTaskAmount(uiState.value.selectedDate)
     }
 
-    private fun openTaskDetail(task: Task, context: Context) {
-        if (task.isSecret) {
-            if (secretModePreferences.isSecretModeEnabled()) {
-                navigateToTaskDetail()
-            } else {
-                authenticate(context) { navigateToTaskDetail() }
-            }
-            return
-        } else {
+    private fun handleSuccessfulBiometricAuthentication() {
+        viewModelScope.launch {
+            val selectedOption = SecretModeReopenOptions.byId(secretModePreferences.getLastSelectedOptionId())
+            val condition = SecretModeConditionFactory(clock = Clock.systemDefaultZone()).create(selectedOption)
+            secretModePreferences.saveCondition(condition)
+            navigateToTaskDetail()
+        }
+    }
+
+    private fun openTaskDetail(task: Task) {
+        selectedTask = task
+
+        if (!task.isSecret) {
             navigateToTaskDetail()
             return
+        }
+
+        viewModelScope.launch {
+            val isActive = secretModePreferences
+                .getCondition()
+                .isActive(System.currentTimeMillis())
+
+            if (isActive) navigateToTaskDetail() else authenticate()
         }
     }
 
     private fun navigateToTaskDetail() {
-        // taskId argümanı geçilecek Task Detail ekranı bitince
-
+        // taskId argümanı geçilecek Task Detail ekranı bitince (selectedTask.id)
         viewModelScope.launch {
             _navEffect.send(NavEffect.NavigateToSettings)
             // TODO() Task Detail ekranı henüz yapılmadı, oraya navigate edecek.
             //  geçici olarak Settings'e navigate ediyor
         }
     }
-    private fun authenticate(context: Context, onSuccess: () -> Unit) {
-        biometricAuthenticator.authenticate(
-            activity = context as FragmentActivity,
-            onSuccess = {
-                secretModePreferences.setSecretModeEnabledUntil()
-                onSuccess()
-            }
-        )
+
+    private fun authenticate() {
+        _uiEffect.trySend(UiEffect.ShowBiometricAuthenticator)
     }
 
     private fun toggleAdvancedSettings() {

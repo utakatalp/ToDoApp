@@ -24,9 +24,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.security.SecretModeReopenOption
+import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
 import com.todoapp.uikit.components.TDButton
+import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTextField
 import com.todoapp.uikit.theme.TDTheme
@@ -79,6 +81,14 @@ private fun SettingsContent(
         ) {
             onAction(UiAction.OnSettingsSave)
         }
+        TDButton(
+            text = stringResource(R.string.disable_secret_mode),
+            type = TDButtonType.CANCEL,
+            modifier = Modifier.fillMaxWidth(),
+            isEnable = uiState.isSecretModeActive
+        ) {
+            onAction(UiAction.OnDisableSecretModeTap)
+        }
 
         if (uiState.remainedSecretModeTime.isNotBlank()) {
             TDText(
@@ -95,7 +105,7 @@ fun ReopenSecretModeDropdown(
     selected: String,
     onSelected: (SecretModeReopenOption) -> Unit,
 ) {
-    val options = SecretModeReopenOption.entries
+    val options = SecretModeReopenOptions.all
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
@@ -132,7 +142,7 @@ fun ReopenSecretModeDropdown(
 private fun SettingsContentPreview() {
     SettingsContent(
         modifier = Modifier.padding(16.dp),
-        uiState = UiState(secretMode = true, SecretModeReopenOption.IMMEDIATE),
+        uiState = UiState(SecretModeReopenOptions.Immediate),
         onAction = {},
     )
 }

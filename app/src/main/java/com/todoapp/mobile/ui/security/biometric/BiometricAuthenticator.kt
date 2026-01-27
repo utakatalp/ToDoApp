@@ -1,23 +1,32 @@
-package com.todoapp.mobile.data.security.biometric
+package com.todoapp.mobile.ui.security.biometric
 
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.security.Authenticator
-import javax.inject.Inject
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
-class BiometricAuthenticator @Inject constructor() : Authenticator {
-    override fun authenticate(
-        activity: FragmentActivity,
-        onSuccess: () -> Unit,
-    ) {
+object BiometricAuthenticator : Authenticator {
+
+    override suspend fun authenticate(activity: FragmentActivity): Boolean = suspendCancellableCoroutine { cont ->
+
         val executor = ContextCompat.getMainExecutor(activity)
 
         val authCallback = object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 super.onAuthenticationSucceeded(result)
-                onSuccess()
+                if (cont.isActive) {
+                    cont.resume(true)
+                }
+            }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                if (cont.isActive) {
+                    cont.resume(false)
+                }
             }
         }
 
@@ -31,5 +40,7 @@ class BiometricAuthenticator @Inject constructor() : Authenticator {
             .build()
 
         biometricPrompt.authenticate(promptInfo)
+
+        cont.invokeOnCancellation { biometricPrompt.cancelAuthentication() }
     }
 }
