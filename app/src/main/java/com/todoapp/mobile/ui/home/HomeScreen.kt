@@ -90,7 +90,6 @@ fun HomeScreen(
     }
     TDScreenWithSheet(
         isSheetOpen = uiState.isSheetOpen,
-        isLoading = false,
         sheetContent = {
             AddTaskSheet(
                 uiState = uiState,
