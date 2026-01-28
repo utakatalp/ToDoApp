@@ -79,7 +79,7 @@ fun NavGraph(
                 uiState = uiState,
             )
         }
-        
+
         composable<Screen.Settings> {
             TDOverlayPermissionItem(LocalContext.current)
         }
