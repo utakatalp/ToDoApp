@@ -35,10 +35,13 @@ class HomeViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
+
     private val _navEffect by lazy { Channel<NavigationEffect>() }
     val navEffect by lazy { _navEffect.receiveAsFlow() }
+
     private lateinit var selectedTask: Task
     private var fetchJob: Job? = null
+
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
             is UiAction.OnTaskClick -> checkTask(uiAction)
@@ -61,14 +64,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun navigateToPomodoro() {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
-    }
-
     init {
         fetchDailyTask(uiState.value.selectedDate)
         updatePendingTaskAmount(uiState.value.selectedDate)
         updateCompletedTaskAmount(uiState.value.selectedDate)
+    }
+
+    private fun navigateToPomodoro() {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
     }
 
     private fun updateTaskIndices(uiAction: UiAction.OnMoveTask) {

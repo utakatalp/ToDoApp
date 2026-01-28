@@ -11,11 +11,11 @@ object AddPomodoroTimerContract {
     )
 
     sealed interface UiAction {
-        data class onSessionCountChange(val value: Float) : UiAction
-        data class onFocusTimeChange(val value: Float) : UiAction
-        data class onShortBreakChange(val value: Float) : UiAction
-        data class onLongBreakChange(val value: Float) : UiAction
-        data class onSectionCountChange(val value: Float) : UiAction
+        data class OnSessionCountChange(val value: Float) : UiAction
+        data class OnFocusTimeChange(val value: Float) : UiAction
+        data class OnShortBreakChange(val value: Float) : UiAction
+        data class OnLongBreakChange(val value: Float) : UiAction
+        data class OnSectionCountChange(val value: Float) : UiAction
         data object OnCancelTap : UiAction
         data object OnStartTap : UiAction
     }

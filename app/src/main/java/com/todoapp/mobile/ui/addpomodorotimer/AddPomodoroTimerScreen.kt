@@ -72,32 +72,32 @@ private fun AddPomodoroTimerContent(
             modifier = Modifier.height(80.dp),
             sectionMode = true,
             label = "Session Count",
-            onSelectedChange = { onAction(UiAction.onSessionCountChange(it)) }
+            onSelectedChange = { onAction(UiAction.OnSessionCountChange(it)) }
         )
         PomodoroInputCard(
             selected = uiState.focusTime,
             modifier = Modifier.height(80.dp),
             label = "Focus Time",
-            onSelectedChange = { onAction(UiAction.onFocusTimeChange(it)) }
+            onSelectedChange = { onAction(UiAction.OnFocusTimeChange(it)) }
         )
         PomodoroInputCard(
             selected = uiState.shortBreak,
             modifier = Modifier.height(80.dp),
             label = "Short Break",
-            onSelectedChange = { onAction(UiAction.onShortBreakChange(it)) }
+            onSelectedChange = { onAction(UiAction.OnShortBreakChange(it)) }
         )
         PomodoroInputCard(
             selected = uiState.longBreak,
             modifier = Modifier.height(80.dp),
             label = "Long Break",
-            onSelectedChange = { onAction(UiAction.onLongBreakChange(it)) }
+            onSelectedChange = { onAction(UiAction.OnLongBreakChange(it)) }
         )
         PomodoroInputCard(
             selected = uiState.sectionCount,
             modifier = Modifier.height(80.dp),
             sectionMode = true,
             label = "Section Count",
-            onSelectedChange = { onAction(UiAction.onSectionCountChange(it)) }
+            onSelectedChange = { onAction(UiAction.OnSectionCountChange(it)) }
         )
         Spacer(Modifier.weight(1f))
         Row(Modifier.fillMaxWidth()) {

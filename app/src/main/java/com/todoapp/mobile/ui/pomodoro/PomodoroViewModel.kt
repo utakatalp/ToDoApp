@@ -31,8 +31,10 @@ class PomodoroViewModel @Inject constructor(
         UiState(min = INITIAL_MINUTES, second = INITIAL_SECONDS)
     )
     val uiState = _uiState.asStateFlow()
+
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
+
     private val _navEffect by lazy { Channel<NavigationEffect>() }
     val navEffect by lazy { _navEffect.receiveAsFlow() }
 
@@ -49,7 +51,7 @@ class PomodoroViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            pomodoro = pomodoroRepository.getPomodoro()!! // null olma ihtimali yok ama sor
+            pomodoro = pomodoroRepository.getSavedPomodoroSettings()!! // null olma ihtimali yok ama sor
             buildSessionQueue(pomodoro)
             startNextSession(autoStart = false)
         }
