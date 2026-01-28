@@ -6,7 +6,11 @@ import com.todoapp.mobile.common.move
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toAlarmItem
+import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.security.SecretModeConditionFactory
+import com.todoapp.mobile.domain.security.SecretModeReopenOptions
+import com.todoapp.mobile.navigation.NavEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
@@ -21,23 +25,27 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
+    private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
+    private val _navEffect = Channel<NavEffect>()
+    val navEffect: Flow<NavEffect> = _navEffect.receiveAsFlow()
     private lateinit var selectedTask: Task
     private var fetchJob: Job? = null
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
-            is UiAction.OnTaskClick -> checkTask(uiAction)
+            is UiAction.OnTaskCheck -> checkTask(uiAction)
             is UiAction.OnDateSelect -> changeSelectedDate(uiAction)
             is UiAction.OnTaskDateChange -> changeTaskDate(uiAction)
             is UiAction.OnTaskDescriptionChange -> changeTaskDescription(uiAction)
@@ -53,6 +61,10 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnDeleteDialogDismiss -> closeDialog()
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
+            is UiAction.OnTaskSecretChange -> toggleTaskSecret(uiAction)
+            is UiAction.OnToggleAdvancedSettings -> toggleAdvancedSettings()
+            is UiAction.OnTaskClick -> openTaskDetail(uiAction.task)
+            is UiAction.OnSuccessfulBiometricAuthenticationHandle -> handleSuccessfulBiometricAuthentication()
         }
     }
 
@@ -60,6 +72,57 @@ class HomeViewModel @Inject constructor(
         fetchDailyTask(uiState.value.selectedDate)
         updatePendingTaskAmount(uiState.value.selectedDate)
         updateCompletedTaskAmount(uiState.value.selectedDate)
+    }
+
+    private fun handleSuccessfulBiometricAuthentication() {
+        viewModelScope.launch {
+            val selectedOption = SecretModeReopenOptions.byId(secretModePreferences.getLastSelectedOptionId())
+            val condition = SecretModeConditionFactory(clock = Clock.systemDefaultZone()).create(selectedOption)
+            secretModePreferences.saveCondition(condition)
+            navigateToTaskDetail()
+        }
+    }
+
+    private fun openTaskDetail(task: Task) {
+        selectedTask = task
+
+        if (!task.isSecret) {
+            navigateToTaskDetail()
+            return
+        }
+
+        viewModelScope.launch {
+            val isActive = secretModePreferences
+                .getCondition()
+                .isActive(System.currentTimeMillis())
+
+            if (isActive) navigateToTaskDetail() else authenticate()
+        }
+    }
+
+    private fun navigateToTaskDetail() {
+        // taskId argümanı geçilecek Task Detail ekranı bitince (selectedTask.id)
+        viewModelScope.launch {
+            _navEffect.send(NavEffect.NavigateToSettings)
+            // TODO() Task Detail ekranı henüz yapılmadı, oraya navigate edecek.
+            //  geçici olarak Settings'e navigate ediyor
+        }
+    }
+
+    private fun authenticate() {
+        _uiEffect.trySend(UiEffect.ShowBiometricAuthenticator)
+    }
+
+    private fun toggleAdvancedSettings() {
+        _uiState.update { state ->
+            state.copy(isAdvancedSettingsExpanded = !state.isAdvancedSettingsExpanded)
+        }
+    }
+
+    private fun toggleTaskSecret(uiAction: UiAction.OnTaskSecretChange) {
+        _uiState.update {
+            it.copy(isTaskSecret = uiAction.isSecret)
+        }
     }
 
     private fun updateTaskIndices(uiAction: UiAction.OnMoveTask) {
@@ -140,13 +203,15 @@ class HomeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            val state = uiState.value
             val task = Task(
-                title = uiState.value.taskTitle,
-                description = uiState.value.taskDescription,
-                date = uiState.value.dialogSelectedDate!!,
-                timeStart = uiState.value.taskTimeStart!!,
-                timeEnd = uiState.value.taskTimeEnd!!,
+                title = state.taskTitle,
+                description = state.taskDescription,
+                date = state.dialogSelectedDate!!,
+                timeStart = state.taskTimeStart!!,
+                timeEnd = state.taskTimeEnd!!,
                 isCompleted = false,
+                isSecret = state.isTaskSecret
             )
             taskRepository.insert(task = task)
             scheduleTaskReminders(task)
@@ -252,7 +317,7 @@ class HomeViewModel @Inject constructor(
         fetchDailyTask(uiAction.date)
     }
 
-    private fun checkTask(uiAction: UiAction.OnTaskClick) {
+    private fun checkTask(uiAction: UiAction.OnTaskCheck) {
         viewModelScope.launch(Dispatchers.IO) {
             taskRepository.updateTask(uiAction.task.id, isCompleted = !uiAction.task.isCompleted)
         }

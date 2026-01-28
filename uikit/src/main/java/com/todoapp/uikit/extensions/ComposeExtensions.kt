@@ -3,7 +3,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.flow.Flow
 
-val <T> Flow<T>.collectWithLifecycle: @Composable (result: (T) -> Unit) -> Unit
+val <T> Flow<T>.collectWithLifecycle: @Composable (result: suspend (T) -> Unit) -> Unit
     @Composable get() = { function ->
         CollectWithLaunchedEffect {
             function(it)
@@ -11,7 +11,7 @@ val <T> Flow<T>.collectWithLifecycle: @Composable (result: (T) -> Unit) -> Unit
     }
 
 @Composable
-fun <T> Flow<T>.CollectWithLaunchedEffect(result: (T) -> Unit) {
+fun <T> Flow<T>.CollectWithLaunchedEffect(result: suspend (T) -> Unit) {
     LaunchedEffect(Unit) {
         collect { effect ->
             result(effect)

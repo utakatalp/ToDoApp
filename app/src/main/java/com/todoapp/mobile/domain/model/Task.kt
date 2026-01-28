@@ -12,6 +12,7 @@ data class Task(
     val timeStart: LocalTime,
     val timeEnd: LocalTime,
     val isCompleted: Boolean,
+    val isSecret: Boolean
 )
 fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem {
     return AlarmItem(

@@ -1,9 +1,12 @@
 package com.todoapp.mobile.ui.home
 
+import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -36,11 +41,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
+import com.todoapp.mobile.ui.security.biometric.BiometricAuthenticator
 import com.todoapp.uikit.components.TDAddTaskButton
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
@@ -70,12 +77,19 @@ fun HomeScreen(
 
     uiEffect.collectWithLifecycle {
         when (it) {
-            is UiEffect.ShowError -> Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            is UiEffect.ShowToast -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            }
+            is UiEffect.ShowBiometricAuthenticator -> {
+                handleBiometricAuthentication(context) {
+                    onAction(UiAction.OnSuccessfulBiometricAuthenticationHandle)
+                }
+            }
+            is UiEffect.ShowError -> TODO()
         }
     }
     TDScreenWithSheet(
         isSheetOpen = uiState.isSheetOpen,
-        isLoading = false,
         sheetContent = {
             AddTaskSheet(
                 uiState = uiState,
@@ -173,10 +187,10 @@ fun HomeContent(
                                             hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
                                         }
                                     ),
-                                taskText = task.title,
+                                taskText = if (task.isSecret) maskTitle(task.title) else task.title,
                                 isChecked = task.isCompleted,
                                 onCheckBoxClick = {
-                                    onAction(UiAction.OnTaskClick(task))
+                                    onAction(UiAction.OnTaskCheck(task))
                                 }
                             )
                         }
@@ -215,55 +229,67 @@ fun HomeContent(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun HomeContentPreview() {
-    val fakeUiState =
-        UiState(
-            selectedDate = LocalDate.now(),
-            tasks =
-                listOf(
-                    Task(
-                        id = 1L,
-                        title = "Design the main screen",
-                        description = "Draft layout & components",
-                        date = LocalDate.now(),
-                        timeStart = LocalTime.of(9, 30),
-                        timeEnd = LocalTime.of(10, 15),
-                        isCompleted = false,
-                    ),
-                    Task(
-                        id = 2L,
-                        title = "Develop the API client",
-                        description = "Retrofit + serialization setup",
-                        date = LocalDate.now().minusDays(1),
-                        timeStart = LocalTime.of(11, 0),
-                        timeEnd = LocalTime.of(12, 0),
-                        isCompleted = true,
-                    ),
-                    Task(
-                        id = 3L,
-                        title = "Fix the login bug",
-                        description = null,
-                        date = LocalDate.now(),
-                        timeStart = LocalTime.of(14, 0),
-                        timeEnd = LocalTime.of(14, 30),
-                        isCompleted = false,
-                    ),
+private fun AdvancedSettings(
+    isExpanded: Boolean,
+    isSecret: Boolean,
+    onToggleExpanded: () -> Unit,
+    onSecretChange: (Boolean) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onToggleExpanded() }
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TDText(
+                text = stringResource(com.todoapp.mobile.R.string.advanced_settings),
+                style = TDTheme.typography.heading3,
+                color = TDTheme.colors.onBackground.copy(alpha = 0.7f)
+            )
+            Icon(
+                painter = painterResource(
+                    if (isExpanded) {
+                        R.drawable.ic_outline_expand_circle_down_24
+                    } else {
+                        R.drawable.ic_outline_expand_circle_right_24
+                    }
                 ),
-            completedTaskCountThisWeek = 5,
-            pendingTaskCountThisWeek = 8,
-        )
+                contentDescription = null,
+                tint = TDTheme.colors.onBackground.copy(alpha = 0.7f)
+            )
+        }
 
-    HomeContent(
-        uiState = fakeUiState,
-        onAction = {},
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp),
-    )
+        AnimatedVisibility(visible = isExpanded) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = isSecret,
+                    onCheckedChange = { onSecretChange(it) },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = TDTheme.colors.primary,
+                        uncheckedColor = TDTheme.colors.onBackground.copy(alpha = 0.6f)
+                    )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                TDText(
+                    text = stringResource(com.todoapp.mobile.R.string.secret_task),
+                    style = TDTheme.typography.heading6,
+                )
+            }
+        }
+    }
 }
 
 @Composable
-fun AddTaskSheet(
+private fun AddTaskSheet(
     uiState: UiState,
     onClick: () -> Unit,
     onAction: (UiAction) -> Unit,
@@ -332,6 +358,16 @@ fun AddTaskSheet(
             singleLine = false,
         )
         Spacer(Modifier.height(12.dp))
+
+        AdvancedSettings(
+            isExpanded = uiState.isAdvancedSettingsExpanded,
+            isSecret = uiState.isTaskSecret,
+            onToggleExpanded = { onAction(UiAction.OnToggleAdvancedSettings) },
+            onSecretChange = { onAction(UiAction.OnTaskSecretChange(it)) }
+        )
+
+        Spacer(Modifier.height(12.dp))
+
         TDButton(
             text = stringResource(com.todoapp.mobile.R.string.create_task),
             onClick = onClick,
@@ -339,6 +375,73 @@ fun AddTaskSheet(
             modifier = Modifier.fillMaxWidth(),
         )
     }
+}
+
+private fun maskTitle(title: String): String {
+    return title.first() + "*".repeat(title.length - 1)
+}
+
+private suspend fun handleBiometricAuthentication(
+    context: Context,
+    onSuccess: () -> Unit,
+) {
+    val activity = context as? FragmentActivity ?: return
+
+    val isAuthenticated = BiometricAuthenticator.authenticate(activity)
+    if (isAuthenticated) onSuccess()
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeContentPreview() {
+    val fakeUiState =
+        UiState(
+            selectedDate = LocalDate.now(),
+            tasks =
+                listOf(
+                    Task(
+                        id = 1L,
+                        title = "Design the main screen",
+                        description = "Draft layout & components",
+                        date = LocalDate.now(),
+                        timeStart = LocalTime.of(9, 30),
+                        timeEnd = LocalTime.of(10, 15),
+                        isCompleted = false,
+                        isSecret = false,
+
+                        ),
+                    Task(
+                        id = 2L,
+                        title = "Develop the API client",
+                        description = "Retrofit + serialization setup",
+                        date = LocalDate.now().minusDays(1),
+                        timeStart = LocalTime.of(11, 0),
+                        timeEnd = LocalTime.of(12, 0),
+                        isCompleted = true,
+                        isSecret = false
+
+                    ),
+                    Task(
+                        id = 3L,
+                        title = "Fix the login bug",
+                        description = null,
+                        date = LocalDate.now(),
+                        timeStart = LocalTime.of(14, 0),
+                        timeEnd = LocalTime.of(14, 30),
+                        isCompleted = false,
+                        isSecret = false
+
+                    ),
+                ),
+            completedTaskCountThisWeek = 5,
+            pendingTaskCountThisWeek = 8,
+        )
+
+    HomeContent(
+        uiState = fakeUiState,
+        onAction = {},
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp),
+    )
 }
 
 @Preview(
@@ -360,6 +463,8 @@ private fun HomeContentPreview_Dark() {
                         timeStart = LocalTime.of(9, 30),
                         timeEnd = LocalTime.of(10, 15),
                         isCompleted = false,
+                        isSecret = false
+
                     ),
                     Task(
                         id = 2L,
@@ -369,6 +474,8 @@ private fun HomeContentPreview_Dark() {
                         timeStart = LocalTime.of(11, 0),
                         timeEnd = LocalTime.of(12, 0),
                         isCompleted = true,
+                        isSecret = false
+
                     ),
                     Task(
                         id = 3L,
@@ -378,6 +485,8 @@ private fun HomeContentPreview_Dark() {
                         timeStart = LocalTime.of(14, 0),
                         timeEnd = LocalTime.of(14, 30),
                         isCompleted = false,
+                        isSecret = false
+
                     ),
                 ),
             completedTaskCountThisWeek = 5,

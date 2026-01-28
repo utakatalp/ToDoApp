@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TDScreenWithSheet(
-    isLoading: Boolean = false,
     isSheetOpen: Boolean = false,
     skipPartiallyExpanded: Boolean = true,
     containerColor: Color = TDTheme.colors.background,
@@ -63,6 +62,4 @@ fun TDScreenWithSheet(
             sheetContent()
         }
     }
-
-    if (isLoading) TDLoading()
 }

@@ -9,7 +9,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,10 +24,10 @@ import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
-import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
-import com.todoapp.uikit.components.TDOverlayPermissionItem
+import com.todoapp.mobile.ui.settings.SettingsScreen
+import com.todoapp.mobile.ui.settings.SettingsViewModel
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
@@ -46,22 +45,24 @@ fun NavGraph(
         composable<Screen.Onboarding> {
             val viewModel: OnboardingViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val uiEffect = viewModel.uiEffect
-            NavigationEffectController(uiEffect, navController)
+            val navEffect = viewModel.navEffect
             OnboardingScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
+            NavigationEffectController(navEffect, navController)
         }
         composable<Screen.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
+            val navEffect = viewModel.navEffect
             HomeScreen(
                 uiState = uiState,
                 uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
+            NavigationEffectController(navEffect, navController)
         }
         composable<Screen.Calendar> {
             val viewModel: CalendarViewModel = hiltViewModel()
@@ -71,17 +72,20 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
-
+        composable<Screen.Settings> {
+            val viewModel: SettingsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            SettingsScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction,
+            )
+        }
         composable<Screen.Activity> {
             val viewModel: ActivityViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             ActivityScreen(
                 uiState = uiState,
             )
-        }
-
-        composable<Screen.Settings> {
-            TDOverlayPermissionItem(LocalContext.current)
         }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
@@ -113,18 +117,20 @@ fun ToDoApp() {
 
 @Composable
 private fun NavigationEffectController(
-    uiEffect: Flow<UiEffect>,
+    navEffect: Flow<NavEffect>,
     navController: NavHostController,
 ) {
-    uiEffect.CollectWithLifecycle { effect ->
+    navEffect.CollectWithLifecycle { effect ->
         when (effect) {
-            UiEffect.NavigateToLogin -> {
-                navController.navigate(Screen.Home)
-            }
-
-            UiEffect.NavigateToRegister -> {
-                navController.navigate(Screen.Home)
-            }
+            NavEffect.NavigateToLogin -> navController.navigate(Screen.Home)
+            NavEffect.NavigateToRegister -> navController.navigate(Screen.Home)
+            NavEffect.NavigateToSettings -> navController.navigate(Screen.Settings)
         }
     }
+}
+
+sealed interface NavEffect {
+    data object NavigateToLogin : NavEffect
+    data object NavigateToRegister : NavEffect
+    data object NavigateToSettings : NavEffect
 }

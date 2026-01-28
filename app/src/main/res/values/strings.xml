@@ -36,4 +36,15 @@
     <string name="bar_chart_days_fri">Fr</string>
     <string name="bar_chart_days_sat">Sa</string>
     <string name="bar_chart_days_sun">Su</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="secret_task">Secret Task</string>
+    <string name="authentication_failed">Authentication Failed</string>
+    <string name="biometric_authentication">Biometric Authentication</string>
+    <string name="log_in_using_your_biometric_credential">Log in using your biometric credential</string>
+    <string name="cancel">Cancel</string>
+    <string name="privacy_security"><![CDATA[Privacy & Security]]></string>
+    <string name="the_time_of_reopening_for_secret_mode">The time of reopening for secret mode</string>
+    <string name="save">Save</string>
+    <string name="disable_secret_mode">Disable Secret Mode</string>
+
 </resources>
