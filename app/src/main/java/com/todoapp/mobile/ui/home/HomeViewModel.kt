@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.model.Task
-import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.model.toAlarmItem
+import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.security.SecretModeConditionFactory
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
@@ -32,7 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
-    private val secretModePreferences: SecretPreferences
+    private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
@@ -203,13 +203,15 @@ class HomeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            val state = uiState.value
             val task = Task(
-                title = uiState.value.taskTitle,
-                description = uiState.value.taskDescription,
-                date = uiState.value.dialogSelectedDate!!,
-                timeStart = uiState.value.taskTimeStart!!,
-                timeEnd = uiState.value.taskTimeEnd!!,
+                title = state.taskTitle,
+                description = state.taskDescription,
+                date = state.dialogSelectedDate!!,
+                timeStart = state.taskTimeStart!!,
+                timeEnd = state.taskTimeEnd!!,
                 isCompleted = false,
+                isSecret = state.isTaskSecret
             )
             taskRepository.insert(task = task)
             scheduleTaskReminders(task)

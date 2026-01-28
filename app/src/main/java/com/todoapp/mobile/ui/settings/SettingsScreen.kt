@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,7 @@ import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonType
+import com.todoapp.uikit.components.TDOverlayPermissionItem
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTextField
 import com.todoapp.uikit.theme.TDTheme
@@ -51,6 +53,7 @@ private fun SettingsContent(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
 ) {
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -73,6 +76,13 @@ private fun SettingsContent(
             onSelected = { onAction(UiAction.OnSelectedSecretModeChange(it)) }
         )
 
+        if (uiState.remainedSecretModeTime.isNotBlank()) {
+            TDText(
+                text = uiState.remainedSecretModeTime,
+                style = TDTheme.typography.heading6
+            )
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         TDButton(
@@ -89,13 +99,8 @@ private fun SettingsContent(
         ) {
             onAction(UiAction.OnDisableSecretModeTap)
         }
-
-        if (uiState.remainedSecretModeTime.isNotBlank()) {
-            TDText(
-                text = uiState.remainedSecretModeTime,
-                style = TDTheme.typography.heading6
-            )
-        }
+        Spacer(Modifier.height(8.dp))
+        TDOverlayPermissionItem(context)
     }
 }
 

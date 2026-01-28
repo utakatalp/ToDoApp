@@ -1,17 +1,17 @@
 package com.todoapp.mobile
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.security.SecretModeEndEvent
 import com.todoapp.mobile.domain.usecase.security.OnSecretModeEventUseCase
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.os.Build
-import com.todoapp.mobile.data.notification.NotificationService
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.launch
 import javax.inject.Inject
