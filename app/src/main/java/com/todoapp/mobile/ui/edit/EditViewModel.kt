@@ -103,7 +103,12 @@ class EditViewModel @Inject constructor(
     }
 
     private fun selectDialogDate(date: LocalDate) {
-        updateState { it.copy(dialogSelectedDate = date) }
+        updateState {
+            it.copy(
+                dialogSelectedDate = date,
+                taskDate = date
+            )
+        }
     }
 
     private fun deselectDialogDate() {
@@ -207,6 +212,7 @@ class EditViewModel @Inject constructor(
             updated.copy(isDirty = computeIsDirty(updated))
         }
     }
+
     private companion object {
         const val MIN_TITLE_LENGTH = 3
     }
