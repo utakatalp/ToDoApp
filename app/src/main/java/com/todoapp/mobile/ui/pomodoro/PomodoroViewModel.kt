@@ -221,7 +221,6 @@ class PomodoroViewModel @Inject constructor(
     private companion object {
         // Time constants
         const val MILLIS_PER_SECOND: Long = 1_000L
-        const val SECONDS_PER_MINUTE: Long = 60L
         const val SECONDS_PER_MINUTE_INT: Int = 60
         const val MILLIS_PER_MINUTE: Long = 60_000L
 
