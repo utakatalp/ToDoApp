@@ -8,7 +8,6 @@ import androidx.security.crypto.MasterKey
 import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
-import com.todoapp.mobile.data.source.local.MIGRATION_1_2
 import com.todoapp.mobile.data.source.local.TaskDao
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
@@ -37,7 +36,6 @@ object LocalStorageModule {
             AppDatabase::class.java,
             DB_NAME
         )
-            .addMigrations(MIGRATION_1_2)
             .build()
     }
 
