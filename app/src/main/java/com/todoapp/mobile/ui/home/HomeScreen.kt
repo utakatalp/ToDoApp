@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -197,14 +198,24 @@ fun HomeContent(
                     }
                 }
             }
-            TDAddTaskButton(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(56.dp),
-                onClick = {
-                    onAction(UiAction.OnShowBottomSheet)
+            Column(modifier = Modifier.align(Alignment.BottomEnd)) {
+                IconButton(
+                    modifier = Modifier.size(56.dp),
+                    onClick = { onAction(UiAction.OnPomodoroTap) }
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_pomodoro_technique),
+                        contentDescription = null
+                    )
                 }
-            )
+                TDAddTaskButton(
+                    modifier = Modifier
+                        .size(56.dp),
+                    onClick = {
+                        onAction(UiAction.OnShowBottomSheet)
+                    }
+                )
+            }
             if (uiState.isDeleteDialogOpen) {
                 AlertDialog(
                     onDismissRequest = { onAction(UiAction.OnDeleteDialogDismiss) },

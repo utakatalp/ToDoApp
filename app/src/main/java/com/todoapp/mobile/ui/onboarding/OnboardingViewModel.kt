@@ -2,12 +2,12 @@ package com.todoapp.mobile.ui.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.todoapp.mobile.navigation.NavEffect
+import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiAction
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,8 +20,9 @@ private const val INTERVAL = 1500L
 class OnboardingViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
-    private val _navEffect = Channel<NavEffect>()
-    val navEffect: Flow<NavEffect> = _navEffect.receiveAsFlow()
+
+    private val _navEffect by lazy { Channel<NavigationEffect>() }
+    val navEffect by lazy { _navEffect.receiveAsFlow() }
 
     init {
         viewModelScope.launch {
@@ -36,8 +37,8 @@ class OnboardingViewModel : ViewModel() {
 
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
-            is UiAction.OnLoginClick -> _navEffect.trySend(NavEffect.NavigateToLogin)
-            is UiAction.OnRegisterClick -> _navEffect.trySend(NavEffect.NavigateToRegister)
+            is UiAction.OnLoginClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Home))
+            is UiAction.OnRegisterClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Home))
         }
     }
 }

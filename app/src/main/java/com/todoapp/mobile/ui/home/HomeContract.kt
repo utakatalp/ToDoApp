@@ -46,6 +46,7 @@ object HomeContract {
             val from: Int,
             val to: Int
         ) : UiAction
+        data object OnPomodoroTap : UiAction
         object OnToggleAdvancedSettings : UiAction
         data class OnTaskSecretChange(val isSecret: Boolean) : UiAction
         data class OnTaskClick(val task: Task) : UiAction

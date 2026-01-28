@@ -10,7 +10,8 @@ import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.security.SecretModeConditionFactory
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
-import com.todoapp.mobile.navigation.NavEffect
+import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
@@ -37,12 +38,16 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
+
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
-    private val _navEffect = Channel<NavEffect>()
-    val navEffect: Flow<NavEffect> = _navEffect.receiveAsFlow()
+
+    private val _navEffect by lazy { Channel<NavigationEffect>() }
+    val navEffect by lazy { _navEffect.receiveAsFlow() }
+
     private lateinit var selectedTask: Task
     private var fetchJob: Job? = null
+
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
             is UiAction.OnTaskCheck -> checkTask(uiAction)
@@ -61,6 +66,7 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnDeleteDialogDismiss -> closeDialog()
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
+            is UiAction.OnPomodoroTap -> navigateToPomodoro()
             is UiAction.OnTaskSecretChange -> toggleTaskSecret(uiAction)
             is UiAction.OnToggleAdvancedSettings -> toggleAdvancedSettings()
             is UiAction.OnTaskClick -> openTaskDetail(uiAction.task)
@@ -72,6 +78,10 @@ class HomeViewModel @Inject constructor(
         fetchDailyTask(uiState.value.selectedDate)
         updatePendingTaskAmount(uiState.value.selectedDate)
         updateCompletedTaskAmount(uiState.value.selectedDate)
+    }
+
+    private fun navigateToPomodoro() {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
     }
 
     private fun handleSuccessfulBiometricAuthentication() {
@@ -103,7 +113,7 @@ class HomeViewModel @Inject constructor(
     private fun navigateToTaskDetail() {
         // taskId argümanı geçilecek Task Detail ekranı bitince (selectedTask.id)
         viewModelScope.launch {
-            _navEffect.send(NavEffect.NavigateToSettings)
+            _navEffect.send(NavigationEffect.Navigate(Screen.Settings))
             // TODO() Task Detail ekranı henüz yapılmadı, oraya navigate edecek.
             //  geçici olarak Settings'e navigate ediyor
         }

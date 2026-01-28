@@ -234,5 +234,24 @@ private fun TDButtonPreview() {
             size = TDButtonSize.MEDIUM,
             fullWidth = true,
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TDButton(
+            text = "Cancel Button",
+            onClick = {},
+            type = TDButtonType.CANCEL,
+            size = TDButtonSize.SMALL,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TDButton(
+            text = "Cancel Button2",
+            onClick = {},
+            type = TDButtonType.CANCEL,
+            size = TDButtonSize.MEDIUM,
+            fullWidth = true,
+        )
     }
 }
