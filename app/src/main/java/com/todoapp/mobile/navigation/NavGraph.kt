@@ -29,10 +29,9 @@ import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
 import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
-import com.todoapp.uikit.components.TDOverlayPermissionItem
-import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
+import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
@@ -55,7 +54,7 @@ fun NavGraph(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
-            NavigationEffectController(navEffect, navController)
+            NavigationEffectController(navController, navEffect)
         }
         composable<Screen.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
@@ -67,7 +66,7 @@ fun NavGraph(
                 uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
-            NavigationEffectController(navEffect, navController)
+            NavigationEffectController(navController, navEffect)
         }
         composable<Screen.Calendar> {
             val viewModel: CalendarViewModel = hiltViewModel()
@@ -95,7 +94,6 @@ fun NavGraph(
         composable<Screen.AddPomodoroTimer> {
             val viewModel: AddPomodoroTimerViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val uiEffect = viewModel.uiEffect
             NavigationEffectController(navController, viewModel.navEffect)
             AddPomodoroTimerScreen(
                 uiState,
@@ -140,6 +138,7 @@ fun ToDoApp() {
         )
     }
 }
+
 sealed interface NavigationEffect {
     data class Navigate(val route: Screen) : NavigationEffect
     data object Back : NavigationEffect
@@ -152,14 +151,12 @@ private fun NavigationEffectController(
 ) {
     navEffect.collectWithLifecycle { effect ->
         when (effect) {
-            is NavigationEffect.Navigate -> { navController.navigate(effect.route) }
-            is NavigationEffect.Back -> { navController.popBackStack() }
+            is NavigationEffect.Navigate -> {
+                navController.navigate(effect.route)
+            }
+            is NavigationEffect.Back -> {
+                navController.popBackStack()
+            }
         }
     }
-}
-
-sealed interface NavEffect {
-    data object NavigateToLogin : NavEffect
-    data object NavigateToRegister : NavEffect
-    data object NavigateToSettings : NavEffect
 }

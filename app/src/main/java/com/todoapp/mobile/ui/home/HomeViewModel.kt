@@ -8,11 +8,10 @@ import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toAlarmItem
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
-import com.todoapp.mobile.navigation.NavigationEffect
-import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.domain.security.SecretModeConditionFactory
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
-import com.todoapp.mobile.navigation.NavEffect
+import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
@@ -39,7 +38,7 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
-    
+
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
@@ -83,6 +82,8 @@ class HomeViewModel @Inject constructor(
 
     private fun navigateToPomodoro() {
         _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
+    }
+
     private fun handleSuccessfulBiometricAuthentication() {
         viewModelScope.launch {
             val selectedOption = SecretModeReopenOptions.byId(secretModePreferences.getLastSelectedOptionId())
@@ -112,7 +113,7 @@ class HomeViewModel @Inject constructor(
     private fun navigateToTaskDetail() {
         // taskId argümanı geçilecek Task Detail ekranı bitince (selectedTask.id)
         viewModelScope.launch {
-            _navEffect.send(NavEffect.NavigateToSettings)
+            _navEffect.send(NavigationEffect.Navigate(Screen.Settings))
             // TODO() Task Detail ekranı henüz yapılmadı, oraya navigate edecek.
             //  geçici olarak Settings'e navigate ediyor
         }

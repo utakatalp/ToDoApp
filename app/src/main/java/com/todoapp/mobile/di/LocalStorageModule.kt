@@ -3,9 +3,9 @@ package com.todoapp.mobile.di
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
-import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
@@ -66,6 +66,10 @@ object LocalStorageModule {
     @Provides
     @Singleton
     fun provideTaskDao(database: AppDatabase): TaskDao = database.taskDao()
+
+    @Provides
+    @Singleton
+    fun providePomodoro(database: AppDatabase): PomodoroDao = database.pomodoroDao()
 }
 
 @Module
@@ -82,4 +86,10 @@ abstract class LocalStorageModuleForBindings {
     abstract fun bindSecretModePreferences(
         secretPreferencesImpl: SecretPreferencesImpl
     ): SecretPreferences
+
+    @Binds
+    @Singleton
+    abstract fun bindPomodoroRepository(
+        pomodoroRepositoryImpl: PomodoroRepositoryImpl
+    ): PomodoroRepository
 }
