@@ -42,10 +42,11 @@ import kotlin.math.max
 
 @Composable
 fun TDWeeklyBarChart(
+    modifier: Modifier,
     title: String,
-    days: List<String>,
+    days: List<String> = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
     values: List<Int>,
-    yLabelColor: Color,
+    yLabelColor: Color = TDTheme.colors.onBackground,
     height: Dp,
     autoScaleHeightToMaxY: Boolean = true,
     minGridStep: Dp = 24.dp,
@@ -80,6 +81,7 @@ fun TDWeeklyBarChart(
     val dashedLines = remember { PathEffect.dashPathEffect(floatArrayOf(48f, 4f), 0f) }
 
     TDWeeklyBarChartContent(
+        modifier = modifier,
         title = title,
         days = days,
         values = values,
@@ -100,6 +102,7 @@ fun TDWeeklyBarChart(
 
 @Composable
 private fun TDWeeklyBarChartContent(
+    modifier: Modifier,
     title: String,
     days: List<String>,
     values: List<Int>,
@@ -117,15 +120,15 @@ private fun TDWeeklyBarChartContent(
     dashedLines: PathEffect,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
     ) {
         TDText(
             text = title,
-            style = TDTheme.typography.heading1,
+            style = TDTheme.typography.heading4,
             color = TDTheme.colors.onBackground,
-            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Box(
@@ -231,10 +234,9 @@ fun TDWeeklyBarChartPreviewLight() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TDWeeklyBarChart(
+            modifier = Modifier,
             title = "Task",
-            days = listOf("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"),
             values = listOf(9, 4, 5, 2, 2, 3, 4),
-            yLabelColor = TDTheme.colors.onBackground,
             height = 220.dp,
         )
     }
@@ -251,10 +253,9 @@ fun TDWeeklyBarChartPreviewDark() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TDWeeklyBarChart(
+            modifier = Modifier,
             title = "Task",
-            days = listOf("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"),
             values = listOf(17, 28, 30, 20, 17, 14, 21),
-            yLabelColor = TDTheme.colors.onBackground,
             height = 220.dp,
         )
     }

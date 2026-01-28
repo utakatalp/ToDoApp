@@ -21,6 +21,9 @@ object HomeContract {
         val isAdvancedSettingsExpanded: Boolean = false,
         val isTaskSecret: Boolean = false,
         val isSecretModeEnabled: Boolean = true,
+        val isTitleError: Boolean = false,
+        val isTimeError: Boolean = false,
+        val isDateError: Boolean = false,
     )
 
     sealed interface UiAction {
@@ -52,5 +55,6 @@ object HomeContract {
     sealed interface UiEffect {
         data class ShowToast(val message: String) : UiEffect
         data object ShowBiometricAuthenticator : UiEffect
+        data class ShowError(val message: String) : UiEffect
     }
 }

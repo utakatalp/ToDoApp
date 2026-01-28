@@ -1,11 +1,12 @@
 package com.todoapp.mobile.ui.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
+import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.SecretPreferences
+import com.todoapp.mobile.domain.model.toAlarmItem
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.security.SecretModeConditionFactory
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
@@ -17,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +33,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val secretModePreferences: SecretPreferences
+    private val alarmScheduler: AlarmScheduler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -39,7 +42,6 @@ class HomeViewModel @Inject constructor(
     private val _navEffect = Channel<NavEffect>()
     val navEffect: Flow<NavEffect> = _navEffect.receiveAsFlow()
     private lateinit var selectedTask: Task
-
     private var fetchJob: Job? = null
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
@@ -139,7 +141,7 @@ class HomeViewModel @Inject constructor(
 
     private fun updateCompletedTaskAmount(date: LocalDate) {
         viewModelScope.launch {
-            taskRepository.observeCompletedTasksInAWeek(date).collect { amount ->
+            taskRepository.countCompletedTasksInAWeek(date).collect { amount ->
                 _uiState.update { it.copy(completedTaskCountThisWeek = amount) }
             }
         }
@@ -176,20 +178,84 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun createTask() {
+        val state = uiState.value
+
+        when {
+            state.taskTitle.isBlank() -> {
+                showTitleError()
+                return
+            }
+
+            state.dialogSelectedDate == null -> {
+                showDateError()
+                return
+            }
+
+            state.taskTimeStart == null || state.taskTimeEnd == null -> {
+                showTimeError()
+                return
+            }
+
+            state.taskTimeStart.isAfter(state.taskTimeEnd) -> {
+                showTimeError()
+                return
+            }
+        }
+
         viewModelScope.launch {
-            taskRepository.insert(
-                task = Task(
-                    title = uiState.value.taskTitle,
-                    description = uiState.value.taskDescription,
-                    date = uiState.value.dialogSelectedDate!!,
-                    timeStart = uiState.value.taskTimeStart!!,
-                    timeEnd = uiState.value.taskTimeEnd!!,
-                    isCompleted = false,
-                    isSecret = uiState.value.isTaskSecret
-                )
+            val task = Task(
+                title = uiState.value.taskTitle,
+                description = uiState.value.taskDescription,
+                date = uiState.value.dialogSelectedDate!!,
+                timeStart = uiState.value.taskTimeStart!!,
+                timeEnd = uiState.value.taskTimeEnd!!,
+                isCompleted = false,
             )
+            taskRepository.insert(task = task)
+            scheduleTaskReminders(task)
             flush()
             dismissBottomSheet()
+        }
+    }
+
+    private fun scheduleTaskReminders(
+        task: Task,
+        remindBeforeMinutes: List<Long> = DEFAULT_REMINDER_MINUTES,
+    ) {
+        remindBeforeMinutes.forEach { minutes ->
+            alarmScheduler.schedule(task.toAlarmItem(remindBeforeMinutes = minutes))
+        }
+    }
+
+    private fun showTitleError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isTitleError = value) },
+        )
+    }
+
+    private fun showDateError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isDateError = value) },
+        )
+    }
+
+    private fun showTimeError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isTimeError = value) },
+        )
+    }
+
+    private fun showTransientError(
+        durationMs: Long,
+        setFlag: (UiState, Boolean) -> UiState,
+    ) {
+        viewModelScope.launch {
+            _uiState.update { current -> setFlag(current, true) }
+            delay(durationMs)
+            _uiState.update { current -> setFlag(current, false) }
         }
     }
 
@@ -245,7 +311,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun changeSelectedDate(uiAction: UiAction.OnDateSelect) {
-        Log.d("HomeViewModel", "changeSelectedDate: ${uiAction.date}")
         _uiState.update { it.copy(selectedDate = uiAction.date) }
         fetchDailyTask(uiAction.date)
     }
@@ -262,5 +327,15 @@ class HomeViewModel @Inject constructor(
 
     private fun dismissBottomSheet() {
         _uiState.update { it.copy(isSheetOpen = false) }
+    }
+
+    companion object {
+        private val DEFAULT_REMINDER_MINUTES = listOf(
+            0L, // at time
+            1L, // 1 min before
+            2L, // 2 min before
+            5L, // 5 min before
+            10L, // 10 min before
+        )
     }
 }

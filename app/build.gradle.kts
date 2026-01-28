@@ -71,7 +71,7 @@ detekt {
     buildUponDefaultConfig = true
     allRules = false
     config.setFrom("$projectDir/detekt.yml")
-    // baseline = file("$projectDir/config/baseline.xml")
+    baseline = file("$projectDir/config/baseline.xml")
 }
 tasks.withType<Detekt>().configureEach {
     jvmTarget = "17"

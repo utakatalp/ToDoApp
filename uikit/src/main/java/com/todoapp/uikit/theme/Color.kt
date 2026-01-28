@@ -77,7 +77,7 @@ internal fun darkColors(
     statusCardGray: Color = Color(0xFF898DA1),
     bgColorPurple: Color = Color(0xFF2B2F5E),
     bgColor: Color = Color.Black,
-    background: Color = bgColor,
+    background: Color = Color(0xFF090E23),
     onBackground: Color = Color(0xFFFFFAF0),
     surface: Color = Color.Black,
     onSurface: Color = Color(0xFFFFFAF0),

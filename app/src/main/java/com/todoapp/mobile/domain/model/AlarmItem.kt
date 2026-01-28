@@ -1,0 +1,9 @@
+package com.todoapp.mobile.domain.model
+
+import java.time.LocalDateTime
+
+data class AlarmItem(
+    val time: LocalDateTime,
+    val message: String,
+    val minutesBefore: Long,
+)

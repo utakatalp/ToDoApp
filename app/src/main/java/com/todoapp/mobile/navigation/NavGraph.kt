@@ -9,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -18,6 +19,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.todoapp.mobile.common.CollectWithLifecycle
+import com.todoapp.mobile.ui.activity.ActivityScreen
+import com.todoapp.mobile.ui.activity.ActivityViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
@@ -29,7 +32,6 @@ import com.todoapp.mobile.ui.settings.SettingsViewModel
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
@@ -64,7 +66,7 @@ fun NavGraph(
             NavigationEffectController(navEffect, navController)
         }
         composable<Screen.Calendar> {
-            val viewModel: CalendarViewModel = viewModel()
+            val viewModel: CalendarViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             CalendarScreen(
                 uiState = uiState,
@@ -79,9 +81,15 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
+        composable<Screen.Activity> {
+            val viewModel: ActivityViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            ActivityScreen(
+                uiState = uiState,
+            )
+        }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
-        composable<Screen.Statistic> { }
         composable<Screen.Profile> { }
         composable<Screen.Task> { }
     }

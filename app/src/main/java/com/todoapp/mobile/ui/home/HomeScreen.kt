@@ -60,6 +60,7 @@ import com.todoapp.uikit.components.TDTaskCardWithCheckbox
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.components.TDWeeklyDatePicker
+import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
@@ -75,16 +76,14 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        uiEffect.collect {
-            when (it) {
-                is UiEffect.ShowToast -> {
-                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-                }
-                UiEffect.ShowBiometricAuthenticator -> {
-                    handleBiometricAuthentication(context) {
-                        onAction(UiAction.OnSuccessfulBiometricAuthenticationHandle)
-                    }
+    uiEffect.collectWithLifecycle {
+        when (it) {
+            is UiEffect.ShowToast -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            }
+            is UiEffect.ShowBiometricAuthenticator -> {
+                handleBiometricAuthentication(context) {
+                    onAction(UiAction.OnSuccessfulBiometricAuthenticationHandle)
                 }
             }
         }
@@ -323,12 +322,14 @@ private fun AddTaskSheet(
             label = stringResource(com.todoapp.mobile.R.string.task_title),
             value = uiState.taskTitle,
             onValueChange = { onAction(UiAction.OnTaskTitleChange(it)) },
+            isError = uiState.isTitleError
         )
         Spacer(Modifier.height(12.dp))
         TDDatePickerDialog(
             selectedDate = uiState.dialogSelectedDate,
             onDateSelect = { onAction(UiAction.OnDialogDateSelect(it)) },
             onDateDeselect = { onAction(UiAction.OnDialogDateDeselect) },
+            isError = uiState.isDateError
         )
         Spacer(Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -338,6 +339,7 @@ private fun AddTaskSheet(
                 placeholder = stringResource(com.todoapp.mobile.R.string.starts),
                 selectedTime = uiState.taskTimeStart,
                 onTimeChange = { onAction(UiAction.OnTaskTimeStartChange(it)) },
+                isError = uiState.isTimeError
             )
             Spacer(Modifier.width(12.dp))
             TDTimePickerDialog(
@@ -346,6 +348,7 @@ private fun AddTaskSheet(
                 placeholder = stringResource(com.todoapp.mobile.R.string.ends),
                 selectedTime = uiState.taskTimeEnd,
                 onTimeChange = { onAction(UiAction.OnTaskTimeEndChange(it)) },
+                isError = uiState.isTimeError
             )
         }
         Spacer(Modifier.height(12.dp))
