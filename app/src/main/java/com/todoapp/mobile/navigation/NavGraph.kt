@@ -18,11 +18,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerScreen
-import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerViewModel
-import com.todoapp.mobile.common.CollectWithLifecycle
 import com.todoapp.mobile.ui.activity.ActivityScreen
 import com.todoapp.mobile.ui.activity.ActivityViewModel
+import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerScreen
+import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
@@ -84,7 +83,7 @@ fun NavGraph(
                 uiState = uiState,
             )
         }
-        
+
         composable<Screen.Settings> {
             TDOverlayPermissionItem(LocalContext.current)
         }

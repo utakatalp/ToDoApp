@@ -5,7 +5,6 @@ import androidx.room.Room
 import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
-import com.todoapp.mobile.data.source.local.MIGRATION_1_2
 import com.todoapp.mobile.data.source.local.PomodoroDao
 import com.todoapp.mobile.data.source.local.TaskDao
 import com.todoapp.mobile.domain.repository.PomodoroRepository
@@ -32,7 +31,6 @@ object LocalStorageModule {
             AppDatabase::class.java,
             DB_NAME
         )
-            .addMigrations(MIGRATION_1_2)
             .build()
     }
 

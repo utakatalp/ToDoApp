@@ -19,6 +19,9 @@ android {
     }
 
     defaultConfig {
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
         applicationId = "com.todoapp.mobile"
         minSdk = 26
         targetSdk = 36

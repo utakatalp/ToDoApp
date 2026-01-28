@@ -13,4 +13,5 @@ data class TaskEntity(
     @ColumnInfo(name = "time_start") val timeStart: Long,
     @ColumnInfo(name = "time_end") val timeEnd: Long,
     @ColumnInfo(name = "is_completed") val isCompleted: Boolean,
+    @ColumnInfo(name = "is_secret") val isSecret: Boolean = false,
 )
