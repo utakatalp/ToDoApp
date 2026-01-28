@@ -9,7 +9,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,6 +31,8 @@ import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
 import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
 import com.todoapp.uikit.components.TDOverlayPermissionItem
 import com.todoapp.uikit.extensions.collectWithLifecycle
+import com.todoapp.mobile.ui.settings.SettingsScreen
+import com.todoapp.mobile.ui.settings.SettingsViewModel
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
@@ -49,23 +50,24 @@ fun NavGraph(
         composable<Screen.Onboarding> {
             val viewModel: OnboardingViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            // val uiEffect = viewModel.uiEffect
-            NavigationEffectController(navController, viewModel.navEffect)
+            val navEffect = viewModel.navEffect
             OnboardingScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
+            NavigationEffectController(navEffect, navController)
         }
         composable<Screen.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
-            NavigationEffectController(navController, viewModel.navEffect)
+            val navEffect = viewModel.navEffect
             HomeScreen(
                 uiState = uiState,
                 uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
+            NavigationEffectController(navEffect, navController)
         }
         composable<Screen.Calendar> {
             val viewModel: CalendarViewModel = hiltViewModel()
@@ -75,17 +77,20 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
-
+        composable<Screen.Settings> {
+            val viewModel: SettingsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            SettingsScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction,
+            )
+        }
         composable<Screen.Activity> {
             val viewModel: ActivityViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             ActivityScreen(
                 uiState = uiState,
             )
-        }
-
-        composable<Screen.Settings> {
-            TDOverlayPermissionItem(LocalContext.current)
         }
         composable<Screen.AddPomodoroTimer> {
             val viewModel: AddPomodoroTimerViewModel = hiltViewModel()
@@ -151,4 +156,10 @@ private fun NavigationEffectController(
             is NavigationEffect.Back -> { navController.popBackStack() }
         }
     }
+}
+
+sealed interface NavEffect {
+    data object NavigateToLogin : NavEffect
+    data object NavigateToRegister : NavEffect
+    data object NavigateToSettings : NavEffect
 }

@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiAction
-import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiEffect
 import com.todoapp.mobile.ui.onboarding.OnboardingContract.UiState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -22,9 +21,8 @@ private const val INTERVAL = 1500L
 class OnboardingViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
-
-    private val _uiEffect by lazy { Channel<UiEffect>() }
-    val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
+    private val _navEffect = Channel<NavEffect>()
+    val navEffect: Flow<NavEffect> = _navEffect.receiveAsFlow()
 
     private val _navEffect by lazy { Channel<NavigationEffect>() }
     val navEffect by lazy { _navEffect.receiveAsFlow() }

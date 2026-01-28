@@ -18,6 +18,9 @@ object HomeContract {
         val taskDescription: String = "",
         val isSheetOpen: Boolean = false,
         val isDeleteDialogOpen: Boolean = false,
+        val isAdvancedSettingsExpanded: Boolean = false,
+        val isTaskSecret: Boolean = false,
+        val isSecretModeEnabled: Boolean = true,
         val isTitleError: Boolean = false,
         val isTimeError: Boolean = false,
         val isDateError: Boolean = false,
@@ -26,7 +29,7 @@ object HomeContract {
     sealed interface UiAction {
         data class OnDateSelect(val date: LocalDate) : UiAction
         data object OnDialogDateDeselect : UiAction
-        data class OnTaskClick(val task: Task) : UiAction
+        data class OnTaskCheck(val task: Task) : UiAction
         data class OnTaskTitleChange(val title: String) : UiAction
         data class OnTaskTimeStartChange(val time: LocalTime) : UiAction
         data class OnTaskTimeEndChange(val time: LocalTime) : UiAction
@@ -44,9 +47,15 @@ object HomeContract {
             val to: Int
         ) : UiAction
         data object OnPomodoroTap : UiAction
+        object OnToggleAdvancedSettings : UiAction
+        data class OnTaskSecretChange(val isSecret: Boolean) : UiAction
+        data class OnTaskClick(val task: Task) : UiAction
+        data object OnSuccessfulBiometricAuthenticationHandle : UiAction
     }
 
     sealed interface UiEffect {
+        data class ShowToast(val message: String) : UiEffect
+        data object ShowBiometricAuthenticator : UiEffect
         data class ShowError(val message: String) : UiEffect
     }
 }

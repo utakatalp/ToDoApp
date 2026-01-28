@@ -171,7 +171,7 @@ fun TDButton(
                     ButtonColors(
                         containerColor = TDTheme.colors.red,
                         contentColor = TDTheme.colors.purple,
-                        disabledContainerColor = TDTheme.colors.white.copy(alpha = 0.8f),
+                        disabledContainerColor = TDTheme.colors.red.copy(alpha = 0.5f),
                         disabledContentColor = TDTheme.colors.purple.copy(alpha = 0.8f),
                     ),
             ) {
