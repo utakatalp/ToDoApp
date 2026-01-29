@@ -30,6 +30,7 @@ import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonType
+import com.todoapp.uikit.components.TDNotificationPermissionItem
 import com.todoapp.uikit.components.TDOverlayPermissionItem
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTextField
@@ -101,6 +102,7 @@ private fun SettingsContent(
         }
         Spacer(Modifier.height(8.dp))
         TDOverlayPermissionItem(context)
+        TDNotificationPermissionItem()
     }
 }
 

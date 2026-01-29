@@ -39,11 +39,21 @@ fun TDOverlayPermissionItem(
             isEnable = !Settings.canDrawOverlays(context),
             text = stringResource(R.string.grant_permission),
             onClick = {
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    "package:${context.packageName}".toUri()
-                )
-                context.startActivity(intent)
+                val packageUri = "package:${context.packageName}".toUri()
+
+                val overlayIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, packageUri).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+
+                val appDetailsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageUri).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+
+                runCatching {
+                    context.startActivity(overlayIntent)
+                }.getOrElse {
+                    context.startActivity(appDetailsIntent)
+                }
             }
         )
     }
