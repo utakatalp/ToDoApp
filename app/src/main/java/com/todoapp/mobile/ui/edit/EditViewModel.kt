@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.ui.edit.EditContract.UiAction
 import com.todoapp.mobile.ui.edit.EditContract.UiEffect
 import com.todoapp.mobile.ui.edit.EditContract.UiState
@@ -35,8 +36,8 @@ class EditViewModel @Inject constructor(
     private val _uiEffect by lazy { Channel<UiEffect>(Channel.BUFFERED) }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
-    private val _navigationEffect = Channel<EditContract.NavigationEffect>(Channel.BUFFERED)
-    val navigationEffect = _navigationEffect.receiveAsFlow()
+    private val _navEffect by lazy { Channel<NavigationEffect>() }
+    val navEffect by lazy { _navEffect.receiveAsFlow() }
 
     private var originalTask: Task? = null
 
@@ -158,8 +159,8 @@ class EditViewModel @Inject constructor(
     private suspend fun onSaveSuccess(updatedTask: Task) {
         originalTask = updatedTask
         _uiState.update { it.copy(isDirty = false) }
-        _uiEffect.send(UiEffect.ShowToast(R.string.save_changes))
-        _navigationEffect.send(EditContract.NavigationEffect.NavigateBack)
+        _uiEffect.send(UiEffect.ShowToast(R.string.changes_saved))
+        navigateBack()
     }
 
     private suspend fun onSaveFailure() {
@@ -181,7 +182,7 @@ class EditViewModel @Inject constructor(
     }
 
     private fun navigateBack() {
-        _navigationEffect.trySend(EditContract.NavigationEffect.NavigateBack)
+        _navEffect.trySend(NavigationEffect.Back)
     }
 
     private fun buildUpdatedTask(current: UiState, existingTask: Task): Task {

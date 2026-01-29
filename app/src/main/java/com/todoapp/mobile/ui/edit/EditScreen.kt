@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.edit
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -28,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
 import com.todoapp.mobile.ui.edit.EditContract.UiAction
+import com.todoapp.mobile.ui.edit.EditContract.UiEffect
 import com.todoapp.mobile.ui.edit.EditContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
@@ -36,14 +39,27 @@ import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
+import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun EditScreen(
     uiState: UiState,
+    uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
     val verticalScroll = rememberScrollState()
+    val context = LocalContext.current
+
+    uiEffect.collectWithLifecycle {
+        when (it) {
+            is UiEffect.ShowToast -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -165,7 +181,8 @@ private fun EditScreenPreview_Light() {
     TDTheme {
         EditScreen(
             uiState = UiState(),
-            onAction = {}
+            onAction = {},
+            uiEffect = emptyFlow()
         )
     }
 }
@@ -176,7 +193,8 @@ private fun EditScreenPreview_Dark() {
     TDTheme {
         EditScreen(
             uiState = UiState(),
-            onAction = {}
+            onAction = {},
+            uiEffect = emptyFlow()
         )
     }
 }

@@ -32,8 +32,4 @@ object EditContract {
     sealed interface UiEffect {
         data class ShowToast(@StringRes val message: Int) : UiEffect
     }
-
-    sealed interface NavigationEffect {
-        data object NavigateBack : NavigationEffect
-    }
 }

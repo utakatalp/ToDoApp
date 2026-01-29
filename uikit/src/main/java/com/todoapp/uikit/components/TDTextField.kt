@@ -208,13 +208,14 @@ fun TDCompactOutlinedTextField(
                 color = color,
             )
             Spacer(Modifier.height(8.dp))
-    val borderColor =
-        when {
-            isError -> TDTheme.colors.red
-            !enabled -> TDTheme.colors.gray.copy(alpha = 0.3f)
-            else -> TDTheme.colors.onBackground
         }
-        
+        val borderColor =
+            when {
+                isError -> TDTheme.colors.red
+                !enabled -> TDTheme.colors.gray.copy(alpha = 0.3f)
+                else -> TDTheme.colors.onBackground
+            }
+
         Column {
             Box(
                 modifier =
@@ -268,7 +269,7 @@ fun TDCompactOutlinedTextField(
 
 @Preview(showBackground = true)
 @Composable
-private fun TextFieldPreview() {
+fun TextFieldPreview() {
     var passwordVisible by remember { mutableStateOf(false) }
 
     Column(

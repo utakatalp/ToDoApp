@@ -126,11 +126,6 @@ class TaskRepositoryImpl @Inject constructor(
 
     override suspend fun update(task: Task) = withContext(Dispatchers.IO) {
         taskDao.update(task.toEntity())
-    override suspend fun updateTask(
-        id: Long,
-        isCompleted: Boolean,
-    ) = withContext(Dispatchers.IO) {
-        taskDao.updateTask(id, isCompleted)
     }
 
     companion object {

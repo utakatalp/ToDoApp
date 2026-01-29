@@ -46,6 +46,7 @@ import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
+import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
 import com.todoapp.mobile.ui.security.biometric.BiometricAuthenticator
 import com.todoapp.uikit.components.TDAddTaskButton
@@ -61,6 +62,7 @@ import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.components.TDWeeklyDatePicker
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
+import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.time.LocalDate
@@ -69,6 +71,7 @@ import java.time.LocalTime
 @Composable
 fun HomeScreen(
     uiState: UiState,
+    uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
@@ -78,11 +81,13 @@ fun HomeScreen(
             is UiEffect.ShowToast -> {
                 Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
             }
+
             is UiEffect.ShowBiometricAuthenticator -> {
                 handleBiometricAuthentication(context) {
                     onAction(UiAction.OnSuccessfulBiometricAuthenticationHandle)
                 }
             }
+
             is UiEffect.ShowError -> TODO()
         }
     }
@@ -150,7 +155,11 @@ fun HomeContent(
             style = TDTheme.typography.heading3
         )
         Spacer(Modifier.height(16.dp))
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
@@ -188,17 +197,21 @@ fun HomeContent(
                                 taskText = if (task.isSecret) maskTitle(task.title) else task.title,
                                 isChecked = task.isCompleted,
                                 onCheckBoxClick = {
-                                    onAction(UiAction.OnTaskClick(task))
+                                    onAction(UiAction.OnTaskCheck(task))
                                 },
                                 onEditClick = { onAction(UiAction.OnEditClick(task)) }
-                                    onAction(UiAction.OnTaskCheck(task))
-                                }
                             )
                         }
                     }
                 }
             }
-            Column(modifier = Modifier.align(Alignment.BottomEnd)) {
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 IconButton(
                     modifier = Modifier.size(56.dp),
                     onClick = { onAction(UiAction.OnPomodoroTap) }
@@ -208,34 +221,32 @@ fun HomeContent(
                         contentDescription = null
                     )
                 }
+
                 TDAddTaskButton(
-                    modifier = Modifier
-                        .size(56.dp),
-                    onClick = {
-                        onAction(UiAction.OnShowBottomSheet)
-                    }
+                    modifier = Modifier.size(56.dp),
+                    onClick = { onAction(UiAction.OnShowBottomSheet) }
                 )
             }
-            if (uiState.isDeleteDialogOpen) {
-                AlertDialog(
-                    onDismissRequest = { onAction(UiAction.OnDeleteDialogDismiss) },
-                    title = { Text("Delete task?") },
-                    titleContentColor = TDTheme.colors.onBackground,
-                    containerColor = TDTheme.colors.background,
-                    textContentColor = TDTheme.colors.onBackground,
-                    text = { Text("Do you want to delete the task?") },
-                    confirmButton = {
-                        TextButton(onClick = { onAction(UiAction.OnDeleteDialogConfirm) }) {
-                            Text("Delete")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { onAction(UiAction.OnDeleteDialogDismiss) }) {
-                            Text("Cancel")
-                        }
+        }
+        if (uiState.isDeleteDialogOpen) {
+            AlertDialog(
+                onDismissRequest = { onAction(UiAction.OnDeleteDialogDismiss) },
+                title = { Text("Delete task?") },
+                titleContentColor = TDTheme.colors.onBackground,
+                containerColor = TDTheme.colors.background,
+                textContentColor = TDTheme.colors.onBackground,
+                text = { Text("Do you want to delete the task?") },
+                confirmButton = {
+                    TextButton(onClick = { onAction(UiAction.OnDeleteDialogConfirm) }) {
+                        Text("Delete")
                     }
-                )
-            }
+                },
+                dismissButton = {
+                    TextButton(onClick = { onAction(UiAction.OnDeleteDialogDismiss) }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }
@@ -245,7 +256,7 @@ private fun AdvancedSettings(
     isExpanded: Boolean,
     isSecret: Boolean,
     onToggleExpanded: () -> Unit,
-    onSecretChange: (Boolean) -> Unit
+    onSecretChange: (Boolean) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
