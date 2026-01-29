@@ -42,9 +42,10 @@ object HomeContract {
         data object OnDeleteDialogDismiss : UiAction
         data object OnDeleteDialogConfirm : UiAction
         data class OnDialogDateSelect(val date: LocalDate) : UiAction
+        data class OnEditClick(val task: Task) : UiAction
         data class OnMoveTask(
             val from: Int,
-            val to: Int
+            val to: Int,
         ) : UiAction
         data object OnPomodoroTap : UiAction
         data object OnToggleAdvancedSettings : UiAction

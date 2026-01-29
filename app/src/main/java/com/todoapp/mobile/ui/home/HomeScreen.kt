@@ -46,7 +46,6 @@ import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
-import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
 import com.todoapp.mobile.ui.security.biometric.BiometricAuthenticator
 import com.todoapp.uikit.components.TDAddTaskButton
@@ -62,7 +61,6 @@ import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.components.TDWeeklyDatePicker
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
-import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.time.LocalDate
@@ -71,7 +69,6 @@ import java.time.LocalTime
 @Composable
 fun HomeScreen(
     uiState: UiState,
-    uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
@@ -191,6 +188,9 @@ fun HomeContent(
                                 taskText = if (task.isSecret) maskTitle(task.title) else task.title,
                                 isChecked = task.isCompleted,
                                 onCheckBoxClick = {
+                                    onAction(UiAction.OnTaskClick(task))
+                                },
+                                onEditClick = { onAction(UiAction.OnEditClick(task)) }
                                     onAction(UiAction.OnTaskCheck(task))
                                 }
                             )

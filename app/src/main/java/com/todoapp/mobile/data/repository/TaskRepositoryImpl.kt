@@ -116,6 +116,16 @@ class TaskRepositoryImpl @Inject constructor(
         taskDao.delete(task.toEntity())
     }
 
+    override suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean) = withContext(Dispatchers.IO) {
+        taskDao.updateTask(id, isCompleted)
+    }
+
+    override suspend fun getTaskById(id: Long): Task? = withContext(Dispatchers.IO) {
+        taskDao.getTaskById(id)?.toDomain()
+    }
+
+    override suspend fun update(task: Task) = withContext(Dispatchers.IO) {
+        taskDao.update(task.toEntity())
     override suspend fun updateTask(
         id: Long,
         isCompleted: Boolean,

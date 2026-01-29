@@ -162,7 +162,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onDeleteDialogConfirmed() {
-        deleteTask(selectedTask)
+        selectedTask?.let { deleteTask(it) }
         closeDialog()
     }
 
@@ -329,7 +329,7 @@ class HomeViewModel @Inject constructor(
 
     private fun checkTask(uiAction: UiAction.OnTaskCheck) {
         viewModelScope.launch(Dispatchers.IO) {
-            taskRepository.updateTask(uiAction.task.id, isCompleted = !uiAction.task.isCompleted)
+            taskRepository.updateTaskCompletion(uiAction.task.id, isCompleted = !uiAction.task.isCompleted)
         }
     }
 

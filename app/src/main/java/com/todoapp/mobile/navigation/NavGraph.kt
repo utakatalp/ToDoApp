@@ -1,18 +1,20 @@
 package com.todoapp.mobile.navigation
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,8 +25,13 @@ import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerScreen
 import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
+import com.todoapp.mobile.ui.edit.EditContract
+import com.todoapp.mobile.ui.edit.EditScreen
+import com.todoapp.mobile.ui.edit.EditViewModel
+import com.todoapp.mobile.ui.home.HomeContract
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
+import com.todoapp.mobile.ui.onboarding.OnboardingContract
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
@@ -63,7 +70,6 @@ fun NavGraph(
             val navEffect = viewModel.navEffect
             HomeScreen(
                 uiState = uiState,
-                uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
             NavigationEffectController(navController, navEffect)
@@ -118,7 +124,6 @@ fun NavGraph(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun ToDoApp() {
