@@ -208,15 +208,13 @@ fun TDCompactOutlinedTextField(
                 color = color,
             )
             Spacer(Modifier.height(8.dp))
+    val borderColor =
+        when {
+            isError -> TDTheme.colors.red
+            !enabled -> TDTheme.colors.gray.copy(alpha = 0.3f)
+            else -> TDTheme.colors.onBackground
         }
-
-        val borderColor =
-            when {
-                !enabled -> TDTheme.colors.gray.copy(alpha = 0.3f)
-                isError -> TDTheme.colors.red
-                else -> TDTheme.colors.onBackground
-            }
-
+        
         Column {
             Box(
                 modifier =

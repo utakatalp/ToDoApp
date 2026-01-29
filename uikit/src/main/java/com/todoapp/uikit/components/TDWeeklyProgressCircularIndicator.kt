@@ -3,26 +3,29 @@ package com.todoapp.uikit.components
 import android.content.res.Configuration
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,86 +36,113 @@ import com.example.uikit.R
 import com.todoapp.uikit.theme.TDTheme
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TDWeeklyCircularProgressIndicator(
     modifier: Modifier = Modifier,
     progress: Float,
+    inProgress: Float = 0f,
     color: Color = TDTheme.colors.purple,
-    trackColor: Color = TDTheme.colors.lightPurple,
+    inProgressColor: Color = TDTheme.colors.lightPurple,
     strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth,
     strokeCap: StrokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
-    gapSize: Dp = ProgressIndicatorDefaults.CircularIndicatorTrackGapSize,
     animationSpec: AnimationSpec<Float> = ProgressIndicatorDefaults.ProgressAnimationSpec,
 ) {
-    val target = progress.coerceIn(0f, 1f)
-    val animatedProgress by animateFloatAsState(
-        targetValue = target,
+    val targetCompleted = progress.coerceIn(0f, 1f)
+    val targetInProgress = inProgress.coerceIn(0f, 1f - targetCompleted)
+    val animatedCompleted by animateFloatAsState(
+        targetValue = targetCompleted,
+        animationSpec = animationSpec,
+    )
+    val animatedInProgress by animateFloatAsState(
+        targetValue = targetInProgress,
         animationSpec = animationSpec,
     )
 
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+    BoxWithConstraints(
+        modifier = modifier
     ) {
-        Box(
-            modifier = Modifier,
-            contentAlignment = Alignment.Center,
+        val indicatorSize = maxWidth * 0.35f
+
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            TDText(
-                text = "%${(100 * progress).roundToInt()}",
-                color = TDTheme.colors.onBackground,
-                style = TDTheme.typography.heading7,
-                textAlign = TextAlign.Center,
-            )
+            Box(
+                modifier = Modifier,
+                contentAlignment = Alignment.Center,
+            ) {
+                TDText(
+                    text = "%${(100 * targetCompleted).roundToInt()}",
+                    color = TDTheme.colors.onBackground,
+                    style = TDTheme.typography.heading7,
+                    textAlign = TextAlign.Center,
+                )
 
-            CircularProgressIndicator(
-                modifier = modifier,
-                progress = { animatedProgress },
-                color = color,
-                trackColor = trackColor,
-                strokeWidth = strokeWidth,
-                strokeCap = strokeCap,
-                gapSize = gapSize,
-            )
-        }
+                Canvas(modifier = Modifier.size(indicatorSize)) {
+                    val stroke = Stroke(width = strokeWidth.toPx(), cap = strokeCap)
+                    val diameter = size.minDimension
+                    val arcSize = Size(diameter, diameter)
 
-        Spacer(modifier = Modifier.width(24.dp))
+                    val completedSweep = 360f * animatedCompleted
+                    val inProgressSweep = 360f * animatedInProgress
 
-        Column(
-            modifier = Modifier,
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.Start,
-        ) {
-            TDText(
-                text = stringResource(id = R.string.activity_screen_weekly_progress_text),
-                color = TDTheme.colors.onBackground,
-                style = TDTheme.typography.heading5,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                textAlign = TextAlign.Center,
-            )
+                    drawArc(
+                        color = color,
+                        startAngle = -90f,
+                        sweepAngle = completedSweep,
+                        useCenter = false,
+                        size = arcSize,
+                        style = stroke
+                    )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                    drawArc(
+                        color = inProgressColor,
+                        startAngle = -90f,
+                        sweepAngle = -inProgressSweep,
+                        useCenter = false,
+                        size = arcSize,
+                        style = stroke
+                    )
+                }
+            }
 
-            LegendColoredBoxItem(
-                color = TDTheme.colors.purple,
-                text = stringResource(id = R.string.activity_screen_weekly_progress_legend_complete_text),
-            )
+            Spacer(modifier = Modifier.width(36.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Column(
+                modifier = Modifier,
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.Start,
+            ) {
+                TDText(
+                    text = stringResource(id = R.string.activity_screen_weekly_progress_text),
+                    color = TDTheme.colors.onBackground,
+                    style = TDTheme.typography.heading2,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                )
 
-            LegendColoredBoxItem(
-                color = TDTheme.colors.lightPurple,
-                text = stringResource(id = R.string.activity_screen_weekly_progress_legend_in_progress_text),
-            )
+                Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
+                LegendColoredBoxItem(
+                    color = TDTheme.colors.purple,
+                    text = stringResource(id = R.string.activity_screen_weekly_progress_legend_complete_text),
+                )
 
-            LegendColoredBoxItem(
-                color = TDTheme.colors.gray,
-                text = stringResource(id = R.string.activity_screen_weekly_progress_legend_not_started_text),
-            )
+                Spacer(modifier = Modifier.height(4.dp))
+
+                LegendColoredBoxItem(
+                    color = TDTheme.colors.lightPurple,
+                    text = stringResource(id = R.string.activity_screen_weekly_progress_legend_in_progress_text),
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                LegendColoredBoxItem(
+                    color = TDTheme.colors.gray,
+                    text = stringResource(id = R.string.activity_screen_weekly_progress_legend_not_started_text),
+                )
+            }
         }
     }
 }
@@ -136,7 +166,7 @@ fun LegendColoredBoxItem(
         TDText(
             text = text,
             color = TDTheme.colors.onBackground,
-            style = TDTheme.typography.subheading1,
+            style = TDTheme.typography.heading7,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -150,19 +180,20 @@ fun TDWeeklyCircularProgressIndicatorPreviewLight(
 ) {
     Column(
         modifier = Modifier
+            .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
         TDTheme {
             TDWeeklyCircularProgressIndicator(
-                modifier = modifier.size(100.dp),
+                modifier = modifier.fillMaxWidth(),
                 progress = 0.65f,
+                inProgress = 0.35f,
                 color = TDTheme.colors.purple,
-                trackColor = TDTheme.colors.lightPurple,
+                inProgressColor = TDTheme.colors.lightPurple,
                 strokeWidth = 14.dp,
                 strokeCap = Butt,
-                gapSize = 0.dp,
             )
         }
     }
@@ -175,19 +206,20 @@ fun TDWeeklyCircularProgressIndicatorPreviewDark(
 ) {
     Column(
         modifier = Modifier
+            .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
         TDTheme {
             TDWeeklyCircularProgressIndicator(
-                modifier = modifier.size(100.dp),
-                progress = 0.65f,
+                modifier = modifier.fillMaxWidth(),
+                progress = 0.90f,
+                inProgress = 0.10f,
                 color = TDTheme.colors.purple,
-                trackColor = TDTheme.colors.lightPurple,
+                inProgressColor = TDTheme.colors.lightPurple,
                 strokeWidth = 14.dp,
                 strokeCap = Butt,
-                gapSize = 0.dp,
             )
         }
     }

@@ -8,6 +8,11 @@ import androidx.room.Update
 import com.todoapp.mobile.data.model.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
+data class DayCount(
+    val date: Long,
+    val count: Int,
+)
+
 @Dao
 interface TaskDao {
     @Query("SELECT * FROM tasks")
@@ -28,16 +33,26 @@ interface TaskDao {
         endDate: Long,
     ): Flow<List<TaskEntity>>
 
-    @Query("SELECT COUNT(*) FROM tasks WHERE date BETWEEN :startDate AND :endDate AND is_completed = 1")
-    fun getCompletedTaskAmountInAWeek(
+    @Query(
+        """
+        SELECT date, COUNT(*) AS count
+        FROM tasks
+        WHERE date BETWEEN :startDate AND :endDate
+          AND is_completed = 1
+        GROUP BY date
+        ORDER BY date ASC
+        """
+    )
+    fun observeCompletedCountsByDay(
         startDate: Long,
         endDate: Long,
-    ): Flow<Int>
+    ): Flow<List<DayCount>>
 
-    @Query("SELECT COUNT(*) FROM tasks WHERE date BETWEEN :startDate AND :endDate AND is_completed = 0")
-    fun getPendingTaskAmountInAWeek(
+    @Query("""SELECT COUNT(*) FROM tasks WHERE date BETWEEN :startDate AND :endDate AND is_completed = :isCompleted""")
+    fun getTaskCountInRange(
         startDate: Long,
         endDate: Long,
+        isCompleted: Boolean,
     ): Flow<Int>
 
     @Query("SELECT * FROM tasks WHERE id = :id LIMIT 1")

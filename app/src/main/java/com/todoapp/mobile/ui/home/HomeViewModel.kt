@@ -1,11 +1,17 @@
 package com.todoapp.mobile.ui.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
+import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.domain.model.toAlarmItem
+import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.security.SecretModeConditionFactory
+import com.todoapp.mobile.domain.security.SecretModeReopenOptions
+import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
@@ -13,33 +19,38 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
+    private val secretModePreferences: SecretPreferences,
+    private val alarmScheduler: AlarmScheduler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _uiEffect = Channel<UiEffect>(Channel.BUFFERED)
-    val uiEffect = _uiEffect.receiveAsFlow()
+    private val _uiEffect by lazy { Channel<UiEffect>() }
+    val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
-    private val _navigationEffect = Channel<HomeContract.NavigationEffect>(Channel.BUFFERED)
-    val navigationEffect = _navigationEffect.receiveAsFlow()
+    private val _navEffect by lazy { Channel<NavigationEffect>() }
+    val navEffect by lazy { _navEffect.receiveAsFlow() }
 
-    private var selectedTask: Task? = null
-
+    private lateinit var selectedTask: Task
     private var fetchJob: Job? = null
+
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
-            is UiAction.OnTaskClick -> checkTask(uiAction)
+            is UiAction.OnTaskCheck -> checkTask(uiAction)
             is UiAction.OnDateSelect -> changeSelectedDate(uiAction)
             is UiAction.OnTaskDateChange -> changeTaskDate(uiAction)
             is UiAction.OnTaskDescriptionChange -> changeTaskDescription(uiAction)
@@ -55,7 +66,11 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnDeleteDialogDismiss -> closeDialog()
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnMoveTask -> updateTaskIndices(uiAction)
-            is UiAction.OnEditClick -> navigateToEdit(uiAction.task.id)
+            is UiAction.OnPomodoroTap -> navigateToPomodoro()
+            is UiAction.OnTaskSecretChange -> toggleTaskSecret(uiAction)
+            is UiAction.OnToggleAdvancedSettings -> toggleAdvancedSettings()
+            is UiAction.OnTaskClick -> openTaskDetail(uiAction.task)
+            is UiAction.OnSuccessfulBiometricAuthenticationHandle -> handleSuccessfulBiometricAuthentication()
         }
     }
 
@@ -65,9 +80,58 @@ class HomeViewModel @Inject constructor(
         updateCompletedTaskAmount(uiState.value.selectedDate)
     }
 
-    private fun navigateToEdit(taskId: Long) {
+    private fun navigateToPomodoro() {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
+    }
+
+    private fun handleSuccessfulBiometricAuthentication() {
         viewModelScope.launch {
-            _navigationEffect.send(HomeContract.NavigationEffect.NavigateToEdit(taskId))
+            val selectedOption = SecretModeReopenOptions.byId(secretModePreferences.getLastSelectedOptionId())
+            val condition = SecretModeConditionFactory(clock = Clock.systemDefaultZone()).create(selectedOption)
+            secretModePreferences.saveCondition(condition)
+            navigateToTaskDetail()
+        }
+    }
+
+    private fun openTaskDetail(task: Task) {
+        selectedTask = task
+
+        if (!task.isSecret) {
+            navigateToTaskDetail()
+            return
+        }
+
+        viewModelScope.launch {
+            val isActive = secretModePreferences
+                .getCondition()
+                .isActive(System.currentTimeMillis())
+
+            if (isActive) navigateToTaskDetail() else authenticate()
+        }
+    }
+
+    private fun navigateToTaskDetail() {
+        // taskId argümanı geçilecek Task Detail ekranı bitince (selectedTask.id)
+        viewModelScope.launch {
+            _navEffect.send(NavigationEffect.Navigate(Screen.Settings))
+            // TODO() Task Detail ekranı henüz yapılmadı, oraya navigate edecek.
+            //  geçici olarak Settings'e navigate ediyor
+        }
+    }
+
+    private fun authenticate() {
+        _uiEffect.trySend(UiEffect.ShowBiometricAuthenticator)
+    }
+
+    private fun toggleAdvancedSettings() {
+        _uiState.update { state ->
+            state.copy(isAdvancedSettingsExpanded = !state.isAdvancedSettingsExpanded)
+        }
+    }
+
+    private fun toggleTaskSecret(uiAction: UiAction.OnTaskSecretChange) {
+        _uiState.update {
+            it.copy(isTaskSecret = uiAction.isSecret)
         }
     }
 
@@ -87,7 +151,7 @@ class HomeViewModel @Inject constructor(
 
     private fun updateCompletedTaskAmount(date: LocalDate) {
         viewModelScope.launch {
-            taskRepository.observeCompletedTasksInAWeek(date).collect { amount ->
+            taskRepository.countCompletedTasksInAWeek(date).collect { amount ->
                 _uiState.update { it.copy(completedTaskCountThisWeek = amount) }
             }
         }
@@ -124,19 +188,86 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun createTask() {
+        val state = uiState.value
+
+        when {
+            state.taskTitle.isBlank() -> {
+                showTitleError()
+                return
+            }
+
+            state.dialogSelectedDate == null -> {
+                showDateError()
+                return
+            }
+
+            state.taskTimeStart == null || state.taskTimeEnd == null -> {
+                showTimeError()
+                return
+            }
+
+            state.taskTimeStart.isAfter(state.taskTimeEnd) -> {
+                showTimeError()
+                return
+            }
+        }
+
         viewModelScope.launch {
-            taskRepository.insert(
-                task = Task(
-                    title = uiState.value.taskTitle,
-                    description = uiState.value.taskDescription,
-                    date = uiState.value.dialogSelectedDate!!,
-                    timeStart = uiState.value.taskTimeStart!!,
-                    timeEnd = uiState.value.taskTimeEnd!!,
-                    isCompleted = false,
-                )
+            val state = uiState.value
+            val task = Task(
+                title = state.taskTitle,
+                description = state.taskDescription,
+                date = state.dialogSelectedDate!!,
+                timeStart = state.taskTimeStart!!,
+                timeEnd = state.taskTimeEnd!!,
+                isCompleted = false,
+                isSecret = state.isTaskSecret
             )
+            taskRepository.insert(task = task)
+            scheduleTaskReminders(task)
             flush()
             dismissBottomSheet()
+        }
+    }
+
+    private fun scheduleTaskReminders(
+        task: Task,
+        remindBeforeMinutes: List<Long> = DEFAULT_REMINDER_MINUTES,
+    ) {
+        remindBeforeMinutes.forEach { minutes ->
+            alarmScheduler.schedule(task.toAlarmItem(remindBeforeMinutes = minutes))
+        }
+    }
+
+    private fun showTitleError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isTitleError = value) },
+        )
+    }
+
+    private fun showDateError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isDateError = value) },
+        )
+    }
+
+    private fun showTimeError(durationMs: Long = 2000L) {
+        showTransientError(
+            durationMs = durationMs,
+            setFlag = { state, value -> state.copy(isTimeError = value) },
+        )
+    }
+
+    private fun showTransientError(
+        durationMs: Long,
+        setFlag: (UiState, Boolean) -> UiState,
+    ) {
+        viewModelScope.launch {
+            _uiState.update { current -> setFlag(current, true) }
+            delay(durationMs)
+            _uiState.update { current -> setFlag(current, false) }
         }
     }
 
@@ -192,12 +323,11 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun changeSelectedDate(uiAction: UiAction.OnDateSelect) {
-        Log.d("HomeViewModel", "changeSelectedDate: ${uiAction.date}")
         _uiState.update { it.copy(selectedDate = uiAction.date) }
         fetchDailyTask(uiAction.date)
     }
 
-    private fun checkTask(uiAction: UiAction.OnTaskClick) {
+    private fun checkTask(uiAction: UiAction.OnTaskCheck) {
         viewModelScope.launch(Dispatchers.IO) {
             taskRepository.updateTaskCompletion(uiAction.task.id, isCompleted = !uiAction.task.isCompleted)
         }
@@ -209,5 +339,15 @@ class HomeViewModel @Inject constructor(
 
     private fun dismissBottomSheet() {
         _uiState.update { it.copy(isSheetOpen = false) }
+    }
+
+    companion object {
+        private val DEFAULT_REMINDER_MINUTES = listOf(
+            0L, // at time
+            1L, // 1 min before
+            2L, // 2 min before
+            5L, // 5 min before
+            10L, // 10 min before
+        )
     }
 }

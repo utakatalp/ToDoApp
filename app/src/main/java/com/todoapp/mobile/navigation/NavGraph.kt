@@ -19,7 +19,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.todoapp.mobile.common.CollectWithLifecycle
+import com.todoapp.mobile.ui.activity.ActivityScreen
+import com.todoapp.mobile.ui.activity.ActivityViewModel
+import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerScreen
+import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.edit.EditContract
@@ -31,6 +34,11 @@ import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingContract
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
+import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
+import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
+import com.todoapp.mobile.ui.settings.SettingsScreen
+import com.todoapp.mobile.ui.settings.SettingsViewModel
+import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
@@ -48,86 +56,67 @@ fun NavGraph(
         composable<Screen.Onboarding> {
             val viewModel: OnboardingViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val uiEffect = viewModel.uiEffect
-            NavigationEffectHandler(
-                effect = uiEffect,
-                navController = navController,
-            ) { effect, controller ->
-                when (effect) {
-                    is OnboardingContract.UiEffect.NavigateToLogin -> {
-                        controller.navigate(Screen.Home)
-                    }
-
-                    is OnboardingContract.UiEffect.NavigateToRegister -> {
-                        controller.navigate(Screen.Home)
-                    }
-                }
-            }
+            val navEffect = viewModel.navEffect
             OnboardingScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
+            NavigationEffectController(navController, navEffect)
         }
         composable<Screen.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val navigationEffect = viewModel.navigationEffect
-            NavigationEffectHandler(
-                effect = navigationEffect,
-                navController = navController,
-            ) { effect, controller ->
-                when (effect) {
-                    is HomeContract.NavigationEffect.NavigateToEdit -> {
-                        controller.navigate(Screen.Edit(taskId = effect.taskId))
-                    }
-                }
-            }
+            val uiEffect = viewModel.uiEffect
+            val navEffect = viewModel.navEffect
             HomeScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
+            NavigationEffectController(navController, navEffect)
         }
         composable<Screen.Calendar> {
-            val viewModel: CalendarViewModel = viewModel()
+            val viewModel: CalendarViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             CalendarScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
         }
-
-        composable<Screen.Edit> {
-            val viewModel: EditViewModel = hiltViewModel()
+        composable<Screen.Settings> {
+            val viewModel: SettingsViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val navigationEffect = viewModel.navigationEffect
-            val context = LocalContext.current
-
-            NavigationEffectHandler(
-                effect = navigationEffect,
-                navController = navController,
-            ) { effect, controller ->
-                when (effect) {
-                    EditContract.NavigationEffect.NavigateBack -> {
-                        controller.popBackStack()
-                    }
-                }
-            }
-
-            viewModel.uiEffect.CollectWithLifecycle { effect ->
-                when (effect) {
-                    is EditContract.UiEffect.ShowToast -> {
-                        Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-            EditScreen(
+            SettingsScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
         }
-
-        composable<Screen.Settings> {}
+        composable<Screen.Activity> {
+            val viewModel: ActivityViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            ActivityScreen(
+                uiState = uiState,
+            )
+        }
+        composable<Screen.AddPomodoroTimer> {
+            val viewModel: AddPomodoroTimerViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(navController, viewModel.navEffect)
+            AddPomodoroTimerScreen(
+                uiState,
+                viewModel::onAction
+            )
+        }
+        composable<Screen.Pomodoro> {
+            val viewModel: PomodoroViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
+            PomodoroScreen(
+                uiState,
+                uiEffect,
+                viewModel::onAction
+            )
+        }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }
@@ -155,13 +144,24 @@ fun ToDoApp() {
     }
 }
 
+sealed interface NavigationEffect {
+    data class Navigate(val route: Screen) : NavigationEffect
+    data object Back : NavigationEffect
+}
+
 @Composable
-private fun <T> NavigationEffectHandler(
-    effect: Flow<T>,
+private fun NavigationEffectController(
     navController: NavHostController,
-    onEffect: (T, NavController) -> Unit,
+    navEffect: Flow<NavigationEffect>,
 ) {
-    effect.CollectWithLifecycle { navEffect ->
-        onEffect(navEffect, navController)
+    navEffect.collectWithLifecycle { effect ->
+        when (effect) {
+            is NavigationEffect.Navigate -> {
+                navController.navigate(effect.route)
+            }
+            is NavigationEffect.Back -> {
+                navController.popBackStack()
+            }
+        }
     }
 }

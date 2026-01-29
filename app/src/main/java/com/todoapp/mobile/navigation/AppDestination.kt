@@ -8,6 +8,7 @@ sealed class AppDestination(
     val icon: Int,
     val selectedIcon: Int,
 ) {
+
     data object Home : AppDestination(
         title = R.string.navbar_home_screen_page_name,
         route = Screen.Home::class.qualifiedName!!,
@@ -24,9 +25,16 @@ sealed class AppDestination(
 
     data object Activity : AppDestination(
         title = R.string.navbar_statistic_screen_page_name,
-        route = Screen.Statistic::class.qualifiedName!!,
+        route = Screen.Activity::class.qualifiedName!!,
         icon = R.drawable.ic_statistic,
         selectedIcon = R.drawable.ic_selected_statistic,
+    )
+
+    data object PomodoroAddTimer : AppDestination(
+        title = R.string.add_timer,
+        route = Screen.AddPomodoroTimer::class.qualifiedName!!,
+        icon = com.example.uikit.R.drawable.ic_pomodoro_technique,
+        selectedIcon = com.example.uikit.R.drawable.ic_pomodoro_technique
     )
 
     companion object {
