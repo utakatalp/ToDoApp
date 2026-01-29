@@ -71,6 +71,7 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnToggleAdvancedSettings -> toggleAdvancedSettings()
             is UiAction.OnTaskClick -> openTaskDetail(uiAction.task)
             is UiAction.OnSuccessfulBiometricAuthenticationHandle -> handleSuccessfulBiometricAuthentication()
+            is UiAction.OnEditClick -> navigateToEdit(uiAction.task)
         }
     }
 
@@ -78,6 +79,10 @@ class HomeViewModel @Inject constructor(
         fetchDailyTask(uiState.value.selectedDate)
         updatePendingTaskAmount(uiState.value.selectedDate)
         updateCompletedTaskAmount(uiState.value.selectedDate)
+    }
+
+    private fun navigateToEdit(task: Task) {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Edit(task.id)))
     }
 
     private fun navigateToPomodoro() {
