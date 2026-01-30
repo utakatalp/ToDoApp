@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
+import com.todoapp.mobile.domain.model.ThemePreference
 import com.todoapp.mobile.domain.security.SecretModeReopenOption
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
@@ -38,7 +39,6 @@ import com.todoapp.uikit.theme.TDTheme
 @Composable
 fun SettingsScreen(
     uiState: UiState,
-    // uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
     SettingsContent(
@@ -54,6 +54,7 @@ private fun SettingsContent(
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -61,6 +62,25 @@ private fun SettingsContent(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+       
+        TDOverlayPermissionItem(context)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TDText(
+            text = stringResource(R.string.appearance),
+            style = TDTheme.typography.heading1
+        )
+
+        ThemeSelector(
+            currentTheme = uiState.currentTheme,
+            onThemeChange = { theme ->
+                onAction(UiAction.OnThemeChange(theme))
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         TDText(
             text = stringResource(R.string.privacy_security),
             style = TDTheme.typography.heading1
@@ -91,6 +111,7 @@ private fun SettingsContent(
         ) {
             onAction(UiAction.OnSettingsSave)
         }
+
         TDButton(
             text = stringResource(R.string.disable_secret_mode),
             type = TDButtonType.CANCEL,
@@ -99,8 +120,6 @@ private fun SettingsContent(
         ) {
             onAction(UiAction.OnDisableSecretModeTap)
         }
-        Spacer(Modifier.height(8.dp))
-        TDOverlayPermissionItem(context)
     }
 }
 
@@ -144,10 +163,16 @@ fun ReopenSecretModeDropdown(
 
 @Preview(showBackground = true)
 @Composable
-private fun SettingsContentPreview() {
-    SettingsContent(
-        modifier = Modifier.padding(16.dp),
-        uiState = UiState(SecretModeReopenOptions.Immediate),
-        onAction = {},
-    )
+private fun SettingsScreenPreview() {
+    TDTheme {
+        SettingsScreen(
+            uiState = UiState(
+                currentTheme = ThemePreference.SYSTEM_DEFAULT,
+                selectedSecretMode = SecretModeReopenOptions.Immediate,
+                remainedSecretModeTime = "",
+                isSecretModeActive = true
+            ),
+            onAction = {}
+        )
+    }
 }

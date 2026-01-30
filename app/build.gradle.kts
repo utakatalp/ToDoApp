@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.datastore.preferences.core)
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.lifecycle.process)
@@ -124,4 +125,6 @@ dependencies {
     implementation(libs.timber)
     detektPlugins(libs.detekt.formatting)
     implementation(libs.reorderable)
+
+    implementation(libs.androidx.datastore.preferences)
 }

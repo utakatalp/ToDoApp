@@ -1,6 +1,5 @@
 package com.todoapp.uikit.components
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,9 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -403,26 +402,16 @@ private fun specifyColorBetweenRange(
         else -> Color.Transparent
     }
 
-@Preview(showBackground = true, name = "Date Picker Preview")
+@TDPreviewWide
 @Composable
-private fun TDDatePickerPreview() {
-    Column {
-        TDDatePicker(
-            onFirstDaySelect = {},
-            onSecondDaySelect = {},
-            onFirstDayDeselect = {},
-        ) {}
-    }
-}
-
-@Preview(showBackground = true, name = "Date Picker Preview Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun TDDatePickerPreviewDark() {
-    Column {
-        TDDatePicker(
-            onFirstDaySelect = {},
-            onSecondDaySelect = {},
-            onFirstDayDeselect = {},
-        ) {}
+fun TDDatePickerPreview() {
+    TDTheme {
+        Column {
+            TDDatePicker(
+                onFirstDaySelect = {},
+                onSecondDaySelect = {},
+                onFirstDayDeselect = {},
+            ) {}
+        }
     }
 }

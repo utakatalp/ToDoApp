@@ -39,6 +39,8 @@
     <string name="bar_chart_days_fri">Fr</string>
     <string name="bar_chart_days_sat">Sa</string>
     <string name="bar_chart_days_sun">Su</string>
+    <string name="settings_title">Settings</string>
+    <string name="app_theme">Change App Theme</string>
     <string name="changes_saved">Saved Successfully</string>
     <string name="changes_not_saved">Changes Not Saved</string>
     <string name="changes_cancelled">Changes Discarded</string>

@@ -10,8 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.todoapp.uikit.previews.TDPreview
+import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -43,20 +44,21 @@ fun TDTaskCard(
             TDText(
                 text = taskTitle,
                 style = TDTheme.typography.heading7,
+                color = TDTheme.colors.onBackground,
             )
             Spacer(Modifier.weight(1f))
             TDText(
                 text = "$taskTimeStart - $taskTimeEnd",
                 style = TDTheme.typography.subheading1,
-                color = TDTheme.colors.gray,
+                color = TDTheme.colors.onBackground,
             )
         }
     }
 }
 
-@Preview(showBackground = true, widthDp = 140)
+@TDPreview
 @Composable
-private fun TDTaskCardPreview() {
+fun TDTaskCardPreview() {
     TDTheme {
         TDTaskCard(
             taskTitle = "Read Book",
@@ -66,9 +68,9 @@ private fun TDTaskCardPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@TDPreviewWide
 @Composable
-private fun TDTaskCardPreview_LongTitle() {
+fun TDTaskCardLongTitlePreview() {
     TDTheme {
         TDTaskCard(
             modifier = Modifier.fillMaxWidth(),

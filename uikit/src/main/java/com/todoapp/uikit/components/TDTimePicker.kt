@@ -1,6 +1,5 @@
 package com.todoapp.uikit.components
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,10 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreview
+import com.todoapp.uikit.previews.TDPreviewDialog
 import com.todoapp.uikit.theme.TDTheme
 import com.todoapp.uikit.theme.timePickerColors
 import java.time.LocalTime
@@ -126,9 +126,7 @@ fun TDTimePicker(
     }
 }
 
-@Preview(
-    showBackground = true,
-)
+@TDPreview
 @Composable
 fun TDTimePickerPreview() {
     TDTheme {
@@ -147,67 +145,10 @@ fun TDTimePickerPreview() {
     }
 }
 
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
-@Composable
-fun TDTimePickerPreview_Dark() {
-    TDTheme {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            TDTimePickerDialog(
-                title = "Set Time",
-                placeholder = "HH:MM",
-                selectedTime = LocalTime.now(),
-                onTimeChange = { },
-            )
-        }
-    }
-}
-
+@TDPreviewDialog
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(
-    showBackground = true,
-    name = "Time Picker Dialog (Open) – Light",
-)
 @Composable
-fun TDTimePickerDialogOpenPreview_Light() {
-    TDTheme {
-        val timePickerState = rememberTimePickerState(
-            initialHour = 10,
-            initialMinute = 15,
-            is24Hour = true,
-        )
-
-        Dialog(onDismissRequest = {}) {
-            Surface(
-                modifier = Modifier.padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-                tonalElevation = 8.dp,
-                contentColor = TDTheme.colors.onBackground,
-                color = TDTheme.colors.background,
-            ) {
-                TDTimePicker(
-                    timePickerState = timePickerState,
-                    onConfirm = {},
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    name = "Time Picker Dialog (Open) – Dark",
-)
-@Composable
-fun TDTimePickerDialogOpenPreview_Dark() {
+fun TDTimePickerDialogOpenPreview() {
     TDTheme {
         val timePickerState = rememberTimePickerState(
             initialHour = 10,
