@@ -179,16 +179,16 @@ fun TDLabeledTextField(
                 if (placeholder != null) TDText(text = placeholder, color = TDTheme.colors.onBackground)
             },
             textStyle = TDTheme.typography.regularTextStyle,
-            )
+        )
     }
 }
 
 @Composable
 fun TDCompactOutlinedTextField(
-    value: String,
-    label: String,
-    onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    value: String,
+    label: String? = null,
+    onValueChange: (String) -> Unit,
     placeholder: String? = null,
     enabled: Boolean = true,
     isError: Boolean = false,
@@ -198,58 +198,70 @@ fun TDCompactOutlinedTextField(
     color: Color = TDTheme.colors.onBackground,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
+    supportingText: String? = null,
 ) {
-    TDText(
-        text = label,
-        style = style,
-        color = color,
-    )
-
-    Spacer(Modifier.height(8.dp))
-    val borderColor =
-        when {
-            isError -> TDTheme.colors.red
-            !enabled -> TDTheme.colors.gray.copy(alpha = 0.3f)
-            else -> TDTheme.colors.onBackground
+    Column(modifier = modifier) {
+        if (!label.isNullOrEmpty()) {
+            TDText(
+                text = label,
+                style = style,
+                color = color,
+            )
+            Spacer(Modifier.height(8.dp))
         }
-
-    Column {
-        Box(
-            modifier =
-                modifier
-                    .heightIn(min = 40.dp)
-                    .border(1.dp, borderColor, RoundedCornerShape(4.dp)),
-            contentAlignment = Alignment.CenterStart,
-        ) {
-            if (value.isEmpty() && placeholder != null) {
-                TDText(text = placeholder, color = TDTheme.colors.background)
+        val borderColor =
+            when {
+                isError -> TDTheme.colors.red
+                !enabled -> TDTheme.colors.gray.copy(alpha = 0.3f)
+                else -> TDTheme.colors.onBackground
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+
+        Column {
+            Box(
+                modifier =
+                    modifier
+                        .heightIn(min = 40.dp)
+                        .border(1.dp, borderColor, RoundedCornerShape(4.dp)),
+                contentAlignment = Alignment.CenterStart,
             ) {
-                leadingIcon?.invoke()
-                BasicTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    enabled = enabled,
-                    singleLine = singleLine,
-                    visualTransformation = visualTransformation,
-                    textStyle =
-                        TDTheme.typography.regularTextStyle.copy(
-                            color = TDTheme.colors.onBackground,
-                        ),
-                    modifier =
-                        Modifier
-                            .padding(
-                                vertical = 8.dp,
-                                horizontal = 12.dp,
-                            )
-                            .weight(1f),
+                if (value.isEmpty() && placeholder != null) {
+                    TDText(text = placeholder, color = TDTheme.colors.background)
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    leadingIcon?.invoke()
+                    BasicTextField(
+                        value = value,
+                        onValueChange = onValueChange,
+                        enabled = enabled,
+                        singleLine = singleLine,
+                        visualTransformation = visualTransformation,
+                        textStyle =
+                            TDTheme.typography.regularTextStyle.copy(
+                                color = TDTheme.colors.onBackground,
+                            ),
+                        modifier =
+                            Modifier
+                                .padding(
+                                    vertical = 8.dp,
+                                    horizontal = 12.dp,
+                                )
+                                .weight(1f),
+                    )
+                    trailingIcon?.invoke()
+                }
+            }
+            if (!supportingText.isNullOrEmpty()) {
+                Spacer(Modifier.height(4.dp))
+                TDText(
+                    text = supportingText,
+                    style = TDTheme.typography.subheading3,
+                    color = if (isError) TDTheme.colors.crossRed else TDTheme.colors.gray,
                 )
-                trailingIcon?.invoke()
             }
         }
     }
@@ -257,7 +269,7 @@ fun TDCompactOutlinedTextField(
 
 @Preview(showBackground = true)
 @Composable
-private fun TextFieldPreview() {
+fun TextFieldPreview() {
     var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
@@ -333,6 +345,7 @@ private fun TextFieldPreview() {
             placeholder = "Task Title",
             isError = false,
             label = "Task title",
+            supportingText = "Example Error"
         )
     }
 }
@@ -368,6 +381,7 @@ private fun TDCompactOutlinedTextFieldPreview_Filled_Error() {
                                 .size(24.dp),
                     )
                 },
+                supportingText = "Example Error",
             )
         }
     }
@@ -457,6 +471,7 @@ private fun TextFieldPreview_Dark() {
                 placeholder = "Task Title",
                 isError = false,
                 label = "Task title",
+                supportingText = "Example Error",
             )
         }
     }
@@ -494,6 +509,7 @@ private fun TDCompactOutlinedTextFieldPreview_Filled_Error_Dark() {
                                 .size(24.dp),
                     )
                 },
+                supportingText = "Example Error",
             )
         }
     }
