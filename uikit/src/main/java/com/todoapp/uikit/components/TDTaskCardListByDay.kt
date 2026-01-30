@@ -69,21 +69,23 @@ fun TDTaskCardListByDayPreview() {
         TDTaskCardListByDay(
             modifier = Modifier.padding(16.dp),
             date = LocalDate.of(2025, 1, 18),
-            tasks = listOf(
-                TaskCardItem(
-                    taskTitle = "Read Book",
-                    taskTimeStart = "09:30",
-                    taskTimeEnd = "10:15",
-                ),
-                TaskCardItem(
-                    taskTitle = "Gym",
-                    taskTimeStart = "18:00",
-                    taskTimeEnd = "19:00",
-                ),
-                TaskCardItem(
-                    taskTitle = "Study Kotlin",
-                    taskTimeStart = "21:00",
-                    taskTimeEnd = "22:30",
+            tasks =
+                listOf(
+                    TaskCardItem(
+                        taskTitle = "Read Book",
+                        taskTimeStart = "09:30",
+                        taskTimeEnd = "10:15",
+                    ),
+                    TaskCardItem(
+                        taskTitle = "Gym",
+                        taskTimeStart = "18:00",
+                        taskTimeEnd = "19:00",
+                    ),
+                    TaskCardItem(
+                        taskTitle = "Study Kotlin",
+                        taskTimeStart = "21:00",
+                        taskTimeEnd = "22:30",
+                    ),
                 ),
             ),
         )

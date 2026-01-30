@@ -58,7 +58,7 @@ fun TDBottomBar(navController: NavHostController) {
                 icon = {
                     val iconId = if (selected) screen.selectedIcon else screen.icon
                     Icon(
-                        painter = painterResource(id = iconId),
+                        painter = painterResource(id = iconId!!),
                         contentDescription = stringResource(screen.title),
                         tint = Color.Unspecified,
                     )

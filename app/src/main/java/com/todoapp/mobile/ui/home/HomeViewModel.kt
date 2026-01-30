@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.home
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
@@ -35,6 +36,7 @@ class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -82,7 +84,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun navigateToEdit(task: Task) {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.Edit(task.id)))
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Edit))
+        savedStateHandle["taskId"] = task.id
     }
 
     private fun navigateToPomodoro() {

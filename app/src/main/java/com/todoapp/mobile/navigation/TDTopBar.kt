@@ -58,7 +58,7 @@ fun ShowTopBar(navController: NavHostController) {
             ?.route
     val destination = appDestinationFromRoute(route) ?: return
     val titleText = stringResource(destination.title)
-    val state = when (appDestinationFromRoute(route)) {
+    val state = when (destination) {
         AppDestination.Home ->
             TDTopBarState(
                 title = titleText,
@@ -70,25 +70,13 @@ fun ShowTopBar(navController: NavHostController) {
                             icon = R.drawable.ic_notification,
                             onClick = { navController.navigate(Screen.Notifications) },
                         ),
-                        TDTopBarAction(
-                            icon = R.drawable.ic_hamburger,
-                            onClick = { /* there is no hamburger menu yet */ },
-                        ),
                     ),
             )
-
         else -> {
             TDTopBarState(
                 title = titleText,
                 onNavigationClick = { navController.popBackStack() },
                 navigationIcon = R.drawable.ic_arrow_back,
-                actions =
-                    listOf(
-                        TDTopBarAction(
-                            icon = R.drawable.ic_hamburger,
-                            onClick = { /* there is no hamburger menu yet */ },
-                        ),
-                    ),
             )
         }
     }

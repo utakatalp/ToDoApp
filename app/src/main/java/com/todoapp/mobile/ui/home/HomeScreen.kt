@@ -44,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
+import com.todoapp.mobile.common.maskTitle
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
@@ -194,7 +195,7 @@ fun HomeContent(
                                             hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
                                         }
                                     ),
-                                taskText = if (task.isSecret) maskTitle(task.title) else task.title,
+                                taskText = if (task.isSecret) task.title.maskTitle() else task.title,
                                 isChecked = task.isCompleted,
                                 onCheckBoxClick = {
                                     onAction(UiAction.OnTaskCheck(task))
@@ -397,10 +398,6 @@ private fun AddTaskSheet(
             modifier = Modifier.fillMaxWidth(),
         )
     }
-}
-
-private fun maskTitle(title: String): String {
-    return title.first() + "*".repeat(title.length - 1)
 }
 
 private suspend fun handleBiometricAuthentication(
