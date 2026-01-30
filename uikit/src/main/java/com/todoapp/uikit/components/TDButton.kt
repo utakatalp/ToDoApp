@@ -1,5 +1,6 @@
 package com.todoapp.uikit.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -19,10 +21,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreviewNoBg
 import com.todoapp.uikit.theme.TDTheme
 
 enum class TDButtonType { PRIMARY, SECONDARY, CANCEL }
@@ -102,8 +104,8 @@ fun TDButton(
                     ButtonColors(
                         containerColor = TDTheme.colors.purple,
                         contentColor = TDTheme.colors.white,
-                        disabledContainerColor = TDTheme.colors.purple.copy(alpha = 0.8f),
-                        disabledContentColor = TDTheme.colors.white.copy(alpha = 0.8f),
+                        disabledContainerColor = TDTheme.colors.purple.copy(alpha = 0.4f),
+                        disabledContentColor = TDTheme.colors.white.copy(alpha = 0.5f),
                     ),
             ) {
                 icon?.let {
@@ -122,7 +124,7 @@ fun TDButton(
         }
 
         TDButtonType.SECONDARY -> {
-            Button(
+            OutlinedButton(
                 modifier =
                     Modifier
                         .height(height)
@@ -131,28 +133,22 @@ fun TDButton(
                 onClick = onClick,
                 enabled = isEnable,
                 contentPadding = paddingValues,
-                shape = RoundedCornerShape(16.dp),
-                colors =
-                    ButtonColors(
-                        containerColor = TDTheme.colors.white,
-                        contentColor = TDTheme.colors.purple,
-                        disabledContainerColor = TDTheme.colors.white.copy(alpha = 0.8f),
-                        disabledContentColor = TDTheme.colors.purple.copy(alpha = 0.8f),
-                    ),
+                shape = RoundedCornerShape(6.dp),
+                border = BorderStroke(2.dp, TDTheme.colors.crossRed),
             ) {
                 icon?.let {
                     Icon(
                         modifier = Modifier.size(14.dp),
                         imageVector = icon,
                         contentDescription = text,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = TDTheme.colors.purple,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
                 TDText(
                     text = text,
                     style = textStyle,
-                    color = TDTheme.colors.black,
+                    color = TDTheme.colors.crossRed,
                 )
             }
         }
@@ -194,9 +190,9 @@ fun TDButton(
     }
 }
 
-@Preview(showBackground = false)
+@TDPreviewNoBg
 @Composable
-private fun TDButtonPreview() {
+fun TDButtonPreview() {
     Column {
         TDButton(
             text = "Primary Button",

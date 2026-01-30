@@ -8,11 +8,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreview
+import com.todoapp.uikit.theme.TDTheme
 
 @Composable
 fun TDAddTaskButton(
@@ -31,19 +31,19 @@ fun TDAddTaskButton(
                 modifier = Modifier.fillMaxSize(1f),
                 painter = painterResource(R.drawable.ic_ellipse),
                 contentDescription = null,
-                tint = Color.Unspecified,
+                tint = TDTheme.colors.purple,
             )
             Icon(
                 modifier = Modifier.fillMaxSize(0.57f),
                 painter = painterResource(R.drawable.ic_plus),
                 contentDescription = null,
-                tint = Color.Unspecified,
+                tint = TDTheme.colors.background,
             )
         }
     }
 }
 
-@Preview(showBackground = true)
+@TDPreview
 @Composable
 fun TDAddTaskButtonPreview() {
     TDAddTaskButton(onClick = {})

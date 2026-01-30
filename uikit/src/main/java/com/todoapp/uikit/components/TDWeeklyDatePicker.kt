@@ -21,9 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreview
+import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
 import java.time.LocalDate
 import java.time.YearMonth
@@ -82,7 +83,8 @@ private fun DatePickerCard(
                 .size(width = 48.dp, height = 80.dp)
                 .clickable(
                     onClick = { onDateSelect(currentDate) },
-                ).padding(vertical = 4.dp, horizontal = 8.dp),
+                )
+                .padding(vertical = 4.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier.weight(0.8f))
@@ -113,26 +115,25 @@ private fun DatePickerCard(
     }
 }
 
-@Preview(showBackground = true, widthDp = 420)
+@TDPreviewWide
 @Composable
-private fun WeeklyDatePickerPreview() {
-    var selected by remember {
-        mutableStateOf(LocalDate.of(2025, 12, 3))
-    }
+fun WeeklyDatePickerPreview() {
+    TDTheme {
+        var selected by remember {
+            mutableStateOf(LocalDate.of(2025, 12, 3))
+        }
 
-    TDWeeklyDatePicker(
-        modifier = Modifier,
-        selectedDate = selected,
-        onDateSelect = { selected = it },
-    )
+        TDWeeklyDatePicker(
+            modifier = Modifier,
+            selectedDate = selected,
+            onDateSelect = { selected = it },
+        )
+    }
 }
 
-@Preview(
-    name = "DatePickerCard - Selected",
-    showBackground = true,
-)
+@TDPreview
 @Composable
-private fun DatePickerCardSelectedPreview() {
+fun DatePickerCardSelectedPreview() {
     TDTheme {
         DatePickerCard(
             modifier = Modifier,
@@ -142,12 +143,9 @@ private fun DatePickerCardSelectedPreview() {
     }
 }
 
-@Preview(
-    name = "DatePickerCard - Unselected",
-    showBackground = true,
-)
+@TDPreview
 @Composable
-private fun DatePickerCardUnselectedPreview() {
+fun DatePickerCardUnselectedPreview() {
     TDTheme {
         DatePickerCard(
             modifier = Modifier,

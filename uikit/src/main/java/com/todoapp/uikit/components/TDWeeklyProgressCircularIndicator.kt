@@ -1,6 +1,5 @@
 package com.todoapp.uikit.components
 
-import android.content.res.Configuration
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
@@ -29,10 +28,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
 import kotlin.math.roundToInt
 
@@ -65,7 +64,7 @@ fun TDWeeklyCircularProgressIndicator(
 
         Row(
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier,
@@ -173,49 +172,23 @@ fun LegendColoredBoxItem(
     }
 }
 
-@Preview("Light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
+@TDPreviewWide
 @Composable
-fun TDWeeklyCircularProgressIndicatorPreviewLight(
+fun TDWeeklyCircularProgressIndicatorPreview(
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
-    ) {
-        TDTheme {
+    TDTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top,
+        ) {
             TDWeeklyCircularProgressIndicator(
                 modifier = modifier.fillMaxWidth(),
                 progress = 0.65f,
                 inProgress = 0.35f,
-                color = TDTheme.colors.purple,
-                inProgressColor = TDTheme.colors.lightPurple,
-                strokeWidth = 14.dp,
-                strokeCap = Butt,
-            )
-        }
-    }
-}
-
-@Preview("Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
-@Composable
-fun TDWeeklyCircularProgressIndicatorPreviewDark(
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
-    ) {
-        TDTheme {
-            TDWeeklyCircularProgressIndicator(
-                modifier = modifier.fillMaxWidth(),
-                progress = 0.90f,
-                inProgress = 0.10f,
                 color = TDTheme.colors.purple,
                 inProgressColor = TDTheme.colors.lightPurple,
                 strokeWidth = 14.dp,

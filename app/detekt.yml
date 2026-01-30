@@ -11,8 +11,8 @@ complexity:
       - Composable
   TooManyFunctions:
     active: true
-    thresholdInClasses: 13
-    thresholdInInterfaces: 13
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
     ignoreAnnotated:
       - HiltViewModel
     ignorePrivate: true

@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,6 +22,8 @@ import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerScreen
 import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
+import com.todoapp.mobile.ui.edit.EditScreen
+import com.todoapp.mobile.ui.edit.EditViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
@@ -91,6 +92,16 @@ fun NavGraph(
                 uiState = uiState,
             )
         }
+
+        composable<Screen.Settings> {
+            val viewModel: SettingsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(navController, viewModel.navEffect)
+            SettingsScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction,
+            )
+        }
         composable<Screen.AddPomodoroTimer> {
             val viewModel: AddPomodoroTimerViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -111,6 +122,19 @@ fun NavGraph(
                 viewModel::onAction
             )
         }
+
+        composable<Screen.Edit> {
+            val viewModel: EditViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
+            EditScreen(
+                uiState,
+                uiEffect,
+                viewModel::onAction
+            )
+        }
+
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }
@@ -118,7 +142,6 @@ fun NavGraph(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun ToDoApp() {
@@ -154,6 +177,7 @@ private fun NavigationEffectController(
             is NavigationEffect.Navigate -> {
                 navController.navigate(effect.route)
             }
+
             is NavigationEffect.Back -> {
                 navController.popBackStack()
             }

@@ -35,4 +35,7 @@ interface Screen {
 
     @Serializable
     data object Task : Screen
+
+    @Serializable
+    data object Edit : Screen
 }

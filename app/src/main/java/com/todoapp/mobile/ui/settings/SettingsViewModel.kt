@@ -4,11 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.security.SecretModeEndCondition
 import com.todoapp.mobile.domain.repository.SecretPreferences
+import com.todoapp.mobile.domain.repository.ThemeRepository
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
+import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
+import com.todoapp.mobile.ui.settings.SettingsContract.UiEffect
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +21,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,11 +31,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    private val themeRepository: ThemeRepository,
     private val secretModePreferences: SecretPreferences,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
-    val uiState = _uiState.asStateFlow()
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _uiEffect = Channel<UiEffect>()
+    val uiEffect = _uiEffect.receiveAsFlow()
+
+    private val _navEffect by lazy { Channel<NavigationEffect>() }
+    val navEffect by lazy { _navEffect.receiveAsFlow() }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val secretModeMessageFlow: StateFlow<String> =
@@ -41,15 +55,8 @@ class SettingsViewModel @Inject constructor(
                 initialValue = "Secret mode is closed."
             )
 
-    fun onAction(uiAction: UiAction) {
-        when (uiAction) {
-            is UiAction.OnSelectedSecretModeChange -> updateSelectedSecretMode(uiAction)
-            is UiAction.OnSettingsSave -> updateOption()
-            is UiAction.OnDisableSecretModeTap -> disableSecretMode()
-        }
-    }
-
     init {
+        observeTheme()
         viewModelScope.launch {
             val lastSelectedOptionId = secretModePreferences.getLastSelectedOptionId()
             val condition = secretModePreferences.getCondition()
@@ -68,6 +75,23 @@ class SettingsViewModel @Inject constructor(
                     it.copy(remainedSecretModeTime = value)
                 }
             }
+        }
+    }
+
+    private fun observeTheme() {
+        themeRepository.themeFlow
+            .onEach { theme ->
+                _uiState.update { it.copy(currentTheme = theme) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun onAction(action: UiAction) {
+        when (action) {
+            is UiAction.OnThemeChange -> viewModelScope.launch { themeRepository.saveTheme(action.theme) }
+            is UiAction.OnSelectedSecretModeChange -> updateSelectedSecretMode(action)
+            is UiAction.OnSettingsSave -> updateOption()
+            is UiAction.OnDisableSecretModeTap -> disableSecretMode()
         }
     }
 
