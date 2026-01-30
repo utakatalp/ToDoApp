@@ -24,3 +24,7 @@ fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
     val item = removeAt(fromIndex)
     add(toIndex, item)
 }
+
+fun String.maskTitle(): String {
+    return this.first() + "*".repeat(this.length - 1)
+}

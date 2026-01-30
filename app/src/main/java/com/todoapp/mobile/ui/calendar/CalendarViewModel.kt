@@ -2,6 +2,7 @@ package com.todoapp.mobile.ui.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.common.maskTitle
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.ui.calendar.CalendarContract.UiAction
@@ -98,9 +99,9 @@ class CalendarViewModel @Inject constructor(
                     date = date,
                     tasks = tasks.map { task ->
                         TaskCardItem(
-                            task.title,
+                            if (task.isSecret) task.title.maskTitle() else task.title,
                             task.timeStart.toString(),
-                            task.timeEnd.toString()
+                            task.timeEnd.toString(),
                         )
                     }
                 )

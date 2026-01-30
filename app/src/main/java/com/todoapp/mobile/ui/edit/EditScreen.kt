@@ -16,15 +16,11 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,7 +33,6 @@ import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
-import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
@@ -69,35 +64,6 @@ fun EditScreen(
             .systemBarsPadding()
             .imePadding()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(
-                onClick = { onAction(UiAction.OnBackClick) },
-            ) {
-                Icon(
-                    painter = painterResource(com.example.uikit.R.drawable.ic_arrow_back),
-                    contentDescription = "Back",
-                    tint = TDTheme.colors.onBackground,
-                )
-            }
-
-            Spacer(Modifier.weight(1f))
-
-            TDText(
-                text = stringResource(R.string.edit_task_details),
-                style = TDTheme.typography.heading3,
-                color = TDTheme.colors.onBackground,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            Spacer(Modifier.weight(1f))
-        }
-
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,

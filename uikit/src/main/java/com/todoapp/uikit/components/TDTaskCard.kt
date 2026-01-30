@@ -61,7 +61,7 @@ private fun TDTaskCardPreview() {
         TDTaskCard(
             taskTitle = "Read Book",
             taskTimeStart = "09:30",
-            taskTimeEnd = "10:15",
+            taskTimeEnd = "10:15"
         )
     }
 }
@@ -74,7 +74,7 @@ private fun TDTaskCardPreview_LongTitle() {
             modifier = Modifier.fillMaxWidth(),
             taskTitle = "Prepare Presentation Slides",
             taskTimeStart = "14:00",
-            taskTimeEnd = "16:30",
+            taskTimeEnd = "16:30"
         )
     }
 }
