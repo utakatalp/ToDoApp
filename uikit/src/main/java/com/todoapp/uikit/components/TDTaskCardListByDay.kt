@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 import java.time.LocalDate
 
@@ -36,7 +36,11 @@ fun TDTaskCardListByDay(
                 style = TDTheme.typography.subheading4,
                 color = TDTheme.colors.gray,
             )
-            TDText(text = date.dayOfMonth.toString(), style = TDTheme.typography.heading3)
+            TDText(
+                text = date.dayOfMonth.toString(),
+                style = TDTheme.typography.heading3,
+                color = TDTheme.colors.onBackground
+            )
         }
         Spacer(Modifier.width(20.dp))
         Column {
@@ -58,31 +62,30 @@ data class TaskCardItem(
     val taskTimeEnd: String,
 )
 
-@Preview(showBackground = true, widthDp = 360)
+@TDPreview
 @Composable
-private fun TDTaskCardListByDayPreview() {
+fun TDTaskCardListByDayPreview() {
     TDTheme {
         TDTaskCardListByDay(
             modifier = Modifier.padding(16.dp),
             date = LocalDate.of(2025, 1, 18),
-            tasks =
-                listOf(
-                    TaskCardItem(
-                        taskTitle = "Read Book",
-                        taskTimeStart = "09:30",
-                        taskTimeEnd = "10:15",
-                    ),
-                    TaskCardItem(
-                        taskTitle = "Gym",
-                        taskTimeStart = "18:00",
-                        taskTimeEnd = "19:00",
-                    ),
-                    TaskCardItem(
-                        taskTitle = "Study Kotlin",
-                        taskTimeStart = "21:00",
-                        taskTimeEnd = "22:30",
-                    ),
+            tasks = listOf(
+                TaskCardItem(
+                    taskTitle = "Read Book",
+                    taskTimeStart = "09:30",
+                    taskTimeEnd = "10:15",
                 ),
+                TaskCardItem(
+                    taskTitle = "Gym",
+                    taskTimeStart = "18:00",
+                    taskTimeEnd = "19:00",
+                ),
+                TaskCardItem(
+                    taskTitle = "Study Kotlin",
+                    taskTimeStart = "21:00",
+                    taskTimeEnd = "22:30",
+                ),
+            ),
         )
     }
 }

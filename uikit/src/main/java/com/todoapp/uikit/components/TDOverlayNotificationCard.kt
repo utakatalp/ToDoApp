@@ -25,18 +25,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
 fun TDOverlayNotificationCard(
+    modifier: Modifier = Modifier,
     message: String,
     show: Boolean,
     minutesBefore: Long = 0,
-    modifier: Modifier = Modifier,
     onDismissClick: () -> Unit = {},
-    onOpenClick: () -> Unit = {}
+    onOpenClick: () -> Unit = {},
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -68,7 +68,7 @@ private fun NotificationCardContent(
     message: String,
     minutesBefore: Long = 0,
     onDismissClick: () -> Unit = {},
-    onOpenClick: () -> Unit = {}
+    onOpenClick: () -> Unit = {},
 ) {
     Box(
         modifier = Modifier
@@ -178,21 +178,29 @@ private fun NotificationCardContent(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF313131)
+@TDPreview
 @Composable
 fun OverlayNotificationCardPreview() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        TDOverlayNotificationCard(
-            message = "Go to the gym and do cardio",
-            show = true
-        )
+    TDTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF313131))
+        ) {
+            TDOverlayNotificationCard(
+                message = "Go to the gym and do cardio",
+                show = true
+            )
+        }
     }
 }
 
-@Preview(showBackground = true, name = "Card Content Only")
+@TDPreview
 @Composable
-private fun NotificationCardContentPreview() {
-    Box(modifier = Modifier.padding(16.dp)) {
-        NotificationCardContent(message = "Meeting with the team at 2 PM")
+fun NotificationCardContentPreview() {
+    TDTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            NotificationCardContent(message = "Meeting with the team at 2 PM")
+        }
     }
 }

@@ -2,6 +2,18 @@ package com.todoapp.mobile.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.domain.repository.ThemeRepository
+import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
+import com.todoapp.mobile.ui.settings.SettingsContract.UiEffect
+import com.todoapp.mobile.ui.settings.SettingsContract.UiState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import com.todoapp.mobile.data.security.SecretModeEndCondition
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
@@ -24,32 +36,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    private val themeRepository: ThemeRepository,
     private val secretModePreferences: SecretPreferences,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
-    val uiState = _uiState.asStateFlow()
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val secretModeMessageFlow: StateFlow<String> =
-        secretModePreferences
-            .observeCondition()
-            .flatMapLatest { condition -> observeSecretModeMessage(condition) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-                initialValue = "Secret mode is closed."
-            )
-
-    fun onAction(uiAction: UiAction) {
-        when (uiAction) {
-            is UiAction.OnSelectedSecretModeChange -> updateSelectedSecretMode(uiAction)
-            is UiAction.OnSettingsSave -> updateOption()
-            is UiAction.OnDisableSecretModeTap -> disableSecretMode()
-        }
-    }
+    private val _uiEffect = Channel<UiEffect>()
+    val uiEffect = _uiEffect.receiveAsFlow()
 
     init {
+        observeTheme()
         viewModelScope.launch {
             val lastSelectedOptionId = secretModePreferences.getLastSelectedOptionId()
             val condition = secretModePreferences.getCondition()
@@ -70,6 +68,35 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
+    private fun observeTheme() {
+        themeRepository.themeFlow
+            .onEach { theme ->
+                _uiState.update { it.copy(currentTheme = theme) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun onAction(action: UiAction) {
+        when (action) {
+            is UiAction.OnThemeChange -> viewModelScope.launch { themeRepository.saveTheme(action.theme) } 
+            is UiAction.OnSelectedSecretModeChange -> updateSelectedSecretMode(uiAction)
+            is UiAction.OnSettingsSave -> updateOption()
+            is UiAction.OnDisableSecretModeTap -> disableSecretMode()
+            
+        }
+    }
+            
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val secretModeMessageFlow: StateFlow<String> =
+        secretModePreferences
+            .observeCondition()
+            .flatMapLatest { condition -> observeSecretModeMessage(condition) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+                initialValue = "Secret mode is closed."
+            )
 
     private fun updateSelectedSecretMode(uiAction: UiAction.OnSelectedSecretModeChange) {
         _uiState.update { it.copy(selectedSecretMode = uiAction.label) }

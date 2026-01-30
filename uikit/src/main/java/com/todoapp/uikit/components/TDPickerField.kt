@@ -11,9 +11,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreviewForm
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -37,9 +37,9 @@ fun TDPickerField(
 
         Spacer(Modifier.height(8.dp))
         Box(
-            modifier =
-                Modifier
-                    .clickable(onClick = onClick),
+            modifier = modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
         ) {
             TDCompactOutlinedTextField(
                 enabled = false,
@@ -57,13 +57,13 @@ fun TDPickerField(
     }
 }
 
-@Preview(showBackground = true)
+@TDPreviewForm
 @Composable
-private fun TDPickerFieldErrorPreview() {
+fun TDPickerFieldErrorPreview() {
     TDTheme {
         TDPickerField(
             title = "Pick a date",
-            value = "",
+            value = "21.02.2002",
             onClick = {},
             isError = true,
             modifier = Modifier.fillMaxWidth(),

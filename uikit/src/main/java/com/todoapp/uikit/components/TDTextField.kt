@@ -1,6 +1,5 @@
 package com.todoapp.uikit.components
 
-import android.content.res.Configuration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,9 +38,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreviewForm
 import com.todoapp.uikit.theme.TDTheme
 import com.todoapp.uikit.theme.textFieldColors
 
@@ -267,7 +266,7 @@ fun TDCompactOutlinedTextField(
     }
 }
 
-@Preview(showBackground = true)
+@TDPreviewForm
 @Composable
 fun TextFieldPreview() {
     var passwordVisible by remember { mutableStateOf(false) }
@@ -462,9 +461,7 @@ private fun TextFieldPreview_Dark() {
                 enabled = false,
                 singleLine = false,
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
             TDCompactOutlinedTextField(
                 value = "CompactOutlinedTextField",
                 onValueChange = { },
@@ -477,12 +474,9 @@ private fun TextFieldPreview_Dark() {
     }
 }
 
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
+@TDPreviewForm
 @Composable
-private fun TDCompactOutlinedTextFieldPreview_Filled_Error_Dark() {
+fun TDCompactOutlinedTextFieldPreview_Filled_Error() {
     TDTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             TDCompactOutlinedTextField(
@@ -495,7 +489,9 @@ private fun TDCompactOutlinedTextFieldPreview_Filled_Error_Dark() {
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = null,
                         tint = TDTheme.colors.gray,
-                        modifier = Modifier.padding(end = 8.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp),
                     )
                 },
                 leadingIcon = {

@@ -28,6 +28,9 @@ import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
+import com.todoapp.mobile.ui.settings.SettingsContract
+import com.todoapp.mobile.ui.settings.SettingsScreen
+import com.todoapp.mobile.ui.settings.SettingsViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
 import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
 import com.todoapp.mobile.ui.settings.SettingsScreen
@@ -90,6 +93,21 @@ fun NavGraph(
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             ActivityScreen(
                 uiState = uiState,
+            )
+        }
+
+        composable<Screen.Settings> {
+            val viewModel: SettingsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+            viewModel.uiEffect.CollectWithLifecycle { effect ->
+                when (effect) {
+                    SettingsContract.UiEffect.NavigateToBack -> navController.popBackStack()
+                }
+            }
+            SettingsScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction,
             )
         }
         composable<Screen.AddPomodoroTimer> {

@@ -1,6 +1,8 @@
 package com.todoapp.mobile.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.preferencesDataStore
 import android.content.SharedPreferences
 import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -27,12 +29,13 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object LocalStorageModule {
     private const val DB_NAME = "todo_db"
+    private val Context.dataStore by preferencesDataStore(name = "settings")
     private const val PREFS_NAME = "todo_prefs"
 
     @Provides
     @Singleton
     fun provideAppDatabase(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): AppDatabase {
         return Room.databaseBuilder(
             context,
@@ -68,6 +71,18 @@ object LocalStorageModule {
     fun provideTaskDao(database: AppDatabase): TaskDao = database.taskDao()
 
     @Provides
+    fun provideTaskRepository(taskDao: TaskDao): TaskRepository = TaskRepositoryImpl(taskDao)
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object DataStoreModule
+
+    @Provides
+    @Singleton
+    fun provideDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<androidx.datastore.preferences.core.Preferences> =
+        context.dataStore
     @Singleton
     fun providePomodoro(database: AppDatabase): PomodoroDao = database.pomodoroDao()
 }
