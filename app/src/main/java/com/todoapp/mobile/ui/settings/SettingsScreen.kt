@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -58,6 +59,7 @@ private fun SettingsContent(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(TDTheme.colors.background)
             .statusBarsPadding()
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -77,12 +79,14 @@ private fun SettingsContent(
 
         TDText(
             text = stringResource(R.string.privacy_security),
-            style = TDTheme.typography.heading1
+            style = TDTheme.typography.heading1,
+            color = TDTheme.colors.onBackground
         )
 
         TDText(
             text = stringResource(R.string.the_time_of_reopening_for_secret_mode),
-            style = TDTheme.typography.heading3
+            style = TDTheme.typography.heading3,
+            color = TDTheme.colors.onBackground
         )
 
         ReopenSecretModeDropdown(
@@ -93,7 +97,8 @@ private fun SettingsContent(
         if (uiState.remainedSecretModeTime.isNotBlank()) {
             TDText(
                 text = uiState.remainedSecretModeTime,
-                style = TDTheme.typography.heading6
+                style = TDTheme.typography.heading6,
+                color = TDTheme.colors.onBackground
             )
         }
 
