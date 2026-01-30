@@ -18,9 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreviewForm
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -104,9 +104,9 @@ private fun TDCheckBox(
     }
 }
 
-@Preview(showBackground = true)
+@TDPreviewForm
 @Composable
-private fun TDTaskCardWithCheckboxPreview() {
+fun TDTaskCardWithCheckboxPreview() {
     TDTaskCardWithCheckbox(
         isChecked = true,
         taskText = "Buy a cat food",
@@ -114,9 +114,9 @@ private fun TDTaskCardWithCheckboxPreview() {
     )
 }
 
-@Preview(showBackground = true)
+@TDPreviewForm
 @Composable
-private fun TDTaskCardWithoutCheckboxPreview() {
+fun TDTaskCardWithoutCheckboxPreview() {
     TDTaskCardWithCheckbox(
         isChecked = false,
         taskText = "Buy a cat food",
@@ -124,46 +124,14 @@ private fun TDTaskCardWithoutCheckboxPreview() {
     )
 }
 
-@Preview
+@TDPreviewForm
 @Composable
-private fun TDCheckBoxPreview() {
+fun TDCheckBoxPreview() {
     TDCheckBox(modifier = Modifier, isChecked = true, onCheckBoxClick = { })
 }
 
-@Preview
+@TDPreviewForm
 @Composable
-private fun TDCheckBoxPreviewWithoutCheck() {
-    TDCheckBox(modifier = Modifier, isChecked = false, onCheckBoxClick = { })
-}
-
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun TDTaskCardWithCheckboxPreview_Dark() {
-    TDTaskCardWithCheckbox(
-        isChecked = true,
-        taskText = "Buy a cat food",
-        onCheckBoxClick = { },
-    )
-}
-
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun TDTaskCardWithoutCheckboxPreview_Dark() {
-    TDTaskCardWithCheckbox(
-        isChecked = false,
-        taskText = "Buy a cat food",
-        onCheckBoxClick = { },
-    )
-}
-
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun TDCheckBoxPreview_Dark() {
-    TDCheckBox(modifier = Modifier, isChecked = true, onCheckBoxClick = { })
-}
-
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun TDCheckBoxPreviewWithoutCheck_Dark() {
+fun TDCheckBoxPreviewWithoutCheck() {
     TDCheckBox(modifier = Modifier, isChecked = false, onCheckBoxClick = { })
 }

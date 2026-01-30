@@ -1,6 +1,5 @@
 package com.todoapp.uikit.components
 
-import android.content.res.Configuration
 import android.graphics.Paint
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -32,11 +31,11 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
 import kotlin.math.max
 
@@ -223,40 +222,23 @@ private fun TDWeeklyBarChartContent(
     }
 }
 
-@Preview(name = "Light", showBackground = true)
+@TDPreviewWide
 @Composable
-fun TDWeeklyBarChartPreviewLight() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        TDWeeklyBarChart(
-            modifier = Modifier,
-            title = "Task",
-            values = listOf(9, 4, 5, 2, 2, 3, 4),
-            height = 220.dp,
-        )
-    }
-}
-
-@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
-@Composable
-fun TDWeeklyBarChartPreviewDark() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        TDWeeklyBarChart(
-            modifier = Modifier,
-            title = "Task",
-            values = listOf(17, 28, 30, 20, 17, 14, 21),
-            height = 220.dp,
-        )
+fun TDWeeklyBarChartPreview() {
+    TDTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TDWeeklyBarChart(
+                modifier = Modifier,
+                title = "Task",
+                values = listOf(9, 4, 5, 2, 2, 3, 4),
+                height = 220.dp,
+            )
+        }
     }
 }

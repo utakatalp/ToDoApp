@@ -1,6 +1,8 @@
 package com.todoapp.mobile.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
@@ -17,11 +19,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object LocalStorageModule {
     private const val DB_NAME = "todo_db"
+    private val Context.dataStore by preferencesDataStore(name = "settings")
 
     @Provides
     @Singleton
     fun provideAppDatabase(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): AppDatabase {
         return Room.databaseBuilder(
             context,
@@ -37,4 +40,15 @@ object LocalStorageModule {
 
     @Provides
     fun provideTaskRepository(taskDao: TaskDao): TaskRepository = TaskRepositoryImpl(taskDao)
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object DataStoreModule
+
+    @Provides
+    @Singleton
+    fun provideDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<androidx.datastore.preferences.core.Preferences> =
+        context.dataStore
 }

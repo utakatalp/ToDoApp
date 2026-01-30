@@ -1,6 +1,5 @@
 package com.todoapp.uikit.components
 
-import android.content.res.Configuration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,9 +38,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreviewForm
 import com.todoapp.uikit.theme.TDTheme
 import com.todoapp.uikit.theme.textFieldColors
 
@@ -179,7 +178,7 @@ fun TDLabeledTextField(
                 if (placeholder != null) TDText(text = placeholder, color = TDTheme.colors.onBackground)
             },
             textStyle = TDTheme.typography.regularTextStyle,
-            )
+        )
     }
 }
 
@@ -255,132 +254,10 @@ fun TDCompactOutlinedTextField(
     }
 }
 
-@Preview(showBackground = true)
+@TDPreviewForm
 @Composable
-private fun TextFieldPreview() {
+fun TextFieldPreview() {
     var passwordVisible by remember { mutableStateOf(false) }
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxHeight()
-                .padding(top = 24.dp, start = 16.dp, end = 16.dp),
-    ) {
-        TDTextField(
-            value = "john",
-            onValueChange = {},
-            label = "First Name",
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_name),
-                    contentDescription = null,
-                )
-            },
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        TDTextField(
-            value = "Doing Homework",
-            onValueChange = {},
-            label = "",
-            leadingIcon = null,
-        )
-
-        TDTextField(
-            value = "johndoe@hotmail.com",
-            onValueChange = {},
-            label = "",
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_mail),
-                    contentDescription = null,
-                )
-            },
-        )
-
-        TDTextField(
-            value = "Example Password",
-            supportingText = "Example Error",
-            onValueChange = {},
-            label = "Password",
-            isError = true,
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_password),
-                    contentDescription = null,
-                )
-            },
-            passwordVisible = passwordVisible,
-            onTogglePasswordVisible = { passwordVisible = !passwordVisible },
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TDLabeledTextField(
-            title = "Title",
-            value = "Doing Homework",
-            onValueChange = {},
-            placeholder = "Placeholder",
-            isError = true,
-            enabled = false,
-            singleLine = false,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        TDCompactOutlinedTextField(
-            value = "CompactOutlinedTextField",
-            onValueChange = { },
-            placeholder = "Task Title",
-            isError = false,
-            label = "Task title",
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TDCompactOutlinedTextFieldPreview_Filled_Error() {
-    TDTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            TDCompactOutlinedTextField(
-                value = "Read 10 pages",
-                label = "Task Title",
-                isError = true,
-                onValueChange = {},
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search),
-                        contentDescription = null,
-                        tint = TDTheme.colors.gray,
-                        modifier =
-                            Modifier
-                                .padding(end = 8.dp),
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        contentDescription = null,
-                        tint = TDTheme.colors.gray,
-                        modifier =
-                            Modifier
-                                .padding(start = 8.dp)
-                                .size(24.dp),
-                    )
-                },
-            )
-        }
-    }
-}
-
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
-@Composable
-private fun TextFieldPreview_Dark() {
-    var passwordVisible by remember { mutableStateOf(false) }
-
     TDTheme {
         Column(
             modifier =
@@ -448,9 +325,7 @@ private fun TextFieldPreview_Dark() {
                 enabled = false,
                 singleLine = false,
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
             TDCompactOutlinedTextField(
                 value = "CompactOutlinedTextField",
                 onValueChange = { },
@@ -462,12 +337,9 @@ private fun TextFieldPreview_Dark() {
     }
 }
 
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
+@TDPreviewForm
 @Composable
-private fun TDCompactOutlinedTextFieldPreview_Filled_Error_Dark() {
+fun TDCompactOutlinedTextFieldPreview_Filled_Error() {
     TDTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             TDCompactOutlinedTextField(
@@ -480,7 +352,9 @@ private fun TDCompactOutlinedTextFieldPreview_Filled_Error_Dark() {
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = null,
                         tint = TDTheme.colors.gray,
-                        modifier = Modifier.padding(end = 8.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp),
                     )
                 },
                 leadingIcon = {

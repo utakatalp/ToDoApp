@@ -1,7 +1,5 @@
 package com.todoapp.uikit.components
 
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,8 +9,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 import java.time.LocalDate
 
@@ -64,37 +62,9 @@ data class TaskCardItem(
     val taskTimeEnd: String,
 )
 
-@Preview("Light", showBackground = true, widthDp = 360, uiMode = UI_MODE_NIGHT_NO)
+@TDPreview
 @Composable
-private fun TDTaskCardListByDayPreview_Light() {
-    TDTheme {
-        TDTaskCardListByDay(
-            modifier = Modifier.padding(16.dp),
-            date = LocalDate.of(2025, 1, 18),
-            tasks = listOf(
-                TaskCardItem(
-                    taskTitle = "Read Book",
-                    taskTimeStart = "09:30",
-                    taskTimeEnd = "10:15",
-                ),
-                TaskCardItem(
-                    taskTitle = "Gym",
-                    taskTimeStart = "18:00",
-                    taskTimeEnd = "19:00",
-                ),
-                TaskCardItem(
-                    taskTitle = "Study Kotlin",
-                    taskTimeStart = "21:00",
-                    taskTimeEnd = "22:30",
-                ),
-            ),
-        )
-    }
-}
-
-@Preview("Dark", showBackground = true, widthDp = 360, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-private fun TDTaskCardListByDayPreview_Dark() {
+fun TDTaskCardListByDayPreview() {
     TDTheme {
         TDTaskCardListByDay(
             modifier = Modifier.padding(16.dp),

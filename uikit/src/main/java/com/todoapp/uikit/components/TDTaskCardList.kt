@@ -1,7 +1,5 @@
 package com.todoapp.uikit.components
 
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,8 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 import java.time.LocalDate
 
@@ -40,9 +38,9 @@ data class TaskDayItem(
     val tasks: List<TaskCardItem>,
 )
 
-@Preview("Light", showBackground = true, widthDp = 360, uiMode = UI_MODE_NIGHT_NO)
+@TDPreview
 @Composable
-private fun TDTaskCardListPreview_Light() {
+fun TDTaskCardListPreview() {
     TDTheme {
         TDTaskCardList(
             modifier = Modifier.padding(16.dp),
@@ -65,41 +63,9 @@ private fun TDTaskCardListPreview_Light() {
                             taskTimeStart = "10:00",
                             taskTimeEnd = "12:00",
                         ),
-                    ),
-                ),
-            ),
-        )
-    }
-}
-
-@Preview("Dark", showBackground = true, widthDp = 360, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-private fun TDTaskCardListPreview_Dark() {
-    TDTheme {
-        TDTaskCardList(
-            modifier = Modifier.padding(16.dp),
-            tasks = listOf(
-                TaskDayItem(
-                    date = LocalDate.of(2025, 1, 12),
-                    tasks = listOf(
-                        TaskCardItem(
-                            taskTitle = "Read Book",
-                            taskTimeStart = "09:30",
-                            taskTimeEnd = "10:15",
-                        ),
-                    ),
-                ),
-                TaskDayItem(
-                    date = LocalDate.of(2025, 1, 13),
-                    tasks = listOf(
-                        TaskCardItem(
-                            taskTitle = "Study Kotlin",
-                            taskTimeStart = "10:00",
-                            taskTimeEnd = "12:00",
-                        ),
-                    ),
-                ),
-            ),
+                    )
+                )
+            )
         )
     }
 }

@@ -19,10 +19,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreviewNoBg
 import com.todoapp.uikit.theme.TDTheme
 
 enum class TDButtonType { PRIMARY, SECONDARY }
@@ -159,9 +159,9 @@ fun TDButton(
     }
 }
 
-@Preview(showBackground = false)
+@TDPreviewNoBg
 @Composable
-private fun TDButtonPreview() {
+fun TDButtonPreview() {
     Column {
         TDButton(
             text = "Primary Button",

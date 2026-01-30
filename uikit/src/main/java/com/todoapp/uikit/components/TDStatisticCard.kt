@@ -17,10 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -113,7 +113,6 @@ fun TDStatisticCard(
     }
 }
 
-@Preview
 @Composable
 private fun CheckInBoxComponent() {
     Box(
@@ -138,7 +137,6 @@ private fun CheckInBoxComponent() {
     }
 }
 
-@Preview
 @Composable
 private fun CrossInBoxComponent() {
     Box(
@@ -169,22 +167,26 @@ private fun CrossInBoxComponent() {
     }
 }
 
-@Preview(showBackground = true)
+@TDPreview
 @Composable
-private fun TDStatisticCardCompletedPreview() {
-    TDStatisticCard(
-        "Task Complete",
-        taskAmount = 10,
-        isCompleted = true,
-    )
+fun TDStatisticCardCompletedPreview() {
+    TDTheme {
+        TDStatisticCard(
+            "Task Complete",
+            taskAmount = 10,
+            isCompleted = true,
+        )
+    }
 }
 
-@Preview(showBackground = true)
+@TDPreview
 @Composable
-private fun TDStatisticCardPendingPreview() {
-    TDStatisticCard(
-        "Task Pending",
-        taskAmount = 3,
-        isCompleted = false,
-    )
+fun TDStatisticCardPendingPreview() {
+    TDTheme {
+        TDStatisticCard(
+            "Task Pending",
+            taskAmount = 3,
+            isCompleted = false,
+        )
+    }
 }

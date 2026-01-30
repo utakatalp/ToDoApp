@@ -1,7 +1,5 @@
 package com.todoapp.uikit.components
 
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,8 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.todoapp.uikit.previews.TDPreview
+import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -57,9 +56,9 @@ fun TDTaskCard(
     }
 }
 
-@Preview("Light", showBackground = true, widthDp = 140, uiMode = UI_MODE_NIGHT_NO)
+@TDPreview
 @Composable
-private fun TDTaskCardPreview_Light() {
+fun TDTaskCardPreview() {
     TDTheme {
         TDTaskCard(
             taskTitle = "Read Book",
@@ -69,34 +68,9 @@ private fun TDTaskCardPreview_Light() {
     }
 }
 
-@Preview("Dark", showBackground = true, widthDp = 140, uiMode = UI_MODE_NIGHT_YES)
+@TDPreviewWide
 @Composable
-private fun TDTaskCardPreview_Dark() {
-    TDTheme {
-        TDTaskCard(
-            taskTitle = "Read Book",
-            taskTimeStart = "09:30",
-            taskTimeEnd = "10:15",
-        )
-    }
-}
-
-@Preview("Light - Long Title", showBackground = true, uiMode = UI_MODE_NIGHT_NO)
-@Composable
-private fun TDTaskCardPreview_LongTitle_Light() {
-    TDTheme {
-        TDTaskCard(
-            modifier = Modifier.fillMaxWidth(),
-            taskTitle = "Prepare Presentation Slides",
-            taskTimeStart = "14:00",
-            taskTimeEnd = "16:30",
-        )
-    }
-}
-
-@Preview("Dark - Long Title", showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-private fun TDTaskCardPreview_LongTitle_Dark() {
+fun TDTaskCardLongTitlePreview() {
     TDTheme {
         TDTaskCard(
             modifier = Modifier.fillMaxWidth(),

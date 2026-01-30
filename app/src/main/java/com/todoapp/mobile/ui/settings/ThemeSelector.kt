@@ -1,7 +1,7 @@
 package com.todoapp.mobile.ui.settings
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,30 +47,33 @@ fun ThemeSelector(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = TDTheme.colors.background,
-            border = BorderStroke(1.dp, TDTheme.colors.gray)
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(TDTheme.colors.background)
+                .border(
+                    width = 1.dp,
+                    color = TDTheme.colors.gray,
+                    shape = RoundedCornerShape(12.dp)
+                )
         ) {
-            Row {
-                ThemeItem(
-                    selected = currentTheme == ThemePreference.LIGHT_MODE,
-                    onClick = { onThemeChange(ThemePreference.LIGHT_MODE) },
-                    icon = painterResource(com.example.uikit.R.drawable.ic_light_mode)
-                )
+            ThemeItem(
+                selected = currentTheme == ThemePreference.LIGHT_MODE,
+                onClick = { onThemeChange(ThemePreference.LIGHT_MODE) },
+                icon = painterResource(com.example.uikit.R.drawable.ic_light_mode)
+            )
 
-                ThemeItem(
-                    selected = currentTheme == ThemePreference.DARK_MODE,
-                    onClick = { onThemeChange(ThemePreference.DARK_MODE) },
-                    icon = painterResource(com.example.uikit.R.drawable.ic_dark_mode)
-                )
+            ThemeItem(
+                selected = currentTheme == ThemePreference.DARK_MODE,
+                onClick = { onThemeChange(ThemePreference.DARK_MODE) },
+                icon = painterResource(com.example.uikit.R.drawable.ic_dark_mode)
+            )
 
-                ThemeItem(
-                    selected = currentTheme == ThemePreference.SYSTEM_DEFAULT,
-                    onClick = { onThemeChange(ThemePreference.SYSTEM_DEFAULT) },
-                    icon = painterResource(com.example.uikit.R.drawable.ic_system_default)
-                )
-            }
+            ThemeItem(
+                selected = currentTheme == ThemePreference.SYSTEM_DEFAULT,
+                onClick = { onThemeChange(ThemePreference.SYSTEM_DEFAULT) },
+                icon = painterResource(com.example.uikit.R.drawable.ic_system_default)
+            )
         }
     }
 }
