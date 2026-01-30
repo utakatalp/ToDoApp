@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.todoapp.mobile.data.model.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -53,6 +54,12 @@ interface TaskDao {
         endDate: Long,
         isCompleted: Boolean,
     ): Flow<Int>
+
+    @Query("SELECT * FROM tasks WHERE id = :id LIMIT 1")
+    suspend fun getTaskById(id: Long): TaskEntity?
+
+    @Update
+    suspend fun update(task: TaskEntity)
 
     @Delete
     suspend fun delete(task: TaskEntity)

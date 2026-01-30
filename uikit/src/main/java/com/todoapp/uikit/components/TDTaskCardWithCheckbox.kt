@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,7 @@ fun TDTaskCardWithCheckbox(
     isChecked: Boolean,
     taskText: String,
     onCheckBoxClick: (Boolean) -> Unit,
+    onEditClick: () -> Unit = {},
 ) {
     Column(modifier.background(TDTheme.colors.background)) {
         Row(
@@ -54,6 +56,17 @@ fun TDTaskCardWithCheckbox(
                     ),
             )
             Spacer(Modifier.weight(2f))
+
+            IconButton(
+                onClick = onEditClick,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_edit_task),
+                    tint = TDTheme.colors.onBackground,
+                    contentDescription = "edit",
+                )
+            }
+
             Icon(
                 painter = painterResource(R.drawable.ic_drag),
                 tint = TDTheme.colors.onBackground,
@@ -98,7 +111,6 @@ private fun TDCheckBox(
                 painter = painterResource(id = R.drawable.ic_check),
                 tint = TDTheme.colors.white,
                 contentDescription = "check",
-                // tint = TDTheme.colors.purple,
             )
         }
     }
@@ -111,6 +123,7 @@ fun TDTaskCardWithCheckboxPreview() {
         isChecked = true,
         taskText = "Buy a cat food",
         onCheckBoxClick = { },
+        onEditClick = { },
     )
 }
 
@@ -121,6 +134,7 @@ fun TDTaskCardWithoutCheckboxPreview() {
         isChecked = false,
         taskText = "Buy a cat food",
         onCheckBoxClick = { },
+        onEditClick = { },
     )
 }
 

@@ -7,6 +7,12 @@ interface Screen {
     data object Onboarding : Screen
 
     @Serializable
+    data object AddPomodoroTimer : Screen
+
+    @Serializable
+    data object Pomodoro : Screen
+
+    @Serializable
     data object Home : Screen
 
     @Serializable
@@ -29,4 +35,7 @@ interface Screen {
 
     @Serializable
     data object Task : Screen
+
+    @Serializable
+    data class Edit(val taskId: Long) : Screen
 }

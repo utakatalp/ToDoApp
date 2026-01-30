@@ -24,6 +24,7 @@ fun TaskEntity.toDomain(): Task =
         timeStart = timeStart.toLocalTimeFromMinuteOfDay(),
         timeEnd = timeEnd.toLocalTimeFromMinuteOfDay(),
         isCompleted = isCompleted,
+        isSecret = isSecret,
     )
 
 fun Task.toEntity(): TaskEntity =
@@ -35,4 +36,5 @@ fun Task.toEntity(): TaskEntity =
         timeStart = timeStart.toMinuteOfDayLong(),
         timeEnd = timeEnd.toMinuteOfDayLong(),
         isCompleted = isCompleted,
+        isSecret = isSecret,
     )

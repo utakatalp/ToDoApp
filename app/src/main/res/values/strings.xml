@@ -14,6 +14,7 @@
     <string name="task_pending">Task Pending</string>
     <string name="tasks_today">Tasks Today</string>
     <string name="add_new_task">Add New Task</string>
+    <string name="edit_task_details">Edit Task Details</string>
     <string name="close_button">Close Button</string>
     <string name="task_title">Task Title</string>
     <string name="set_time">Set time</string>
@@ -21,6 +22,8 @@
     <string name="ends">Ends</string>
     <string name="description">Description</string>
     <string name="create_task">Create Task</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="cancel">Cancel</string>
     <string name="home">Home</string>
     <string name="settings">settings</string>
     <string name="search">search</string>
@@ -38,4 +41,25 @@
     <string name="bar_chart_days_sun">Su</string>
     <string name="settings_title">Settings</string>
     <string name="app_theme">Change App Theme</string>
+    <string name="changes_saved">Saved Successfully</string>
+    <string name="changes_not_saved">Changes Not Saved</string>
+    <string name="changes_cancelled">Changes Discarded</string>
+    <string name="error_title_required">Title is required</string>
+    <string name="error_title_too_short">Title is too short</string>
+    <string name = "add_timer">Add Timer</string>
+    <string name="more">More</string>
+    <string name="next">Next</string>
+    <string name="pause">Pause</string>
+    <string name="start">Start</string>
+    <string name="skip">Skip</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="secret_task">Secret Task</string>
+    <string name="authentication_failed">Authentication Failed</string>
+    <string name="biometric_authentication">Biometric Authentication</string>
+    <string name="log_in_using_your_biometric_credential">Log in using your biometric credential</string>
+    <string name="privacy_security"><![CDATA[Privacy & Security]]></string>
+    <string name="the_time_of_reopening_for_secret_mode">The time of reopening for secret mode</string>
+    <string name="save">Save</string>
+    <string name="disable_secret_mode">Disable Secret Mode</string>
+
 </resources>

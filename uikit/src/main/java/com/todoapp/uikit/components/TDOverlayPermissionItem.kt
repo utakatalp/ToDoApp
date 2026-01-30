@@ -2,7 +2,6 @@ package com.todoapp.uikit.components
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.core.net.toUri
 import com.example.uikit.R
 import com.todoapp.uikit.theme.TDTheme
 
@@ -56,7 +56,8 @@ fun TDOverlayPermissionItem(
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+       .statusBarsPadding(),
     ) {
         Column(
             modifier = Modifier

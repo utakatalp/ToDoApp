@@ -123,10 +123,4 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         const val BOUND_MODE_NOT_SUPPORTED = "Bound mode not supported"
         const val WINDOW_MANAGER_LAYOUT_HEIGHT = 600
     }
-
-//    companion object {
-//        private const val INTENT_EXTRA_COMMAND_SHOW_OVERLAY = "INTENT_EXTRA_COMMAND_SHOW_OVERLAY"
-//        private const val INTENT_EXTRA_COMMAND_HIDE_OVERLAY = "INTENT_EXTRA_COMMAND_HIDE_OVERLAY"
-//        private const val BOUND_MODE_NOT_SUPPORTED = "Bound mode not supported"
-//    }
 }
