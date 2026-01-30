@@ -1,5 +1,6 @@
 package com.todoapp.uikit.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreviewForm
@@ -346,43 +348,6 @@ fun TextFieldPreview() {
             label = "Task title",
             supportingText = "Example Error"
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TDCompactOutlinedTextFieldPreview_Filled_Error() {
-    TDTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            TDCompactOutlinedTextField(
-                value = "Read 10 pages",
-                label = "Task Title",
-                isError = true,
-                onValueChange = {},
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search),
-                        contentDescription = null,
-                        tint = TDTheme.colors.gray,
-                        modifier =
-                            Modifier
-                                .padding(end = 8.dp),
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        contentDescription = null,
-                        tint = TDTheme.colors.gray,
-                        modifier =
-                            Modifier
-                                .padding(start = 8.dp)
-                                .size(24.dp),
-                    )
-                },
-                supportingText = "Example Error",
-            )
-        }
     }
 }
 

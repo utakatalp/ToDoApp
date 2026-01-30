@@ -1,9 +1,9 @@
 package com.todoapp.mobile.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.preferencesDataStore
-import android.content.SharedPreferences
 import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -48,7 +48,7 @@ object LocalStorageModule {
     @Provides
     @Singleton
     fun provideSharedPreferences(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): SharedPreferences {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -70,9 +70,6 @@ object LocalStorageModule {
     @Singleton
     fun provideTaskDao(database: AppDatabase): TaskDao = database.taskDao()
 
-    @Provides
-    fun provideTaskRepository(taskDao: TaskDao): TaskRepository = TaskRepositoryImpl(taskDao)
-
     @Module
     @InstallIn(SingletonComponent::class)
     object DataStoreModule
@@ -83,6 +80,8 @@ object LocalStorageModule {
         @ApplicationContext context: Context,
     ): DataStore<androidx.datastore.preferences.core.Preferences> =
         context.dataStore
+
+    @Provides
     @Singleton
     fun providePomodoro(database: AppDatabase): PomodoroDao = database.pomodoroDao()
 }
@@ -93,18 +92,18 @@ abstract class LocalStorageModuleForBindings {
     @Binds
     @Singleton
     abstract fun bindTaskRepository(
-        taskRepositoryImpl: TaskRepositoryImpl
+        taskRepositoryImpl: TaskRepositoryImpl,
     ): TaskRepository
 
     @Binds
     @Singleton
     abstract fun bindSecretModePreferences(
-        secretPreferencesImpl: SecretPreferencesImpl
+        secretPreferencesImpl: SecretPreferencesImpl,
     ): SecretPreferences
 
     @Binds
     @Singleton
     abstract fun bindPomodoroRepository(
-        pomodoroRepositoryImpl: PomodoroRepositoryImpl
+        pomodoroRepositoryImpl: PomodoroRepositoryImpl,
     ): PomodoroRepository
 }

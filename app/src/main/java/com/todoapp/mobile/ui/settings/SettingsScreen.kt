@@ -62,15 +62,9 @@ private fun SettingsContent(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-       
         TDOverlayPermissionItem(context)
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        TDText(
-            text = stringResource(R.string.appearance),
-            style = TDTheme.typography.heading1
-        )
 
         ThemeSelector(
             currentTheme = uiState.currentTheme,
