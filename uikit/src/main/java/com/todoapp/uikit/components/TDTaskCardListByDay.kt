@@ -87,7 +87,6 @@ fun TDTaskCardListByDayPreview() {
                         taskTimeEnd = "22:30",
                     ),
                 ),
-            ),
-        )
+            )
     }
 }
