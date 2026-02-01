@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.pomodoro
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,13 +23,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
 import com.todoapp.mobile.common.RingtoneHolder
+import com.todoapp.mobile.common.resolveTextColor
+import com.todoapp.mobile.common.toUiMode
+import com.todoapp.mobile.domain.engine.PomodoroMode
 import com.todoapp.mobile.ui.pomodoro.PomodoroContract.UiAction
 import com.todoapp.mobile.ui.pomodoro.PomodoroContract.UiEffect
 import com.todoapp.mobile.ui.pomodoro.PomodoroContract.UiState
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun PomodoroScreen(
@@ -36,9 +39,25 @@ fun PomodoroScreen(
     uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit
 ) {
+    val ringToneHolder = remember { RingtoneHolder() }
+    val context = LocalContext.current
+
+    BackHandler {
+        onAction(UiAction.ToggleBannerVisibility)
+        onAction(UiAction.Back)
+    }
+
+    LaunchedEffect(Unit) {
+        onAction(UiAction.ToggleBannerVisibility)
+        uiEffect.collect { effect ->
+            when (effect) {
+                is UiEffect.SessionFinished -> ringToneHolder.play(context)
+            }
+        }
+    }
+
     PomodoroContent(
         uiState = uiState,
-        uiEffect = uiEffect,
         onAction = onAction
     )
 }
@@ -46,21 +65,10 @@ fun PomodoroScreen(
 @Composable
 private fun PomodoroContent(
     uiState: UiState,
-    uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit
 ) {
     val minuteText = "%02d".format(uiState.min)
     val secondText = "%02d".format(uiState.second)
-    val context = LocalContext.current
-    val ringToneHolder = remember { RingtoneHolder() }
-
-    LaunchedEffect(uiEffect) {
-        uiEffect.collect { effect ->
-            when (effect) {
-                is UiEffect.SessionFinished -> ringToneHolder.play(context)
-            }
-        }
-    }
 
     Column(
         Modifier.fillMaxSize(),
@@ -106,7 +114,6 @@ private fun PomodoroContent(
                     contentDescription = stringResource(R.string.more)
                 )
             }
-            // While overtime is active, show only the Start button so user can advance to next step.
             if (uiState.isOvertime) {
                 IconButton(
                     modifier = Modifier.size(96.dp),
@@ -118,7 +125,7 @@ private fun PomodoroContent(
                         contentDescription = stringResource(R.string.next)
                     )
                 }
-            } else if (uiState.isStopWatchRunning) {
+            } else if (uiState.isRunning) {
                 IconButton(
                     modifier = Modifier.size(96.dp),
                     onClick = { onAction(UiAction.StopCountDown) }
@@ -165,9 +172,8 @@ private fun PomodoroContentPreview_Focus() {
             uiState = UiState(
                 min = 25,
                 second = 0,
-                mode = PomodoroMode.Focus
+                mode = PomodoroMode.Focus.toUiMode()
             ),
-            uiEffect = emptyFlow(),
             onAction = {}
         )
     }
@@ -185,9 +191,8 @@ private fun PomodoroContentPreview_ShortBreak() {
             uiState = UiState(
                 min = 5,
                 second = 0,
-                mode = PomodoroMode.ShortBreak
+                mode = PomodoroMode.ShortBreak.toUiMode()
             ),
-            uiEffect = emptyFlow(),
             onAction = {}
         )
     }
@@ -202,12 +207,11 @@ private fun PomodoroContentPreview_ShortBreak() {
 private fun PomodoroContentPreview_LongBreak() {
     TDTheme {
         PomodoroContent(
-            uiState = PomodoroContract.UiState(
+            uiState = UiState(
                 min = 15,
                 second = 0,
-                mode = PomodoroMode.LongBreak
+                mode = PomodoroMode.LongBreak.toUiMode()
             ),
-            uiEffect = emptyFlow(),
             onAction = {}
         )
     }

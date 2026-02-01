@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
+import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toAlarmItem
 import com.todoapp.mobile.domain.repository.SecretPreferences
@@ -36,7 +37,8 @@ class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val pomodoroEngine: PomodoroEngine
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -89,7 +91,11 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun navigateToPomodoro() {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
+        if (pomodoroEngine.state.value.isRunning) {
+            _navEffect.trySend(NavigationEffect.Navigate(Screen.Pomodoro))
+        } else {
+            _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
+        }
     }
 
     private fun handleSuccessfulBiometricAuthentication() {
@@ -170,7 +176,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onDeleteDialogConfirmed() {
-        selectedTask?.let { deleteTask(it) }
+        deleteTask(selectedTask)
         closeDialog()
     }
 

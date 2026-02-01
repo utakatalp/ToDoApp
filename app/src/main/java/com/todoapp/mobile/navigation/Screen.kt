@@ -38,4 +38,7 @@ interface Screen {
 
     @Serializable
     data object Edit : Screen
+
+    @Serializable
+    data object PomodoroFinish : Screen
 }
