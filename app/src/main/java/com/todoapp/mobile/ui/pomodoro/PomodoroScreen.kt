@@ -202,7 +202,7 @@ private fun PomodoroContentPreview_ShortBreak() {
 private fun PomodoroContentPreview_LongBreak() {
     TDTheme {
         PomodoroContent(
-            uiState = PomodoroContract.UiState(
+            uiState = UiState(
                 min = 15,
                 second = 0,
                 mode = PomodoroMode.LongBreak

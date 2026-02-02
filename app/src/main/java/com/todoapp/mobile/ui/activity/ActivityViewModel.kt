@@ -3,6 +3,7 @@ package com.todoapp.mobile.ui.activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.ui.activity.ActivityContract.UiAction
 import com.todoapp.mobile.ui.activity.ActivityContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,21 +18,45 @@ import javax.inject.Inject
 class ActivityViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(UiState())
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
 
     init {
-        val date = uiState.value.selectedDate
+        loadData()
+    }
+
+    fun onAction(action: UiAction) {
+        when (action) {
+            UiAction.OnRetry -> retry()
+        }
+    }
+
+    private fun retry() {
+        _uiState.value = UiState.Loading
+        loadData()
+    }
+
+    private fun loadData() {
+        val date = LocalDate.now()
         updateWeeklyProgress(date)
         updateYearlyProgress(date)
     }
 
+    private inline fun updateSuccessState(crossinline transform: (UiState.Success) -> UiState.Success) {
+        _uiState.update { currentState ->
+            when (currentState) {
+                is UiState.Success -> transform(currentState)
+                is UiState.Loading -> transform(UiState.Success(selectedDate = LocalDate.now()))
+                else -> currentState
+            }
+        }
+    }
+
     private fun updateWeeklyProgress(date: LocalDate) {
         viewModelScope.launch {
-            val selectedDate = _uiState.value.selectedDate
             combine(
-                taskRepository.observePendingTasksInAWeek(selectedDate),
-                taskRepository.countCompletedTasksInAWeek(selectedDate)
+                taskRepository.observePendingTasksInAWeek(date),
+                taskRepository.countCompletedTasksInAWeek(date)
             ) { pendingCount, completedCount ->
                 val total = pendingCount + completedCount
                 if (total <= 0) {
@@ -42,7 +67,7 @@ class ActivityViewModel @Inject constructor(
                     completedRatio to pendingRatio
                 }
             }.collect { (completedRatio, pendingRatio) ->
-                _uiState.update {
+                updateSuccessState {
                     it.copy(
                         weeklyProgress = completedRatio,
                         weeklyPendingProgress = pendingRatio
@@ -53,7 +78,7 @@ class ActivityViewModel @Inject constructor(
 
         viewModelScope.launch {
             taskRepository.observeCompletedCountsByDayInAWeek(date).collect { values ->
-                _uiState.update { it.copy(weeklyBarValues = values) }
+                updateSuccessState { it.copy(weeklyBarValues = values) }
             }
         }
     }
@@ -73,7 +98,7 @@ class ActivityViewModel @Inject constructor(
                     completedRatio to pendingRatio
                 }
             }.collect { (completedRatio, pendingRatio) ->
-                _uiState.update {
+                updateSuccessState {
                     it.copy(
                         yearlyProgress = completedRatio,
                         yearlyPendingProgress = pendingRatio,

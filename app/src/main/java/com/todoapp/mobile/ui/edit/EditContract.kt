@@ -5,16 +5,25 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 object EditContract {
-    data class UiState(
-        val isDirty: Boolean = false,
-        val taskTitle: String = "",
-        val taskTimeStart: LocalTime? = null,
-        val taskTimeEnd: LocalTime? = null,
-        val taskDate: LocalDate = LocalDate.now(),
-        val taskDescription: String = "",
-        val dialogSelectedDate: LocalDate? = null,
-        val titleError: Int? = null,
-    )
+    sealed interface UiState {
+        data object Loading : UiState
+
+        data class Success(
+            val isDirty: Boolean = false,
+            val taskTitle: String = "",
+            val taskTimeStart: LocalTime? = null,
+            val taskTimeEnd: LocalTime? = null,
+            val taskDate: LocalDate = LocalDate.now(),
+            val taskDescription: String = "",
+            val dialogSelectedDate: LocalDate? = null,
+            val titleError: Int? = null,
+        ) : UiState
+
+        data class Error(
+            val message: String,
+            val throwable: Throwable? = null,
+        ) : UiState
+    }
 
     sealed interface UiAction {
         data object OnBackClick : UiAction
@@ -27,6 +36,7 @@ object EditContract {
         data class OnDialogDateSelect(val date: LocalDate) : UiAction
         data object OnDialogDateDeselect : UiAction
         data object OnSaveChanges : UiAction
+        data object OnRetry : UiAction
     }
 
     sealed interface UiEffect {

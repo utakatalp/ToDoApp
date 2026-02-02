@@ -16,7 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun LoadingBar() {
+fun TDLoadingBar() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -38,6 +38,6 @@ fun LoadingBar() {
 @Composable
 fun LoadingBarPreview() {
     TDTheme {
-        LoadingBar()
+        TDLoadingBar()
     }
 }
