@@ -128,9 +128,10 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
-
-        updatePendingTaskAmount(date)
-        updateCompletedTaskAmount(date)
+        viewModelScope.launch {
+            updatePendingTaskAmount(date)
+            updateCompletedTaskAmount(date)
+        }
     }
 
     private fun updatePendingTaskAmount(date: LocalDate) {
