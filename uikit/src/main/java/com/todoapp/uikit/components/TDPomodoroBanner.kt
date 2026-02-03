@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,27 +30,18 @@ fun TDPomodoroBanner(
     val formattedSeconds = "%02d".format(seconds)
     Row(
         modifier = Modifier
+            .statusBarsPadding()
             .fillMaxWidth()
             .height(60.dp)
-            .background(if (isOverTime) Color.Red else Color.Green)
+            .background(if (isOverTime) TDTheme.colors.red else TDTheme.colors.green)
             .clickable { onClick() },
         verticalAlignment = Alignment.Bottom,
     ) {
         Spacer(Modifier.weight(1f))
-        Box(modifier = Modifier.width(65.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.width(140.dp)) {
             TDText(
-                text = formattedMinutes,
-                    style = TDTheme.typography.heading1.copy(
-                    fontSize = 48.sp
-                ),
-                color = if (isOverTime) TDTheme.colors.lightPurple else TDTheme.colors.purple
-            )
-        }
-        Spacer(Modifier.weight(1f))
-        Box(Modifier.width(65.dp)) {
-            TDText(
-                text = formattedSeconds,
-                    style = TDTheme.typography.heading1.copy(
+                text = "$formattedMinutes:$formattedSeconds",
+                style = TDTheme.typography.heading1.copy(
                     fontSize = 48.sp
                 ),
                 color = if (isOverTime) TDTheme.colors.lightPurple else TDTheme.colors.purple
