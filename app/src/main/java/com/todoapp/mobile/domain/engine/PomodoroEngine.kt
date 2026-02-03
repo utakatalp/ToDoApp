@@ -20,7 +20,7 @@ interface PomodoroEngine {
 
     fun finish()
 
-    fun toggleVisibility()
+    fun updateBannerVisibility(isVisible: Boolean)
 }
 
 data class PomodoroEngineState(

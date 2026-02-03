@@ -44,7 +44,7 @@ class PomodoroViewModel @Inject constructor(
             UiAction.SkipSession -> onSkipSession()
             UiAction.StartCountDown -> onStartCountdown()
             UiAction.StopCountDown -> onStopCountdown()
-            UiAction.ToggleBannerVisibility -> onToggleBannerVisibility()
+            is UiAction.ToggleBannerVisibility -> updateBannerVisibility(action.isVisible)
             UiAction.Back -> onBack()
         }
     }
@@ -71,8 +71,8 @@ class PomodoroViewModel @Inject constructor(
         engine.pause()
     }
 
-    private fun onToggleBannerVisibility() {
-        engine.toggleVisibility()
+    private fun updateBannerVisibility(isVisible: Boolean) {
+        engine.updateBannerVisibility(isVisible)
     }
 
     private fun onBack() {

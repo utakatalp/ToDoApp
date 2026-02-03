@@ -1,6 +1,5 @@
 package com.todoapp.mobile.data.engine
 
-import android.util.Log
 import com.todoapp.mobile.common.pollFirst
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.engine.PomodoroEngineState
@@ -81,8 +80,8 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
         _events.tryEmit(PomodoroEvent.PomodoroFinished)
     }
 
-    override fun toggleVisibility() {
-        _state.update { it.copy(isVisible = !it.isVisible) }
+    override fun updateBannerVisibility(isVisible: Boolean) {
+        _state.update { it.copy(isVisible = isVisible) }
     }
 
     // ---------------- CORE LOGIC ----------------
@@ -122,17 +121,9 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
         _state.update { it.copy(isOvertime = false) }
 
         val next = sessionQueue.pollFirst()
-        Log.d("next", next.toString())
         if (next == null) {
-            Log.d("next", "effect sent")
             _events.tryEmit(PomodoroEvent.PomodoroFinished)
-            toggleVisibility()
-            /*
-            remainingMillis = ZERO_MILLIS
-            publishRemaining(ZERO_MILLIS)
-            _state.update { it.copy(mode = PomodoroMode.Focus, isRunning = false) }
-
-             */
+            updateBannerVisibility(false)
             return
         }
 

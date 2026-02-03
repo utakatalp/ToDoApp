@@ -17,7 +17,7 @@ object PomodoroContract {
         data object SkipSession : UiAction
         data object StartCountDown : UiAction
         data object StopCountDown : UiAction
-        data object ToggleBannerVisibility : UiAction
+        data class ToggleBannerVisibility(val isVisible: Boolean) : UiAction
         data object Back : UiAction
     }
 

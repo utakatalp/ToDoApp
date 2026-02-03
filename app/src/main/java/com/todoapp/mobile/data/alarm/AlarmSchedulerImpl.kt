@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
@@ -30,7 +29,6 @@ class AlarmSchedulerImpl(
             Intent(context, NotificationService::class.java).apply {
                 putExtra(NotificationService.INTENT_EXTRA_MESSAGE, item.message)
                 putExtra(NotificationService.INTENT_EXTRA_LONG, item.minutesBefore)
-                Log.d("Intent", item.minutesBefore.toString())
             }
         }
         alarmManager.setExactAndAllowWhileIdle(

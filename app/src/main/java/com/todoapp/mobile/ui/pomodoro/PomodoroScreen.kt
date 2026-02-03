@@ -43,12 +43,12 @@ fun PomodoroScreen(
     val context = LocalContext.current
 
     BackHandler {
-        onAction(UiAction.ToggleBannerVisibility)
+        onAction(UiAction.ToggleBannerVisibility(true))
         onAction(UiAction.Back)
     }
 
     LaunchedEffect(Unit) {
-        onAction(UiAction.ToggleBannerVisibility)
+        onAction(UiAction.ToggleBannerVisibility(false))
         uiEffect.collect { effect ->
             when (effect) {
                 is UiEffect.SessionFinished -> ringToneHolder.play(context)

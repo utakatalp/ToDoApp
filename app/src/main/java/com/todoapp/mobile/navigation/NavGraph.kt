@@ -1,6 +1,5 @@
 package com.todoapp.mobile.navigation
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -166,28 +165,35 @@ fun ToDoApp() {
                 .fillMaxSize()
                 .background(TDTheme.colors.background),
         bottomBar = { TDBottomBar(navController) },
+        topBar = {
+            Column {
+                BannerOverlay(
+                    bannerState,
+                    bannerViewModel::onAction,
+                    bannerViewModel.uiEffect
+                )
+                NavigationEffectController(navController, bannerViewModel.navEffect)
+                ShowTopBar(navController, bannerState.isBannerActivated)
+            }
+        },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            BannerOverlay(
-                bannerState,
-                bannerViewModel::onAction,
-                bannerViewModel.uiEffect
-            )
-            NavigationEffectController(navController, bannerViewModel.navEffect)
-            ShowTopBar(navController, bannerState.isBannerActivated)
-            NavGraph(
-                navController = navController,
-                modifier = Modifier.padding(padding),
-            )
-        }
+
+        NavGraph(
+            navController = navController,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+        )
     }
 }
 
 sealed interface NavigationEffect {
-    data class Navigate(val route: Screen, val popUpTo: Screen? = null) : NavigationEffect
+    data class Navigate(
+        val route: Screen,
+        val popUpTo: Screen? = null,
+        val isInclusive: Boolean = false
+    ) : NavigationEffect
     data object Back : NavigationEffect
 }
 
@@ -197,13 +203,12 @@ private fun NavigationEffectController(
     navEffect: Flow<NavigationEffect>,
 ) {
     navEffect.collectWithLifecycle { effect ->
-        Log.d("effect", effect.toString())
         when (effect) {
             is NavigationEffect.Navigate -> {
                 navController.navigate(effect.route) {
                     effect.popUpTo?.let {
                         popUpTo(it) {
-                            inclusive = false
+                            inclusive = effect.isInclusive
                         }
                     }
                 }
