@@ -56,7 +56,8 @@ fun ShowTopBar(navController: NavHostController) {
             .value
             ?.destination
             ?.route
-    val destination = appDestinationFromRoute(route) ?: return
+    val normalizedRoute = normalizeRoute(route)
+    val destination = appDestinationFromRoute(normalizedRoute) ?: return
     val titleText = stringResource(destination.title)
     val state = when (destination) {
         AppDestination.Home ->
@@ -72,6 +73,7 @@ fun ShowTopBar(navController: NavHostController) {
                         ),
                     ),
             )
+
         else -> {
             TDTopBarState(
                 title = titleText,
@@ -95,6 +97,11 @@ data class TDTopBarAction(
     @DrawableRes val icon: Int,
     val onClick: () -> Unit,
 )
+
+private fun normalizeRoute(route: String?): String? {
+    val normalizedRoute = route?.substringBefore("/")
+    return normalizedRoute
+}
 
 @Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, widthDp = 360)
 @Composable

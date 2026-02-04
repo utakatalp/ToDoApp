@@ -34,8 +34,5 @@ interface Screen {
     data object Profile : Screen
 
     @Serializable
-    data object Task : Screen
-
-    @Serializable
-    data object Edit : Screen
+    data class Task(val taskId: Long) : Screen
 }

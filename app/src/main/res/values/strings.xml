@@ -14,7 +14,7 @@
     <string name="task_pending">Task Pending</string>
     <string name="tasks_today">Tasks Today</string>
     <string name="add_new_task">Add New Task</string>
-    <string name="edit_task_details">Edit Task Details</string>
+    <string name="task_details">Task Details</string>
     <string name="close_button">Close Button</string>
     <string name="task_title">Task Title</string>
     <string name="set_time">Set time</string>
@@ -46,7 +46,7 @@
     <string name="changes_cancelled">Changes Discarded</string>
     <string name="error_title_required">Title is required</string>
     <string name="error_title_too_short">Title is too short</string>
-    <string name = "add_timer">Add Timer</string>
+    <string name="add_timer">Add Timer</string>
     <string name="more">More</string>
     <string name="next">Next</string>
     <string name="pause">Pause</string>

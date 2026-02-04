@@ -200,7 +200,6 @@ fun HomeContent(
                                 onCheckBoxClick = {
                                     onAction(UiAction.OnTaskCheck(task))
                                 },
-                                onEditClick = { onAction(UiAction.OnEditClick(task)) }
                             )
                         }
                     }

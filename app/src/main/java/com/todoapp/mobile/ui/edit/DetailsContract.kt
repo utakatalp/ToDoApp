@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import java.time.LocalDate
 import java.time.LocalTime
 
-object EditContract {
+object DetailsContract {
     data class UiState(
         val isDirty: Boolean = false,
         val taskTitle: String = "",

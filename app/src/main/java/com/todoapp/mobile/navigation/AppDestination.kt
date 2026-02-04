@@ -43,16 +43,16 @@ sealed class AppDestination(
         selectedIcon = null
     )
 
-    data object Edit : AppDestination(
-        title = R.string.edit_task_details,
-        route = Screen.Edit::class.qualifiedName!!,
+    data object Task : AppDestination(
+        title = R.string.task_details,
+        route = Screen.Task::class.qualifiedName!!,
         icon = null,
         selectedIcon = null
     )
 
     companion object {
         val bottomBarItems = listOf(Home, Calendar, Activity)
-        val items = listOf(Home, Calendar, Activity, PomodoroAddTimer, Settings, Edit)
+        val items = listOf(Home, Calendar, Activity, PomodoroAddTimer, Settings, Task)
     }
 }
 fun bottomBarAppDestinationFromRoute(route: String?) = AppDestination.bottomBarItems.firstOrNull { it.route == route }

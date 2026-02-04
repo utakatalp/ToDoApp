@@ -36,7 +36,7 @@ class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -73,7 +73,6 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnToggleAdvancedSettings -> toggleAdvancedSettings()
             is UiAction.OnTaskClick -> openTaskDetail(uiAction.task)
             is UiAction.OnSuccessfulBiometricAuthenticationHandle -> handleSuccessfulBiometricAuthentication()
-            is UiAction.OnEditClick -> navigateToEdit(uiAction.task)
         }
     }
 
@@ -81,11 +80,6 @@ class HomeViewModel @Inject constructor(
         fetchDailyTask(uiState.value.selectedDate)
         updatePendingTaskAmount(uiState.value.selectedDate)
         updateCompletedTaskAmount(uiState.value.selectedDate)
-    }
-
-    private fun navigateToEdit(task: Task) {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.Edit))
-        savedStateHandle["taskId"] = task.id
     }
 
     private fun navigateToPomodoro() {
@@ -97,7 +91,9 @@ class HomeViewModel @Inject constructor(
             val selectedOption = SecretModeReopenOptions.byId(secretModePreferences.getLastSelectedOptionId())
             val condition = SecretModeConditionFactory(clock = Clock.systemDefaultZone()).create(selectedOption)
             secretModePreferences.saveCondition(condition)
-            navigateToTaskDetail()
+            navigateToTaskDetail(
+                task = taskRepository.getTaskById(selectedTask.id)!!
+            )
         }
     }
 
@@ -105,7 +101,9 @@ class HomeViewModel @Inject constructor(
         selectedTask = task
 
         if (!task.isSecret) {
-            navigateToTaskDetail()
+            navigateToTaskDetail(
+                task = task
+            )
             return
         }
 
@@ -114,17 +112,19 @@ class HomeViewModel @Inject constructor(
                 .getCondition()
                 .isActive(System.currentTimeMillis())
 
-            if (isActive) navigateToTaskDetail() else authenticate()
+            if (isActive) {
+                navigateToTaskDetail(
+                task = task
+            )
+            } else {
+                authenticate()
+            }
         }
     }
 
-    private fun navigateToTaskDetail() {
-        // taskId argümanı geçilecek Task Detail ekranı bitince (selectedTask.id)
-        viewModelScope.launch {
-            _navEffect.send(NavigationEffect.Navigate(Screen.Settings))
-            // TODO() Task Detail ekranı henüz yapılmadı, oraya navigate edecek.
-            //  geçici olarak Settings'e navigate ediyor
-        }
+    private fun navigateToTaskDetail(task: Task) {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Task(task.id)))
+        savedStateHandle["taskId"] = task.id
     }
 
     private fun authenticate() {

@@ -22,8 +22,8 @@ import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerScreen
 import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
-import com.todoapp.mobile.ui.edit.EditScreen
-import com.todoapp.mobile.ui.edit.EditViewModel
+import com.todoapp.mobile.ui.edit.DetailsScreen
+import com.todoapp.mobile.ui.edit.DetailsViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
@@ -123,12 +123,12 @@ fun NavGraph(
             )
         }
 
-        composable<Screen.Edit> {
-            val viewModel: EditViewModel = hiltViewModel()
+        composable<Screen.Task> {
+            val viewModel: DetailsViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
             NavigationEffectController(navController, viewModel.navEffect)
-            EditScreen(
+            DetailsScreen(
                 uiState,
                 uiEffect,
                 viewModel::onAction
@@ -138,7 +138,6 @@ fun NavGraph(
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }
-        composable<Screen.Task> { }
     }
 }
 

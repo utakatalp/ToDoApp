@@ -8,9 +8,9 @@ import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.navigation.NavigationEffect
-import com.todoapp.mobile.ui.edit.EditContract.UiAction
-import com.todoapp.mobile.ui.edit.EditContract.UiEffect
-import com.todoapp.mobile.ui.edit.EditContract.UiState
+import com.todoapp.mobile.ui.edit.DetailsContract.UiAction
+import com.todoapp.mobile.ui.edit.DetailsContract.UiEffect
+import com.todoapp.mobile.ui.edit.DetailsContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +25,7 @@ import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
-class EditViewModel @Inject constructor(
+class DetailsViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {

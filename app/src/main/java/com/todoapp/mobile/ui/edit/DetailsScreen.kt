@@ -25,9 +25,9 @@ import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
-import com.todoapp.mobile.ui.edit.EditContract.UiAction
-import com.todoapp.mobile.ui.edit.EditContract.UiEffect
-import com.todoapp.mobile.ui.edit.EditContract.UiState
+import com.todoapp.mobile.ui.edit.DetailsContract.UiAction
+import com.todoapp.mobile.ui.edit.DetailsContract.UiEffect
+import com.todoapp.mobile.ui.edit.DetailsContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
-fun EditScreen(
+fun DetailsScreen(
     uiState: UiState,
     uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
@@ -143,9 +143,9 @@ fun EditScreen(
 
 @Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
-private fun EditScreenPreview_Light() {
+private fun DetailsScreenPreview_Light() {
     TDTheme {
-        EditScreen(
+        DetailsScreen(
             uiState = UiState(),
             onAction = {},
             uiEffect = emptyFlow()
@@ -155,9 +155,9 @@ private fun EditScreenPreview_Light() {
 
 @Preview("Dark", uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-private fun EditScreenPreview_Dark() {
+private fun DetailsScreenPreview_Dark() {
     TDTheme {
-        EditScreen(
+        DetailsScreen(
             uiState = UiState(),
             onAction = {},
             uiEffect = emptyFlow()
