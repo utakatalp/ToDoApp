@@ -33,9 +33,11 @@ import com.todoapp.mobile.ui.settings.SettingsContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDOverlayPermissionItem
+import com.todoapp.uikit.components.TDPlanTimePickerField
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTextField
 import com.todoapp.uikit.theme.TDTheme
+import java.time.LocalTime
 
 @Composable
 fun SettingsScreen(
@@ -73,6 +75,15 @@ private fun SettingsContent(
             onThemeChange = { theme ->
                 onAction(UiAction.OnThemeChange(theme))
             }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TDPlanTimePickerField(
+            title = stringResource(R.string.plan_your_day),
+            subtitle = stringResource(R.string.when_do_you_want_to_get_notified),
+            time = uiState.dailyPlanTime,
+            onTimeChange = { onAction(UiAction.OnDailyPlanTimeChange(it)) },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -169,7 +180,8 @@ private fun SettingsScreenPreview() {
                 currentTheme = ThemePreference.SYSTEM_DEFAULT,
                 selectedSecretMode = SecretModeReopenOptions.Immediate,
                 remainedSecretModeTime = "",
-                isSecretModeActive = true
+                isSecretModeActive = true,
+                dailyPlanTime = LocalTime.of(9, 0)
             ),
             onAction = {}
         )

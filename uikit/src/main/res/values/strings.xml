@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">UIKit</string>
     <string name="pick_a_date">Pick a date</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="activity_screen_weekly_progress_text">Weekly Progress</string>
     <string name="activity_screen_weekly_progress_legend_complete_text">Complete</string>
     <string name="activity_screen_weekly_progress_legend_in_progress_text">In Progress</string>
@@ -16,4 +16,8 @@
     <string name="allows_the_app_to_display_content_over_other_applications">Allows the app to display content over other applications.</string>
     <string name="grant_permission">Grant Permission</string>
     <string name="overlay_permission">Overlay Permission</string>
+    <string name="cancel">Cancel</string>
+    <string name="daily_plan_notification_title">What\'s your plans for today?</string>
+    <string name="daily_plan_notification_subtitle">Tab to plan your tasks</string>
+    <string name="close">Close</string>
 </resources>
