@@ -1,0 +1,42 @@
+package com.todoapp.mobile.ui.register
+
+object RegisterContract {
+    data class UiState(
+        val fullName: String = "",
+        val email: String = "",
+        val password: String = "",
+        val confirmPassword: String = "",
+        val isPasswordVisible: Boolean = false,
+        val isEmailFieldEnabled: Boolean = false,
+        val isFullNameFieldEnabled: Boolean = false,
+        val isPasswordConfirmationFieldEnabled: Boolean = false,
+        val isPasswordFieldEnabled: Boolean = false,
+        val emailError: RegisterError? = null,
+        val passwordError: RegisterError? = null,
+        val confirmPasswordError: RegisterError? = null,
+        val isWebViewAvailable: Boolean = false,
+    )
+
+    sealed interface UiAction {
+        data object OnSignUpTap : UiAction
+        data object OnTermsOfServiceTap : UiAction
+        data object OnPrivacyPolicyTap : UiAction
+        data object OnLoginTap : UiAction
+        data object OnGoogleSignInTap : UiAction
+        data object OnPasswordVisibilityTap : UiAction
+        data object OnPasswordFieldTap : UiAction
+        data object OnConfirmPasswordFieldTap : UiAction
+        data object OnFullNameFieldTap : UiAction
+        data object OnEmailFieldTap : UiAction
+        data class OnFullNameChange(val fullName: String) : UiAction
+        data class OnEmailChange(val email: String) : UiAction
+        data class OnPasswordChange(val password: String) : UiAction
+        data class OnConfirmPasswordChange(val confirmPassword: String) : UiAction
+
+        data class OnUpdateWebViewVisibility(val isVisible: Boolean) : UiAction
+    }
+
+    sealed interface UiEffect
+
+    data class RegisterError(val message: String)
+}

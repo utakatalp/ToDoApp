@@ -38,4 +38,10 @@ interface Screen {
 
     @Serializable
     data object Edit : Screen
+
+    @Serializable
+    data object Register : Screen
+
+    @Serializable
+    data class WebView(val url: String) : Screen
 }

@@ -16,7 +16,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -38,7 +39,7 @@ fun TDButton(
     isEnable: Boolean = true,
     type: TDButtonType = TDButtonType.PRIMARY,
     size: TDButtonSize = TDButtonSize.MEDIUM,
-    icon: ImageVector? = null,
+    icon: Painter? = null,
     fullWidth: Boolean = false,
     onClick: () -> Unit,
 ) {
@@ -110,8 +111,10 @@ fun TDButton(
             ) {
                 icon?.let {
                     Icon(
-                        imageVector = icon,
+                        modifier = Modifier.size(24.dp),
+                        painter = icon,
                         contentDescription = text,
+                        tint = Color.Unspecified,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
@@ -139,7 +142,7 @@ fun TDButton(
                 icon?.let {
                     Icon(
                         modifier = Modifier.size(14.dp),
-                        imageVector = icon,
+                        painter = icon,
                         contentDescription = text,
                         tint = TDTheme.colors.purple,
                     )
@@ -174,7 +177,7 @@ fun TDButton(
                 icon?.let {
                     Icon(
                         modifier = Modifier.size(14.dp),
-                        imageVector = icon,
+                        painter = icon,
                         contentDescription = text,
                         tint = MaterialTheme.colorScheme.primary,
                     )

@@ -28,3 +28,6 @@ fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
 fun String.maskTitle(): String {
     return this.first() + "*".repeat(this.length - 1)
 }
+fun String.maskPassword(): String {
+    return "*".repeat(this.length)
+}

@@ -30,8 +30,12 @@ import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
 import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
+import com.todoapp.mobile.ui.register.RegisterScreen
+import com.todoapp.mobile.ui.register.RegisterViewModel
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
+import com.todoapp.mobile.ui.webview.WebViewScreen
+import com.todoapp.mobile.ui.webview.WebViewViewModel
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
@@ -122,7 +126,6 @@ fun NavGraph(
                 viewModel::onAction
             )
         }
-
         composable<Screen.Edit> {
             val viewModel: EditViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -134,7 +137,26 @@ fun NavGraph(
                 viewModel::onAction
             )
         }
+        composable<Screen.Register> {
+            val viewModel: RegisterViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
+            RegisterScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction
+            )
+        }
 
+        composable<Screen.WebView> {
+            val viewModel: WebViewViewModel = hiltViewModel()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
+            WebViewScreen(
+                onAction = viewModel::onAction,
+                uiEffect = uiEffect
+            )
+        }
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }
@@ -163,7 +185,12 @@ fun ToDoApp() {
 }
 
 sealed interface NavigationEffect {
-    data class Navigate(val route: Screen) : NavigationEffect
+    data class Navigate(
+        val route: Screen,
+        val popUpTo: Screen? = null,
+        val isInclusive: Boolean = false
+    ) : NavigationEffect
+
     data object Back : NavigationEffect
 }
 
@@ -175,7 +202,13 @@ private fun NavigationEffectController(
     navEffect.collectWithLifecycle { effect ->
         when (effect) {
             is NavigationEffect.Navigate -> {
-                navController.navigate(effect.route)
+                navController.navigate(effect.route) {
+                    effect.popUpTo?.let {
+                        popUpTo(it) {
+                            inclusive = effect.isInclusive
+                        }
+                    }
+                }
             }
 
             is NavigationEffect.Back -> {
