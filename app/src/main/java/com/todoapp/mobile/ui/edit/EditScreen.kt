@@ -230,23 +230,50 @@ private fun EditErrorPreview() {
     }
 }
 
-@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
-@Composable
-private fun EditSuccessPreview_Light() {
-    TDTheme {
-        EditSuccessContent(
-            uiState = UiState.Success(),
-            onAction = {}
-        )
-    }
-}
-
 @Preview("Dark", uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 private fun EditSuccessPreview_Dark() {
     TDTheme {
         EditSuccessContent(
-            uiState = UiState.Success(),
+            uiState = EditPreviewData.successState(),
+            onAction = {}
+        )
+    }
+}
+
+@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun EditSuccessPreview_Light() {
+    TDTheme {
+        EditSuccessContent(
+            uiState = EditPreviewData.successState(),
+            onAction = {}
+        )
+    }
+}
+
+@Preview("Dirty State")
+@Composable
+private fun EditSuccessPreview_Dirty() {
+    TDTheme {
+        EditSuccessContent(
+            uiState = EditPreviewData.successState(
+                isDirty = true,
+                taskTitle = "Modified Task"
+            ),
+            onAction = {}
+        )
+    }
+}
+
+@Preview("Error State")
+@Composable
+private fun EditSuccessPreview_WithError() {
+    TDTheme {
+        EditSuccessContent(
+            uiState = EditPreviewData.successState(
+                titleError = R.string.error_title_required
+            ),
             onAction = {}
         )
     }

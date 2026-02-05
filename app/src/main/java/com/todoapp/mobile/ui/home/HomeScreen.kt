@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
 import com.todoapp.mobile.common.maskTitle
-import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
@@ -67,7 +66,6 @@ import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import java.time.LocalDate
 import java.time.LocalTime
 
 @Composable
@@ -502,100 +500,29 @@ private fun HomeErrorPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun HomeContentPreview() {
-    val fakeUiState = UiState.Success(
-        selectedDate = LocalDate.now(),
-        tasks = listOf(
-            Task(
-                id = 1L,
-                title = "Design the main screen",
-                description = "Draft layout & components",
-                date = LocalDate.now(),
-                timeStart = LocalTime.of(9, 30),
-                timeEnd = LocalTime.of(10, 15),
-                isCompleted = false,
-                isSecret = false,
-            ),
-            Task(
-                id = 2L,
-                title = "Develop the API client",
-                description = "Retrofit + serialization setup",
-                date = LocalDate.now().minusDays(1),
-                timeStart = LocalTime.of(11, 0),
-                timeEnd = LocalTime.of(12, 0),
-                isCompleted = true,
-                isSecret = false
-            ),
-            Task(
-                id = 3L,
-                title = "Fix the login bug",
-                description = null,
-                date = LocalDate.now(),
-                timeStart = LocalTime.of(14, 0),
-                timeEnd = LocalTime.of(14, 30),
-                isCompleted = false,
-                isSecret = false
-            ),
-        ),
-        completedTaskCountThisWeek = 5,
-        pendingTaskCountThisWeek = 8,
-    )
-
     TDTheme {
         HomeContent(
-            uiState = fakeUiState,
+            uiState = HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+            ),
             onAction = {},
             modifier = Modifier.padding(horizontal = 24.dp),
         )
     }
 }
 
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun HomeContentPreview_Dark() {
-    val fakeUiState = UiState.Success(
-        selectedDate = LocalDate.now(),
-        tasks = listOf(
-            Task(
-                id = 1L,
-                title = "Design the main screen",
-                description = "Draft layout & components",
-                date = LocalDate.now(),
-                timeStart = LocalTime.of(9, 30),
-                timeEnd = LocalTime.of(10, 15),
-                isCompleted = false,
-                isSecret = false
-            ),
-            Task(
-                id = 2L,
-                title = "Develop the API client",
-                description = "Retrofit + serialization setup",
-                date = LocalDate.now().minusDays(1),
-                timeStart = LocalTime.of(11, 0),
-                timeEnd = LocalTime.of(12, 0),
-                isCompleted = true,
-                isSecret = false
-            ),
-            Task(
-                id = 3L,
-                title = "Fix the login bug",
-                description = null,
-                date = LocalDate.now(),
-                timeStart = LocalTime.of(14, 0),
-                timeEnd = LocalTime.of(14, 30),
-                isCompleted = false,
-                isSecret = false
-            ),
-        ),
-        completedTaskCountThisWeek = 5,
-        pendingTaskCountThisWeek = 8,
-    )
-
     TDTheme(darkTheme = true) {
         HomeContent(
-            uiState = fakeUiState,
+            uiState = HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+            ),
             onAction = {},
             modifier = Modifier.padding(horizontal = 24.dp),
         )
@@ -607,7 +534,7 @@ private fun HomeContentPreview_Dark() {
 private fun AddTaskSheetPreview() {
     TDTheme {
         AddTaskSheet(
-            uiState = UiState.Success(
+            uiState = HomePreviewData.successState(
                 taskTitle = "Read 10 pages",
                 taskTimeEnd = LocalTime.of(10, 15),
                 taskDescription = "Focus mode on. No phone.",
@@ -618,16 +545,12 @@ private fun AddTaskSheetPreview() {
     }
 }
 
-@Preview(
-    showBackground = true,
-    widthDp = 360,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
+@Preview(showBackground = true, widthDp = 360, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AddTaskSheetPreview_Dark() {
     TDTheme(darkTheme = true) {
         AddTaskSheet(
-            uiState = UiState.Success(
+            uiState = HomePreviewData.successState(
                 taskTitle = "Read 10 pages",
                 taskTimeEnd = LocalTime.of(10, 15),
                 taskDescription = "Focus mode on. No phone.",

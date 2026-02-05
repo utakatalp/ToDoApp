@@ -6,10 +6,11 @@ import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.ui.activity.ActivityContract.UiAction
 import com.todoapp.mobile.ui.activity.ActivityContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -38,73 +39,44 @@ class ActivityViewModel @Inject constructor(
 
     private fun loadData() {
         val date = LocalDate.now()
-        updateWeeklyProgress(date)
-        updateYearlyProgress(date)
-    }
 
-    private inline fun updateSuccessState(crossinline transform: (UiState.Success) -> UiState.Success) {
-        _uiState.update { currentState ->
-            when (currentState) {
-                is UiState.Success -> transform(currentState)
-                is UiState.Loading -> transform(UiState.Success(selectedDate = LocalDate.now()))
-                else -> currentState
-            }
-        }
-    }
-
-    private fun updateWeeklyProgress(date: LocalDate) {
         viewModelScope.launch {
+            delay(LOADING_DELAY)
             combine(
                 taskRepository.observePendingTasksInAWeek(date),
-                taskRepository.countCompletedTasksInAWeek(date)
-            ) { pendingCount, completedCount ->
-                val total = pendingCount + completedCount
-                if (total <= 0) {
-                    0f to 0f
-                } else {
-                    val completedRatio = completedCount.toFloat() / total.toFloat()
-                    val pendingRatio = pendingCount.toFloat() / total.toFloat()
-                    completedRatio to pendingRatio
-                }
-            }.collect { (completedRatio, pendingRatio) ->
-                updateSuccessState {
-                    it.copy(
-                        weeklyProgress = completedRatio,
-                        weeklyPendingProgress = pendingRatio
-                    )
-                }
-            }
-        }
+                taskRepository.countCompletedTasksInAWeek(date),
+                taskRepository.observeCompletedCountsByDayInAWeek(date),
+                taskRepository.observePendingTasksYearToDate(date),
+                taskRepository.countCompletedTasksYearToDate(date)
+            ) { weeklyPending, weeklyCompleted, weeklyBarValues, yearlyPending, yearlyCompleted ->
 
-        viewModelScope.launch {
-            taskRepository.observeCompletedCountsByDayInAWeek(date).collect { values ->
-                updateSuccessState { it.copy(weeklyBarValues = values) }
+                val (weeklyProgress, weeklyPendingProcess) = calculateProgress(weeklyCompleted, weeklyPending)
+                val (yearlyProgress, yearlyPendingProcess) = calculateProgress(yearlyCompleted, yearlyPending)
+
+                UiState.Success(
+                    selectedDate = date,
+                    weeklyProgress = weeklyProgress,
+                    weeklyPendingProgress = weeklyPendingProcess,
+                    weeklyBarValues = weeklyBarValues,
+                    yearlyProgress = yearlyProgress,
+                    yearlyPendingProgress = yearlyPendingProcess
+                )
             }
+                .catch { e -> _uiState.value = UiState.Error(e.message ?: "Unknown Error", e) }
+                .collect { _uiState.value = it }
         }
     }
 
-    private fun updateYearlyProgress(date: LocalDate) {
-        viewModelScope.launch {
-            val pendingFlow = taskRepository.observePendingTasksYearToDate(date)
-            val completedFlow = taskRepository.countCompletedTasksYearToDate(date)
-
-            combine(pendingFlow, completedFlow) { pendingCount, completedCount ->
-                val total = pendingCount + completedCount
-                if (total <= 0) {
-                    0f to 0f
-                } else {
-                    val completedRatio = completedCount.toFloat() / total.toFloat()
-                    val pendingRatio = pendingCount.toFloat() / total.toFloat()
-                    completedRatio to pendingRatio
-                }
-            }.collect { (completedRatio, pendingRatio) ->
-                updateSuccessState {
-                    it.copy(
-                        yearlyProgress = completedRatio,
-                        yearlyPendingProgress = pendingRatio,
-                    )
-                }
-            }
+    private fun calculateProgress(completed: Int, pending: Int): Pair<Float, Float> {
+        val total = completed + pending
+        return if (total > 0) {
+            completed.toFloat() / total to pending.toFloat() / total
+        } else {
+            0f to 0f
         }
+    }
+
+    companion object {
+        private const val LOADING_DELAY = 200L
     }
 }

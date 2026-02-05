@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
 import com.todoapp.uikit.theme.TDTheme
@@ -20,7 +19,7 @@ fun TDLoadingBar() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f))
+            .background(TDTheme.colors.background)
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }

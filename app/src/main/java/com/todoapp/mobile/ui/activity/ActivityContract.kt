@@ -7,12 +7,12 @@ object ActivityContract {
         data object Loading : UiState
 
         data class Success(
-            val selectedDate: LocalDate = LocalDate.now(),
-            val weeklyProgress: Float = 0f,
-            val weeklyPendingProgress: Float = 0f,
-            val weeklyBarValues: List<Int> = emptyList(),
-            val yearlyProgress: Float = 0f,
-            val yearlyPendingProgress: Float = 0f,
+            val selectedDate: LocalDate,
+            val weeklyProgress: Float,
+            val weeklyPendingProgress: Float,
+            val weeklyBarValues: List<Int>,
+            val yearlyProgress: Float,
+            val yearlyPendingProgress: Float,
         ) : UiState
 
         data class Error(

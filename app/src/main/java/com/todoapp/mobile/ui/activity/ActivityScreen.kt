@@ -30,6 +30,7 @@ import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDWeeklyBarChart
 import com.todoapp.uikit.components.TDWeeklyCircularProgressIndicator
 import com.todoapp.uikit.theme.TDTheme
+import java.time.LocalDate
 
 @Composable
 fun ActivityScreen(
@@ -195,7 +196,9 @@ private fun ActivityScreenPreview_Light() {
                 weeklyProgress = 0.65f,
                 weeklyPendingProgress = 0.35f,
                 weeklyBarValues = listOf(7, 2, 3, 2, 5, 1, 4),
-                yearlyProgress = 0.5f
+                yearlyProgress = 0.5f,
+                selectedDate = LocalDate.now(),
+                yearlyPendingProgress = 0f
             )
         )
     }
@@ -210,7 +213,9 @@ private fun ActivityScreenPreview_Dark() {
                 weeklyProgress = 0.65f,
                 weeklyPendingProgress = 0.35f,
                 weeklyBarValues = listOf(7, 2, 3, 2, 2, 1, 4),
-                yearlyProgress = 0.5f
+                yearlyProgress = 0.5f,
+                selectedDate = LocalDate.now(),
+                yearlyPendingProgress = 0f
             )
         )
     }

@@ -43,22 +43,29 @@ class EditViewModel @Inject constructor(
     fun loadTask(taskId: Long) {
         currentTaskId = taskId
         viewModelScope.launch {
-            _uiState.value = UiState.Loading
-            val task = taskRepository.getTaskById(taskId)
-            if (task == null) {
-                _uiState.value = UiState.Error(message = "Task not found")
-                return@launch
+            try {
+                _uiState.value = UiState.Loading
+                val task = taskRepository.getTaskById(taskId)
+                if (task == null) {
+                    _uiState.value = UiState.Error(message = R.string.error_task_not_found.toString())
+                    return@launch
+                }
+                originalTask = task
+                _uiState.value = UiState.Success(
+                    taskTitle = task.title,
+                    taskTimeStart = task.timeStart,
+                    taskTimeEnd = task.timeEnd,
+                    taskDate = task.date,
+                    taskDescription = task.description ?: "",
+                    dialogSelectedDate = task.date,
+                    isDirty = false,
+                    titleError = null,
+                    isSaving = false
+                )
+            } catch (e: IOException) {
+                _uiState.value = UiState.Error(message = "Failed to load task", throwable = e)
+                Log.e("EditViewModel", "Failed to load task", e)
             }
-            originalTask = task
-            _uiState.value = UiState.Success(
-                taskTitle = task.title,
-                taskTimeStart = task.timeStart,
-                taskTimeEnd = task.timeEnd,
-                taskDate = task.date,
-                taskDescription = task.description ?: "",
-                dialogSelectedDate = task.date,
-                isDirty = false,
-            )
         }
     }
 
@@ -130,10 +137,13 @@ class EditViewModel @Inject constructor(
     private fun saveChanges() {
         val currentState = _uiState.value
         if (currentState !is UiState.Success) return
+        if (currentState.isSaving) return
         if (!validateFields(currentState)) return
 
         val existingTask = originalTask ?: return
         val updatedTask = buildUpdatedTask(currentState, existingTask)
+
+        updateSuccessState { it.copy(isSaving = true) }
 
         viewModelScope.launch {
             try {
@@ -141,6 +151,7 @@ class EditViewModel @Inject constructor(
                 onSaveSuccess(updatedTask)
             } catch (e: IOException) {
                 Log.e("EditViewModel", "Failed to save changes", e)
+                updateSuccessState { it.copy(isSaving = false) }
                 onSaveFailure()
             }
         }
@@ -165,7 +176,8 @@ class EditViewModel @Inject constructor(
             taskDate = existingTask.date,
             taskDescription = existingTask.description ?: "",
             dialogSelectedDate = existingTask.date,
-            isDirty = false
+            isDirty = false,
+            isSaving = true
         )
         _uiEffect.trySend(UiEffect.ShowToast(R.string.changes_cancelled))
     }
