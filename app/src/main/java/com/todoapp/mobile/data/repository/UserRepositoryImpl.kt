@@ -1,0 +1,17 @@
+package com.todoapp.mobile.data.repository
+
+import com.todoapp.mobile.common.handleRequest
+import com.todoapp.mobile.data.model.network.data.RegisterResponseData
+import com.todoapp.mobile.data.model.network.request.RegisterRequest
+import com.todoapp.mobile.data.source.remote.api.ToDoApi
+import com.todoapp.mobile.domain.repository.UserRepository
+import javax.inject.Inject
+
+class UserRepositoryImpl @Inject constructor(
+    private val todoApi: ToDoApi
+) : UserRepository {
+
+    override suspend fun register(request: RegisterRequest): Result<RegisterResponseData> {
+        return handleRequest { todoApi.register(request) }
+    }
+}

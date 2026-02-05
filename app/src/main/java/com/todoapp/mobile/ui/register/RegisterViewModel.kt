@@ -1,7 +1,12 @@
 package com.todoapp.mobile.ui.register
 
+import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.data.model.network.data.RegisterResponseData
+import com.todoapp.mobile.data.model.network.request.RegisterRequest
+import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.register.RegisterContract.RegisterError
@@ -14,11 +19,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    // private val toDoApi: ToDoApi
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -37,11 +43,7 @@ class RegisterViewModel @Inject constructor(
             is UiAction.OnEmailChange -> onEmailChange(uiAction.email)
             is UiAction.OnFullNameChange -> onFullNameChange(uiAction.fullName)
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.password)
-            is UiAction.OnUpdateWebViewVisibility -> _uiState.update {
-                it.copy(
-                    isWebViewAvailable = uiAction.isVisible
-                )
-            }
+            is UiAction.OnUpdateWebViewVisibility -> updateWebViewVisibility(uiAction.isVisible)
             UiAction.OnGoogleSignInTap -> {}
             UiAction.OnLoginTap -> {}
             UiAction.OnPrivacyPolicyTap -> showPrivacyPolicy()
@@ -52,6 +54,14 @@ class RegisterViewModel @Inject constructor(
             UiAction.OnEmailFieldTap -> enableEmailField()
             UiAction.OnFullNameFieldTap -> enableFullNameField()
             UiAction.OnPasswordFieldTap -> enablePasswordField()
+        }
+    }
+
+    private fun updateWebViewVisibility(isVisible: Boolean) {
+        _uiState.update { state ->
+            state.copy(
+                isWebViewAvailable = isVisible,
+            )
         }
     }
 
@@ -78,48 +88,62 @@ class RegisterViewModel @Inject constructor(
 
         updateValidationMode()
 
-        val isAnyEmptyField =
+        val hasEmptyField =
             state.email.isBlank() ||
                     state.password.isBlank() ||
                     state.confirmPassword.isBlank() ||
                     state.fullName.isBlank()
 
-        if (isAnyEmptyField) {
-            _uiState.update { it.copy(confirmPasswordError = RegisterError("Please fill in the required fields.")) }
+        if (hasEmptyField) {
+            _uiState.update {
+                it.copy(
+                    confirmPasswordError = RegisterError("Please fill in the required fields.")
+                )
+            }
             return
         }
 
         val emailError = validationMode.validate(field = Field.Email(state.email))
         val passwordError = validationMode.validate(field = Field.Password(state.password))
-        val confirmPasswordError = validationMode.validate(field = Field.ConfirmPassword(state.confirmPassword))
+        val confirmPasswordError =
+            validationMode.validate(field = Field.ConfirmPassword(state.confirmPassword))
 
         _uiState.update {
             it.copy(
                 emailError = emailError,
                 passwordError = passwordError,
-                confirmPasswordError = confirmPasswordError
+                confirmPasswordError = confirmPasswordError,
             )
         }
 
-        if (
+        val hasAnyError =
             uiState.value.emailError != null ||
-            uiState.value.passwordError != null ||
-            uiState.value.confirmPasswordError != null
-        ) {
-            return
-        }
+                    uiState.value.passwordError != null ||
+                    uiState.value.confirmPasswordError != null
+
+        if (hasAnyError) return
+
         // sign-up flow devamı, api request vb.
-        /*
         viewModelScope.launch {
-            val response = toDoApi.register(
-                RegisterRequest(
-                    email = state.email,
-                    password = state.password,
-                    displayName = state.fullName
-                )
-            )
+            userRepository.register(RegisterRequest(state.email, state.password, state.fullName))
+                .onSuccess { handleSuccessfulRegister(it) }
+                .onFailure { throwable ->
+                    _uiState.update {
+                        it.copy(emailError = RegisterError(throwable.message ?: "Try again later"))
+                    }
+                }
         }
-         */
+    }
+
+    private fun handleSuccessfulRegister(registerResponseData: RegisterResponseData) {
+        _navEffect.trySend(
+            NavigationEffect.Navigate(
+                route = Screen.Home,
+                popUpTo = Screen.Onboarding,
+                isInclusive = true
+            )
+        )
+        Log.d("response", registerResponseData.toString())
     }
 
     private fun onEmailChange(email: String) {
