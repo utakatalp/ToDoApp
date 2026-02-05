@@ -21,7 +21,7 @@ class DailyPlanPreferencesImpl @Inject constructor(
     }
 
     override fun observePlanTime(): Flow<LocalTime?> {
-        return dataStoreHelper.getOptionalString(PLAN_TIME_KEY).map { value ->
+        return dataStoreHelper.observeOptionalString(PLAN_TIME_KEY).map { value ->
             if (value.isNullOrBlank()) {
                 null
             } else {
@@ -36,8 +36,8 @@ class DailyPlanPreferencesImpl @Inject constructor(
 
     override fun observeCardPosition(): Flow<DailyCardPosition> {
         return combine(
-            dataStoreHelper.getOptionalString(CARD_POSITION_X_KEY),
-            dataStoreHelper.getOptionalString(CARD_POSITION_Y_KEY)
+            dataStoreHelper.observeOptionalString(CARD_POSITION_X_KEY),
+            dataStoreHelper.observeOptionalString(CARD_POSITION_Y_KEY)
         ) { x, y ->
             DailyCardPosition(
                 x?.toFloatOrNull() ?: 0f,

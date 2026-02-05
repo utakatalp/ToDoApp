@@ -19,7 +19,7 @@ class DataStoreHelper @Inject constructor(
         }
     }
 
-    fun getOptionalString(key: String): Flow<String?> {
+    fun observeOptionalString(key: String): Flow<String?> {
         val prefKey = stringPreferencesKey(key)
         return dataStore.data.map { preferences ->
             preferences[prefKey]
