@@ -44,4 +44,7 @@ interface Screen {
 
     @Serializable
     data class WebView(val url: String) : Screen
+
+    @Serializable
+    data object ForgotPassword : Screen
 }
