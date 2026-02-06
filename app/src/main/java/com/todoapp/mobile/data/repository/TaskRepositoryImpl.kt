@@ -1,14 +1,18 @@
 package com.todoapp.mobile.data.repository
 
+import android.util.Log
 import com.todoapp.mobile.data.mapper.toDomain
 import com.todoapp.mobile.data.mapper.toEntity
 import com.todoapp.mobile.data.source.local.DayCount
-import com.todoapp.mobile.data.source.local.TaskDao
+import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
+import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.domain.model.toDomain
 import com.todoapp.mobile.domain.repository.CompletedCountByDay
 import com.todoapp.mobile.domain.repository.TaskRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.time.DayOfWeek
@@ -16,10 +20,11 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 class TaskRepositoryImpl @Inject constructor(
-    private val taskDao: TaskDao,
+    private val remoteDataSource: TaskRemoteDataSource,
+    private val localDataSource: TaskLocalDataSource,
 ) : TaskRepository {
     override fun observeAll(): Flow<List<Task>> {
-        return taskDao.getAllTasks().map { list ->
+        return localDataSource.observeAll().map { list ->
             list.map { it.toDomain() }
         }
     }
@@ -28,16 +33,16 @@ class TaskRepositoryImpl @Inject constructor(
         startDate: LocalDate,
         endDate: LocalDate,
     ): Flow<List<Task>> {
-        return taskDao.loadTasksBetweenRange(
-            startDate.toEpochDay(),
-            endDate.toEpochDay()
+        return localDataSource.observeRange(
+            startDate = startDate.toEpochDay(),
+            endDate = endDate.toEpochDay(),
         ).map { list ->
             list.map { it.toDomain() }
         }
     }
 
     override fun observeTasksByDate(date: LocalDate): Flow<List<Task>> {
-        return taskDao.getTasksByDate(date = date.toEpochDay()).map { list ->
+        return localDataSource.observeByDate(date = date.toEpochDay()).map { list ->
             list.map { it.toDomain() }
         }
     }
@@ -47,7 +52,7 @@ class TaskRepositoryImpl @Inject constructor(
     ): Flow<Int> {
         val weekStart = date.with(DayOfWeek.MONDAY)
         val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
-        return taskDao.getTaskCountInRange(
+        return localDataSource.countInRange(
             startDate = weekStart.toEpochDay(),
             endDate = weekEnd.toEpochDay(),
             isCompleted = true,
@@ -57,7 +62,10 @@ class TaskRepositoryImpl @Inject constructor(
     override fun countCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<CompletedCountByDay>> {
         val weekStart = date.with(DayOfWeek.MONDAY)
         val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
-        return taskDao.observeCompletedCountsByDay(weekStart.toEpochDay(), weekEnd.toEpochDay())
+        return localDataSource.observeCompletedCountsByDay(
+            startDate = weekStart.toEpochDay(),
+            endDate = weekEnd.toEpochDay(),
+        )
             .map { rows: List<DayCount> ->
                 rows.map { row ->
                     CompletedCountByDay(
@@ -70,7 +78,7 @@ class TaskRepositoryImpl @Inject constructor(
 
     override fun countCompletedTasksYearToDate(date: LocalDate): Flow<Int> {
         val yearStart = date.withDayOfYear(1)
-        return taskDao.getTaskCountInRange(
+        return localDataSource.countInRange(
             startDate = yearStart.toEpochDay(),
             endDate = date.toEpochDay(),
             isCompleted = true,
@@ -79,7 +87,7 @@ class TaskRepositoryImpl @Inject constructor(
 
     override fun observePendingTasksYearToDate(date: LocalDate): Flow<Int> {
         val yearStart = date.withDayOfYear(1)
-        return taskDao.getTaskCountInRange(
+        return localDataSource.countInRange(
             startDate = yearStart.toEpochDay(),
             endDate = date.toEpochDay(),
             isCompleted = false,
@@ -91,7 +99,7 @@ class TaskRepositoryImpl @Inject constructor(
     ): Flow<Int> {
         val weekStart = date.with(DayOfWeek.MONDAY)
         val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
-        return taskDao.getTaskCountInRange(
+        return localDataSource.countInRange(
             startDate = weekStart.toEpochDay(),
             endDate = weekEnd.toEpochDay(),
             isCompleted = false,
@@ -109,23 +117,55 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insert(task: Task) {
-        taskDao.insert(task.toEntity())
+        localDataSource.insert(task)
+
+        // Never crash the app if the network is unavailable.
+        runCatching {
+            remoteDataSource.addTask(task)
+        }.onFailure { throwable ->
+            Log.d("TaskRepositoryImpl", "insert: remote addTask failed", throwable)
+        }
     }
 
     override suspend fun delete(task: Task) {
-        taskDao.delete(task.toEntity())
+        localDataSource.delete(task.toEntity())
     }
 
     override suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean) = withContext(Dispatchers.IO) {
-        taskDao.updateTask(id, isCompleted)
+        localDataSource.updateTaskCompletion(id, isCompleted)
     }
 
     override suspend fun getTaskById(id: Long): Task? = withContext(Dispatchers.IO) {
-        taskDao.getTaskById(id)?.toDomain()
+        localDataSource.getTaskById(id)?.toDomain()
     }
 
     override suspend fun update(task: Task) = withContext(Dispatchers.IO) {
-        taskDao.update(task.toEntity())
+        localDataSource.update(task.toEntity())
+    }
+
+    override suspend fun syncLocalTasksToServer(): Result<Unit> = withContext(Dispatchers.IO) {
+        // `remoteDataSource.addTask(...)` can throw (e.g., UnknownHostException) when there is no internet.
+        // Handle both cases: (1) it throws, (2) it returns a Result.failure.
+        val tasks = observeAll().first()
+        Log.d("TaskRepositoryImpl", "syncLocalTasksToServer: $tasks")
+
+        tasks.forEach { task ->
+            val result = runCatching {
+                remoteDataSource.addTask(task)
+            }.getOrElse { throwable ->
+                Log.d("TaskRepositoryImpl", "syncLocalTasksToServer: addTask threw", throwable)
+                return@withContext Result.failure(throwable)
+            }
+
+            Log.d("TaskRepositoryImpl", "syncLocalTasksToServer: $result")
+
+            if (result.isFailure) {
+                val throwable = result.exceptionOrNull() ?: Exception("Failed to sync task")
+                return@withContext Result.failure(throwable)
+            }
+        }
+
+        Result.success(Unit)
     }
 
     companion object {

@@ -14,6 +14,7 @@ object RegisterContract {
         val emailError: RegisterError? = null,
         val passwordError: RegisterError? = null,
         val confirmPasswordError: RegisterError? = null,
+        val generalError: RegisterError? = null,
         val isWebViewAvailable: Boolean = false,
     )
 

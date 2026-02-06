@@ -24,4 +24,6 @@ interface TaskRepository {
     suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean)
     suspend fun getTaskById(id: Long): Task?
     suspend fun update(task: Task)
+
+    suspend fun syncLocalTasksToServer(): Result<Unit>
 }

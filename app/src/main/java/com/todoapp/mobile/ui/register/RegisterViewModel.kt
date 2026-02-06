@@ -3,9 +3,11 @@ package com.todoapp.mobile.ui.register
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.domain.repository.SessionPreferences
+import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -26,6 +28,7 @@ import javax.inject.Inject
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val sessionPreferences: SessionPreferences,
+    private val taskRepository: TaskRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -129,8 +132,14 @@ class RegisterViewModel @Inject constructor(
             userRepository.register(RegisterRequest(state.email, state.password, state.fullName))
                 .onSuccess { handleSuccessfulRegister(it) }
                 .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(emailError = RegisterError(throwable.message ?: "Try again later"))
+                    if (throwable is DomainException.Server) {
+                        _uiState.update {
+                            it.copy(emailError = RegisterError(throwable.message ?: "Try again later"))
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(generalError = RegisterError(throwable.message ?: "Try again later"))
+                        }
                     }
                 }
         }
@@ -148,6 +157,8 @@ class RegisterViewModel @Inject constructor(
             sessionPreferences.setAccessToken(registerResponseData.accessToken)
             sessionPreferences.setExpiresAt(registerResponseData.expiresIn)
             sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
+
+            taskRepository.syncLocalTasksToServer()
         }
     }
 

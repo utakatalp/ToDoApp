@@ -214,6 +214,9 @@ private fun RegisterContent(
             uiState.confirmPasswordError?.let {
                 TDText(text = it.message, color = TDTheme.colors.red)
             }
+            uiState.generalError?.let {
+                TDText(text = it.message, color = TDTheme.colors.red)
+            }
             Spacer(Modifier.height(16.dp))
             TDButton(
                 text = stringResource(R.string.sign_up),
