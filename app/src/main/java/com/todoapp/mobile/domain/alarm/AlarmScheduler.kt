@@ -2,9 +2,13 @@ package com.todoapp.mobile.domain.alarm
 
 import com.todoapp.mobile.domain.model.AlarmItem
 
+enum class AlarmType {
+    TASK,
+    DAILY_PLAN
+}
+
 interface AlarmScheduler {
-    fun schedule(item: AlarmItem)
-    fun cancel(item: AlarmItem)
-    fun scheduleDailyPlan(item: AlarmItem)
-    fun cancelDailyPlan()
+    fun schedule(item: AlarmItem, type: AlarmType)
+    fun cancelTask(item: AlarmItem)
+    fun cancelScheduledAlarm(type: AlarmType)
 }

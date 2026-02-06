@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
+import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.model.AlarmItem
 import com.todoapp.mobile.ui.overlay.OverlayService
 import java.time.ZoneId
@@ -21,71 +22,63 @@ class AlarmSchedulerImpl(
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
-    override fun schedule(item: AlarmItem) {
-        scheduleAlarm(
-            item = item,
-            requestCode = item.hashCode(),
-            intent = buildPreferredIntent(item)
-        )
-    }
-
-    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
-    override fun scheduleDailyPlan(item: AlarmItem) {
-        scheduleAlarm(
-            item = item,
-            requestCode = DAILY_PLAN_REQUEST_CODE,
-            intent = buildOverlayIntent(item, OverlayService.OVERLAY_TYPE_DAILY_PLAN)
-        )
-    }
-
-    override fun cancel(item: AlarmItem) {
-        cancelAlarm(item.hashCode())
-    }
-
-    override fun cancelDailyPlan() {
-        cancelAlarm(DAILY_PLAN_REQUEST_CODE)
-    }
-
-    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
-    private fun scheduleAlarm(item: AlarmItem, requestCode: Int, intent: Intent) {
+    override fun schedule(item: AlarmItem, type: AlarmType) {
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
             item.time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
             PendingIntent.getService(
                 context,
-                requestCode,
-                intent,
+                type.getRequestCode(item),
+                type.buildIntent(item),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         )
+    }
+
+    override fun cancelTask(item: AlarmItem) {
+        cancelAlarm(item.hashCode())
+    }
+
+    override fun cancelScheduledAlarm(type: AlarmType) {
+        val requestCode = when (type) {
+            AlarmType.TASK -> return
+            AlarmType.DAILY_PLAN -> REQUEST_CODE_DAILY_PLAN
+        }
+        cancelAlarm(requestCode)
     }
 
     private fun cancelAlarm(requestCode: Int) {
-        alarmManager.cancel(
-            PendingIntent.getService(
-                context,
-                requestCode,
-                Intent(context, OverlayService::class.java),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        )
+        cancelPendingIntent(requestCode, OverlayService::class.java)
+        cancelPendingIntent(requestCode, NotificationService::class.java)
+    }
 
+    private fun cancelPendingIntent(requestCode: Int, serviceClass: Class<*>) {
         alarmManager.cancel(
             PendingIntent.getService(
                 context,
                 requestCode,
-                Intent(context, NotificationService::class.java),
+                Intent(context, serviceClass),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         )
     }
 
-    private fun buildPreferredIntent(item: AlarmItem): Intent =
-        if (Settings.canDrawOverlays(context)) buildOverlayIntent(item) else buildNotificationIntent(item)
+    private fun AlarmType.getRequestCode(item: AlarmItem): Int = when (this) {
+        AlarmType.TASK -> item.hashCode()
+        AlarmType.DAILY_PLAN -> REQUEST_CODE_DAILY_PLAN
+    }
+
+    private fun AlarmType.buildIntent(item: AlarmItem): Intent = when (this) {
+        AlarmType.TASK -> buildPreferredIntent(item, OverlayService.OVERLAY_TYPE_TASK)
+        AlarmType.DAILY_PLAN -> buildPreferredIntent(item, OverlayService.OVERLAY_TYPE_DAILY_PLAN)
+    }
+
+    private fun buildPreferredIntent(item: AlarmItem, overlayType: String): Intent =
+        if (Settings.canDrawOverlays(context)) buildOverlayIntent(item, overlayType) else buildNotificationIntent(item)
 
     private fun buildOverlayIntent(
         item: AlarmItem,
-        overlayType: String = OverlayService.OVERLAY_TYPE_TASK,
+        overlayType: String,
     ): Intent =
         Intent(context, OverlayService::class.java).apply {
             putExtra(OverlayService.INTENT_EXTRA_COMMAND_SHOW_OVERLAY, item.message)
@@ -101,6 +94,6 @@ class AlarmSchedulerImpl(
         }
 
     private companion object {
-        const val DAILY_PLAN_REQUEST_CODE = 10_001
+        const val REQUEST_CODE_DAILY_PLAN = 10_001
     }
 }

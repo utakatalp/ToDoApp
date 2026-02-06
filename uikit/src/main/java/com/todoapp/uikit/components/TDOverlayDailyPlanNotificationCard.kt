@@ -1,6 +1,7 @@
 package com.todoapp.uikit.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -64,16 +68,30 @@ fun TDOverlayDailyPlanNotificationCard(
     var offsetX by remember(position) { mutableFloatStateOf(position.x) }
     var offsetY by remember(position) { mutableFloatStateOf(position.y) }
 
+    var startAnimation by remember { mutableStateOf(false) }
+
+    val closeTime by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(
+            autoDismissMillis,
+            easing = LinearEasing,
+        ),
+        label = "close time"
+    )
+
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 300),
         label = "alpha"
     )
 
-    LaunchedEffect(isVisible, autoDismissMillis) {
+    LaunchedEffect(isVisible) {
         if (isVisible) {
+            startAnimation = true
             delay(autoDismissMillis.toLong())
             onDismiss()
+        } else {
+            startAnimation = false
         }
     }
 
@@ -93,13 +111,6 @@ fun TDOverlayDailyPlanNotificationCard(
                         targetOffsetY = { fullHeight -> fullHeight },
                     ) + fadeOut(),
             ) {
-                LaunchedEffect(isVisible, autoDismissMillis) {
-                    if (isVisible) {
-                        delay(autoDismissMillis.toLong())
-                        onDismiss()
-                    }
-                }
-
                 val overlayTextColor = TDTheme.colors.onBackground
                 val overlaySurfaceColor = TDTheme.colors.background
 
@@ -126,6 +137,22 @@ fun TDOverlayDailyPlanNotificationCard(
                     color = overlaySurfaceColor,
                     contentColor = overlayTextColor,
                 ) {
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 22.dp))
+                                .background(TDTheme.colors.primary.copy(alpha = 0.2f))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(fraction = closeTime)
+                                    .height(3.dp)
+                                    .background(TDTheme.colors.crossRed)
+                            )
+                        }
+                    }
                     Row(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,

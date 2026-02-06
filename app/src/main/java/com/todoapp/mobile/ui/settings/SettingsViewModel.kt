@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.security.SecretModeEndCondition
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
+import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.alarm.buildDailyPlanAlarmItem
 import com.todoapp.mobile.domain.constants.DailyPlanDefaults
 import com.todoapp.mobile.domain.repository.DailyPlanPreferences
@@ -156,7 +157,7 @@ class SettingsViewModel @Inject constructor(
 
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     private fun rescheduleDailyPlanAlarm(time: LocalTime) {
-        alarmScheduler.cancelDailyPlan()
+        alarmScheduler.cancelScheduledAlarm(AlarmType.DAILY_PLAN)
 
         val item = buildDailyPlanAlarmItem(
             selectedTime = time,
@@ -164,7 +165,7 @@ class SettingsViewModel @Inject constructor(
             message = "",
         )
 
-        alarmScheduler.scheduleDailyPlan(item)
+        alarmScheduler.schedule(item, AlarmType.DAILY_PLAN)
     }
 
     private fun observeSecretModeMessage(condition: SecretModeEndCondition): Flow<String> = flow {
