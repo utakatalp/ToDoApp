@@ -1,6 +1,7 @@
 package com.todoapp.mobile.data.repository
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.todoapp.mobile.domain.repository.SessionPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,7 +13,7 @@ class SessionPreferencesImpl @Inject constructor(
 
     override suspend fun setAccessToken(token: String) {
         return withContext(Dispatchers.IO) {
-            sharedPreferences.edit().putString(KEY_ACCESS_TOKEN, token).apply()
+            sharedPreferences.edit { putString(KEY_ACCESS_TOKEN, token) }
         }
     }
 
@@ -24,7 +25,7 @@ class SessionPreferencesImpl @Inject constructor(
 
     override suspend fun setRefreshToken(token: String) {
         return withContext(Dispatchers.IO) {
-            sharedPreferences.edit().putString(KEY_REFRESH_TOKEN, token).apply()
+            sharedPreferences.edit { putString(KEY_REFRESH_TOKEN, token) }
         }
     }
 
@@ -37,9 +38,9 @@ class SessionPreferencesImpl @Inject constructor(
     override suspend fun setExpiresAt(expiresIn: Long) {
         return withContext(Dispatchers.IO) {
             val expiresAtMillis = System.currentTimeMillis() + (expiresIn * MILLIS_IN_SECOND)
-            sharedPreferences.edit()
-                .putLong(KEY_EXPIRES_AT, expiresAtMillis)
-                .apply()
+            sharedPreferences.edit {
+                putLong(KEY_EXPIRES_AT, expiresAtMillis)
+            }
         }
     }
 

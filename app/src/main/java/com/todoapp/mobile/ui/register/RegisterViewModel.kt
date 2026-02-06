@@ -1,11 +1,11 @@
 package com.todoapp.mobile.ui.register
 
-import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
+import com.todoapp.mobile.domain.repository.SessionPreferences
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -25,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val sessionPreferences: SessionPreferences,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -143,7 +144,11 @@ class RegisterViewModel @Inject constructor(
                 isInclusive = true
             )
         )
-        Log.d("response", registerResponseData.toString())
+        viewModelScope.launch {
+            sessionPreferences.setAccessToken(registerResponseData.accessToken)
+            sessionPreferences.setExpiresAt(registerResponseData.expiresIn)
+            sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
+        }
     }
 
     private fun onEmailChange(email: String) {
