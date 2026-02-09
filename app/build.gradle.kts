@@ -81,6 +81,7 @@ tasks.withType<DetektCreateBaselineTask>().configureEach {
 }
 
 dependencies {
+    implementation("com.facebook.android:facebook-android-sdk:latest.release")
     implementation(project(":uikit"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

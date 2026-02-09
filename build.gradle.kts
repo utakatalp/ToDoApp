@@ -9,3 +9,8 @@ plugins {
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.detekt) apply false
 }
+buildscript{
+    repositories{
+        mavenCentral()
+    }
+}
