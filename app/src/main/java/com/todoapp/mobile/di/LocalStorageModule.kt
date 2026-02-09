@@ -7,6 +7,9 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.todoapp.mobile.data.auth.AuthTokenManager
+import com.todoapp.mobile.data.auth.GoogleSignInManager
+import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
@@ -84,6 +87,18 @@ object LocalStorageModule {
     @Provides
     @Singleton
     fun providePomodoro(database: AppDatabase): PomodoroDao = database.pomodoroDao()
+
+    @Provides
+    @Singleton
+    fun provideGoogleSignInManager(
+        @ApplicationContext context: Context,
+    ): GoogleSignInManager = GoogleSignInManager(context)
+
+    @Provides
+    @Singleton
+    fun provideAuthTokensManager(
+        dataStoreHelper: DataStoreHelper
+    ): AuthTokenManager = AuthTokenManager(dataStoreHelper)
 }
 
 @Module

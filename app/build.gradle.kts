@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -56,7 +57,8 @@ android {
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     android.set(true)
     ignoreFailures.set(false)
-    additionalEditorconfig.set( // not supported until ktlint 0.49
+    additionalEditorconfig.set(
+        // not supported until ktlint 0.49
         mapOf(
             "ktlint_standard_function-naming" to "disabled",
         ),
@@ -129,4 +131,9 @@ dependencies {
     implementation(libs.reorderable)
 
     implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.play.services.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 }

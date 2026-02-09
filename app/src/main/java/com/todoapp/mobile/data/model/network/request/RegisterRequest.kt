@@ -15,3 +15,9 @@ data class LoginRequest(
     @SerialName("email") val email: String,
     @SerialName("password") val password: String,
 )
+
+@Serializable
+data class GoogleLoginRequest(
+    @SerialName("token")
+    val token: String,
+)

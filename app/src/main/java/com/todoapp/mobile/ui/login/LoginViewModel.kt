@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.R
 import com.todoapp.mobile.common.passwordValidation.ValidationManager
+import com.todoapp.mobile.data.auth.AuthModel
+import com.todoapp.mobile.data.auth.AuthTokenManager
+import com.todoapp.mobile.data.auth.GoogleSignInManager
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
@@ -25,6 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val googleSignInManager: GoogleSignInManager,
+    private val authTokenManager: AuthTokenManager,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -44,13 +49,61 @@ class LoginViewModel @Inject constructor(
             UiAction.OnEmailFieldTap -> enableEmailField()
             UiAction.OnFacebookSignInTap -> {}
             UiAction.OnForgotPasswordTap -> {}
-            UiAction.OnGoogleSignInTap -> {}
+            UiAction.OnGoogleSignInTap -> googleLogin()
             UiAction.OnLoginTap -> handleLoginClick()
             UiAction.OnPasswordFieldTap -> enablePasswordField()
             UiAction.OnPasswordVisibilityTap -> togglePasswordVisibility()
             UiAction.OnPrivacyPolicyTap -> showPrivacyPolicy()
             UiAction.OnRegisterTap -> navigateToRegister()
             UiAction.OnTermsOfServiceTap -> showTermsOfService()
+        }
+    }
+
+    private fun googleLogin() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            googleSignInManager.getGoogleIdToken()
+                .onSuccess { idToken ->
+                    userRepository.googleLogin(idToken)
+                        .onSuccess { loginData ->
+                            authTokenManager.saveTokens(
+                                AuthModel(
+                                    accessToken = loginData.accessToken,
+                                    refreshToken = loginData.refreshToken,
+                                    userId = loginData.user.id,
+                                    email = loginData.user.email,
+                                    displayName = loginData.user.displayName,
+                                    avatarUrl = loginData.user.avatarUrl,
+                                )
+                            )
+
+                            _uiState.update { it.copy(isLoading = false) }
+
+                            _navEffect.trySend(
+                                NavigationEffect.Navigate(
+                                    route = Screen.Home,
+                                    popUpTo = Screen.Onboarding,
+                                    isInclusive = true
+                                )
+                            )
+                        }
+                        .onFailure { error ->
+                            _uiState.update { it.copy(isLoading = false) }
+                            _uiEffect.trySend(
+                                UiEffect.ShowToast(
+                                    error.message ?: "Goggle login error"
+                                )
+                            )
+                        }
+                }.onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    _uiEffect.trySend(
+                        UiEffect.ShowToast(
+                            error.message ?: "Goggle Sign-in Cancelled"
+                        )
+                    )
+                }
         }
     }
 

@@ -39,3 +39,22 @@ data class LoginUser(
     val providers: List<String>,
     val createdAt: String,
 )
+
+@Serializable
+data class GoogleLoginResponseData(
+    val accessToken: String,
+    val refreshToken: String,
+    val expiresIn: Long,
+    val user: GoogleLoginUser,
+)
+
+@Serializable
+data class GoogleLoginUser(
+    val id: Long,
+    val email: String,
+    val displayName: String,
+    val avatarUrl: String?,
+    val emailVerified: Boolean,
+    val providers: List<String>,
+    val createdAt: String,
+    )
