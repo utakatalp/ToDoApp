@@ -26,6 +26,8 @@ import com.todoapp.mobile.ui.edit.EditScreen
 import com.todoapp.mobile.ui.edit.EditViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
+import com.todoapp.mobile.ui.login.LoginScreen
+import com.todoapp.mobile.ui.login.LoginViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
@@ -77,14 +79,6 @@ fun NavGraph(
             val viewModel: CalendarViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             CalendarScreen(
-                uiState = uiState,
-                onAction = viewModel::onAction,
-            )
-        }
-        composable<Screen.Settings> {
-            val viewModel: SettingsViewModel = hiltViewModel()
-            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            SettingsScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
@@ -148,6 +142,17 @@ fun NavGraph(
             )
         }
 
+        composable<Screen.Login> {
+            val viewModel: LoginViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
+            LoginScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction
+            )
+        }
+
         composable<Screen.WebView> {
             val viewModel: WebViewViewModel = hiltViewModel()
             val uiEffect = viewModel.uiEffect
@@ -188,7 +193,7 @@ sealed interface NavigationEffect {
     data class Navigate(
         val route: Screen,
         val popUpTo: Screen? = null,
-        val isInclusive: Boolean = false
+        val isInclusive: Boolean = false,
     ) : NavigationEffect
 
     data object Back : NavigationEffect

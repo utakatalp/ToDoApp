@@ -4,6 +4,7 @@ import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.common.passwordValidation.ValidationManager
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.domain.repository.UserRepository
@@ -160,6 +161,7 @@ class RegisterViewModel @Inject constructor(
             state.copy(
                 password = password,
                 passwordError = validationMode.validate(Field.Password(password)),
+                passwordStrength = ValidationManager.computePasswordStrength(password)
             )
         }
     }
@@ -175,7 +177,9 @@ class RegisterViewModel @Inject constructor(
 
     private fun onFullNameChange(fullName: String) {
         _uiState.update { state ->
-            state.copy(fullName = fullName)
+            state.copy(
+                fullName = fullName
+            )
         }
     }
 
@@ -279,7 +283,7 @@ sealed interface ValidationMode {
         private val getState: () -> UiState,
         private val validateEmail: (String) -> RegisterError?,
         private val validatePassword: (String) -> RegisterError?,
-        private val validateConfirm: (String, String) -> RegisterError?
+        private val validateConfirm: (String, String) -> RegisterError?,
     ) : ValidationMode {
 
         override fun validate(field: Field): RegisterError? {

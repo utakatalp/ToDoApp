@@ -311,9 +311,9 @@ fun TDCompactOutlinedTextField(
                                         text = placeholder,
                                         color =
                                             if (enabled) {
-                                                TDTheme.colors.gray
+                                                TDTheme.colors.onBackground.copy(alpha = 0.4f)
                                             } else {
-                                                TDTheme.colors.gray.copy(alpha = 0.38f)
+                                                TDTheme.colors.onBackground.copy(alpha = 0.2f)
                                             },
                                     )
                                 }

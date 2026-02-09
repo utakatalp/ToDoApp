@@ -34,7 +34,7 @@ internal fun lightColors(
     lightBrown: Color = Color(0xFFD3BBAA),
     beige: Color = Color(0xFFE6DCCD),
     lightOrange: Color = Color(0xFFFFE2CD),
-    lightYellow: Color = Color(0xFFFFF5E0),
+    lightYellow: Color = Color(0xFFCDBC2A),
     white: Color = Color(0xFFFFFAF0),
     softPink: Color = Color(0xFFF5D3BB),
     lightGray: Color = Color(0xFFC0C0C0),

@@ -1,5 +1,7 @@
 package com.todoapp.mobile.ui.register
 
+import com.todoapp.mobile.common.passwordValidation.PasswordStrength
+
 object RegisterContract {
     data class UiState(
         val fullName: String = "",
@@ -15,6 +17,7 @@ object RegisterContract {
         val passwordError: RegisterError? = null,
         val confirmPasswordError: RegisterError? = null,
         val isWebViewAvailable: Boolean = false,
+        val passwordStrength: PasswordStrength? = null,
     )
 
     sealed interface UiAction {

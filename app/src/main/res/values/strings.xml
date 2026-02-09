@@ -77,5 +77,23 @@
     <string name="terms_of_service">Terms of Service</string>
     <string name="and">"and "</string>
     <string name="privacy_policy">Privacy Policy</string>
-
+    <string name="login_header">DONEBOT</string>
+    <string name="elevate_your_productivity">Elevate your productivity</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="please_sign_in_to_your_account">Please sign in to your account</string>
+    <string name="email_address">Email Address</string>
+    <string name="email_placeholder">name@example.com</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="or_continue_with">OR CONTINUE WITH</string>
+    <string name="google">Google</string>
+    <string name="facebook">Facebook</string>
+    <string name="dont_have_an_account">Don\'t have an account? </string>
+    <string name="register">Register</string>
+    <string name="register_password_strength_WEAK">Your password is too weak</string>
+    <string name="register_password_strength_MEDIUM">Your password is medium</string>
+    <string name="register_password_strength_STRONG">Your password is strong</string>
+    <string name="error_email_blank">Email cannot be blank</string>
+    <string name="error_email_invalid">Invalid email address</string>
+    <string name="error_password_blank">Password cannot be blank</string>
+    <string name="error_password_min_length">Password must be at least %1$d characters long</string>
 </resources>

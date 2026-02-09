@@ -28,7 +28,7 @@ import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreviewNoBg
 import com.todoapp.uikit.theme.TDTheme
 
-enum class TDButtonType { PRIMARY, SECONDARY, CANCEL }
+enum class TDButtonType { PRIMARY, SECONDARY, OUTLINE, CANCEL }
 
 enum class TDButtonSize { SMALL, MEDIUM }
 
@@ -89,14 +89,15 @@ fun TDButton(
             TDButtonSize.MEDIUM -> PaddingValues(horizontal = 12.dp, vertical = 12.dp)
         }
 
+    val sizeModifier = Modifier
+        .height(height)
+        .then(modifier)
+        .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.width(width))
+
     when (type) {
         TDButtonType.PRIMARY -> {
             Button(
-                modifier =
-                    Modifier
-                        .height(height)
-                        .then(modifier)
-                        .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.width(width)),
+                modifier = sizeModifier,
                 onClick = onClick,
                 enabled = isEnable,
                 contentPadding = paddingValues,
@@ -128,11 +129,7 @@ fun TDButton(
 
         TDButtonType.SECONDARY -> {
             OutlinedButton(
-                modifier =
-                    Modifier
-                        .height(height)
-                        .then(modifier)
-                        .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.width(width)),
+                modifier = sizeModifier,
                 onClick = onClick,
                 enabled = isEnable,
                 contentPadding = paddingValues,
@@ -155,13 +152,39 @@ fun TDButton(
                 )
             }
         }
+
+        TDButtonType.OUTLINE -> {
+            OutlinedButton(
+                modifier = sizeModifier,
+                onClick = onClick,
+                enabled = isEnable,
+                contentPadding = paddingValues,
+                shape = RoundedCornerShape(6.dp),
+                border = BorderStroke(
+                    width = 1.5.dp,
+                    color = if (isEnable) TDTheme.colors.purple else TDTheme.colors.purple.copy(alpha = 0.3f)
+                ),
+            ) {
+                icon?.let {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = icon,
+                        contentDescription = text,
+                        tint = Color.Unspecified,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                TDText(
+                    text = text,
+                    style = textStyle,
+                    color = if (isEnable) TDTheme.colors.purple else TDTheme.colors.purple.copy(alpha = 0.5f),
+                )
+            }
+        }
+
         TDButtonType.CANCEL -> {
             Button(
-                modifier =
-                    Modifier
-                        .height(height)
-                        .then(modifier)
-                        .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.width(width)),
+                modifier = sizeModifier,
                 onClick = onClick,
                 enabled = isEnable,
                 contentPadding = paddingValues,
@@ -230,6 +253,25 @@ fun TDButtonPreview() {
             text = "Secondary Button2",
             onClick = {},
             type = TDButtonType.SECONDARY,
+            size = TDButtonSize.MEDIUM,
+            fullWidth = true,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TDButton(
+            text = "Outline Button",
+            onClick = {},
+            type = TDButtonType.OUTLINE,
+            size = TDButtonSize.SMALL,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TDButton(
+            text = "Outline Button2",
+            onClick = {},
+            type = TDButtonType.OUTLINE,
             size = TDButtonSize.MEDIUM,
             fullWidth = true,
         )

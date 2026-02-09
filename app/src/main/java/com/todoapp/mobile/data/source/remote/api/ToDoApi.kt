@@ -1,6 +1,8 @@
 package com.todoapp.mobile.data.source.remote.api
 
+import com.todoapp.mobile.data.model.network.data.LoginResponseData
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
+import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.data.model.network.response.BaseResponse
 import retrofit2.Response
@@ -12,4 +14,9 @@ interface ToDoApi {
     suspend fun register(
         @Body request: RegisterRequest
     ): Response<BaseResponse<RegisterResponseData?>>
+
+    @POST("auth/login")
+    suspend fun login(
+        @Body request: LoginRequest,
+    ): Response<BaseResponse<LoginResponseData?>>
 }
