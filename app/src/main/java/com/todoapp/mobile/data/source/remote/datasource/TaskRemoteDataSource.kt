@@ -5,4 +5,8 @@ import com.todoapp.mobile.domain.model.Task
 
 interface TaskRemoteDataSource {
     suspend fun addTask(task: Task): Result<TaskData>
+
+    suspend fun updateTask(id: Long): Result<TaskData>
+
+    suspend fun deleteTask(id: Long): Result<Unit>
 }

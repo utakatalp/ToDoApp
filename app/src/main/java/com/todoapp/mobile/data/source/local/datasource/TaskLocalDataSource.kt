@@ -2,7 +2,6 @@ package com.todoapp.mobile.data.source.local.datasource
 
 import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.data.source.local.DayCount
-import com.todoapp.mobile.domain.model.Task
 import kotlinx.coroutines.flow.Flow
 
 interface TaskLocalDataSource {
@@ -26,7 +25,7 @@ interface TaskLocalDataSource {
         endDate: Long,
     ): Flow<List<DayCount>>
 
-    suspend fun insert(task: Task)
+    suspend fun insert(task: TaskEntity)
 
     suspend fun delete(task: TaskEntity)
 

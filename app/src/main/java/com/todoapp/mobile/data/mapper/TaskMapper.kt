@@ -1,5 +1,6 @@
 package com.todoapp.mobile.data.mapper
 
+import com.todoapp.mobile.data.model.entity.SyncStatus
 import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.domain.model.Task
 import java.time.LocalDate
@@ -27,9 +28,10 @@ fun TaskEntity.toDomain(): Task =
         isSecret = isSecret,
     )
 
-fun Task.toEntity(): TaskEntity =
-    TaskEntity(
-        id = id,
+fun Task.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TaskEntity {
+    val remoteIdOrNull = if (syncStatus == SyncStatus.SYNCED) id else null
+
+    return TaskEntity(
         title = title,
         description = description,
         date = date.toEpochDayLong(),
@@ -37,4 +39,7 @@ fun Task.toEntity(): TaskEntity =
         timeEnd = timeEnd.toMinuteOfDayLong(),
         isCompleted = isCompleted,
         isSecret = isSecret,
+        remoteId = remoteIdOrNull,
+        syncStatus = syncStatus,
     )
+}

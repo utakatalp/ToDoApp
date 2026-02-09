@@ -43,7 +43,7 @@ suspend fun <T> handleRequest(
     return try {
         val response = request()
 
-        if (!response.isSuccessful) {
+        if (response.isSuccessful.not()) {
             val errorBody = response.errorBody()?.string()
             val message = errorBody
                 ?.let {

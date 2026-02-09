@@ -1,5 +1,6 @@
 package com.todoapp.mobile.data.source.remote.datasource
 
+import android.util.Log
 import com.todoapp.mobile.common.handleRequest
 import com.todoapp.mobile.data.model.network.data.TaskData
 import com.todoapp.mobile.data.source.remote.api.ToDoApi
@@ -12,5 +13,14 @@ class TaskRemoteDataSourceImpl @Inject constructor(
 ) : TaskRemoteDataSource {
     override suspend fun addTask(task: Task): Result<TaskData> {
         return handleRequest { todoApi.addTask(task.toCreateTaskRequestDto()) }
+    }
+
+    override suspend fun updateTask(id: Long): Result<TaskData> {
+        return handleRequest { todoApi.updateTask(id) }
+    }
+
+    override suspend fun deleteTask(id: Long): Result<Unit> {
+        Log.d("delete", "data source")
+        return handleRequest { todoApi.deleteTask(id) }
     }
 }

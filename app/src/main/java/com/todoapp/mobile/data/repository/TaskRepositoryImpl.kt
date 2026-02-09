@@ -3,6 +3,8 @@ package com.todoapp.mobile.data.repository
 import android.util.Log
 import com.todoapp.mobile.data.mapper.toDomain
 import com.todoapp.mobile.data.mapper.toEntity
+import com.todoapp.mobile.data.model.entity.SyncStatus
+import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.data.source.local.DayCount
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
@@ -23,8 +25,12 @@ class TaskRepositoryImpl @Inject constructor(
     private val remoteDataSource: TaskRemoteDataSource,
     private val localDataSource: TaskLocalDataSource,
 ) : TaskRepository {
-    override fun observeAll(): Flow<List<Task>> {
-        return localDataSource.observeAll().map { list ->
+    override fun observeAllTaskEntities(): Flow<List<TaskEntity>> {
+        return localDataSource.observeAll()
+    }
+
+    override fun observeAllTasks(): Flow<List<Task>> {
+        return observeAllTaskEntities().map { list ->
             list.map { it.toDomain() }
         }
     }
@@ -117,18 +123,31 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insert(task: Task) {
-        localDataSource.insert(task)
-
-        // Never crash the app if the network is unavailable.
-        runCatching {
-            remoteDataSource.addTask(task)
-        }.onFailure { throwable ->
-            Log.d("TaskRepositoryImpl", "insert: remote addTask failed", throwable)
-        }
+        remoteDataSource.addTask(task)
+            .onSuccess {
+                localDataSource.insert(it.toDomain().toEntity())
+            }
+            .onFailure {
+                localDataSource.insert(task.toEntity(SyncStatus.PENDING_CREATE))
+            }
     }
 
     override suspend fun delete(task: Task) {
-        localDataSource.delete(task.toEntity())
+        val taskEntity = localDataSource.getTaskById(task.id)
+        taskEntity?.let { taskEntity ->
+            if (taskEntity.syncStatus != SyncStatus.SYNCED) {
+                localDataSource.delete(taskEntity)
+                return
+            }
+            remoteDataSource.deleteTask(taskEntity.remoteId!!)
+                .onSuccess {
+                    localDataSource.delete(taskEntity)
+                }
+                .onFailure {
+                    Log.d("delete", "repo  ${it.message}")
+                    localDataSource.update(taskEntity.copy(syncStatus = SyncStatus.PENDING_DELETE))
+                }
+        }
     }
 
     override suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean) = withContext(Dispatchers.IO) {
@@ -140,32 +159,97 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun update(task: Task) = withContext(Dispatchers.IO) {
-        localDataSource.update(task.toEntity())
+        val taskEntity = localDataSource.getTaskById(task.id)
+
+        if (taskEntity?.syncStatus != SyncStatus.SYNCED) {
+            // no need to update remote because its not synced
+            localDataSource.update(task.toEntity(SyncStatus.PENDING_UPDATE))
+            return@withContext
+        }
+
+        remoteDataSource.updateTask(taskEntity.remoteId!!)
+            .onSuccess {
+                localDataSource.update(it.toDomain().toEntity(SyncStatus.SYNCED))
+            }
+            .onFailure {
+                localDataSource.update(task.toEntity(SyncStatus.PENDING_UPDATE))
+            }
     }
 
     override suspend fun syncLocalTasksToServer(): Result<Unit> = withContext(Dispatchers.IO) {
-        // `remoteDataSource.addTask(...)` can throw (e.g., UnknownHostException) when there is no internet.
-        // Handle both cases: (1) it throws, (2) it returns a Result.failure.
-        val tasks = observeAll().first()
-        Log.d("TaskRepositoryImpl", "syncLocalTasksToServer: $tasks")
-
-        tasks.forEach { task ->
-            val result = runCatching {
-                remoteDataSource.addTask(task)
-            }.getOrElse { throwable ->
-                Log.d("TaskRepositoryImpl", "syncLocalTasksToServer: addTask threw", throwable)
-                return@withContext Result.failure(throwable)
-            }
-
-            Log.d("TaskRepositoryImpl", "syncLocalTasksToServer: $result")
-
-            if (result.isFailure) {
-                val throwable = result.exceptionOrNull() ?: Exception("Failed to sync task")
-                return@withContext Result.failure(throwable)
+        val nonSyncedTasks = findNonSyncedTasks()
+        nonSyncedTasks.forEach { task ->
+            syncTask(task).onFailure {
+                return@withContext Result.failure(it)
             }
         }
-
         Result.success(Unit)
+    }
+
+    override suspend fun syncTask(taskEntity: TaskEntity): Result<Unit> {
+        return when (taskEntity.syncStatus) {
+            SyncStatus.SYNCED -> { Result.success(Unit) }
+            SyncStatus.PENDING_CREATE -> syncCreatedTask(taskEntity)
+            SyncStatus.PENDING_UPDATE -> syncUpdatedTask(taskEntity)
+            SyncStatus.PENDING_DELETE -> syncDeletedTask(taskEntity)
+        }
+    }
+
+    private suspend fun syncDeletedTask(taskEntity: TaskEntity): Result<Unit> {
+        val remoteResult = remoteDataSource.deleteTask(taskEntity.remoteId!!)
+
+        return remoteResult.fold(
+            onSuccess = {
+                runCatching { localDataSource.delete(taskEntity) }
+            },
+            onFailure = {
+                Result.failure(it)
+            }
+        )
+    }
+
+    private suspend fun syncUpdatedTask(taskEntity: TaskEntity): Result<Unit> {
+        val remoteResult = remoteDataSource.updateTask(taskEntity.remoteId!!)
+
+        return remoteResult.fold(
+            onSuccess = { remoteTask ->
+                val updated = taskEntity.copy(
+                    remoteId = remoteTask.id,
+                    syncStatus = SyncStatus.SYNCED
+                )
+
+                runCatching { localDataSource.update(updated) }
+            },
+            onFailure = {
+                Result.failure(it)
+            }
+        )
+    }
+
+    private suspend fun syncCreatedTask(taskEntity: TaskEntity): Result<Unit> {
+        val remoteResult = remoteDataSource.addTask(taskEntity.toDomain())
+
+        return remoteResult.fold(
+            onSuccess = { remoteTask ->
+                val updated = taskEntity.copy(
+                    remoteId = remoteTask.id,
+                    syncStatus = SyncStatus.SYNCED
+                )
+
+                runCatching {
+                    localDataSource.update(updated)
+                }
+            },
+            onFailure = {
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun findNonSyncedTasks(): List<TaskEntity> {
+        val tasks = observeAllTaskEntities().first()
+        val nonSyncedTasks = tasks.filter { it.syncStatus != SyncStatus.SYNCED }
+        return nonSyncedTasks
     }
 
     companion object {

@@ -1,10 +1,8 @@
 package com.todoapp.mobile.data.source.local.datasource
 
-import com.todoapp.mobile.data.mapper.toEntity
 import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.data.source.local.DayCount
 import com.todoapp.mobile.data.source.local.TaskDao
-import com.todoapp.mobile.domain.model.Task
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -35,8 +33,8 @@ class TaskLocalDataSourceImpl @Inject constructor(
         endDate: Long,
     ): Flow<List<DayCount>> = taskDao.observeCompletedCountsByDay(startDate, endDate)
 
-    override suspend fun insert(task: Task) {
-        taskDao.insert(task.toEntity())
+    override suspend fun insert(task: TaskEntity) {
+        taskDao.insert(task)
     }
 
     override suspend fun delete(task: TaskEntity) {

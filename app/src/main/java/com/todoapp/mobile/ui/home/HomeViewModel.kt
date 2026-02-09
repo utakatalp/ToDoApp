@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.home
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -170,7 +171,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onDeleteDialogConfirmed() {
-        selectedTask?.let { deleteTask(it) }
+        Log.d("delete", "view model")
+        deleteTask(selectedTask)
         closeDialog()
     }
 
