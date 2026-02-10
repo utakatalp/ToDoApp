@@ -213,8 +213,9 @@ sealed interface NavigationEffect {
     data class Navigate(
         val route: Screen,
         val popUpTo: Screen? = null,
-        val isInclusive: Boolean = false
+        val isInclusive: Boolean = false,
     ) : NavigationEffect
+
     data object Back : NavigationEffect
 }
 
