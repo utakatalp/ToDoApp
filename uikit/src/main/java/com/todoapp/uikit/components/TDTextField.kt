@@ -234,7 +234,7 @@ fun TDCompactOutlinedTextField(
 
         LaunchedEffect(enabled) {
             if (enabled) {
-                focusRequester.requestFocus()
+                // focusRequester.requestFocus()
                 delay(50)
                 keyboardController?.show()
             }
