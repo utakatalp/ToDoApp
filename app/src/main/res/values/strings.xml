@@ -88,7 +88,6 @@
     <string name="please_sign_in_to_your_account">Please sign in to your account</string>
     <string name="email_address">Email Address</string>
     <string name="email_placeholder">name@example.com</string>
-    <string name="forgot_password">Forgot Password?</string>
     <string name="or_continue_with">OR CONTINUE WITH</string>
     <string name="google">Google</string>
     <string name="facebook">Facebook</string>

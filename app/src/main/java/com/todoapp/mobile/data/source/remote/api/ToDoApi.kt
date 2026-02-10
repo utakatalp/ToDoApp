@@ -3,10 +3,10 @@ package com.todoapp.mobile.data.source.remote.api
 import com.todoapp.mobile.data.model.network.data.GoogleLoginResponseData
 import com.todoapp.mobile.data.model.network.data.LoginResponseData
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
-import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
-import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.model.network.data.TaskData
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
+import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
+import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.data.model.network.request.TaskRequest
 import com.todoapp.mobile.data.model.network.response.BaseResponse
@@ -31,7 +31,7 @@ interface ToDoApi {
     suspend fun googleLogin(
         @Body request: GoogleLoginRequest,
     ): Response<BaseResponse<GoogleLoginResponseData?>>
-  
+
     @POST("tasks")
     suspend fun addTask(
         @Body request: TaskRequest

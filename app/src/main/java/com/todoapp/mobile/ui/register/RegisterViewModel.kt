@@ -4,8 +4,8 @@ import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.todoapp.mobile.common.passwordValidation.ValidationManager
 import com.todoapp.mobile.common.DomainException
+import com.todoapp.mobile.common.passwordValidation.ValidationManager
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
@@ -52,7 +52,7 @@ class RegisterViewModel @Inject constructor(
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.password)
             is UiAction.OnUpdateWebViewVisibility -> updateWebViewVisibility(uiAction.isVisible)
             UiAction.OnFacebookSignInTap -> _uiEffect.trySend(UiEffect.FacebookLogin)
-            UiAction.OnLoginTap -> {}
+            UiAction.OnLoginTap -> navigateToLogin()
             UiAction.OnPrivacyPolicyTap -> showPrivacyPolicy()
             UiAction.OnSignUpTap -> onSignUpTap()
             UiAction.OnTermsOfServiceTap -> showTermsOfService()
@@ -66,6 +66,9 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
+    private fun navigateToLogin() {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Login))
+    }
     private fun updateWebViewVisibility(isVisible: Boolean) {
         _uiState.update { state ->
             state.copy(

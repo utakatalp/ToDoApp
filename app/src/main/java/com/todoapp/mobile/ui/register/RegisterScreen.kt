@@ -1,7 +1,7 @@
 package com.todoapp.mobile.ui.register
 
-import android.content.res.Configuration
 import android.content.Context
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,7 +48,6 @@ import com.todoapp.mobile.ui.register.RegisterContract.UiAction
 import com.todoapp.mobile.ui.register.RegisterContract.UiEffect
 import com.todoapp.mobile.ui.register.RegisterContract.UiState
 import com.todoapp.uikit.components.TDButton
-import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.extensions.collectWithLifecycle
