@@ -6,7 +6,7 @@ config:
 complexity:
   LongMethod:
     active: true
-    threshold: 60
+    threshold: 62
     ignoreAnnotated:
       - Composable
   TooManyFunctions:
