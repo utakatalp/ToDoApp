@@ -34,9 +34,9 @@ import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
 import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
-import com.todoapp.mobile.ui.settings.SecretModeSettingsScreen
 import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishScreen
 import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishViewModel
+import com.todoapp.mobile.ui.settings.SecretModeSettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
 import com.todoapp.uikit.extensions.collectWithLifecycle

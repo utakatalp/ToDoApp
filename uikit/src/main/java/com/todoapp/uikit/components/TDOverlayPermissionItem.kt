@@ -21,11 +21,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
@@ -101,21 +101,22 @@ fun TDOverlayPermissionItem(
                     )
                     context.startActivity(intent)
                 }
-
-        IconButton(
-            onClick = { dismissed = true },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = 8.dp, y = (-8).dp)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_close),
-                contentDescription = "Close Permission Tab",
-                tint = TDTheme.colors.onBackground,
-                modifier = Modifier.size(24.dp)
             )
         }
+        Box {
+            IconButton(
+                onClick = { dismissed = true },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 8.dp, y = (-8).dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close),
+                    contentDescription = "Close Permission Tab",
+                    tint = TDTheme.colors.onBackground,
+                    modifier = Modifier.size(24.dp)
+                )
             }
-        )
+        }
     }
 }

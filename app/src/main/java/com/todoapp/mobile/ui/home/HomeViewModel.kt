@@ -117,8 +117,6 @@ class HomeViewModel @Inject constructor(
     private fun retry() {
         _uiState.value = UiState.Loading
         loadInitialData()
-    private fun navigateToEdit(task: Task) {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.Edit(task.id)))
     }
 
     private fun navigateToPomodoro() {
@@ -229,11 +227,6 @@ class HomeViewModel @Inject constructor(
         openDeleteDialog()
     }
 
-    private fun onDeleteDialogConfirmed() {
-        deleteTask(selectedTask)
-        closeDeleteDialog()
-    }
-
     private fun changeTaskTitle(uiAction: UiAction.OnTaskTitleChange) {
         updateSuccessState { it.copy(taskTitle = uiAction.title) }
     }
@@ -249,10 +242,10 @@ class HomeViewModel @Inject constructor(
     private fun changeTaskTimeStart(uiAction: UiAction.OnTaskTimeStartChange) {
         updateSuccessState { it.copy(taskTimeStart = uiAction.time) }
     }
-    
+
     private fun onDeleteDialogConfirmed() {
         deleteTask(selectedTask)
-        closeDialog()
+        closeDeleteDialog()
     }
 
     private fun changeTaskTimeEnd(uiAction: UiAction.OnTaskTimeEndChange) {
@@ -365,11 +358,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun navigateToEdit(task: Task) {
-        _navEffect.trySend(NavigationEffect.NavigateToEdit(task.id))
-    }
-
-    private fun navigateToPomodoro() {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Edit(task.id)))
     }
 
     private fun authenticate() {
