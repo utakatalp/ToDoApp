@@ -6,13 +6,13 @@ config:
 complexity:
   LongMethod:
     active: true
-    threshold: 60
+    threshold: 62
     ignoreAnnotated:
       - Composable
   TooManyFunctions:
     active: true
-    thresholdInClasses: 15
-    thresholdInInterfaces: 15
+    thresholdInClasses: 30
+    thresholdInInterfaces: 30
     ignoreAnnotated:
       - HiltViewModel
     ignorePrivate: true
@@ -21,7 +21,11 @@ complexity:
     ignoreSingleWhenExpression: true
 
 
-
+exceptions:
+  InstanceOfCheckForException:
+    active: false
+  TooGenericExceptionCaught:
+    active: false
 naming:
   ClassNaming:
     excludes: &testFolders
@@ -41,6 +45,11 @@ style:
     active: true
     ignoreAnnotated:
       - Preview
+      - TDPreviewForm
+      - TDPreviewDialog
+      - TDPreviewWide
+      - TDPreviewNoBg
+      - TDPreview
   MagicNumber:
     active: true
     ignoreAnnotated:

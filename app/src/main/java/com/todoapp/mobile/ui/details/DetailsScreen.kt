@@ -1,4 +1,4 @@
-package com.todoapp.mobile.ui.edit
+package com.todoapp.mobile.ui.details
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -12,32 +12,36 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
-import com.todoapp.mobile.ui.edit.DetailsContract.UiAction
-import com.todoapp.mobile.ui.edit.DetailsContract.UiEffect
-import com.todoapp.mobile.ui.edit.DetailsContract.UiState
+import com.todoapp.mobile.ui.details.DetailsContract.UiAction
+import com.todoapp.mobile.ui.details.DetailsContract.UiEffect
+import com.todoapp.mobile.ui.details.DetailsContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
+import com.todoapp.uikit.components.TDLoadingBar
+import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun DetailsScreen(
@@ -45,7 +49,6 @@ fun DetailsScreen(
     uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
-    val verticalScroll = rememberScrollState()
     val context = LocalContext.current
 
     uiEffect.collectWithLifecycle {
@@ -55,6 +58,73 @@ fun DetailsScreen(
             }
         }
     }
+
+    when (uiState) {
+        is UiState.Loading -> {
+            DetailsLoadingContent()
+        }
+
+        is UiState.Error -> {
+            DetailsErrorContent(
+                message = uiState.message,
+                onAction = onAction
+            )
+        }
+
+        is UiState.Success -> {
+            DetailsSuccessContent(
+                uiState = uiState,
+                onAction = onAction
+            )
+        }
+    }
+}
+
+@Composable
+private fun DetailsLoadingContent() {
+    TDLoadingBar()
+}
+
+@Composable
+private fun DetailsErrorContent(
+    message: String,
+    onAction: (UiAction) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(TDTheme.colors.background)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            painter = painterResource(com.example.uikit.R.drawable.ic_error),
+            contentDescription = null,
+            tint = TDTheme.colors.crossRed,
+            modifier = Modifier.size(64.dp)
+        )
+        Spacer(Modifier.height(16.dp))
+        TDText(
+            text = message,
+            style = TDTheme.typography.heading3,
+            color = TDTheme.colors.onBackground
+        )
+        Spacer(Modifier.height(24.dp))
+        TDButton(
+            text = stringResource(R.string.retry),
+            onClick = { onAction(UiAction.OnRetry) },
+            size = TDButtonSize.SMALL
+        )
+    }
+}
+
+@Composable
+private fun DetailsSuccessContent(
+    uiState: UiState.Success,
+    onAction: (UiAction) -> Unit,
+) {
+    val verticalScroll = rememberScrollState()
 
     Column(
         modifier = Modifier
@@ -143,24 +213,68 @@ fun DetailsScreen(
 
 @Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
-private fun DetailsScreenPreview_Light() {
+private fun DetailsLoadingPreview() {
     TDTheme {
-        DetailsScreen(
-            uiState = UiState(),
-            onAction = {},
-            uiEffect = emptyFlow()
+        DetailsLoadingContent()
+    }
+}
+
+@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun DetailsErrorPreview() {
+    TDTheme {
+        DetailsErrorContent(
+            message = "Task not found",
+            onAction = {}
         )
     }
 }
 
 @Preview("Dark", uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-private fun DetailsScreenPreview_Dark() {
+private fun DetailsSuccessPreview_Dark() {
     TDTheme {
-        DetailsScreen(
-            uiState = UiState(),
-            onAction = {},
-            uiEffect = emptyFlow()
+        DetailsSuccessContent(
+            uiState = DetailsPreviewData.successState(),
+            onAction = {}
+        )
+    }
+}
+
+@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun DetailsSuccessPreview_Light() {
+    TDTheme {
+        DetailsSuccessContent(
+            uiState = DetailsPreviewData.successState(),
+            onAction = {}
+        )
+    }
+}
+
+@Preview("Dirty State")
+@Composable
+private fun DetailsSuccessPreview_Dirty() {
+    TDTheme {
+        DetailsSuccessContent(
+            uiState = DetailsPreviewData.successState(
+                isDirty = true,
+                taskTitle = "Modified Task"
+            ),
+            onAction = {}
+        )
+    }
+}
+
+@Preview("Error State")
+@Composable
+private fun DetailsSuccessPreview_WithError() {
+    TDTheme {
+        DetailsSuccessContent(
+            uiState = DetailsPreviewData.successState(
+                titleError = R.string.error_title_required
+            ),
+            onAction = {}
         )
     }
 }

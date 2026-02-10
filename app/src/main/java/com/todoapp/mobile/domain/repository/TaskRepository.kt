@@ -1,5 +1,6 @@
 package com.todoapp.mobile.domain.repository
 
+import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.domain.model.Task
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -10,7 +11,6 @@ data class CompletedCountByDay(
 )
 
 interface TaskRepository {
-    fun observeAll(): Flow<List<Task>>
     fun observeRange(startDate: LocalDate, endDate: LocalDate): Flow<List<Task>>
     fun observeTasksByDate(date: LocalDate): Flow<List<Task>>
     fun countCompletedTasksInAWeek(date: LocalDate): Flow<Int>
@@ -24,4 +24,12 @@ interface TaskRepository {
     suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean)
     suspend fun getTaskById(id: Long): Task?
     suspend fun update(task: Task)
+
+    suspend fun syncLocalTasksToServer(): Result<Unit>
+
+    suspend fun findNonSyncedTasks(): List<TaskEntity>
+    fun observeAllTaskEntities(): Flow<List<TaskEntity>>
+    fun observeAllTasks(): Flow<List<Task>>
+
+    suspend fun syncTask(taskEntity: TaskEntity): Result<Unit>
 }

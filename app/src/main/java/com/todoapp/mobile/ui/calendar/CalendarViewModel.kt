@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -24,9 +25,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(UiState())
+    private val _uiState = MutableStateFlow<UiState>(UiState.Success())
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -39,26 +40,43 @@ class CalendarViewModel @Inject constructor(
             is UiAction.OnSecondDateDeselect -> deselectEndDate()
             is UiAction.OnFirstDateSelect -> updateStartDate(uiAction)
             is UiAction.OnSecondDateSelect -> updateEndDate(uiAction)
+            is UiAction.OnRetry -> retry()
         }
+    }
+
+    private inline fun updateSuccessState(crossinline transform: (UiState.Success) -> UiState.Success) {
+        _uiState.update { currentState ->
+            when (currentState) {
+                is UiState.Success -> transform(currentState)
+                else -> currentState
+            }
+        }
+    }
+
+    private fun retry() {
+        _uiState.value = UiState.Success()
+        syncTasksWithSelectedDates()
     }
 
     private fun syncTasksWithSelectedDates() {
         viewModelScope.launch {
-            uiState
+            _uiState
+                .filterIsInstance<UiState.Success>()
                 .map { it.selectedFirstDate to it.selectedSecondDate }
                 .distinctUntilChanged()
                 .collectLatest { (startDate, endDate) ->
-                    observeTasks(
-                        startDate,
-                        endDate
-                    ).collect { tasks -> _uiState.update { it.copy(taskDayItems = mapTasksToTaskDayItems(tasks)) } }
+                    observeTasks(startDate, endDate).collect { tasks ->
+                        updateSuccessState {
+                            it.copy(taskDayItems = mapTasksToTaskDayItems(tasks))
+                        }
+                    }
                 }
         }
     }
 
     private fun observeTasks(
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): Flow<List<Task>> = when {
         startDate == null && endDate == null -> flowOf(emptyList())
         startDate != null && endDate == null -> taskRepository.observeTasksByDate(startDate)
@@ -67,27 +85,27 @@ class CalendarViewModel @Inject constructor(
     }
 
     private fun deselectEndDate() {
-        _uiState.update { it.copy(selectedSecondDate = null) }
+        updateSuccessState { it.copy(selectedSecondDate = null) }
     }
 
     private fun deselectStartDate() {
-        _uiState.update { it.copy(selectedFirstDate = null) }
+        updateSuccessState { it.copy(selectedFirstDate = null) }
     }
 
     private fun updateEndDate(uiAction: UiAction.OnSecondDateSelect) {
-        _uiState.update { it.copy(selectedSecondDate = uiAction.date) }
+        updateSuccessState { it.copy(selectedSecondDate = uiAction.date) }
     }
 
     private fun updateStartDate(uiAction: UiAction.OnFirstDateSelect) {
-        if (uiState.value.selectedSecondDate != null && uiAction.date > uiState.value.selectedSecondDate) {
-            _uiState.update { state ->
+        updateSuccessState { state ->
+            if (state.selectedSecondDate != null && uiAction.date > state.selectedSecondDate) {
                 state.copy(
                     selectedFirstDate = state.selectedSecondDate,
                     selectedSecondDate = uiAction.date
                 )
+            } else {
+                state.copy(selectedFirstDate = uiAction.date)
             }
-        } else {
-            _uiState.update { it.copy(selectedFirstDate = uiAction.date) }
         }
     }
 

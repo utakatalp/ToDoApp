@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -81,6 +83,7 @@ tasks.withType<DetektCreateBaselineTask>().configureEach {
 }
 
 dependencies {
+    implementation("com.facebook.android:facebook-android-sdk:latest.release")
     implementation(project(":uikit"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -96,6 +99,7 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.lifecycle.process)
+    implementation(libs.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -109,12 +113,14 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
-    // Network (Retrofit & Serialization)
+    // Network (Retrofit & KotlinX Serialization)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)
+
+
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
-    implementation(libs.kotlinx.serialization.json)
 
     // Local Storage (Room)
     implementation(libs.room.runtime)
@@ -125,6 +131,12 @@ dependencies {
     implementation(libs.timber)
     detektPlugins(libs.detekt.formatting)
     implementation(libs.reorderable)
+    implementation(libs.facebook)
 
     implementation(libs.androidx.datastore.preferences)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
+
 }

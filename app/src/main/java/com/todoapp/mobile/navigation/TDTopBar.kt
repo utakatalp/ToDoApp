@@ -1,6 +1,7 @@
 package com.todoapp.mobile.navigation
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,7 +21,10 @@ import com.todoapp.uikit.theme.TDTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TDTopBar(state: TDTopBarState) {
+fun TDTopBar(
+    state: TDTopBarState,
+    isBannerActivated: Boolean
+) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -45,17 +49,22 @@ fun TDTopBar(state: TDTopBarState) {
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = TDTheme.colors.background),
+        windowInsets = if (isBannerActivated) WindowInsets(0, 0, 0, 0) else TopAppBarDefaults.windowInsets
     )
 }
 
 @Composable
-fun ShowTopBar(navController: NavHostController) {
+fun ShowTopBar(
+    navController: NavHostController,
+    isBannerActivated: Boolean
+) {
     val route =
         navController
             .currentBackStackEntryAsState()
             .value
             ?.destination
             ?.route
+
     val normalizedRoute = normalizeRoute(route)
     val destination = appDestinationFromRoute(normalizedRoute) ?: return
     val titleText = stringResource(destination.title)
@@ -83,7 +92,7 @@ fun ShowTopBar(navController: NavHostController) {
         }
     }
 
-    TDTopBar(state = state)
+    TDTopBar(state = state, isBannerActivated)
 }
 
 data class TDTopBarState(
@@ -125,6 +134,7 @@ private fun TDTopBarPreview_Home() {
                             ),
                         ),
                 ),
+            isBannerActivated = false,
         )
     }
 }
@@ -146,6 +156,7 @@ private fun TDTopBarPreview_Calendar() {
                         ),
                     ),
                 ),
+            isBannerActivated = true,
         )
     }
 }
