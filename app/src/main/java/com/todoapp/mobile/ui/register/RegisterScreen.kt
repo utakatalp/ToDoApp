@@ -58,7 +58,7 @@ import kotlinx.coroutines.flow.Flow
 fun RegisterScreen(
     uiState: UiState,
     uiEffect: Flow<UiEffect>,
-    onAction: (UiAction) -> Unit
+    onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
     uiEffect.collectWithLifecycle {
@@ -106,7 +106,8 @@ private fun RegisterContent(
             .fillMaxSize()
             .imePadding()
             .background(color = TDTheme.colors.primary)
-            .statusBarsPadding(),
+            .statusBarsPadding()
+            .verticalScroll(verticalScroll),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -137,7 +138,6 @@ private fun RegisterContent(
                 .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
                 .background(color = TDTheme.colors.background)
                 .padding(start = 32.dp, end = 32.dp, top = 24.dp)
-                .verticalScroll(verticalScroll)
         ) {
             Spacer(Modifier.height(16.dp))
             TDCompactOutlinedTextField(

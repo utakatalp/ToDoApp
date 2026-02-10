@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,9 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -74,16 +71,10 @@ private fun LoginContent(
     activityContext: Context,
 ) {
     val verticalScroll = rememberScrollState()
-    val focusManager = LocalFocusManager.current
 
     Column(
         Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    focusManager.clearFocus()
-                })
-            }
             .imePadding()
             .background(color = TDTheme.colors.primary)
             .statusBarsPadding()
@@ -123,10 +114,9 @@ private fun LoginContent(
         Column(
             Modifier
                 .fillMaxWidth()
-                .weight(1f)
                 .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
                 .background(color = TDTheme.colors.background)
-                .padding(start = 32.dp, end = 32.dp, top = 32.dp),
+                .padding(start = 32.dp, end = 32.dp, top = 32.dp, bottom = 16.dp),
         ) {
             TDText(
                 text = stringResource(R.string.welcome_back),
