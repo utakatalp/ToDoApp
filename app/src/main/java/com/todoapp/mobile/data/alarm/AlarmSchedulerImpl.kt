@@ -12,7 +12,6 @@ import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.model.AlarmItem
 import com.todoapp.mobile.ui.overlay.OverlayService
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 class AlarmSchedulerImpl(
@@ -90,7 +89,6 @@ class AlarmSchedulerImpl(
         Intent(context, NotificationService::class.java).apply {
             putExtra(NotificationService.INTENT_EXTRA_MESSAGE, item.message)
             putExtra(NotificationService.INTENT_EXTRA_LONG, item.minutesBefore)
-            Log.d("Intent", item.minutesBefore.toString())
         }
 
     private companion object {

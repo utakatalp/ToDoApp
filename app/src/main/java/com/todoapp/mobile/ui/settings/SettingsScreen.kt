@@ -59,11 +59,6 @@ private fun SettingsContent(
     ) {
         Spacer(modifier = Modifier.height(8.dp))
 
-        TDText(
-            text = stringResource(R.string.privacy_security),
-            style = TDTheme.typography.heading1
-        )
-
         ThemeSelector(
             currentTheme = uiState.currentTheme,
             onThemeChange = { theme ->
@@ -82,24 +77,7 @@ private fun SettingsContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TDText(
-            text = stringResource(R.string.privacy_security),
-            style = TDTheme.typography.heading1,
-            color = TDTheme.colors.onBackground
-        )
-
-        TDText(
-            text = stringResource(R.string.the_time_of_reopening_for_secret_mode),
-            style = TDTheme.typography.heading3,
-            color = TDTheme.colors.onBackground
-        )
-
-        ReopenSecretModeDropdown(
-            selected = uiState.selectedSecretMode.label,
-            onSelected = { onAction(UiAction.OnSelectedSecretModeChange(it)) }
-        HorizontalDivider(
-            color = TDTheme.colors.onBackground.copy(alpha = 0.3f)
-        )
+        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.3f))
 
         Row(
             modifier
@@ -120,18 +98,12 @@ private fun SettingsContent(
                 tint = TDTheme.colors.onBackground
             )
         }
+        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.3f))
+
         TDNotificationPermissionItem()
         TDOverlayPermissionItem(context)
     }
 }
-/*
-        HorizontalDivider(
-            color = TDTheme.colors.onBackground.copy(alpha = 0.3f)
-        )
-    }
-}
-
- */
 
 @Preview(showBackground = true)
 @Composable

@@ -299,6 +299,8 @@ class HomeViewModel @Inject constructor(
                 false
             }
             else -> true
+        }
+    }
 
     private fun scheduleTaskReminders(
         task: Task,
@@ -309,7 +311,6 @@ class HomeViewModel @Inject constructor(
                 task.toAlarmItem(remindBeforeMinutes = minutes),
                 type = AlarmType.TASK
             )
-            
         }
     }
 
@@ -388,7 +389,6 @@ class HomeViewModel @Inject constructor(
             navigateToTaskDetail()
         }
     }
-
 
     companion object {
         private val DEFAULT_REMINDER_MINUTES = listOf(0L, 1L, 2L, 5L, 10L)
