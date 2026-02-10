@@ -2,9 +2,15 @@ package com.todoapp.mobile.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.todoapp.mobile.domain.engine.PomodoroMode
+import com.todoapp.mobile.ui.pomodoro.ModeColorKey
+import com.todoapp.mobile.ui.pomodoro.PomodoroModeUi
+import com.todoapp.mobile.ui.pomodoro.PomodoroModeUiPreset
+import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -28,3 +34,23 @@ fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
 fun String.maskTitle(): String {
     return this.first() + "*".repeat(this.length - 1)
 }
+
+@Composable
+fun PomodoroModeUi.resolveTextColor(): Color {
+    return when (colorKey) {
+        ModeColorKey.Focus -> TDTheme.colors.primary
+        ModeColorKey.ShortBreak -> TDTheme.colors.softPink
+        ModeColorKey.LongBreak -> TDTheme.colors.green
+        ModeColorKey.OverTime -> TDTheme.colors.red
+    }
+}
+
+fun PomodoroMode.toUiMode(): PomodoroModeUi = when (this) {
+    PomodoroMode.Focus -> PomodoroModeUiPreset.Focus.value
+    PomodoroMode.ShortBreak -> PomodoroModeUiPreset.ShortBreak.value
+    PomodoroMode.LongBreak -> PomodoroModeUiPreset.LongBreak.value
+    PomodoroMode.OverTime -> PomodoroModeUiPreset.OverTime.value
+}
+
+fun <T> ArrayDeque<T>.pollFirst(): T? =
+    if (isEmpty()) null else removeFirst()

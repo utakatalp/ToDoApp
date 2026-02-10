@@ -1,14 +1,15 @@
 package com.todoapp.mobile.navigation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -20,6 +21,8 @@ import com.todoapp.mobile.ui.activity.ActivityScreen
 import com.todoapp.mobile.ui.activity.ActivityViewModel
 import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerScreen
 import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerViewModel
+import com.todoapp.mobile.ui.banner.BannerOverlay
+import com.todoapp.mobile.ui.banner.BannerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.edit.EditScreen
@@ -30,6 +33,8 @@ import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
 import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
+import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishScreen
+import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishViewModel
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
 import com.todoapp.uikit.extensions.collectWithLifecycle
@@ -113,7 +118,7 @@ fun NavGraph(
         }
         composable<Screen.Pomodoro> {
             val viewModel: PomodoroViewModel = hiltViewModel()
-            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiState by viewModel.uiState.collectAsState()
             val uiEffect = viewModel.uiEffect
             NavigationEffectController(navController, viewModel.navEffect)
             PomodoroScreen(
@@ -135,6 +140,12 @@ fun NavGraph(
             )
         }
 
+        composable<Screen.PomodoroFinish> {
+            val viewModel: PomodoroFinishViewModel = hiltViewModel()
+            NavigationEffectController(navController, viewModel.navEffect)
+            PomodoroFinishScreen(viewModel::onAction)
+        }
+
         composable<Screen.Notifications> { }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }
@@ -142,28 +153,47 @@ fun NavGraph(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun ToDoApp() {
     val navController = rememberNavController()
+    val bannerViewModel: BannerViewModel = hiltViewModel()
+    val bannerState by bannerViewModel.uiState.collectAsStateWithLifecycle()
+
     Scaffold(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(TDTheme.colors.white),
-        topBar = { ShowTopBar(navController) },
+                .background(TDTheme.colors.background),
         bottomBar = { TDBottomBar(navController) },
+        topBar = {
+            Column {
+                BannerOverlay(
+                    bannerState,
+                    bannerViewModel::onAction,
+                    bannerViewModel.uiEffect
+                )
+                NavigationEffectController(navController, bannerViewModel.navEffect)
+                ShowTopBar(navController, bannerState.isBannerActivated)
+            }
+        },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
+
         NavGraph(
             navController = navController,
-            modifier = Modifier.padding(padding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
         )
     }
 }
 
 sealed interface NavigationEffect {
-    data class Navigate(val route: Screen) : NavigationEffect
+    data class Navigate(
+        val route: Screen,
+        val popUpTo: Screen? = null,
+        val isInclusive: Boolean = false
+    ) : NavigationEffect
     data object Back : NavigationEffect
 }
 
@@ -175,7 +205,13 @@ private fun NavigationEffectController(
     navEffect.collectWithLifecycle { effect ->
         when (effect) {
             is NavigationEffect.Navigate -> {
-                navController.navigate(effect.route)
+                navController.navigate(effect.route) {
+                    effect.popUpTo?.let {
+                        popUpTo(it) {
+                            inclusive = effect.isInclusive
+                        }
+                    }
+                }
             }
 
             is NavigationEffect.Back -> {
