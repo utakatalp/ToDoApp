@@ -305,6 +305,7 @@ private fun AdvancedSettings(
                 TDText(
                     text = stringResource(com.todoapp.mobile.R.string.secret_task),
                     style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground
                 )
             }
         }

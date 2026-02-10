@@ -77,9 +77,18 @@ private fun SettingsContent(
             }
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TDText(
+            text = stringResource(R.string.privacy_security),
+            style = TDTheme.typography.heading1,
+            color = TDTheme.colors.onBackground
+        )
+
         TDText(
             text = stringResource(R.string.the_time_of_reopening_for_secret_mode),
-            style = TDTheme.typography.heading3
+            style = TDTheme.typography.heading3,
+            color = TDTheme.colors.onBackground
         )
 
         ReopenSecretModeDropdown(
@@ -90,7 +99,8 @@ private fun SettingsContent(
         if (uiState.remainedSecretModeTime.isNotBlank()) {
             TDText(
                 text = uiState.remainedSecretModeTime,
-                style = TDTheme.typography.heading6
+                style = TDTheme.typography.heading6,
+                color = TDTheme.colors.onBackground
             )
         }
 
