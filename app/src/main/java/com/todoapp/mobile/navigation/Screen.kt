@@ -49,5 +49,8 @@ interface Screen {
     data class WebView(val url: String) : Screen
 
     @Serializable
+    data object ForgotPassword : Screen
+  
+    @Serializable
     data object PomodoroFinish : Screen
 }

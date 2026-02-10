@@ -28,6 +28,8 @@ import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.edit.EditScreen
 import com.todoapp.mobile.ui.edit.EditViewModel
+import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordScreen
+import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
@@ -182,6 +184,13 @@ fun NavGraph(
                 onAction = viewModel::onAction,
                 uiEffect = uiEffect
             )
+        }
+
+        composable<Screen.ForgotPassword> {
+            val viewModel: ForgotPasswordViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(navController, viewModel.navEffect)
+            ForgotPasswordScreen(uiState, viewModel::onAction)
         }
         
         composable<Screen.PomodoroFinish> {
