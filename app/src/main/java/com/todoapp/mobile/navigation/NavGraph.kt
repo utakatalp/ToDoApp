@@ -34,11 +34,15 @@ import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
 import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
+import com.todoapp.mobile.ui.register.RegisterScreen
+import com.todoapp.mobile.ui.register.RegisterViewModel
 import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishScreen
 import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishViewModel
 import com.todoapp.mobile.ui.settings.SecretModeSettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
+import com.todoapp.mobile.ui.webview.WebViewScreen
+import com.todoapp.mobile.ui.webview.WebViewViewModel
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
@@ -141,7 +145,6 @@ fun NavGraph(
                 viewModel::onAction
             )
         }
-
         composable<Screen.Edit> {
             val taskId = navController.previousBackStackEntry
                 ?.savedStateHandle
@@ -160,7 +163,27 @@ fun NavGraph(
                 viewModel::onAction
             )
         }
+        composable<Screen.Register> {
+            val viewModel: RegisterViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
+            RegisterScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction
+            )
+        }
 
+        composable<Screen.WebView> {
+            val viewModel: WebViewViewModel = hiltViewModel()
+            val uiEffect = viewModel.uiEffect
+            NavigationEffectController(navController, viewModel.navEffect)
+            WebViewScreen(
+                onAction = viewModel::onAction,
+                uiEffect = uiEffect
+            )
+        }
+        
         composable<Screen.PomodoroFinish> {
             val viewModel: PomodoroFinishViewModel = hiltViewModel()
             NavigationEffectController(navController, viewModel.navEffect)

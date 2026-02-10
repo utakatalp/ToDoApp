@@ -43,5 +43,11 @@ interface Screen {
     data class Edit(val taskId: Long) : Screen
 
     @Serializable
+    data object Register : Screen
+
+    @Serializable
+    data class WebView(val url: String) : Screen
+
+    @Serializable
     data object PomodoroFinish : Screen
 }

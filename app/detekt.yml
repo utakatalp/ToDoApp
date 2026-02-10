@@ -41,6 +41,11 @@ style:
     active: true
     ignoreAnnotated:
       - Preview
+      - TDPreviewForm
+      - TDPreviewDialog
+      - TDPreviewWide
+      - TDPreviewNoBg
+      - TDPreview
   MagicNumber:
     active: true
     ignoreAnnotated:

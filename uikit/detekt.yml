@@ -23,6 +23,11 @@ style:
     ignoreAnnotated:
       - Preview
       - PreviewLightDark
+      - TDPreviewForm
+      - TDPreviewDialog
+      - TDPreviewWide
+      - TDPreviewNoBg
+      - TDPreview
   MagicNumber:
     active: true
     excludes:

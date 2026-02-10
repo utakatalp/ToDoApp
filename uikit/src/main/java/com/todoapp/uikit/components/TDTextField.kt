@@ -2,6 +2,8 @@ package com.todoapp.uikit.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,23 +30,30 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreviewForm
 import com.todoapp.uikit.theme.TDTheme
 import com.todoapp.uikit.theme.textFieldColors
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun TDTextField(
@@ -200,8 +209,10 @@ fun TDCompactOutlinedTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     supportingText: String? = null,
+    roundedCornerShape: RoundedCornerShape = RoundedCornerShape(4.dp),
+    height: Dp = 40.dp
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.padding(vertical = 6.dp)) {
         if (!label.isNullOrEmpty()) {
             TDText(
                 text = label,
@@ -217,44 +228,102 @@ fun TDCompactOutlinedTextField(
                 else -> TDTheme.colors.onBackground
             }
 
+        val focusRequester = remember { FocusRequester() }
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(enabled) {
+            if (enabled) {
+                focusRequester.requestFocus()
+                delay(50)
+                keyboardController?.show()
+            }
+        }
+
         Column {
             Box(
                 modifier =
-                    modifier
+                    Modifier
+                        .height(height = height)
                         .heightIn(min = 40.dp)
-                        .border(1.dp, borderColor, RoundedCornerShape(4.dp)),
+                        .border(1.dp, borderColor, roundedCornerShape),
                 contentAlignment = Alignment.CenterStart,
             ) {
-                if (value.isEmpty() && placeholder != null) {
-                    TDText(text = placeholder, color = TDTheme.colors.background)
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    leadingIcon?.invoke()
-                    BasicTextField(
-                        value = value,
-                        onValueChange = onValueChange,
-                        enabled = enabled,
-                        singleLine = singleLine,
-                        visualTransformation = visualTransformation,
-                        textStyle =
-                            TDTheme.typography.regularTextStyle.copy(
-                                color = TDTheme.colors.onBackground,
-                            ),
-                        modifier =
-                            Modifier
-                                .padding(
-                                    vertical = 8.dp,
-                                    horizontal = 12.dp,
-                                )
-                                .weight(1f),
-                    )
-                    trailingIcon?.invoke()
-                }
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    enabled = enabled,
+                    singleLine = singleLine,
+                    visualTransformation = visualTransformation,
+                    textStyle =
+                        TDTheme.typography.regularTextStyle.copy(
+                            color =
+                                if (enabled) {
+                                    TDTheme.colors.onBackground
+                                } else {
+                                    TDTheme.colors.onBackground.copy(alpha = 0.38f)
+                                },
+                        ),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
+                            .focusRequester(focusRequester),
+                    decorationBox = { innerTextField ->
+                        Row(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 0.dp)
+                                    .then(
+                                        if (enabled) {
+                                            Modifier
+                                                .clickable(
+                                                    indication = null,
+                                                    interactionSource = MutableInteractionSource()
+                                                ) {
+                                                    focusRequester.requestFocus()
+                                                    coroutineScope.launch {
+                                                        delay(50)
+                                                        keyboardController?.show()
+                                                    }
+                                                }
+                                        } else {
+                                            Modifier
+                                        },
+                                    ),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            leadingIcon?.invoke()
+
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .padding(
+                                            vertical = 8.dp,
+                                            horizontal = 12.dp,
+                                        )
+                                        .weight(1f),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                if (value.isEmpty() && !placeholder.isNullOrEmpty()) {
+                                    TDText(
+                                        text = placeholder,
+                                        color =
+                                            if (enabled) {
+                                                TDTheme.colors.gray
+                                            } else {
+                                                TDTheme.colors.gray.copy(alpha = 0.38f)
+                                            },
+                                    )
+                                }
+                                innerTextField()
+                            }
+
+                            trailingIcon?.invoke()
+                        }
+                    },
+                )
             }
             if (!supportingText.isNullOrEmpty()) {
                 Spacer(Modifier.height(4.dp))
@@ -270,7 +339,7 @@ fun TDCompactOutlinedTextField(
 
 @TDPreviewForm
 @Composable
-fun TextFieldPreview() {
+private fun TextFieldPreview() {
     var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
@@ -441,7 +510,7 @@ private fun TextFieldPreview_Dark() {
 
 @TDPreviewForm
 @Composable
-fun TDCompactOutlinedTextFieldPreview_Filled_Error() {
+private fun TDCompactOutlinedTextFieldPreview_Filled_Error() {
     TDTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             TDCompactOutlinedTextField(
