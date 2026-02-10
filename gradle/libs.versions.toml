@@ -31,8 +31,12 @@ datastorePreferencesCore = "1.2.0"
 biometric = "1.4.0-alpha02"
 securityCrypto = "1.1.0-alpha06"
 lifecycleProcess = "2.10.0"
+facebook = "latest.release"
+appcompatVersion = "1.7.1"
+firebaseAuthCommon = "9.8.0"
 
 [libraries]
+facebook = { group = "com.facebook.android", name = "facebook-android-sdk", version.ref = "facebook" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
@@ -86,6 +90,8 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 reorderable = { module = "sh.calvin.reorderable:reorderable", version = "3.0.0" }
 androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastorePreferencesCore" }
 androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompatVersion" }
+firebase-auth-common = { group = "com.google.firebase", name = "firebase-auth-common", version.ref = "firebaseAuthCommon" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

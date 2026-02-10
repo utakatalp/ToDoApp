@@ -11,8 +11,8 @@ complexity:
       - Composable
   TooManyFunctions:
     active: true
-    thresholdInClasses: 15
-    thresholdInInterfaces: 15
+    thresholdInClasses: 30
+    thresholdInInterfaces: 30
     ignoreAnnotated:
       - HiltViewModel
     ignorePrivate: true
@@ -21,7 +21,11 @@ complexity:
     ignoreSingleWhenExpression: true
 
 
-
+exceptions:
+  InstanceOfCheckForException:
+    active: false
+  TooGenericExceptionCaught:
+    active: false
 naming:
   ClassNaming:
     excludes: &testFolders

@@ -6,7 +6,6 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "tasks")
 data class TaskEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "description") val description: String?,
     @ColumnInfo(name = "date") val date: Long,
@@ -14,4 +13,21 @@ data class TaskEntity(
     @ColumnInfo(name = "time_end") val timeEnd: Long,
     @ColumnInfo(name = "is_completed") val isCompleted: Boolean,
     @ColumnInfo(name = "is_secret") val isSecret: Boolean = false,
+    @ColumnInfo(name = "remote_id") val remoteId: Long? = null,
+
+    @ColumnInfo(
+        name = "sync_status",
+        defaultValue = "PENDING_CREATE"
+    )
+    val syncStatus: SyncStatus = SyncStatus.PENDING_CREATE,
+
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id") val id: Long = 0L,
 )
+
+enum class SyncStatus {
+    PENDING_CREATE,
+    PENDING_UPDATE,
+    PENDING_DELETE,
+    SYNCED,
+}

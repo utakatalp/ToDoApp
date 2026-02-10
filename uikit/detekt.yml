@@ -38,6 +38,7 @@ formatting:
   Indentation:
     active: false
 complexity:
+
   CyclomaticComplexMethod:
     active: false
     threshold: 15

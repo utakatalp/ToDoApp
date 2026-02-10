@@ -50,7 +50,7 @@ interface Screen {
 
     @Serializable
     data object ForgotPassword : Screen
-  
+
     @Serializable
     data object PomodoroFinish : Screen
 }

@@ -72,10 +72,6 @@ object LocalStorageModule {
     @Singleton
     fun provideTaskDao(database: AppDatabase): TaskDao = database.taskDao()
 
-    @Module
-    @InstallIn(SingletonComponent::class)
-    object DataStoreModule
-
     @Provides
     @Singleton
     fun provideDataStore(
