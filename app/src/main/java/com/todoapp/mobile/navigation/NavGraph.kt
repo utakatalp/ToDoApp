@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -35,6 +36,7 @@ import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
 import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
 import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishScreen
 import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishViewModel
+import com.todoapp.mobile.ui.settings.SecretModeSettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
 import com.todoapp.uikit.extensions.collectWithLifecycle
@@ -95,6 +97,7 @@ fun NavGraph(
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             ActivityScreen(
                 uiState = uiState,
+                onAction = viewModel::onAction,
             )
         }
 
@@ -107,6 +110,17 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
+
+        composable<Screen.SecretMode> {
+            val viewModel: SettingsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(navController, viewModel.navEffect)
+            SecretModeSettingsScreen(
+                uiState,
+                viewModel::onAction,
+            )
+        }
+
         composable<Screen.AddPomodoroTimer> {
             val viewModel: AddPomodoroTimerViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -129,9 +143,16 @@ fun NavGraph(
         }
 
         composable<Screen.Edit> {
+            val taskId = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<Long>("taskId")
             val viewModel: EditViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
+
+            LaunchedEffect(taskId) {
+                taskId?.let { viewModel.loadTask(it) }
+            }
             NavigationEffectController(navController, viewModel.navEffect)
             EditScreen(
                 uiState,

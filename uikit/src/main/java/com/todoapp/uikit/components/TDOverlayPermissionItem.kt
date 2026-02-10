@@ -3,18 +3,29 @@ package com.todoapp.uikit.components
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
@@ -26,9 +37,8 @@ import com.todoapp.uikit.theme.TDTheme
 @Composable
 fun TDOverlayPermissionItem(
     context: Context,
-    initialGranted: Boolean = Settings.canDrawOverlays(context)
 ) {
-    var granted by remember { mutableStateOf(initialGranted) }
+    var granted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     var dismissed by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -52,37 +62,61 @@ fun TDOverlayPermissionItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = TDTheme.colors.onBackground.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(12.dp)
+            )
     ) {
-        TDText(
-            text = stringResource(R.string.overlay_permission),
-            style = TDTheme.typography.heading1
-        )
-        TDText(
-            text = stringResource(R.string.allows_the_app_to_display_content_over_other_applications),
-            style = TDTheme.typography.subheading1
-        )
-        Spacer(Modifier.height(8.dp))
-        TDButton(
-            modifier = Modifier.fillMaxWidth(),
-            isEnable = !Settings.canDrawOverlays(context),
-            text = stringResource(R.string.grant_permission),
-            onClick = {
-                val packageUri = "package:${context.packageName}".toUri()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TDText(
+                text = stringResource(R.string.overlay_permission),
+                style = TDTheme.typography.heading4,
+                color = TDTheme.colors.onBackground
+            )
 
-                val overlayIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, packageUri).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
+            Spacer(Modifier.height(8.dp))
 
-                val appDetailsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageUri).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
+            TDText(
+                text = stringResource(R.string.allows_the_app_to_display_content_over_other_applications),
+                style = TDTheme.typography.subheading1,
+                color = TDTheme.colors.onBackground.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
 
-                runCatching {
-                    context.startActivity(overlayIntent)
-                }.getOrElse {
-                    context.startActivity(appDetailsIntent)
+            Spacer(Modifier.height(16.dp))
+
+            TDButton(
+                isEnable = true,
+                text = stringResource(R.string.grant_permission),
+                onClick = {
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        ("package:${context.packageName}".toUri())
+                    )
+                    context.startActivity(intent)
                 }
+            )
+        }
+        Box {
+            IconButton(
+                onClick = { dismissed = true },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 8.dp, y = (-8).dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close),
+                    contentDescription = "Close Permission Tab",
+                    tint = TDTheme.colors.onBackground,
+                    modifier = Modifier.size(24.dp)
+                )
             }
-        )
+        }
     }
 }

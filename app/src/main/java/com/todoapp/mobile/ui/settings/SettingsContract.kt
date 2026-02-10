@@ -9,7 +9,7 @@ object SettingsContract {
         val currentTheme: ThemePreference = ThemePreference.SYSTEM_DEFAULT,
         val selectedSecretMode: SecretModeReopenOption = SecretModeReopenOptions.Immediate,
         val remainedSecretModeTime: String = "",
-        val isSecretModeActive: Boolean = false
+        val isSecretModeActive: Boolean = false,
     )
 
     sealed interface UiAction {
@@ -17,6 +17,7 @@ object SettingsContract {
         data class OnThemeChange(val theme: ThemePreference) : UiAction
         data object OnSettingsSave : UiAction
         data object OnDisableSecretModeTap : UiAction
+        data object OnNavigateToSecretModeSettings : UiAction
     }
 
     sealed interface UiEffect
