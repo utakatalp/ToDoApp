@@ -6,8 +6,8 @@ import android.net.NetworkCapabilities
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.fragment.app.FragmentActivity
 import androidx.compose.ui.graphics.Color
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -18,13 +18,13 @@ import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.todoapp.mobile.data.model.network.response.BaseResponse
 import com.todoapp.mobile.data.model.network.response.ErrorResponse
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.InternalCoroutinesApi
 import com.todoapp.mobile.domain.engine.PomodoroMode
 import com.todoapp.mobile.ui.pomodoro.ModeColorKey
 import com.todoapp.mobile.ui.pomodoro.PomodoroModeUi
 import com.todoapp.mobile.ui.pomodoro.PomodoroModeUiPreset
 import com.todoapp.uikit.theme.TDTheme
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
@@ -164,6 +164,7 @@ suspend fun loginWithFacebook(
         LoginManager.getInstance().unregisterCallback(callbackManager)
     }
 }
+
 @Composable
 fun PomodoroModeUi.resolveTextColor(): Color {
     return when (colorKey) {

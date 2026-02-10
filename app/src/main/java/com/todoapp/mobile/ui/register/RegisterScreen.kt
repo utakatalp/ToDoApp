@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.register
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -334,7 +335,7 @@ private fun RegisterContent(
  * Handles Facebook login with context safety and error reporting.
  */
 private suspend fun handleFacebookLogin(
-    context: android.content.Context,
+    context: Context,
     onAction: (UiAction) -> Unit,
 ) {
     val activity = context as? FragmentActivity

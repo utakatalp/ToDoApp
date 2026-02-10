@@ -36,10 +36,10 @@ import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
 import com.todoapp.mobile.ui.pomodoro.PomodoroViewModel
-import com.todoapp.mobile.ui.register.RegisterScreen
-import com.todoapp.mobile.ui.register.RegisterViewModel
 import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishScreen
 import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishViewModel
+import com.todoapp.mobile.ui.register.RegisterScreen
+import com.todoapp.mobile.ui.register.RegisterViewModel
 import com.todoapp.mobile.ui.settings.SecretModeSettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
@@ -193,7 +193,7 @@ fun NavGraph(
             NavigationEffectController(navController, viewModel.navEffect)
             ForgotPasswordScreen(uiState, viewModel::onAction)
         }
-        
+
         composable<Screen.PomodoroFinish> {
             val viewModel: PomodoroFinishViewModel = hiltViewModel()
             NavigationEffectController(navController, viewModel.navEffect)
