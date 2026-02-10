@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -32,6 +31,7 @@ import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonType
+import com.todoapp.uikit.components.TDNotificationPermissionItem
 import com.todoapp.uikit.components.TDOverlayPermissionItem
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTextField
@@ -59,14 +59,16 @@ private fun SettingsContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(TDTheme.colors.background)
-            .statusBarsPadding()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .background(TDTheme.colors.background),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        TDOverlayPermissionItem(context)
-
         Spacer(modifier = Modifier.height(8.dp))
+
+        TDText(
+            text = stringResource(R.string.privacy_security),
+            style = TDTheme.typography.heading1
+        )
 
         ThemeSelector(
             currentTheme = uiState.currentTheme,
@@ -119,6 +121,8 @@ private fun SettingsContent(
         ) {
             onAction(UiAction.OnDisableSecretModeTap)
         }
+        TDOverlayPermissionItem(context)
+        TDNotificationPermissionItem()
     }
 }
 
