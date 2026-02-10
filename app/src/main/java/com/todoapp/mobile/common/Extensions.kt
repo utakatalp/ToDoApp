@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.fragment.app.FragmentActivity
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -19,6 +20,11 @@ import com.todoapp.mobile.data.model.network.response.BaseResponse
 import com.todoapp.mobile.data.model.network.response.ErrorResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.InternalCoroutinesApi
+import com.todoapp.mobile.domain.engine.PomodoroMode
+import com.todoapp.mobile.ui.pomodoro.ModeColorKey
+import com.todoapp.mobile.ui.pomodoro.PomodoroModeUi
+import com.todoapp.mobile.ui.pomodoro.PomodoroModeUiPreset
+import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
@@ -158,3 +164,22 @@ suspend fun loginWithFacebook(
         LoginManager.getInstance().unregisterCallback(callbackManager)
     }
 }
+@Composable
+fun PomodoroModeUi.resolveTextColor(): Color {
+    return when (colorKey) {
+        ModeColorKey.Focus -> TDTheme.colors.primary
+        ModeColorKey.ShortBreak -> TDTheme.colors.softPink
+        ModeColorKey.LongBreak -> TDTheme.colors.green
+        ModeColorKey.OverTime -> TDTheme.colors.red
+    }
+}
+
+fun PomodoroMode.toUiMode(): PomodoroModeUi = when (this) {
+    PomodoroMode.Focus -> PomodoroModeUiPreset.Focus.value
+    PomodoroMode.ShortBreak -> PomodoroModeUiPreset.ShortBreak.value
+    PomodoroMode.LongBreak -> PomodoroModeUiPreset.LongBreak.value
+    PomodoroMode.OverTime -> PomodoroModeUiPreset.OverTime.value
+}
+
+fun <T> ArrayDeque<T>.pollFirst(): T? =
+    if (isEmpty()) null else removeFirst()

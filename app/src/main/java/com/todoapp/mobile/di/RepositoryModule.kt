@@ -8,6 +8,8 @@ import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSourceImpl
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSourceImpl
 import com.todoapp.mobile.domain.repository.SessionPreferences
+import com.todoapp.mobile.data.engine.PomodoroEngineImpl
+import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.ThemeRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import dagger.Binds
@@ -39,4 +41,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
+  
+    @Binds
+    @Singleton
+    abstract fun bindPomodoroEngine(impl: PomodoroEngineImpl): PomodoroEngine
 }

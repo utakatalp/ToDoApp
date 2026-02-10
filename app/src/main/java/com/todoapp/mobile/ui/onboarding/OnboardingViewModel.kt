@@ -37,7 +37,7 @@ class OnboardingViewModel : ViewModel() {
 
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
-            is UiAction.OnLoginClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Home))
+            is UiAction.OnLoginClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.ForgotPassword))
             is UiAction.OnRegisterClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Register))
         }
     }

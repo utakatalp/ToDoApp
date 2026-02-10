@@ -1,6 +1,7 @@
 package com.todoapp.mobile.navigation
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,7 +21,10 @@ import com.todoapp.uikit.theme.TDTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TDTopBar(state: TDTopBarState) {
+fun TDTopBar(
+    state: TDTopBarState,
+    isBannerActivated: Boolean
+) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -45,18 +49,24 @@ fun TDTopBar(state: TDTopBarState) {
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = TDTheme.colors.background),
+        windowInsets = if (isBannerActivated) WindowInsets(0, 0, 0, 0) else TopAppBarDefaults.windowInsets
     )
 }
 
 @Composable
-fun ShowTopBar(navController: NavHostController) {
+fun ShowTopBar(
+    navController: NavHostController,
+    isBannerActivated: Boolean
+) {
     val route =
         navController
             .currentBackStackEntryAsState()
             .value
             ?.destination
             ?.route
-    val destination = appDestinationFromRoute(route) ?: return
+
+    val normalizedRoute = normalizeRoute(route)
+    val destination = appDestinationFromRoute(normalizedRoute) ?: return
     val titleText = stringResource(destination.title)
     val state = when (destination) {
         AppDestination.Home ->
@@ -81,7 +91,7 @@ fun ShowTopBar(navController: NavHostController) {
         }
     }
 
-    TDTopBar(state = state)
+    TDTopBar(state = state, isBannerActivated)
 }
 
 data class TDTopBarState(
@@ -95,6 +105,11 @@ data class TDTopBarAction(
     @DrawableRes val icon: Int,
     val onClick: () -> Unit,
 )
+
+private fun normalizeRoute(route: String?): String? {
+    val normalizedRoute = route?.substringBefore("/")
+    return normalizedRoute
+}
 
 @Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, widthDp = 360)
 @Composable
@@ -118,6 +133,7 @@ private fun TDTopBarPreview_Home() {
                             ),
                         ),
                 ),
+            isBannerActivated = false,
         )
     }
 }
@@ -139,6 +155,7 @@ private fun TDTopBarPreview_Calendar() {
                         ),
                     ),
                 ),
+            isBannerActivated = true,
         )
     }
 }
