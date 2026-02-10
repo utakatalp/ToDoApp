@@ -40,5 +40,8 @@ interface Screen {
     data object Task : Screen
 
     @Serializable
-    data object Edit : Screen
+    data class Edit(val taskId: Long) : Screen
+
+    @Serializable
+    data object PomodoroFinish : Screen
 }

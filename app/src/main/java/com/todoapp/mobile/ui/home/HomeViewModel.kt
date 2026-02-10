@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
+import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toAlarmItem
 import com.todoapp.mobile.domain.repository.SecretPreferences
@@ -37,6 +38,7 @@ class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
+    private val pomodoroEngine: PomodoroEngine
 ) : ViewModel() {
 
     private data class DailyData(
@@ -115,6 +117,16 @@ class HomeViewModel @Inject constructor(
     private fun retry() {
         _uiState.value = UiState.Loading
         loadInitialData()
+    private fun navigateToEdit(task: Task) {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Edit(task.id)))
+    }
+
+    private fun navigateToPomodoro() {
+        if (pomodoroEngine.state.value.isRunning) {
+            _navEffect.trySend(NavigationEffect.Navigate(Screen.Pomodoro))
+        } else {
+            _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
+        }
     }
 
     private fun fetchDailyTask(date: LocalDate) {
@@ -236,6 +248,11 @@ class HomeViewModel @Inject constructor(
 
     private fun changeTaskTimeStart(uiAction: UiAction.OnTaskTimeStartChange) {
         updateSuccessState { it.copy(taskTimeStart = uiAction.time) }
+    }
+    
+    private fun onDeleteDialogConfirmed() {
+        deleteTask(selectedTask)
+        closeDialog()
     }
 
     private fun changeTaskTimeEnd(uiAction: UiAction.OnTaskTimeEndChange) {

@@ -12,6 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -24,6 +29,9 @@ import com.todoapp.mobile.domain.model.ThemePreference
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
+import com.todoapp.uikit.components.TDButton
+import com.todoapp.uikit.components.TDButtonType
+import com.todoapp.uikit.components.TDNotificationPermissionItem
 import com.todoapp.uikit.components.TDOverlayPermissionItem
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
@@ -54,9 +62,12 @@ private fun SettingsContent(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        TDOverlayPermissionItem(context)
-
         Spacer(modifier = Modifier.height(8.dp))
+
+        TDText(
+            text = stringResource(R.string.privacy_security),
+            style = TDTheme.typography.heading1
+        )
 
         ThemeSelector(
             currentTheme = uiState.currentTheme,
@@ -88,6 +99,10 @@ private fun SettingsContent(
                 tint = TDTheme.colors.onBackground
             )
         }
+        // TDOverlayPermissionItem(context)
+        // TDNotificationPermissionItem()
+    }
+}
 
         HorizontalDivider(
             color = TDTheme.colors.onBackground.copy(alpha = 0.3f)
