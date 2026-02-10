@@ -6,13 +6,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.model.AlarmItem
 import com.todoapp.mobile.ui.overlay.OverlayService
+import java.time.LocalDateTime
 import java.time.ZoneId
 
 class AlarmSchedulerImpl(

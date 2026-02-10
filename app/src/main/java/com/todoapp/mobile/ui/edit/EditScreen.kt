@@ -12,14 +12,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,11 +36,12 @@ import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
+import com.todoapp.uikit.components.TDLoadingBar
+import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun EditScreen(
@@ -45,7 +49,6 @@ fun EditScreen(
     uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
-    val verticalScroll = rememberScrollState()
     val context = LocalContext.current
 
     uiEffect.collectWithLifecycle {
@@ -55,6 +58,73 @@ fun EditScreen(
             }
         }
     }
+
+    when (uiState) {
+        is UiState.Loading -> {
+            EditLoadingContent()
+        }
+
+        is UiState.Error -> {
+            EditErrorContent(
+                message = uiState.message,
+                onAction = onAction
+            )
+        }
+
+        is UiState.Success -> {
+            EditSuccessContent(
+                uiState = uiState,
+                onAction = onAction
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditLoadingContent() {
+    TDLoadingBar()
+}
+
+@Composable
+private fun EditErrorContent(
+    message: String,
+    onAction: (UiAction) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(TDTheme.colors.background)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            painter = painterResource(com.example.uikit.R.drawable.ic_error),
+            contentDescription = null,
+            tint = TDTheme.colors.crossRed,
+            modifier = Modifier.size(64.dp)
+        )
+        Spacer(Modifier.height(16.dp))
+        TDText(
+            text = message,
+            style = TDTheme.typography.heading3,
+            color = TDTheme.colors.onBackground
+        )
+        Spacer(Modifier.height(24.dp))
+        TDButton(
+            text = stringResource(R.string.retry),
+            onClick = { onAction(UiAction.OnRetry) },
+            size = TDButtonSize.SMALL
+        )
+    }
+}
+
+@Composable
+private fun EditSuccessContent(
+    uiState: UiState.Success,
+    onAction: (UiAction) -> Unit,
+) {
+    val verticalScroll = rememberScrollState()
 
     Column(
         modifier = Modifier
@@ -143,24 +213,68 @@ fun EditScreen(
 
 @Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
-private fun EditScreenPreview_Light() {
+private fun EditLoadingPreview() {
     TDTheme {
-        EditScreen(
-            uiState = UiState(),
-            onAction = {},
-            uiEffect = emptyFlow()
+        EditLoadingContent()
+    }
+}
+
+@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun EditErrorPreview() {
+    TDTheme {
+        EditErrorContent(
+            message = "Task not found",
+            onAction = {}
         )
     }
 }
 
 @Preview("Dark", uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-private fun EditScreenPreview_Dark() {
+private fun EditSuccessPreview_Dark() {
     TDTheme {
-        EditScreen(
-            uiState = UiState(),
-            onAction = {},
-            uiEffect = emptyFlow()
+        EditSuccessContent(
+            uiState = EditPreviewData.successState(),
+            onAction = {}
+        )
+    }
+}
+
+@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun EditSuccessPreview_Light() {
+    TDTheme {
+        EditSuccessContent(
+            uiState = EditPreviewData.successState(),
+            onAction = {}
+        )
+    }
+}
+
+@Preview("Dirty State")
+@Composable
+private fun EditSuccessPreview_Dirty() {
+    TDTheme {
+        EditSuccessContent(
+            uiState = EditPreviewData.successState(
+                isDirty = true,
+                taskTitle = "Modified Task"
+            ),
+            onAction = {}
+        )
+    }
+}
+
+@Preview("Error State")
+@Composable
+private fun EditSuccessPreview_WithError() {
+    TDTheme {
+        EditSuccessContent(
+            uiState = EditPreviewData.successState(
+                titleError = R.string.error_title_required
+            ),
+            onAction = {}
         )
     }
 }

@@ -21,6 +21,7 @@ object SettingsContract {
         data object OnSettingsSave : UiAction
         data object OnDisableSecretModeTap : UiAction
         data class OnDailyPlanTimeChange(val time: LocalTime) : UiAction
+        data object OnNavigateToSecretModeSettings : UiAction
     }
 
     sealed interface UiEffect

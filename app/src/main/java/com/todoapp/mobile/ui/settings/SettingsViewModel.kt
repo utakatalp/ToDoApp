@@ -14,6 +14,7 @@ import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.ThemeRepository
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
 import com.todoapp.mobile.ui.settings.SettingsContract.UiEffect
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
@@ -128,7 +129,12 @@ class SettingsViewModel @Inject constructor(
             is UiAction.OnSettingsSave -> updateOption()
             is UiAction.OnDisableSecretModeTap -> disableSecretMode()
             is UiAction.OnDailyPlanTimeChange -> updateDailyPlanTime(action.time)
+            is UiAction.OnNavigateToSecretModeSettings -> navigateToSecretModeSettings()
         }
+    }
+
+    private fun navigateToSecretModeSettings() {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.SecretMode))
     }
 
     private fun updateSelectedSecretMode(uiAction: UiAction.OnSelectedSecretModeChange) {

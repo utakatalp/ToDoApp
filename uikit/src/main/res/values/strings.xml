@@ -20,4 +20,6 @@
     <string name="daily_plan_notification_title">What\'s your plans for today?</string>
     <string name="daily_plan_notification_subtitle">Tab to plan your tasks</string>
     <string name="close">Close</string>
+    <string name="notification_permission">Notification Permission</string>
+    <string name="allows_the_app_to_display_notifications">Allows the app to display notifications</string>
 </resources>

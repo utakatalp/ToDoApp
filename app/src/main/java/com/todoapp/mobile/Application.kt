@@ -38,8 +38,11 @@ class Application : Application(), DefaultLifecycleObserver {
             val channel = NotificationChannel(
                 NotificationService.CHANNEL_ID,
                 "Tasks",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                enableVibration(true)
+                setShowBadge(true)
+            }
             channel.description = "Used for the notifications"
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
