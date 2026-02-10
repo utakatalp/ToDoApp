@@ -1,14 +1,6 @@
-package com.todoapp.mobile.data.model.response
+package com.todoapp.mobile.data.model.network.data
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-@Serializable
-data class RegisterResponse(
-    @SerialName("code") val code: Int,
-    @SerialName("message") val message: String,
-    @SerialName("data") val data: RegisterResponseData
-)
 
 @Serializable
 data class RegisterResponseData(

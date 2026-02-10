@@ -29,19 +29,37 @@ class AddPomodoroTimerViewModel @Inject constructor(
 
     private var pomodoroId: Long = 0
 
-    fun onAction(uiAction: UiAction) {
-        when (uiAction) {
-            is UiAction.OnFocusTimeChange -> _uiState.update { it.copy(focusTime = uiAction.value) }
-            is UiAction.OnLongBreakChange -> _uiState.update { it.copy(longBreak = uiAction.value) }
-            is UiAction.OnSectionCountChange -> _uiState.update { it.copy(sectionCount = uiAction.value) }
-            is UiAction.OnSessionCountChange -> _uiState.update { it.copy(sessionCount = uiAction.value) }
-            is UiAction.OnShortBreakChange -> _uiState.update { it.copy(shortBreak = uiAction.value) }
-            is UiAction.OnCancelTap -> _navEffect.trySend(NavigationEffect.Back)
-            is UiAction.OnStartTap -> updateSavedPomodoroSettings()
+    fun onAction(action: UiAction) {
+        when (action) {
+            is UiAction.OnFocusTimeChange -> updateUiState { copy(focusTime = action.value) }
+            is UiAction.OnLongBreakChange -> updateUiState { copy(longBreak = action.value) }
+            is UiAction.OnSectionCountChange -> updateUiState { copy(sectionCount = action.value) }
+            is UiAction.OnSessionCountChange -> updateUiState { copy(sessionCount = action.value) }
+            is UiAction.OnShortBreakChange -> updateUiState { copy(shortBreak = action.value) }
+            UiAction.OnCancelTap -> onCancelTap()
+            UiAction.OnStartTap -> onStartTap()
         }
     }
 
+    private inline fun updateUiState(
+        crossinline reducer: UiState.() -> UiState,
+    ) {
+        _uiState.update { current -> current.reducer() }
+    }
+
+    private fun onCancelTap() {
+        _navEffect.trySend(NavigationEffect.Back)
+    }
+
+    private fun onStartTap() {
+        updateSavedPomodoroSettings()
+    }
+
     init {
+        loadSavedPomodoroSettings()
+    }
+
+    private fun loadSavedPomodoroSettings() {
         viewModelScope.launch {
             val pomodoro = pomodoroRepository.getSavedPomodoroSettings()
             if (pomodoro == null) {
@@ -65,7 +83,7 @@ class AddPomodoroTimerViewModel @Inject constructor(
                     sectionCount = uiState.value.sectionCount.toInt()
                 )
             )
-            _navEffect.trySend(NavigationEffect.Navigate(Screen.Pomodoro))
+            _navEffect.trySend(NavigationEffect.Navigate(Screen.Pomodoro, Screen.Home))
         }
     }
 
@@ -82,15 +100,15 @@ class AddPomodoroTimerViewModel @Inject constructor(
         )
     }
 
-    private fun loadPomodoroSettings(pomodoro: Pomodoro) {
-        _uiState.update {
-            it.copy(
-                sessionCount = pomodoro.sessionCount.toFloat(),
-                focusTime = pomodoro.focusTime.toFloat(),
-                shortBreak = pomodoro.shortBreak.toFloat(),
-                longBreak = pomodoro.longBreak.toFloat(),
-                sectionCount = pomodoro.sectionCount.toFloat()
-            )
-        }
+private fun loadPomodoroSettings(pomodoro: Pomodoro) {
+    updateUiState {
+        copy(
+            sessionCount = pomodoro.sessionCount.toFloat(),
+            focusTime = pomodoro.focusTime.toFloat(),
+            shortBreak = pomodoro.shortBreak.toFloat(),
+            longBreak = pomodoro.longBreak.toFloat(),
+            sectionCount = pomodoro.sectionCount.toFloat(),
+        )
     }
+}
 }

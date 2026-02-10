@@ -19,6 +19,9 @@ interface Screen {
     data object Settings : Screen
 
     @Serializable
+    data object SecretMode : Screen
+
+    @Serializable
     data object Notifications : Screen
 
     @Serializable
@@ -37,7 +40,7 @@ interface Screen {
     data object Task : Screen
 
     @Serializable
-    data object Edit : Screen
+    data class Edit(val taskId: Long) : Screen
 
     @Serializable
     data object Register : Screen
@@ -47,4 +50,7 @@ interface Screen {
 
     @Serializable
     data object ForgotPassword : Screen
+  
+    @Serializable
+    data object PomodoroFinish : Screen
 }
