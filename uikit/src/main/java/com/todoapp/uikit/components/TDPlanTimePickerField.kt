@@ -1,10 +1,8 @@
 package com.todoapp.uikit.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -62,76 +60,56 @@ fun TDPlanTimePickerField(
         modifier = modifier,
         verticalArrangement = Arrangement.Top
     ) {
-        val borderColor = TDTheme.colors.onBackground.copy(alpha = 0.12f)
-
-        Box(
+        Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .background(TDTheme.colors.background)
                 .clickable { isDialogOpen = true }
-                .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(16.dp))
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier.widthIn(max = 520.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
             ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(TDTheme.colors.purple.copy(alpha = 0.06f))
-                            .padding(10.dp),
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_clock),
-                            contentDescription = null,
-                            tint = TDTheme.colors.onBackground,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
+                Text(
+                    text = title,
+                    style = TDTheme.typography.heading3,
+                    color = TDTheme.colors.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = TDTheme.typography.regularTextStyle,
+                    color = TDTheme.colors.onBackground.copy(alpha = 0.65f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(
-                            text = title,
-                            style = TDTheme.typography.heading3,
-                            color = TDTheme.colors.onBackground,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = subtitle,
-                            style = TDTheme.typography.regularTextStyle,
-                            color = TDTheme.colors.onBackground.copy(alpha = 0.65f),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(TDTheme.colors.purple.copy(alpha = 0.08f))
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                ) {
-                    Text(
-                        text = time.format(HH_MM),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = TDTheme.colors.onBackground,
-                    )
-                }
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(TDTheme.colors.primary)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_clock),
+                    contentDescription = null,
+                    tint = TDTheme.colors.onBackground,
+                    modifier = Modifier.size(16.dp),
+                )
+                Text(
+                    text = time.format(HH_MM),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = TDTheme.colors.onBackground,
+                )
             }
         }
 

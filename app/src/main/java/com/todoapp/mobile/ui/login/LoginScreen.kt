@@ -122,7 +122,8 @@ private fun LoginContent(
 
         Column(
             Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .weight(1f)
                 .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
                 .background(color = TDTheme.colors.background)
                 .padding(start = 32.dp, end = 32.dp, top = 32.dp),

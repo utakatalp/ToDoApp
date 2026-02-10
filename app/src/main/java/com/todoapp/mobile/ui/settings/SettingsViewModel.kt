@@ -1,7 +1,12 @@
 package com.todoapp.mobile.ui.settings
 
 import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
 import androidx.annotation.RequiresPermission
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.security.SecretModeEndCondition
@@ -112,6 +117,28 @@ class SettingsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun checkPermission(context: Context) {
+        val list = buildList {
+            if (!Settings.canDrawOverlays(context)) add(PermissionType.OVERLAY)
+            if (needsNotificationPermission(context)) add(PermissionType.NOTIFICATION)
+        }
+        _uiState.update { it.copy(visiblePermissions = list) }
+    }
+
+    fun dismissPermission(type: PermissionType) {
+        _uiState.update { current ->
+            current.copy(visiblePermissions = current.visiblePermissions - type)
+        }
+    }
+
+    private fun needsNotificationPermission(context: Context): Boolean {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
     }
 
     private fun observeTheme() {

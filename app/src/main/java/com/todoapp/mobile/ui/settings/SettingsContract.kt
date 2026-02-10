@@ -6,6 +6,8 @@ import com.todoapp.mobile.domain.security.SecretModeReopenOption
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import java.time.LocalTime
 
+enum class PermissionType { OVERLAY, NOTIFICATION }
+
 object SettingsContract {
     data class UiState(
         val currentTheme: ThemePreference = ThemePreference.SYSTEM_DEFAULT,
@@ -13,6 +15,7 @@ object SettingsContract {
         val remainedSecretModeTime: String = "",
         val isSecretModeActive: Boolean = false,
         val dailyPlanTime: LocalTime = DEFAULT_PLAN_TIME,
+        val visiblePermissions: List<PermissionType> = emptyList(),
     )
 
     sealed interface UiAction {
