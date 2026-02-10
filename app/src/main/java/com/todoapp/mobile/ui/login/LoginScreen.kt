@@ -86,7 +86,8 @@ private fun LoginContent(
             }
             .imePadding()
             .background(color = TDTheme.colors.primary)
-            .statusBarsPadding(),
+            .statusBarsPadding()
+            .verticalScroll(verticalScroll),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(32.dp))
@@ -124,8 +125,7 @@ private fun LoginContent(
                 .fillMaxSize()
                 .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
                 .background(color = TDTheme.colors.background)
-                .padding(start = 32.dp, end = 32.dp, top = 32.dp)
-                .verticalScroll(verticalScroll),
+                .padding(start = 32.dp, end = 32.dp, top = 32.dp),
         ) {
             TDText(
                 text = stringResource(R.string.welcome_back),
