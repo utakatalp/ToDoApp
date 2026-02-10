@@ -49,7 +49,7 @@ class LoginViewModel @Inject constructor(
             UiAction.OnEmailFieldTap -> enableEmailField()
             UiAction.OnFacebookSignInTap -> {}
             UiAction.OnForgotPasswordTap -> {}
-            UiAction.OnGoogleSignInTap -> googleLogin()
+            is UiAction.OnGoogleSignInTap -> googleLogin(uiAction.activityContext)
             UiAction.OnLoginTap -> handleLoginClick()
             UiAction.OnPasswordFieldTap -> enablePasswordField()
             UiAction.OnPasswordVisibilityTap -> togglePasswordVisibility()
@@ -59,11 +59,11 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun googleLogin() {
+    private fun googleLogin(activityContext: Context) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            googleSignInManager.getGoogleIdToken()
+            googleSignInManager.getGoogleIdToken(activityContext)
                 .onSuccess { idToken ->
                     userRepository.googleLogin(idToken)
                         .onSuccess { loginData ->

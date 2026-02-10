@@ -1,5 +1,7 @@
 package com.todoapp.mobile.ui.login
 
+import android.content.Context
+
 object LoginContract {
 
     data class UiState(
@@ -22,7 +24,7 @@ object LoginContract {
         data object OnPasswordVisibilityTap : UiAction
         data object OnLoginTap : UiAction
         data object OnForgotPasswordTap : UiAction
-        data object OnGoogleSignInTap : UiAction
+        data class OnGoogleSignInTap(val activityContext: Context) : UiAction
         data object OnFacebookSignInTap : UiAction
         data object OnRegisterTap : UiAction
         data object OnTermsOfServiceTap : UiAction
