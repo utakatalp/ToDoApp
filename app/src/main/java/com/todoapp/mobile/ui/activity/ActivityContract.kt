@@ -3,15 +3,27 @@ package com.todoapp.mobile.ui.activity
 import java.time.LocalDate
 
 object ActivityContract {
-    data class UiState(
-        val selectedDate: LocalDate = LocalDate.now(),
-        val weeklyProgress: Float = 0f,
-        val weeklyPendingProgress: Float = 0f,
-        val weeklyBarValues: List<Int> = emptyList(),
-        val yearlyProgress: Float = 0f,
-        val yearlyPendingProgress: Float = 0f,
-    )
+    sealed interface UiState {
+        data object Loading : UiState
 
-    sealed interface UiAction
+        data class Success(
+            val selectedDate: LocalDate,
+            val weeklyProgress: Float,
+            val weeklyPendingProgress: Float,
+            val weeklyBarValues: List<Int>,
+            val yearlyProgress: Float,
+            val yearlyPendingProgress: Float,
+        ) : UiState
+
+        data class Error(
+            val message: String,
+            val throwable: Throwable? = null,
+        ) : UiState
+    }
+
+    sealed interface UiAction {
+        data object OnRetry : UiAction
+    }
+
     sealed interface UiEffect
 }

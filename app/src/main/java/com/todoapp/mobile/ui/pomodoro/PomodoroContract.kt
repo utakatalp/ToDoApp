@@ -1,17 +1,14 @@
 package com.todoapp.mobile.ui.pomodoro
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import com.todoapp.mobile.R
-import com.todoapp.uikit.theme.TDTheme
 
 object PomodoroContract {
 
     data class UiState(
         val min: Int = 25,
         val second: Int = 0,
-        val mode: PomodoroMode = PomodoroMode.Focus,
-        val isStopWatchRunning: Boolean = false,
+        val mode: PomodoroModeUi = PomodoroModeUiPreset.Focus.value,
+        val isRunning: Boolean = false,
         val isOvertime: Boolean = false,
         val infoMessage: String? = null,
     )
@@ -20,59 +17,59 @@ object PomodoroContract {
         data object SkipSession : UiAction
         data object StartCountDown : UiAction
         data object StopCountDown : UiAction
+        data class ToggleBannerVisibility(val isVisible: Boolean) : UiAction
+        data object Back : UiAction
     }
 
     sealed interface UiEffect {
-        data class SessionFinished(val mode: PomodoroMode) : UiEffect
+        data object SessionFinished : UiEffect
     }
 }
-sealed class PomodoroMode(
+
+data class PomodoroModeUi(
     val title: String,
     val iconRes: Int,
-    val colorKey: ModeColorKey,
-) {
-    object Focus : PomodoroMode(
-        title = "Focus",
-        iconRes = R.drawable.ic_focus,
-        colorKey = ModeColorKey.Focus
-    )
+    val colorKey: ModeColorKey
+)
+sealed interface PomodoroModeUiPreset {
+    val value: PomodoroModeUi
 
-    object ShortBreak : PomodoroMode(
-        title = "Short Break",
-        iconRes = R.drawable.ic_short_break,
-        colorKey = ModeColorKey.ShortBreak
-    )
+    data object Focus : PomodoroModeUiPreset {
+        override val value = PomodoroModeUi(
+            title = "Focus",
+            iconRes = R.drawable.ic_focus,
+            colorKey = ModeColorKey.Focus,
+        )
+    }
 
-    object LongBreak : PomodoroMode(
-        title = "Long Break",
-        iconRes = R.drawable.ic_long_break,
-        colorKey = ModeColorKey.LongBreak
-    )
+    data object ShortBreak : PomodoroModeUiPreset {
+        override val value = PomodoroModeUi(
+            title = "Short Break",
+            iconRes = R.drawable.ic_short_break,
+            colorKey = ModeColorKey.ShortBreak,
+        )
+    }
 
-    object OverTime : PomodoroMode(
-        title = "Overtime",
-        iconRes = R.drawable.ic_overtime,
-        colorKey = ModeColorKey.OverTime
-    )
+    data object LongBreak : PomodoroModeUiPreset {
+        override val value = PomodoroModeUi(
+            title = "Long Break",
+            iconRes = R.drawable.ic_long_break,
+            colorKey = ModeColorKey.LongBreak,
+        )
+    }
+
+    data object OverTime : PomodoroModeUiPreset {
+        override val value = PomodoroModeUi(
+            title = "Overtime",
+            iconRes = R.drawable.ic_overtime,
+            colorKey = ModeColorKey.OverTime,
+        )
+    }
 }
 
-data class Session(
-    val duration: Long,
-    val mode: PomodoroMode,
-)
 enum class ModeColorKey {
     Focus,
     ShortBreak,
     LongBreak,
-    OverTime
-}
-
-@Composable
-fun PomodoroMode.resolveTextColor(): Color {
-    return when (colorKey) {
-        ModeColorKey.Focus -> TDTheme.colors.primary
-        ModeColorKey.ShortBreak -> TDTheme.colors.softPink
-        ModeColorKey.LongBreak -> TDTheme.colors.green
-        ModeColorKey.OverTime -> TDTheme.colors.red
-    }
+    OverTime,
 }

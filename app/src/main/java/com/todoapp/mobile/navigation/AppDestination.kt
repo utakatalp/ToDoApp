@@ -50,10 +50,18 @@ sealed class AppDestination(
         selectedIcon = null
     )
 
+    data object SecretMode : AppDestination(
+        title = R.string.secret_mode_settings,
+        route = Screen.SecretMode::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null
+    )
+
     companion object {
         val bottomBarItems = listOf(Home, Calendar, Activity)
-        val items = listOf(Home, Calendar, Activity, PomodoroAddTimer, Settings, Edit)
+        val items = listOf(Home, Calendar, Activity, PomodoroAddTimer, Settings, Edit, SecretMode)
     }
 }
+
 fun bottomBarAppDestinationFromRoute(route: String?) = AppDestination.bottomBarItems.firstOrNull { it.route == route }
 fun appDestinationFromRoute(route: String?) = AppDestination.items.firstOrNull { it.route == route }

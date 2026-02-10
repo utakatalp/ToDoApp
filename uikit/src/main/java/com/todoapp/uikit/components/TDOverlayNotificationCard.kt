@@ -125,7 +125,7 @@ private fun NotificationCardContent(
                         )
                     }
                     TDText(
-                        text = if (minutesBefore == 0L) "Now" else "$minutesBefore minutes before",
+                        text = if (minutesBefore == 0L) "Now" else "$minutesBefore minutes later",
                         style = TDTheme.typography.subheading4,
                         color = TDTheme.colors.gray
                     )

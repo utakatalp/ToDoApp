@@ -1,5 +1,7 @@
 package com.todoapp.uikit.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +35,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 @Composable
@@ -142,52 +144,53 @@ fun TDDatePicker(
                         currentDate.year == selectedMonth.year && currentDate.month == selectedMonth.month
                     val isCurrentDateInRange =
                         isCurrentDateInRange(selectedFirstDate, selectedSecondDate, currentDate)
-                    Box(
-                        modifier =
-                            Modifier
-                                .height(30.dp)
-                                .weight(1f)
-                                .background(
-                                    color =
-                                        specifyColorBetweenRange(
-                                            selectedFirstDate = selectedFirstDate,
-                                            selectedSecondDate = selectedSecondDate,
-                                            currentDate = currentDate,
-                                        ),
-                                )
-                                .padding(horizontal = 6.dp)
-                                .clickable {
-                                    when {
-                                        currentDate == selectedFirstDate -> {
-                                            onFirstDayDeselect()
-                                        }
-
-                                        currentDate == selectedSecondDate -> {
-                                            onSecondDayDeselect()
-                                        }
-
-                                        selectedFirstDate == null -> {
-                                            onFirstDaySelect(currentDate)
-                                        }
-
-                                        selectedSecondDate == null -> {
-                                            if (currentDate < selectedFirstDate) {
-                                                onFirstDaySelect(currentDate)
-                                            } else {
-                                                onSecondDaySelect(currentDate)
-                                            }
-                                        }
-
-                                        else -> {
-                                            if (currentDate < selectedFirstDate) {
-                                                onFirstDaySelect(currentDate)
-                                            } else if (currentDate > selectedFirstDate) {
-                                                onSecondDaySelect(currentDate)
-                                            }
-                                        }
+                    val cellIndex = week * 7 + day
+                    val targetColor =
+                        specifyColorBetweenRange(
+                            selectedFirstDate = selectedFirstDate,
+                            selectedSecondDate = selectedSecondDate,
+                            currentDate = currentDate,
+                        )
+                    var rangeStartIndex = 0
+                    var delayMillis = 0
+                    if (selectedFirstDate != null && selectedSecondDate != null) {
+                        val minDate = minOf(selectedFirstDate, selectedSecondDate)
+                        rangeStartIndex = ChronoUnit.DAYS.between(calendarStartDate, minDate).toInt()
+                        if (targetColor != Color.Transparent) {
+                            delayMillis = ((cellIndex - rangeStartIndex).coerceAtLeast(0)) * 30
+                        }
+                    }
+                    TDAnimatedCell(
+                        modifier = Modifier.weight(1f),
+                        backgroundColor = targetColor,
+                        delayMillis = delayMillis,
+                        onClick = {
+                            when {
+                                currentDate == selectedFirstDate -> {
+                                    onFirstDayDeselect()
+                                }
+                                currentDate == selectedSecondDate -> {
+                                    onSecondDayDeselect()
+                                }
+                                selectedFirstDate == null -> {
+                                    onFirstDaySelect(currentDate)
+                                }
+                                selectedSecondDate == null -> {
+                                    if (currentDate < selectedFirstDate) {
+                                        onFirstDaySelect(currentDate)
+                                    } else {
+                                        onSecondDaySelect(currentDate)
                                     }
-                                },
-                        contentAlignment = Alignment.Center,
+                                }
+                                else -> {
+                                    if (currentDate < selectedFirstDate) {
+                                        onFirstDaySelect(currentDate)
+                                    } else if (currentDate > selectedFirstDate) {
+                                        onSecondDaySelect(currentDate)
+                                    }
+                                }
+                            }
+                        }
                     ) {
                         Text(
                             text = currentDate.dayOfMonth.toString(),
@@ -305,9 +308,25 @@ fun TDDatePickerSingleInput(
                     val currentDate = calendarStartDate.plusDays((week * 7 + day).toLong())
                     val isFromCurrentMonth =
                         currentDate.year == selectedMonth.year && currentDate.month == selectedMonth.month
-
                     val isSelected = selectedDate == currentDate
-
+                    TDAnimatedCell(
+                        modifier = Modifier.weight(1f),
+                        backgroundColor = if (isSelected) TDTheme.colors.purple else Color.Transparent,
+                        delayMillis = 0,
+                        onClick = { if (isSelected) onDayDeselect() else onDaySelect(currentDate) }
+                    ) {
+                        Text(
+                            text = currentDate.dayOfMonth.toString(),
+                            color =
+                                when {
+                                    !isFromCurrentMonth -> TDTheme.colors.gray.copy(alpha = 0.35f)
+                                    isSelected -> Color.White
+                                    else -> TDTheme.colors.gray
+                                },
+                            style = TDTheme.typography.subheading4,
+                        )
+                    }
+                    /*
                     Box(
                         modifier =
                             Modifier
@@ -334,9 +353,41 @@ fun TDDatePickerSingleInput(
                             style = TDTheme.typography.subheading4,
                         )
                     }
+
+                     */
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TDAnimatedCell(
+    modifier: Modifier,
+    backgroundColor: Color,
+    delayMillis: Int,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val animatedColor by animateColorAsState(
+        targetValue = backgroundColor,
+        animationSpec = tween(
+            durationMillis = 220,
+            delayMillis = delayMillis,
+        ),
+        label = "td_animated_cell_bg",
+    )
+
+    Box(
+        modifier =
+            modifier
+                .background(color = animatedColor,)
+                .height(30.dp)
+                .padding(horizontal = 6.dp)
+                .clickable { onClick() },
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
     }
 }
 

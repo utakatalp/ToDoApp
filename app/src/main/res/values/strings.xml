@@ -15,9 +15,12 @@
     <string name="tasks_today">Tasks Today</string>
     <string name="add_new_task">Add New Task</string>
     <string name="edit_task_details">Edit Task Details</string>
+    <string name="secret_mode_settings">Secret Mode Settings</string>"
     <string name="close_button">Close Button</string>
     <string name="task_title">Task Title</string>
     <string name="set_time">Set time</string>
+    <string name="plan_your_day">Plan Your Day</string>
+    <string name="when_do_you_want_to_get_notified">When do you want to get notified?</string>
     <string name="starts">Starts</string>
     <string name="ends">Ends</string>
     <string name="description">Description</string>
@@ -31,7 +34,7 @@
     <string name="activity_screen_bar_chart_component_title_text">Task</string>
     <string name="activity_screen_statistic_text">Statistics</string>
     <string name="activity_screen_activity_text">Activity</string>
-    <string name="activity_screen_progress_text">Progress</string>
+    <string name="activity_screen_progress_text">Yearly Progress</string>
     <string name="bar_chart_days_mon">Mo</string>
     <string name="bar_chart_days_tue">Tu</string>
     <string name="bar_chart_days_wed">We</string>
@@ -53,6 +56,7 @@
     <string name="start">Start</string>
     <string name="skip">Skip</string>
     <string name="advanced_settings">Advanced Settings</string>
+    <string name="retry">Retry</string>
     <string name="secret_task">Secret Task</string>
     <string name="authentication_failed">Authentication Failed</string>
     <string name="biometric_authentication">Biometric Authentication</string>
@@ -77,5 +81,13 @@
     <string name="terms_of_service">Terms of Service</string>
     <string name="and">"and "</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="close">Close</string>
+    <string name="error_something_went_wrong">Something went wrong</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_task_not_found">Task not found</string>
+    <string name="error_failed_to_load_tasks">Failed to load tasks</string>
+    <string name="delete_task_title">Delete task?</string>
+    <string name="delete_task_message">Do you want to delete the task?</string>
+    <string name="delete">Delete</string>
 
 </resources>

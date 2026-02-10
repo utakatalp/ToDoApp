@@ -7,12 +7,14 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.todoapp.mobile.data.repository.DailyPlanPreferencesImpl
 import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
 import com.todoapp.mobile.data.source.local.PomodoroDao
 import com.todoapp.mobile.data.source.local.TaskDao
+import com.todoapp.mobile.domain.repository.DailyPlanPreferences
 import com.todoapp.mobile.domain.repository.PomodoroRepository
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
@@ -106,4 +108,10 @@ abstract class LocalStorageModuleForBindings {
     abstract fun bindPomodoroRepository(
         pomodoroRepositoryImpl: PomodoroRepositoryImpl,
     ): PomodoroRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDailyPlanPreferences(
+        dailyPlanPreferencesImpl: DailyPlanPreferencesImpl,
+    ): DailyPlanPreferences
 }
