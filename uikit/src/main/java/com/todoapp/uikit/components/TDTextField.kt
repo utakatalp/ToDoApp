@@ -60,7 +60,7 @@ fun TDTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    label: String?,
+    label: String? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
@@ -234,7 +234,7 @@ fun TDCompactOutlinedTextField(
 
         LaunchedEffect(enabled) {
             if (enabled) {
-                focusRequester.requestFocus()
+                // focusRequester.requestFocus()
                 delay(50)
                 keyboardController?.show()
             }

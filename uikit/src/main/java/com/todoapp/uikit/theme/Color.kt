@@ -28,7 +28,7 @@ internal fun lightColors(
     purple: Color = Color(0xFF4566EC),
     black: Color = Color(0xFF090E23),
     brown: Color = Color(0xFF3F2D20),
-    green: Color = Color(0xFF84BD93),
+    green: Color = Color(0xFF2AE35A),
     orange: Color = Color(0xFFEF8829),
     darkBrown: Color = Color(0xFF73665C),
     lightBrown: Color = Color(0xFFD3BBAA),

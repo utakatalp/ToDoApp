@@ -8,6 +8,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
 import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.security.SecretModeEndEvent
@@ -22,6 +24,10 @@ class Application : Application(), DefaultLifecycleObserver {
     lateinit var secretPreferences: SecretPreferences
     override fun onCreate() {
         super<Application>.onCreate()
+
+        FacebookSdk.sdkInitialize(applicationContext)
+        AppEventsLogger.activateApp(this)
+
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         createNotificationChannel()
     }
@@ -38,8 +44,11 @@ class Application : Application(), DefaultLifecycleObserver {
             val channel = NotificationChannel(
                 NotificationService.CHANNEL_ID,
                 "Tasks",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                enableVibration(true)
+                setShowBadge(true)
+            }
             channel.description = "Used for the notifications"
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)

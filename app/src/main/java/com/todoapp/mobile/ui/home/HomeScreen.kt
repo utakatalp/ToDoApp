@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
 import com.todoapp.mobile.common.maskTitle
-import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
@@ -55,6 +54,7 @@ import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
+import com.todoapp.uikit.components.TDLoadingBar
 import com.todoapp.uikit.components.TDScreenWithSheet
 import com.todoapp.uikit.components.TDStatisticCard
 import com.todoapp.uikit.components.TDTaskCardWithCheckbox
@@ -66,7 +66,6 @@ import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import java.time.LocalDate
 import java.time.LocalTime
 
 @Composable
@@ -92,6 +91,75 @@ fun HomeScreen(
             is UiEffect.ShowError -> TODO()
         }
     }
+
+    when (uiState) {
+        is UiState.Loading -> {
+            HomeLoadingContent()
+        }
+
+        is UiState.Error -> {
+            HomeErrorContent(
+                message = uiState.message,
+                onAction = onAction
+            )
+        }
+
+        is UiState.Success -> {
+            HomeSuccessContent(
+                uiState = uiState,
+                onAction = onAction
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeLoadingContent() {
+    TDLoadingBar()
+}
+
+@Composable
+private fun HomeErrorContent(
+    message: String,
+    onAction: (UiAction) -> Unit,
+
+    ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(TDTheme.colors.background)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_error),
+            contentDescription = null,
+            tint = TDTheme.colors.crossRed,
+            modifier = Modifier.size(64.dp)
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        TDText(
+            text = message,
+            style = TDTheme.typography.heading3,
+            color = TDTheme.colors.onBackground
+        )
+        Spacer(Modifier.height(24.dp))
+        TDButton(
+            text = stringResource(com.todoapp.mobile.R.string.retry),
+            onClick = { onAction(UiAction.OnRetry) },
+            size = TDButtonSize.SMALL
+        )
+    }
+}
+
+@Composable
+private fun HomeSuccessContent(
+    uiState: UiState.Success,
+    onAction: (UiAction) -> Unit,
+) {
     TDScreenWithSheet(
         isSheetOpen = uiState.isSheetOpen,
         sheetContent = {
@@ -104,11 +172,10 @@ fun HomeScreen(
         onDismissSheet = { onAction(UiAction.OnDismissBottomSheet) },
     ) {
         HomeContent(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(TDTheme.colors.background)
-                    .padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(TDTheme.colors.background)
+                .padding(horizontal = 16.dp),
             uiState = uiState,
             onAction = onAction,
         )
@@ -118,7 +185,7 @@ fun HomeScreen(
 @Composable
 fun HomeContent(
     modifier: Modifier,
-    uiState: UiState,
+    uiState: UiState.Success,
     onAction: (UiAction) -> Unit,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
@@ -200,7 +267,6 @@ fun HomeContent(
                                 onCheckBoxClick = {
                                     onAction(UiAction.OnTaskCheck(task))
                                 },
-                                onEditClick = { onAction(UiAction.OnEditClick(task)) }
                             )
                         }
                     }
@@ -232,19 +298,19 @@ fun HomeContent(
         if (uiState.isDeleteDialogOpen) {
             AlertDialog(
                 onDismissRequest = { onAction(UiAction.OnDeleteDialogDismiss) },
-                title = { Text("Delete task?") },
+                title = { Text(stringResource(com.todoapp.mobile.R.string.delete_task_title)) },
                 titleContentColor = TDTheme.colors.onBackground,
                 containerColor = TDTheme.colors.background,
                 textContentColor = TDTheme.colors.onBackground,
-                text = { Text("Do you want to delete the task?") },
+                text = { Text(stringResource(com.todoapp.mobile.R.string.delete_task_message)) },
                 confirmButton = {
                     TextButton(onClick = { onAction(UiAction.OnDeleteDialogConfirm) }) {
-                        Text("Delete")
+                        Text(stringResource(com.todoapp.mobile.R.string.delete))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { onAction(UiAction.OnDeleteDialogDismiss) }) {
-                        Text("Cancel")
+                        Text(stringResource(com.todoapp.mobile.R.string.cancel))
                     }
                 }
             )
@@ -314,7 +380,7 @@ private fun AdvancedSettings(
 
 @Composable
 private fun AddTaskSheet(
-    uiState: UiState,
+    uiState: UiState.Success,
     onClick: () -> Unit,
     onAction: (UiAction) -> Unit,
 ) {
@@ -413,111 +479,51 @@ private suspend fun handleBiometricAuthentication(
 
 @Preview(showBackground = true)
 @Composable
-private fun HomeContentPreview() {
-    val fakeUiState =
-        UiState(
-            selectedDate = LocalDate.now(),
-            tasks =
-                listOf(
-                    Task(
-                        id = 1L,
-                        title = "Design the main screen",
-                        description = "Draft layout & components",
-                        date = LocalDate.now(),
-                        timeStart = LocalTime.of(9, 30),
-                        timeEnd = LocalTime.of(10, 15),
-                        isCompleted = false,
-                        isSecret = false,
-
-                        ),
-                    Task(
-                        id = 2L,
-                        title = "Develop the API client",
-                        description = "Retrofit + serialization setup",
-                        date = LocalDate.now().minusDays(1),
-                        timeStart = LocalTime.of(11, 0),
-                        timeEnd = LocalTime.of(12, 0),
-                        isCompleted = true,
-                        isSecret = false
-
-                    ),
-                    Task(
-                        id = 3L,
-                        title = "Fix the login bug",
-                        description = null,
-                        date = LocalDate.now(),
-                        timeStart = LocalTime.of(14, 0),
-                        timeEnd = LocalTime.of(14, 30),
-                        isCompleted = false,
-                        isSecret = false
-
-                    ),
-                ),
-            completedTaskCountThisWeek = 5,
-            pendingTaskCountThisWeek = 8,
-        )
-
-    HomeContent(
-        uiState = fakeUiState,
-        onAction = {},
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp),
-    )
+private fun HomeLoadingPreview() {
+    TDTheme {
+        HomeLoadingContent()
+    }
 }
 
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
+@Preview(showBackground = true)
+@Composable
+private fun HomeErrorPreview() {
+    TDTheme {
+        HomeErrorContent(
+            message = "Something went wrong",
+            onAction = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeContentPreview() {
+    TDTheme {
+        HomeContent(
+            uiState = HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun HomeContentPreview_Dark() {
-    val fakeUiState =
-        UiState(
-            selectedDate = LocalDate.now(),
-            tasks =
-                listOf(
-                    Task(
-                        id = 1L,
-                        title = "Design the main screen",
-                        description = "Draft layout & components",
-                        date = LocalDate.now(),
-                        timeStart = LocalTime.of(9, 30),
-                        timeEnd = LocalTime.of(10, 15),
-                        isCompleted = false,
-                        isSecret = false
-
-                    ),
-                    Task(
-                        id = 2L,
-                        title = "Develop the API client",
-                        description = "Retrofit + serialization setup",
-                        date = LocalDate.now().minusDays(1),
-                        timeStart = LocalTime.of(11, 0),
-                        timeEnd = LocalTime.of(12, 0),
-                        isCompleted = true,
-                        isSecret = false
-
-                    ),
-                    Task(
-                        id = 3L,
-                        title = "Fix the login bug",
-                        description = null,
-                        date = LocalDate.now(),
-                        timeStart = LocalTime.of(14, 0),
-                        timeEnd = LocalTime.of(14, 30),
-                        isCompleted = false,
-                        isSecret = false
-
-                    ),
-                ),
-            completedTaskCountThisWeek = 5,
-            pendingTaskCountThisWeek = 8,
-        )
-
     TDTheme(darkTheme = true) {
         HomeContent(
-            uiState = fakeUiState,
+            uiState = HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+            ),
             onAction = {},
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp),
+            modifier = Modifier.padding(horizontal = 24.dp),
         )
     }
 }
@@ -525,35 +531,29 @@ private fun HomeContentPreview_Dark() {
 @Preview(showBackground = true, widthDp = 360)
 @Composable
 private fun AddTaskSheetPreview() {
-    AddTaskSheet(
-        uiState =
-            UiState(
-                selectedDate = LocalDate.of(2025, 12, 25),
+    TDTheme {
+        AddTaskSheet(
+            uiState = HomePreviewData.successState(
                 taskTitle = "Read 10 pages",
                 taskTimeEnd = LocalTime.of(10, 15),
                 taskDescription = "Focus mode on. No phone.",
             ),
-        onClick = {},
-        onAction = {},
-    )
+            onClick = {},
+            onAction = {},
+        )
+    }
 }
 
-@Preview(
-    showBackground = true,
-    widthDp = 360,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
+@Preview(showBackground = true, widthDp = 360, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AddTaskSheetPreview_Dark() {
     TDTheme(darkTheme = true) {
         AddTaskSheet(
-            uiState =
-                UiState(
-                    selectedDate = LocalDate.of(2025, 12, 25),
-                    taskTitle = "Read 10 pages",
-                    taskTimeEnd = LocalTime.of(10, 15),
-                    taskDescription = "Focus mode on. No phone.",
-                ),
+            uiState = HomePreviewData.successState(
+                taskTitle = "Read 10 pages",
+                taskTimeEnd = LocalTime.of(10, 15),
+                taskDescription = "Focus mode on. No phone.",
+            ),
             onClick = {},
             onAction = {},
         )

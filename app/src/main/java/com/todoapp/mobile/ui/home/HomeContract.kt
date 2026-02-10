@@ -5,26 +5,34 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 object HomeContract {
-    data class UiState(
-        val selectedDate: LocalDate = LocalDate.now(),
-        val tasks: List<Task> = emptyList(),
-        val completedTaskCountThisWeek: Int = 0,
-        val pendingTaskCountThisWeek: Int = 0,
-        val dialogSelectedDate: LocalDate? = null,
-        val taskTitle: String = "",
-        val taskTimeStart: LocalTime? = null,
-        val taskTimeEnd: LocalTime? = null,
-        val taskDate: LocalDate = LocalDate.now(),
-        val taskDescription: String = "",
-        val isSheetOpen: Boolean = false,
-        val isDeleteDialogOpen: Boolean = false,
-        val isAdvancedSettingsExpanded: Boolean = false,
-        val isTaskSecret: Boolean = false,
-        val isSecretModeEnabled: Boolean = true,
-        val isTitleError: Boolean = false,
-        val isTimeError: Boolean = false,
-        val isDateError: Boolean = false,
-    )
+    sealed interface UiState {
+        data object Loading : UiState
+        data class Success(
+            val selectedDate: LocalDate,
+            val tasks: List<Task>,
+            val completedTaskCountThisWeek: Int,
+            val pendingTaskCountThisWeek: Int,
+            val dialogSelectedDate: LocalDate?,
+            val taskTitle: String,
+            val taskTimeStart: LocalTime?,
+            val taskTimeEnd: LocalTime?,
+            val taskDate: LocalDate,
+            val taskDescription: String,
+            val isSheetOpen: Boolean,
+            val isDeleteDialogOpen: Boolean,
+            val isAdvancedSettingsExpanded: Boolean,
+            val isTaskSecret: Boolean,
+            val isSecretModeEnabled: Boolean,
+            val isTitleError: Boolean,
+            val isTimeError: Boolean,
+            val isDateError: Boolean,
+        ) : UiState
+
+        data class Error(
+            val message: String,
+            val throwable: Throwable? = null,
+        ) : UiState
+    }
 
     sealed interface UiAction {
         data class OnDateSelect(val date: LocalDate) : UiAction
@@ -41,12 +49,13 @@ object HomeContract {
         data class OnTaskLongPress(val task: Task) : UiAction
         data object OnDeleteDialogDismiss : UiAction
         data object OnDeleteDialogConfirm : UiAction
+        data object OnRetry : UiAction
         data class OnDialogDateSelect(val date: LocalDate) : UiAction
-        data class OnEditClick(val task: Task) : UiAction
         data class OnMoveTask(
             val from: Int,
             val to: Int,
         ) : UiAction
+
         data object OnPomodoroTap : UiAction
         data object OnToggleAdvancedSettings : UiAction
         data class OnTaskSecretChange(val isSecret: Boolean) : UiAction

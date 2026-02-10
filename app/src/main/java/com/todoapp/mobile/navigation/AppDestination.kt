@@ -1,6 +1,7 @@
 package com.todoapp.mobile.navigation
 
 import com.todoapp.mobile.R
+import com.todoapp.mobile.navigation.AppDestination.SecretMode
 
 sealed class AppDestination(
     val title: Int,
@@ -43,17 +44,25 @@ sealed class AppDestination(
         selectedIcon = null
     )
 
-    data object Edit : AppDestination(
-        title = R.string.edit_task_details,
-        route = Screen.Edit::class.qualifiedName!!,
+    data object Task : AppDestination(
+        title = R.string.task_details,
+        route = Screen.Task::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null
+    )
+
+    data object SecretMode : AppDestination(
+        title = R.string.secret_mode_settings,
+        route = Screen.SecretMode::class.qualifiedName!!,
         icon = null,
         selectedIcon = null
     )
 
     companion object {
         val bottomBarItems = listOf(Home, Calendar, Activity)
-        val items = listOf(Home, Calendar, Activity, PomodoroAddTimer, Settings, Edit)
+        val items = listOf(Home, Calendar, Activity, PomodoroAddTimer, Settings, Task, SecretMode)
     }
 }
+
 fun bottomBarAppDestinationFromRoute(route: String?) = AppDestination.bottomBarItems.firstOrNull { it.route == route }
 fun appDestinationFromRoute(route: String?) = AppDestination.items.firstOrNull { it.route == route }

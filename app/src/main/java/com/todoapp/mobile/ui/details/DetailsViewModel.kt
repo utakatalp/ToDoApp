@@ -1,4 +1,4 @@
-package com.todoapp.mobile.ui.edit
+package com.todoapp.mobile.ui.details
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
@@ -8,9 +8,9 @@ import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.navigation.NavigationEffect
-import com.todoapp.mobile.ui.edit.EditContract.UiAction
-import com.todoapp.mobile.ui.edit.EditContract.UiEffect
-import com.todoapp.mobile.ui.edit.EditContract.UiState
+import com.todoapp.mobile.ui.details.DetailsContract.UiAction
+import com.todoapp.mobile.ui.details.DetailsContract.UiEffect
+import com.todoapp.mobile.ui.details.DetailsContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -25,12 +25,12 @@ import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
-class EditViewModel @Inject constructor(
+class DetailsViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(UiState())
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
 
     private val _uiEffect by lazy { Channel<UiEffect>(Channel.BUFFERED) }
@@ -40,17 +40,24 @@ class EditViewModel @Inject constructor(
     val navEffect by lazy { _navEffect.receiveAsFlow() }
 
     private var originalTask: Task? = null
+    private var currentTaskId: Long? = null
 
     init {
-        savedStateHandle.get<Long>("taskId")?.let { loadTask(it) }
+        currentTaskId = savedStateHandle.get("taskId")
+        loadTask(currentTaskId!!)
     }
-
-    private fun loadTask(taskId: Long) {
+    fun loadTask(taskId: Long) {
+        currentTaskId = taskId
         viewModelScope.launch {
-            val task = taskRepository.getTaskById(taskId) ?: return@launch
-            originalTask = task
-            _uiState.update {
-                it.copy(
+            try {
+                _uiState.value = UiState.Loading
+                val task = taskRepository.getTaskById(taskId)
+                if (task == null) {
+                    _uiState.value = UiState.Error(message = R.string.error_task_not_found.toString())
+                    return@launch
+                }
+                originalTask = task
+                _uiState.value = UiState.Success(
                     taskTitle = task.title,
                     taskTimeStart = task.timeStart,
                     taskTimeEnd = task.timeEnd,
@@ -58,7 +65,12 @@ class EditViewModel @Inject constructor(
                     taskDescription = task.description ?: "",
                     dialogSelectedDate = task.date,
                     isDirty = false,
+                    titleError = null,
+                    isSaving = false
                 )
+            } catch (e: IOException) {
+                _uiState.value = UiState.Error(message = "Failed to load task", throwable = e)
+                Log.e("EditViewModel", "Failed to load task", e)
             }
         }
     }
@@ -75,53 +87,69 @@ class EditViewModel @Inject constructor(
             is UiAction.OnTaskTimeEndEdit -> updateTimeEnd(uiAction.time)
             is UiAction.OnDialogDateSelect -> selectDialogDate(uiAction.date)
             UiAction.OnDialogDateDeselect -> deselectDialogDate()
+            UiAction.OnRetry -> retry()
+        }
+    }
+
+    private fun retry() {
+        currentTaskId?.let { loadTask(it) }
+    }
+
+    private inline fun updateSuccessState(crossinline transform: (UiState.Success) -> UiState.Success) {
+        _uiState.update { currentState ->
+            when (currentState) {
+                is UiState.Success -> {
+                    val updated = transform(currentState)
+                    updated.copy(isDirty = computeIsDirty(updated))
+                }
+
+                else -> currentState
+            }
         }
     }
 
     private fun updateTitle(title: String) {
-        updateState {
-            it.copy(
-                taskTitle = title,
-                titleError = null
-            )
+        updateSuccessState {
+            it.copy(taskTitle = title, titleError = null)
         }
     }
 
     private fun updateDescription(description: String) {
-        updateState { it.copy(taskDescription = description) }
+        updateSuccessState { it.copy(taskDescription = description) }
     }
 
     private fun updateDate(date: LocalDate) {
-        updateState { it.copy(taskDate = date) }
+        updateSuccessState { it.copy(taskDate = date) }
     }
 
     private fun updateTimeStart(time: LocalTime) {
-        updateState { it.copy(taskTimeStart = time) }
+        updateSuccessState { it.copy(taskTimeStart = time) }
     }
 
     private fun updateTimeEnd(time: LocalTime) {
-        updateState { it.copy(taskTimeEnd = time) }
+        updateSuccessState { it.copy(taskTimeEnd = time) }
     }
 
     private fun selectDialogDate(date: LocalDate) {
-        updateState {
-            it.copy(
-                dialogSelectedDate = date,
-                taskDate = date
-            )
+        updateSuccessState {
+            it.copy(dialogSelectedDate = date, taskDate = date)
         }
     }
 
     private fun deselectDialogDate() {
-        updateState { it.copy(dialogSelectedDate = null) }
+        updateSuccessState { it.copy(dialogSelectedDate = null) }
     }
 
     private fun saveChanges() {
-        if (!validateFields()) return
+        val currentState = _uiState.value
+        if (currentState !is UiState.Success) return
+        if (currentState.isSaving) return
+        if (!validateFields(currentState)) return
 
-        val current = _uiState.value
         val existingTask = originalTask ?: return
-        val updatedTask = buildUpdatedTask(current, existingTask)
+        val updatedTask = buildUpdatedTask(currentState, existingTask)
+
+        updateSuccessState { it.copy(isSaving = true) }
 
         viewModelScope.launch {
             try {
@@ -129,36 +157,40 @@ class EditViewModel @Inject constructor(
                 onSaveSuccess(updatedTask)
             } catch (e: IOException) {
                 Log.e("EditViewModel", "Failed to save changes", e)
+                updateSuccessState { it.copy(isSaving = false) }
                 onSaveFailure()
             }
         }
     }
 
     private fun cancelChanges() {
+        val currentState = _uiState.value
+        if (currentState !is UiState.Success) return
+
         val existingTask = originalTask ?: return
 
-        if (!_uiState.value.isDirty) {
+        if (!currentState.isDirty) {
             navigateBack()
             return
         }
 
-        updateState {
-            it.copy(
-                taskTitle = existingTask.title,
-                titleError = null,
-                taskTimeStart = existingTask.timeStart,
-                taskTimeEnd = existingTask.timeEnd,
-                taskDate = existingTask.date,
-                taskDescription = existingTask.description ?: "",
-                dialogSelectedDate = existingTask.date
-            )
-        }
+        _uiState.value = UiState.Success(
+            taskTitle = existingTask.title,
+            titleError = null,
+            taskTimeStart = existingTask.timeStart,
+            taskTimeEnd = existingTask.timeEnd,
+            taskDate = existingTask.date,
+            taskDescription = existingTask.description ?: "",
+            dialogSelectedDate = existingTask.date,
+            isDirty = false,
+            isSaving = true
+        )
         _uiEffect.trySend(UiEffect.ShowToast(R.string.changes_cancelled))
     }
 
     private suspend fun onSaveSuccess(updatedTask: Task) {
         originalTask = updatedTask
-        _uiState.update { it.copy(isDirty = false) }
+        updateSuccessState { it.copy(isDirty = false) }
         _uiEffect.send(UiEffect.ShowToast(R.string.changes_saved))
         navigateBack()
     }
@@ -167,25 +199,25 @@ class EditViewModel @Inject constructor(
         _uiEffect.send(UiEffect.ShowToast(R.string.changes_not_saved))
     }
 
-    private fun validateFields(): Boolean {
-        val current = _uiState.value
-
+    private fun validateFields(state: UiState.Success): Boolean {
         val titleError = when {
-            current.taskTitle.isBlank() -> R.string.error_title_required
-            current.taskTitle.length < MIN_TITLE_LENGTH -> R.string.error_title_too_short
+            state.taskTitle.isBlank() -> R.string.error_title_required
+            state.taskTitle.length < MIN_TITLE_LENGTH -> R.string.error_title_too_short
             else -> null
         }
 
-        updateState { it.copy(titleError = titleError) }
-
-        return titleError == null
+        if (titleError != null) {
+            updateSuccessState { it.copy(titleError = titleError) }
+            return false
+        }
+        return true
     }
 
     private fun navigateBack() {
         _navEffect.trySend(NavigationEffect.Back)
     }
 
-    private fun buildUpdatedTask(current: UiState, existingTask: Task): Task {
+    private fun buildUpdatedTask(current: UiState.Success, existingTask: Task): Task {
         return existingTask.copy(
             title = current.taskTitle,
             description = current.taskDescription.ifBlank { null },
@@ -195,7 +227,7 @@ class EditViewModel @Inject constructor(
         )
     }
 
-    private fun computeIsDirty(state: UiState): Boolean {
+    private fun computeIsDirty(state: UiState.Success): Boolean {
         val original = originalTask ?: return false
         val candidateTask = original.copy(
             title = state.taskTitle,
@@ -205,13 +237,6 @@ class EditViewModel @Inject constructor(
             timeEnd = state.taskTimeEnd ?: original.timeEnd
         )
         return candidateTask != original
-    }
-
-    private inline fun updateState(block: (UiState) -> UiState) {
-        _uiState.update { current ->
-            val updated = block(current)
-            updated.copy(isDirty = computeIsDirty(updated))
-        }
     }
 
     private companion object {

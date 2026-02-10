@@ -10,12 +10,14 @@ import androidx.security.crypto.MasterKey
 import com.todoapp.mobile.data.auth.AuthTokenManager
 import com.todoapp.mobile.data.auth.GoogleSignInManager
 import com.todoapp.mobile.data.repository.DataStoreHelper
+import com.todoapp.mobile.data.repository.DailyPlanPreferencesImpl
 import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
 import com.todoapp.mobile.data.source.local.PomodoroDao
 import com.todoapp.mobile.data.source.local.TaskDao
+import com.todoapp.mobile.domain.repository.DailyPlanPreferences
 import com.todoapp.mobile.domain.repository.PomodoroRepository
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
@@ -73,10 +75,6 @@ object LocalStorageModule {
     @Singleton
     fun provideTaskDao(database: AppDatabase): TaskDao = database.taskDao()
 
-    @Module
-    @InstallIn(SingletonComponent::class)
-    object DataStoreModule
-
     @Provides
     @Singleton
     fun provideDataStore(
@@ -121,4 +119,10 @@ abstract class LocalStorageModuleForBindings {
     abstract fun bindPomodoroRepository(
         pomodoroRepositoryImpl: PomodoroRepositoryImpl,
     ): PomodoroRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDailyPlanPreferences(
+        dailyPlanPreferencesImpl: DailyPlanPreferencesImpl,
+    ): DailyPlanPreferences
 }
