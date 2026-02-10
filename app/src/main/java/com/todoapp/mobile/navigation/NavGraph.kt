@@ -144,7 +144,8 @@ fun NavGraph(
             NavigationEffectController(navController, viewModel.navEffect)
             RegisterScreen(
                 uiState = uiState,
-                onAction = viewModel::onAction
+                onAction = viewModel::onAction,
+                uiEffect = uiEffect
             )
         }
 

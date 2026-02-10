@@ -2,6 +2,7 @@ package com.todoapp.mobile.data.source.remote.api
 
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
 import com.todoapp.mobile.data.model.network.data.TaskData
+import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.data.model.network.request.TaskRequest
 import com.todoapp.mobile.data.model.network.response.BaseResponse
@@ -31,4 +32,9 @@ interface ToDoApi {
     suspend fun deleteTask(
         @Path("id") taskId: Long,
     ): Response<BaseResponse<Unit?>>
+
+    @POST("auth/facebook")
+    suspend fun facebookLogin(
+        @Body request: FacebookLoginRequest
+    ): Response<BaseResponse<RegisterResponseData?>>
 }

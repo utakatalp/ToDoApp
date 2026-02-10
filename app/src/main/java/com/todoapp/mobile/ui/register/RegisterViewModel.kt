@@ -1,10 +1,12 @@
 package com.todoapp.mobile.ui.register
 
+import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
+import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.domain.repository.SessionPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
@@ -48,7 +50,7 @@ class RegisterViewModel @Inject constructor(
             is UiAction.OnFullNameChange -> onFullNameChange(uiAction.fullName)
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.password)
             is UiAction.OnUpdateWebViewVisibility -> updateWebViewVisibility(uiAction.isVisible)
-            UiAction.OnGoogleSignInTap -> {}
+            UiAction.OnFacebookSignInTap -> _uiEffect.trySend(UiEffect.FacebookLogin)
             UiAction.OnLoginTap -> {}
             UiAction.OnPrivacyPolicyTap -> showPrivacyPolicy()
             UiAction.OnSignUpTap -> onSignUpTap()
@@ -58,6 +60,8 @@ class RegisterViewModel @Inject constructor(
             UiAction.OnEmailFieldTap -> enableEmailField()
             UiAction.OnFullNameFieldTap -> enableFullNameField()
             UiAction.OnPasswordFieldTap -> enablePasswordField()
+            is UiAction.OnSuccessfulFacebookLogin -> loginWithFacebook(uiAction.token)
+            is UiAction.OnFacebookLoginFail -> handleFacebookLoginFailure(uiAction.throwable)
         }
     }
 
@@ -145,20 +149,55 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    private fun handleSuccessfulRegister(registerResponseData: RegisterResponseData) {
-        _navEffect.trySend(
-            NavigationEffect.Navigate(
-                route = Screen.Home,
-                popUpTo = Screen.Onboarding,
-                isInclusive = true
+    private fun loginWithFacebook(token: String) {
+        viewModelScope.launch {
+            setRedirecting(true)
+
+            userRepository.facebookLogin(FacebookLoginRequest(token))
+                .onSuccess { handleSuccessfulRegister(it) }
+                .onFailure { throwable ->
+                    Log.d("facebook_login", throwable.message.orEmpty())
+                    handleFacebookLoginFailure(throwable)
+                }
+        }
+    }
+
+    private fun handleFacebookLoginFailure(throwable: Throwable) {
+        setRedirecting(false)
+
+        val message = when (throwable) {
+            is DomainException.NoInternet -> "No internet connection."
+            is DomainException.Unauthorized -> "Facebook session expired. Please try again."
+            is DomainException.Server -> throwable.message ?: "Try again later."
+            else -> throwable.message ?: "Try again later."
+        }
+
+        _uiState.update { state ->
+            state.copy(
+                generalError = RegisterError(message)
             )
-        )
+        }
+    }
+
+    private fun setRedirecting(isRedirecting: Boolean) {
+        _uiState.update { state -> state.copy(isRedirecting = isRedirecting) }
+    }
+
+    private fun handleSuccessfulRegister(registerResponseData: RegisterResponseData) {
         viewModelScope.launch {
             sessionPreferences.setAccessToken(registerResponseData.accessToken)
             sessionPreferences.setExpiresAt(registerResponseData.expiresIn)
             sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
 
             taskRepository.syncLocalTasksToServer()
+
+            _navEffect.trySend(
+                NavigationEffect.Navigate(
+                    route = Screen.Home,
+                    popUpTo = Screen.Onboarding,
+                    isInclusive = true
+                )
+            )
         }
     }
 

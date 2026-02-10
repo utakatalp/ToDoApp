@@ -1,6 +1,7 @@
 package com.todoapp.mobile.ui.register
 
 object RegisterContract {
+
     data class UiState(
         val fullName: String = "",
         val email: String = "",
@@ -16,6 +17,7 @@ object RegisterContract {
         val confirmPasswordError: RegisterError? = null,
         val generalError: RegisterError? = null,
         val isWebViewAvailable: Boolean = false,
+        val isRedirecting: Boolean = false,
     )
 
     sealed interface UiAction {
@@ -23,7 +25,7 @@ object RegisterContract {
         data object OnTermsOfServiceTap : UiAction
         data object OnPrivacyPolicyTap : UiAction
         data object OnLoginTap : UiAction
-        data object OnGoogleSignInTap : UiAction
+        data object OnFacebookSignInTap : UiAction
         data object OnPasswordVisibilityTap : UiAction
         data object OnPasswordFieldTap : UiAction
         data object OnConfirmPasswordFieldTap : UiAction
@@ -33,11 +35,14 @@ object RegisterContract {
         data class OnEmailChange(val email: String) : UiAction
         data class OnPasswordChange(val password: String) : UiAction
         data class OnConfirmPasswordChange(val confirmPassword: String) : UiAction
-
         data class OnUpdateWebViewVisibility(val isVisible: Boolean) : UiAction
+        data class OnSuccessfulFacebookLogin(val token: String) : UiAction
+        data class OnFacebookLoginFail(val throwable: Throwable) : UiAction
     }
 
-    sealed interface UiEffect
+    sealed interface UiEffect {
+        data object FacebookLogin : UiEffect
+    }
 
     data class RegisterError(val message: String)
 }

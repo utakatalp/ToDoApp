@@ -77,5 +77,8 @@
     <string name="terms_of_service">Terms of Service</string>
     <string name="and">"and "</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="facebook_app_id">909034501717310</string>
+    <string name="fb_login_protocol_scheme">fb909034501717310</string>
+    <string name="facebook_client_token">eae8e9d82cc25dfc659ef2cf8892171b</string>
 
 </resources>

@@ -1,14 +1,26 @@
 package com.todoapp.mobile.common
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 import com.todoapp.mobile.data.model.network.response.BaseResponse
 import com.todoapp.mobile.data.model.network.response.ErrorResponse
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
 import retrofit2.Response
@@ -45,13 +57,14 @@ suspend fun <T> handleRequest(
 
         if (response.isSuccessful.not()) {
             val errorBody = response.errorBody()?.string()
+            Log.d("error", errorBody.toString())
             val message = errorBody
                 ?.let {
                     runCatching { Json.decodeFromString<ErrorResponse>(it).message }.getOrNull()
                 }
                 ?: response.message()
                 ?: "Something went wrong"
-
+                Log.d("error", message)
             return Result.failure(DomainException.Server(message))
         }
 
@@ -93,5 +106,55 @@ sealed class DomainException(message: String) : Exception(message) {
             }
             else -> Unknown(t)
         }
+    }
+}
+
+@OptIn(InternalCoroutinesApi::class)
+suspend fun loginWithFacebook(
+    activity: FragmentActivity
+): Result<String> = suspendCancellableCoroutine { cont ->
+
+    val callbackManager = CallbackManager.Factory.create()
+
+    val connectivityManager = activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = connectivityManager.activeNetwork
+    val capabilities = connectivityManager.getNetworkCapabilities(network)
+    val hasInternet = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+
+    fun resumeOnce(result: Result<String>) {
+        cont.tryResume(result)?.let(cont::completeResume)
+    }
+
+    if (!hasInternet) {
+        resumeOnce(Result.failure(Exception("No internet connection")))
+        return@suspendCancellableCoroutine
+    }
+
+    LoginManager.getInstance().registerCallback(
+        callbackManager,
+        object : FacebookCallback<LoginResult> {
+
+            override fun onCancel() {
+                resumeOnce(Result.failure(Exception("User cancelled")))
+            }
+
+            override fun onError(error: FacebookException) {
+                resumeOnce(Result.failure(error))
+            }
+
+            override fun onSuccess(result: LoginResult) {
+                resumeOnce(Result.success(result.accessToken.token))
+            }
+        }
+    )
+
+    LoginManager.getInstance().logInWithReadPermissions(
+        activity,
+        callbackManager,
+        listOf("public_profile", "email")
+    )
+
+    cont.invokeOnCancellation {
+        LoginManager.getInstance().unregisterCallback(callbackManager)
     }
 }

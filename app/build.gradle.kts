@@ -97,6 +97,7 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.lifecycle.process)
+    implementation(libs.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -128,6 +129,7 @@ dependencies {
     implementation(libs.timber)
     detektPlugins(libs.detekt.formatting)
     implementation(libs.reorderable)
+    implementation(libs.facebook)
 
     implementation(libs.androidx.datastore.preferences)
 }
