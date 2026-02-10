@@ -1,8 +1,15 @@
 package com.todoapp.mobile.ui.settings
 
+import android.Manifest
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.security.SecretModeEndCondition
+import com.todoapp.mobile.domain.alarm.AlarmScheduler
+import com.todoapp.mobile.domain.alarm.AlarmType
+import com.todoapp.mobile.domain.alarm.buildDailyPlanAlarmItem
+import com.todoapp.mobile.domain.constants.DailyPlanDefaults
+import com.todoapp.mobile.domain.repository.DailyPlanPreferences
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.ThemeRepository
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
@@ -23,17 +30,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Clock
+import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val themeRepository: ThemeRepository,
     private val secretModePreferences: SecretPreferences,
+    private val dailyPlanPreferences: DailyPlanPreferences,
+    private val alarmScheduler: AlarmScheduler,
+    private val clock: Clock,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -44,6 +58,17 @@ class SettingsViewModel @Inject constructor(
 
     private val _navEffect by lazy { Channel<NavigationEffect>() }
     val navEffect by lazy { _navEffect.receiveAsFlow() }
+
+    private var didScheduleDailyPlanOnce: Boolean = false
+
+    private val dailyPlanTime: StateFlow<LocalTime> =
+        dailyPlanPreferences.observePlanTime()
+            .map { it ?: DailyPlanDefaults.DEFAULT_PLAN_TIME }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+                initialValue = DailyPlanDefaults.DEFAULT_PLAN_TIME,
+            )
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val secretModeMessageFlow: StateFlow<String> =
@@ -77,6 +102,16 @@ class SettingsViewModel @Inject constructor(
                 }
             }
         }
+        viewModelScope.launch {
+            dailyPlanTime.collect { time ->
+                _uiState.update { it.copy(dailyPlanTime = time) }
+
+                if (!didScheduleDailyPlanOnce) {
+                    didScheduleDailyPlanOnce = true
+                    rescheduleDailyPlanAlarm(time)
+                }
+            }
+        }
     }
 
     private fun observeTheme() {
@@ -93,6 +128,7 @@ class SettingsViewModel @Inject constructor(
             is UiAction.OnSelectedSecretModeChange -> updateSelectedSecretMode(action)
             is UiAction.OnSettingsSave -> updateOption()
             is UiAction.OnDisableSecretModeTap -> disableSecretMode()
+            is UiAction.OnDailyPlanTimeChange -> updateDailyPlanTime(action.time)
             is UiAction.OnNavigateToSecretModeSettings -> navigateToSecretModeSettings()
         }
     }
@@ -116,6 +152,26 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             secretModePreferences.setLastSelectedOptionId(selectedOptionIdAtClick)
         }
+    }
+
+    private fun updateDailyPlanTime(time: LocalTime) {
+        viewModelScope.launch {
+            dailyPlanPreferences.savePlanTime(time)
+            rescheduleDailyPlanAlarm(time)
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
+    private fun rescheduleDailyPlanAlarm(time: LocalTime) {
+        alarmScheduler.cancelScheduledAlarm(AlarmType.DAILY_PLAN)
+
+        val item = buildDailyPlanAlarmItem(
+            selectedTime = time,
+            now = LocalDateTime.now(clock),
+            message = "",
+        )
+
+        alarmScheduler.schedule(item, AlarmType.DAILY_PLAN)
     }
 
     private fun observeSecretModeMessage(condition: SecretModeEndCondition): Flow<String> = flow {

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
+import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toAlarmItem
@@ -297,8 +298,19 @@ class HomeViewModel @Inject constructor(
                 showTransientError { s, v -> s.copy(isTimeError = v) }
                 false
             }
-
             else -> true
+        }
+    }
+
+    private fun scheduleTaskReminders(
+        task: Task,
+        remindBeforeMinutes: List<Long> = DEFAULT_REMINDER_MINUTES,
+    ) {
+        remindBeforeMinutes.forEach { minutes ->
+            alarmScheduler.schedule(
+                task.toAlarmItem(remindBeforeMinutes = minutes),
+                type = AlarmType.TASK
+            )
         }
     }
 
@@ -375,15 +387,6 @@ class HomeViewModel @Inject constructor(
             ).create(selectedOption)
             secretModePreferences.saveCondition(condition)
             navigateToTaskDetail()
-        }
-    }
-
-    private fun scheduleTaskReminders(
-        task: Task,
-        remindBeforeMinutes: List<Long> = DEFAULT_REMINDER_MINUTES,
-    ) {
-        remindBeforeMinutes.forEach { minutes ->
-            alarmScheduler.schedule(task.toAlarmItem(remindBeforeMinutes = minutes))
         }
     }
 

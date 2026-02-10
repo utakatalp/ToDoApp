@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -22,18 +23,29 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.todoapp.mobile.MainActivity
+import com.todoapp.mobile.domain.repository.DailyCardPosition
+import com.todoapp.mobile.domain.repository.DailyPlanPreferences
+import com.todoapp.uikit.components.TDOverlayDailyPlanNotificationCard
 import com.todoapp.uikit.components.TDOverlayNotificationCard
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
-    lateinit var windowManager: WindowManager
+    @Inject
+    lateinit var dailyPlanPreferences: DailyPlanPreferences
+    private lateinit var windowManager: WindowManager
     private val _lifecycleRegistry = LifecycleRegistry(this)
     private val _savedStateRegistryController: SavedStateRegistryController = SavedStateRegistryController.create(this)
     override val savedStateRegistry: SavedStateRegistry = _savedStateRegistryController.savedStateRegistry
     override val lifecycle: Lifecycle = _lifecycleRegistry
-    private var overlayView: View? = null
+    private var taskOverlayView: View? = null
+    private var dailyPlanOverlayView: View? = null
 
     override fun onBind(intent: Intent?): IBinder {
         throw UnsupportedOperationException(BOUND_MODE_NOT_SUPPORTED)
@@ -51,18 +63,28 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         if (intent.hasExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)) {
             val message = intent.getStringExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)
             val minutesBefore = intent.getLongExtra(INTENT_EXTRA_LONG, 0)
-            showOverlay(message.orEmpty(), minutesBefore)
+            val overlayType = intent.getStringExtra(INTENT_EXTRA_OVERLAY_TYPE) ?: OVERLAY_TYPE_TASK
+            showOverlay(message.orEmpty(), minutesBefore, overlayType)
         } else if (intent.hasExtra(INTENT_EXTRA_COMMAND_HIDE_OVERLAY)) hideOverlay()
         return START_NOT_STICKY
     }
 
-    private fun showOverlay(message: String, minutesBefore: Long) {
-        if (overlayView != null) return
+    private fun showOverlay(
+        message: String,
+        minutesBefore: Long,
+        overlayType: String,
+    ) {
+        val targetViewRef =
+            when (overlayType) {
+                OVERLAY_TYPE_DAILY_PLAN -> dailyPlanOverlayView
+                else -> taskOverlayView
+            }
+        if (targetViewRef != null) return
 
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 
-        overlayView = ComposeView(this).apply {
+        val newView = ComposeView(this).apply {
             setViewTreeLifecycleOwner(this@OverlayService)
             setViewTreeSavedStateRegistryOwner(this@OverlayService)
             setContent {
@@ -73,38 +95,71 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                         hideOverlay()
                     }
                 }
-                TDOverlayNotificationCard(
-                    message = message,
-                    minutesBefore = minutesBefore,
-                    show = show,
-                    onDismissClick = { show = false },
-                    onOpenClick = {
-                        show = false
+                when (overlayType) {
+                    OVERLAY_TYPE_DAILY_PLAN -> {
+                        TDOverlayDailyPlanNotificationCard(
+                            isVisible = show,
+                            onDismiss = { show = false },
+                            onOpenApp = {
+                                show = false
+                                openApp()
+                            },
+                            onPositionChange = { offset ->
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    dailyPlanPreferences.saveCardPosition(
+                                        DailyCardPosition(offset.x, offset.y)
+                                    )
+                                }
+                            },
+                            initialPosition = dailyPlanPreferences.observeCardPosition()
+                                .map { Offset(it.cardPositionX, it.cardPositionY) }
 
-                        openApp()
+                        )
                     }
-                )
+
+                    else -> {
+                        TDOverlayNotificationCard(
+                            message = message,
+                            minutesBefore = minutesBefore,
+                            show = show,
+                            onDismissClick = { show = false },
+                            onOpenClick = {
+                                show = false
+                                openApp()
+                            }
+                        )
+                    }
+                }
             }
         }
-        windowManager.addView(overlayView, getLayoutParams())
+        when (overlayType) {
+            OVERLAY_TYPE_DAILY_PLAN -> dailyPlanOverlayView = newView
+            else -> taskOverlayView = newView
+        }
+        windowManager.addView(newView, getLayoutParams(overlayType))
     }
 
     private fun hideOverlay() {
-        if (overlayView == null) return
-        windowManager.removeView(overlayView)
-        overlayView = null
+        taskOverlayView?.let {
+            windowManager.removeView(it)
+            taskOverlayView = null
+        }
+        dailyPlanOverlayView?.let {
+            windowManager.removeView(it)
+            dailyPlanOverlayView = null
+        }
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
     }
 
-    private fun getLayoutParams(): WindowManager.LayoutParams {
+    private fun getLayoutParams(overlayType: String): WindowManager.LayoutParams {
         return WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
-            WINDOW_MANAGER_LAYOUT_HEIGHT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.TOP
+            gravity = if (overlayType == OVERLAY_TYPE_DAILY_PLAN) Gravity.BOTTOM else Gravity.TOP
         }
     }
 
@@ -121,6 +176,8 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         const val INTENT_EXTRA_LONG = "INTENT_EXTRA_LONG"
         const val HIDE_OVERLAY_ANIMATION_DELAY = 300L
         const val BOUND_MODE_NOT_SUPPORTED = "Bound mode not supported"
-        const val WINDOW_MANAGER_LAYOUT_HEIGHT = 600
+        const val INTENT_EXTRA_OVERLAY_TYPE = "INTENT_EXTRA_OVERLAY_TYPE"
+        const val OVERLAY_TYPE_TASK = "OVERLAY_TYPE_TASK"
+        const val OVERLAY_TYPE_DAILY_PLAN = "OVERLAY_TYPE_DAILY_PLAN"
     }
 }

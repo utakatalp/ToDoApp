@@ -19,6 +19,8 @@
     <string name="close_button">Close Button</string>
     <string name="task_title">Task Title</string>
     <string name="set_time">Set time</string>
+    <string name="plan_your_day">Plan Your Day</string>
+    <string name="when_do_you_want_to_get_notified">When do you want to get notified?</string>
     <string name="starts">Starts</string>
     <string name="ends">Ends</string>
     <string name="description">Description</string>
@@ -63,6 +65,7 @@
     <string name="the_time_of_reopening_for_secret_mode">The time of reopening for secret mode</string>
     <string name="save">Save</string>
     <string name="disable_secret_mode">Disable Secret Mode</string>
+    <string name="close">Close</string>
     <string name="error_something_went_wrong">Something went wrong</string>
     <string name="error_unknown">Unknown error</string>
     <string name="error_task_not_found">Task not found</string>

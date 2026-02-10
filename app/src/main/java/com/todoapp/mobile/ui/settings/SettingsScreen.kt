@@ -26,8 +26,10 @@ import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
 import com.todoapp.uikit.components.TDNotificationPermissionItem
 import com.todoapp.uikit.components.TDOverlayPermissionItem
+import com.todoapp.uikit.components.TDPlanTimePickerField
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
+import java.time.LocalTime
 
 @Composable
 fun SettingsScreen(
@@ -57,11 +59,6 @@ private fun SettingsContent(
     ) {
         Spacer(modifier = Modifier.height(8.dp))
 
-        TDText(
-            text = stringResource(R.string.privacy_security),
-            style = TDTheme.typography.heading1
-        )
-
         ThemeSelector(
             currentTheme = uiState.currentTheme,
             onThemeChange = { theme ->
@@ -69,9 +66,18 @@ private fun SettingsContent(
             }
         )
 
-        HorizontalDivider(
-            color = TDTheme.colors.onBackground.copy(alpha = 0.3f)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TDPlanTimePickerField(
+            title = stringResource(R.string.plan_your_day),
+            subtitle = stringResource(R.string.when_do_you_want_to_get_notified),
+            time = uiState.dailyPlanTime,
+            onTimeChange = { onAction(UiAction.OnDailyPlanTimeChange(it)) },
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.3f))
 
         Row(
             modifier
@@ -92,18 +98,12 @@ private fun SettingsContent(
                 tint = TDTheme.colors.onBackground
             )
         }
+        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.3f))
+
         TDNotificationPermissionItem()
         TDOverlayPermissionItem(context)
     }
 }
-/*
-        HorizontalDivider(
-            color = TDTheme.colors.onBackground.copy(alpha = 0.3f)
-        )
-    }
-}
-
- */
 
 @Preview(showBackground = true)
 @Composable
@@ -114,7 +114,8 @@ private fun SettingsScreenPreview() {
                 currentTheme = ThemePreference.SYSTEM_DEFAULT,
                 selectedSecretMode = SecretModeReopenOptions.Immediate,
                 remainedSecretModeTime = "",
-                isSecretModeActive = true
+                isSecretModeActive = true,
+                dailyPlanTime = LocalTime.of(9, 0)
             ),
             onAction = {}
         )
