@@ -12,6 +12,7 @@ object LoginContract {
         val isPasswordFieldEnabled: Boolean = true,
         val emailError: String? = null,
         val passwordError: String? = null,
+        val generalError: LoginError? = null,
         val isLoading: Boolean = false,
         val hasSubmittedOnce: Boolean = false,
     )
@@ -25,6 +26,8 @@ object LoginContract {
         data object OnLoginTap : UiAction
         data object OnForgotPasswordTap : UiAction
         data class OnGoogleSignInTap(val activityContext: Context) : UiAction
+        data class OnSuccessfulFacebookLogin(val token: String) : UiAction
+        data class OnFacebookLoginFail(val throwable: Throwable) : UiAction
         data object OnFacebookSignInTap : UiAction
         data object OnRegisterTap : UiAction
         data object OnTermsOfServiceTap : UiAction
@@ -32,6 +35,9 @@ object LoginContract {
     }
 
     sealed interface UiEffect {
+        data object FacebookLogin : UiEffect
         data class ShowToast(val message: String) : UiEffect
     }
+
+    data class LoginError(val message: String)
 }

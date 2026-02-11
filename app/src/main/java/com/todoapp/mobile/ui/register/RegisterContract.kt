@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.register
 
+import android.content.Context
 import com.todoapp.mobile.common.passwordValidation.PasswordStrength
 
 object RegisterContract {
@@ -29,6 +30,7 @@ object RegisterContract {
         data object OnPrivacyPolicyTap : UiAction
         data object OnLoginTap : UiAction
         data object OnFacebookSignInTap : UiAction
+        data class OnGoogleSignInTap(val activityContext: Context) : UiAction
         data object OnPasswordVisibilityTap : UiAction
         data object OnPasswordFieldTap : UiAction
         data object OnConfirmPasswordFieldTap : UiAction
@@ -45,6 +47,7 @@ object RegisterContract {
 
     sealed interface UiEffect {
         data object FacebookLogin : UiEffect
+        data class ShowToast(val message: String) : UiEffect
     }
 
     data class RegisterError(val message: String)

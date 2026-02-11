@@ -18,11 +18,13 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -48,6 +50,7 @@ import com.todoapp.mobile.ui.register.RegisterContract.UiAction
 import com.todoapp.mobile.ui.register.RegisterContract.UiEffect
 import com.todoapp.mobile.ui.register.RegisterContract.UiState
 import com.todoapp.uikit.components.TDButton
+import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.extensions.collectWithLifecycle
@@ -69,12 +72,15 @@ fun RegisterScreen(
                     onAction = onAction,
                 )
             }
+
+            is UiEffect.ShowToast -> {}
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
         RegisterContent(
             uiState = uiState,
             onAction = onAction,
+            activityContext = context
         )
 
         if (uiState.isRedirecting) {
@@ -98,6 +104,7 @@ fun RegisterScreen(
 private fun RegisterContent(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
+    activityContext: Context,
 ) {
     val verticalScroll = rememberScrollState()
 
@@ -137,7 +144,7 @@ private fun RegisterContent(
                 .fillMaxSize()
                 .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
                 .background(color = TDTheme.colors.background)
-                .padding(start = 32.dp, end = 32.dp, top = 24.dp)
+                .padding(start = 32.dp, end = 32.dp, top = 24.dp, bottom = 16.dp)
         ) {
             Spacer(Modifier.height(16.dp))
             TDCompactOutlinedTextField(
@@ -293,15 +300,56 @@ private fun RegisterContent(
             ) {
                 onAction(UiAction.OnSignUpTap)
             }
-            Spacer(Modifier.height(8.dp))
-            TDButton(
-                modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-                text = "Sign Up with Facebook",
-                fullWidth = true,
-                icon = painterResource(R.drawable.ic_facebook_logo_secondary)
+            Spacer(Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                onAction(UiAction.OnFacebookSignInTap)
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = TDTheme.colors.gray.copy(0.3f)
+                )
+                TDText(
+                    text = stringResource(R.string.or_continue_with),
+                    style = TDTheme.typography.subheading4,
+                    color = TDTheme.colors.gray,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = TDTheme.colors.gray.copy(0.3f)
+                )
             }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                TDButton(
+                    text = stringResource(R.string.google),
+                    fullWidth = false,
+                    type = TDButtonType.OUTLINE,
+                    icon = painterResource(R.drawable.ic_google_logo),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    onAction(UiAction.OnGoogleSignInTap(activityContext))
+                }
+                Spacer(Modifier.width(12.dp))
+                TDButton(
+                    text = stringResource(R.string.facebook),
+                    fullWidth = false,
+                    type = TDButtonType.OUTLINE,
+                    icon = painterResource(R.drawable.ic_facebook_logo),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    onAction(UiAction.OnFacebookSignInTap)
+                }
+            }
+
             Spacer(Modifier.height(16.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 TDText(
@@ -362,7 +410,7 @@ private fun RegisterContent(
 /**
  * Handles Facebook login with context safety and error reporting.
  */
-private suspend fun handleFacebookLogin(
+suspend fun handleFacebookLogin(
     context: Context,
     onAction: (UiAction) -> Unit,
 ) {
@@ -390,6 +438,7 @@ private suspend fun handleFacebookLogin(
 @Preview(showBackground = true)
 @Composable
 private fun RegisterContentPreview() {
+    val context = LocalContext.current
     TDTheme {
         RegisterContent(
             uiState = UiState(
@@ -400,6 +449,7 @@ private fun RegisterContentPreview() {
                 isPasswordVisible = true,
             ),
             onAction = {},
+            activityContext = context
         )
     }
 }
@@ -407,6 +457,7 @@ private fun RegisterContentPreview() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun RegisterContentDarkPreview() {
+    val context = LocalContext.current
     TDTheme {
         RegisterContent(
             uiState = UiState(
@@ -417,6 +468,7 @@ private fun RegisterContentDarkPreview() {
                 isPasswordVisible = false,
             ),
             onAction = {},
+            activityContext = context
         )
     }
 }

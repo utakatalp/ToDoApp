@@ -1,11 +1,15 @@
 package com.todoapp.mobile.ui.register
 
+import android.content.Context
 import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.common.passwordValidation.ValidationManager
+import com.todoapp.mobile.data.auth.AuthModel
+import com.todoapp.mobile.data.auth.AuthTokenManager
+import com.todoapp.mobile.data.auth.GoogleSignInManager
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
@@ -30,7 +34,9 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val googleSignInManager: GoogleSignInManager,
     private val sessionPreferences: SessionPreferences,
+    private val authTokenManager: AuthTokenManager,
     private val taskRepository: TaskRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
@@ -63,12 +69,14 @@ class RegisterViewModel @Inject constructor(
             UiAction.OnPasswordFieldTap -> enablePasswordField()
             is UiAction.OnSuccessfulFacebookLogin -> loginWithFacebook(uiAction.token)
             is UiAction.OnFacebookLoginFail -> handleFacebookLoginFailure(uiAction.throwable)
+            is UiAction.OnGoogleSignInTap -> googleLogin(activityContext = uiAction.activityContext)
         }
     }
 
     private fun navigateToLogin() {
         _navEffect.trySend(NavigationEffect.Navigate(Screen.Login))
     }
+
     private fun updateWebViewVisibility(isVisible: Boolean) {
         _uiState.update { state ->
             state.copy(
@@ -180,6 +188,47 @@ class RegisterViewModel @Inject constructor(
             state.copy(
                 generalError = RegisterError(message)
             )
+        }
+    }
+
+    private fun googleLogin(activityContext: Context) {
+        viewModelScope.launch {
+            googleSignInManager.getGoogleIdToken(activityContext)
+                .onSuccess { idToken ->
+                    userRepository.googleLogin(idToken)
+                        .onSuccess { loginData ->
+                            authTokenManager.saveTokens(
+                                AuthModel(
+                                    accessToken = loginData.accessToken,
+                                    refreshToken = loginData.refreshToken,
+                                    userId = loginData.user.id,
+                                    email = loginData.user.email,
+                                    displayName = loginData.user.displayName,
+                                    avatarUrl = loginData.user.avatarUrl,
+                                )
+                            )
+                            _navEffect.trySend(
+                                NavigationEffect.Navigate(
+                                    route = Screen.Home,
+                                    popUpTo = Screen.Onboarding,
+                                    isInclusive = true
+                                )
+                            )
+                        }
+                        .onFailure { error ->
+                            _uiEffect.trySend(
+                                UiEffect.ShowToast(
+                                    error.message ?: "Goggle login error"
+                                )
+                            )
+                        }
+                }.onFailure { error ->
+                    _uiEffect.trySend(
+                        UiEffect.ShowToast(
+                            error.message ?: "Goggle Sign-in Cancelled"
+                        )
+                    )
+                }
         }
     }
 

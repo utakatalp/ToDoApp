@@ -175,7 +175,8 @@ fun NavGraph(
             NavigationEffectController(navController, viewModel.navEffect)
             LoginScreen(
                 uiState = uiState,
-                onAction = viewModel::onAction
+                onAction = viewModel::onAction,
+                uiEffect = uiEffect
             )
         }
 

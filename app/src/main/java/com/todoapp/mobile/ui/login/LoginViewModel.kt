@@ -1,14 +1,20 @@
 package com.todoapp.mobile.ui.login
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.R
+import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.common.passwordValidation.ValidationManager
 import com.todoapp.mobile.data.auth.AuthModel
 import com.todoapp.mobile.data.auth.AuthTokenManager
 import com.todoapp.mobile.data.auth.GoogleSignInManager
+import com.todoapp.mobile.data.model.network.data.RegisterResponseData
+import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
+import com.todoapp.mobile.domain.repository.SessionPreferences
+import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -30,6 +36,8 @@ class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val googleSignInManager: GoogleSignInManager,
     private val authTokenManager: AuthTokenManager,
+    private val sessionPreferences: SessionPreferences,
+    private val taskRepository: TaskRepository,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -47,15 +55,65 @@ class LoginViewModel @Inject constructor(
             is UiAction.OnEmailChange -> onEmailChange(uiAction.value)
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.value)
             UiAction.OnEmailFieldTap -> enableEmailField()
-            UiAction.OnFacebookSignInTap -> {}
+            UiAction.OnFacebookSignInTap -> _uiEffect.trySend(UiEffect.FacebookLogin)
             UiAction.OnForgotPasswordTap -> {}
             is UiAction.OnGoogleSignInTap -> googleLogin(uiAction.activityContext)
+            is UiAction.OnSuccessfulFacebookLogin -> loginWithFacebook(uiAction.token)
+            is UiAction.OnFacebookLoginFail -> handleFacebookLoginFailure(uiAction.throwable)
             UiAction.OnLoginTap -> handleLoginClick()
             UiAction.OnPasswordFieldTap -> enablePasswordField()
             UiAction.OnPasswordVisibilityTap -> togglePasswordVisibility()
             UiAction.OnPrivacyPolicyTap -> showPrivacyPolicy()
             UiAction.OnRegisterTap -> navigateToRegister()
             UiAction.OnTermsOfServiceTap -> showTermsOfService()
+        }
+    }
+
+    private fun handleSuccessfulLogin(registerResponseData: RegisterResponseData) {
+        viewModelScope.launch {
+            sessionPreferences.setAccessToken(registerResponseData.accessToken)
+            sessionPreferences.setExpiresAt(registerResponseData.expiresIn)
+            sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
+
+            taskRepository.syncLocalTasksToServer()
+
+            _navEffect.trySend(
+                NavigationEffect.Navigate(
+                    route = Screen.Home,
+                    popUpTo = Screen.Onboarding,
+                    isInclusive = true
+                )
+            )
+        }
+    }
+
+    private fun loginWithFacebook(token: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            userRepository.facebookLogin(FacebookLoginRequest(token))
+                .onSuccess { handleSuccessfulLogin(it) }
+                .onFailure { throwable ->
+                    Log.d("facebook_login", throwable.message.orEmpty())
+                    handleFacebookLoginFailure(throwable)
+                }
+        }
+    }
+
+    private fun handleFacebookLoginFailure(throwable: Throwable) {
+        _uiState.update { it.copy(isLoading = false) }
+
+        val message = when (throwable) {
+            is DomainException.NoInternet -> "No internet connection."
+            is DomainException.Unauthorized -> "Facebook session expired. Please try again."
+            is DomainException.Server -> throwable.message ?: "Try again later."
+            else -> throwable.message ?: "Try again later."
+        }
+
+        _uiState.update { state ->
+            state.copy(
+                generalError = LoginContract.LoginError(message)
+            )
         }
     }
 

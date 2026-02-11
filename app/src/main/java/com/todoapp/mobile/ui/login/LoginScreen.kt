@@ -40,22 +40,41 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import com.todoapp.mobile.R
+import com.todoapp.mobile.common.loginWithFacebook
 import com.todoapp.mobile.ui.login.LoginContract.UiAction
+import com.todoapp.mobile.ui.login.LoginContract.UiEffect
 import com.todoapp.mobile.ui.login.LoginContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDText
+import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun LoginScreen(
     uiState: UiState,
+    uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
     val activity = context.findActivity()
+
+    uiEffect.collectWithLifecycle {
+        when (it) {
+            UiEffect.FacebookLogin -> {
+                handleFacebookLogin(
+                    context = context,
+                    onAction = onAction,
+                )
+            }
+
+            is UiEffect.ShowToast -> {}
+        }
+    }
 
     LoginContent(
         uiState = uiState,
@@ -356,6 +375,29 @@ private fun LoginContent(
             }
         }
     }
+}
+
+suspend fun handleFacebookLogin(
+    context: Context,
+    onAction: (UiAction) -> Unit,
+) {
+    val activity = context as? FragmentActivity
+        ?: run {
+            onAction(
+                UiAction.OnFacebookLoginFail(
+                    IllegalStateException("Facebook login requires a FragmentActivity context")
+                )
+            )
+            return
+        }
+
+    loginWithFacebook(activity = activity)
+        .onSuccess { token ->
+            onAction(UiAction.OnSuccessfulFacebookLogin(token))
+        }
+        .onFailure { throwable ->
+            onAction(UiAction.OnFacebookLoginFail(throwable))
+        }
 }
 
 fun Context.findActivity(): Context {
