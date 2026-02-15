@@ -164,7 +164,7 @@ fun NavGraph(
             RegisterScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
-                uiEffect = uiEffect
+                uiEffect = uiEffect,
             )
         }
 
@@ -176,7 +176,7 @@ fun NavGraph(
             LoginScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
-                uiEffect = uiEffect
+                uiEffect = uiEffect,
             )
         }
 

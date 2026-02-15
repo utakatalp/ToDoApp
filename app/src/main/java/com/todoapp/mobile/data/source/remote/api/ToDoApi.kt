@@ -1,9 +1,11 @@
 package com.todoapp.mobile.data.source.remote.api
 
+import com.todoapp.mobile.data.model.network.data.FCMTokenResponseData
 import com.todoapp.mobile.data.model.network.data.GoogleLoginResponseData
 import com.todoapp.mobile.data.model.network.data.LoginResponseData
 import com.todoapp.mobile.data.model.network.data.RegisterResponseData
 import com.todoapp.mobile.data.model.network.data.TaskData
+import com.todoapp.mobile.data.model.network.request.FCMTokenRequest
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
@@ -34,7 +36,7 @@ interface ToDoApi {
 
     @POST("tasks")
     suspend fun addTask(
-        @Body request: TaskRequest
+        @Body request: TaskRequest,
     ): Response<BaseResponse<TaskData?>>
 
     @POST("tasks/{id}")
@@ -49,6 +51,11 @@ interface ToDoApi {
 
     @POST("auth/facebook")
     suspend fun facebookLogin(
-        @Body request: FacebookLoginRequest
+        @Body request: FacebookLoginRequest,
     ): Response<BaseResponse<RegisterResponseData?>>
+
+    @POST("devices/fcm-token")
+    suspend fun fcmToken(
+        @Body request: FCMTokenRequest,
+    ): Response<BaseResponse<FCMTokenResponseData?>>
 }

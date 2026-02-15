@@ -21,3 +21,13 @@ data class GoogleLoginRequest(
     @SerialName("token")
     val token: String,
 )
+
+@Serializable
+data class FCMTokenRequest(
+    @SerialName("token")
+    val token: String,
+    @SerialName("deviceId")
+    val deviceId: String?,
+    @SerialName("deviceName")
+    val deviceName: String?,
+)

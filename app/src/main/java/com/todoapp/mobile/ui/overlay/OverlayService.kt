@@ -12,7 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -23,6 +22,10 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.todoapp.mobile.MainActivity
+import com.todoapp.mobile.domain.alarm.AlarmScheduler
+import com.todoapp.mobile.domain.alarm.AlarmType
+import com.todoapp.mobile.domain.alarm.buildDailyPlanAlarmItem
+import com.todoapp.mobile.domain.constants.DailyPlanDefaults
 import com.todoapp.mobile.domain.repository.DailyCardPosition
 import com.todoapp.mobile.domain.repository.DailyPlanPreferences
 import com.todoapp.uikit.components.TDOverlayDailyPlanNotificationCard
@@ -31,14 +34,19 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     @Inject
     lateinit var dailyPlanPreferences: DailyPlanPreferences
+
+    @Inject
+    lateinit var alarmScheduler: AlarmScheduler
     private lateinit var windowManager: WindowManager
     private val _lifecycleRegistry = LifecycleRegistry(this)
     private val _savedStateRegistryController: SavedStateRegistryController = SavedStateRegistryController.create(this)
@@ -60,6 +68,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        android.util.Log.d("OverlayService", "onStartCommand called, extras: ${intent.extras}")
         if (intent.hasExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)) {
             val message = intent.getStringExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)
             val minutesBefore = intent.getLongExtra(INTENT_EXTRA_LONG, 0)
@@ -84,6 +93,21 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 
+        val layoutParams = getLayoutParams(overlayType)
+
+        if (overlayType == OVERLAY_TYPE_DAILY_PLAN) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val saved = dailyPlanPreferences.observeCardPosition().first()
+                withContext(Dispatchers.Main) {
+                    layoutParams.x = saved.cardPositionX.toInt()
+                    layoutParams.y = saved.cardPositionY.toInt()
+                    dailyPlanOverlayView?.let {
+                        windowManager.updateViewLayout(it, layoutParams)
+                    }
+                }
+            }
+        }
+
         val newView = ComposeView(this).apply {
             setViewTreeLifecycleOwner(this@OverlayService)
             setViewTreeSavedStateRegistryOwner(this@OverlayService)
@@ -104,15 +128,21 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                                 show = false
                                 openApp()
                             },
-                            onPositionChange = { offset ->
+                            onDrag = { dx, dy ->
+                                layoutParams.x += dx.toInt()
+                                layoutParams.y += dy.toInt()
+                                windowManager.updateViewLayout(this@apply, layoutParams)
+                            },
+                            onDragEnd = {
                                 CoroutineScope(Dispatchers.IO).launch {
                                     dailyPlanPreferences.saveCardPosition(
-                                        DailyCardPosition(offset.x, offset.y)
+                                        DailyCardPosition(
+                                            layoutParams.x.toFloat(),
+                                            layoutParams.y.toFloat()
+                                        )
                                     )
                                 }
-                            },
-                            initialPosition = dailyPlanPreferences.observeCardPosition()
-                                .map { Offset(it.cardPositionX, it.cardPositionY) }
+                            }
 
                         )
                     }
@@ -133,10 +163,29 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             }
         }
         when (overlayType) {
-            OVERLAY_TYPE_DAILY_PLAN -> dailyPlanOverlayView = newView
+            OVERLAY_TYPE_DAILY_PLAN -> {
+                dailyPlanOverlayView = newView
+                rescheduleNextDailyPlan()
+            }
+
             else -> taskOverlayView = newView
         }
-        windowManager.addView(newView, getLayoutParams(overlayType))
+        windowManager.addView(newView, layoutParams)
+    }
+
+    private fun rescheduleNextDailyPlan() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val time = dailyPlanPreferences.observePlanTime().first()
+                ?: DailyPlanDefaults.DEFAULT_PLAN_TIME
+
+            val now = LocalDateTime.now()
+            val item = buildDailyPlanAlarmItem(
+                selectedTime = time,
+                now = now,
+                message = "",
+            )
+            alarmScheduler.schedule(item, AlarmType.DAILY_PLAN)
+        }
     }
 
     private fun hideOverlay() {
@@ -156,10 +205,18 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = if (overlayType == OVERLAY_TYPE_DAILY_PLAN) Gravity.BOTTOM else Gravity.TOP
+            gravity = Gravity.TOP or Gravity.START
+            x = 0
+            y = if (overlayType == OVERLAY_TYPE_DAILY_PLAN) {
+                val bottomMarginPx = (DAILY_PLAN_BOTTOM_MARGIN_DP * resources.displayMetrics.density).toInt()
+                resources.displayMetrics.heightPixels - bottomMarginPx
+            } else {
+                0
+            }
         }
     }
 
@@ -179,5 +236,6 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         const val INTENT_EXTRA_OVERLAY_TYPE = "INTENT_EXTRA_OVERLAY_TYPE"
         const val OVERLAY_TYPE_TASK = "OVERLAY_TYPE_TASK"
         const val OVERLAY_TYPE_DAILY_PLAN = "OVERLAY_TYPE_DAILY_PLAN"
+        const val DAILY_PLAN_BOTTOM_MARGIN_DP = 80
     }
 }

@@ -1,9 +1,7 @@
 package com.todoapp.mobile.ui.login
 
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.res.Configuration
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -43,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.todoapp.mobile.R
 import com.todoapp.mobile.common.loginWithFacebook
+import com.todoapp.mobile.di.LocalGoogleSignInManager
 import com.todoapp.mobile.ui.login.LoginContract.UiAction
 import com.todoapp.mobile.ui.login.LoginContract.UiEffect
 import com.todoapp.mobile.ui.login.LoginContract.UiState
@@ -61,7 +61,7 @@ fun LoginScreen(
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
-    val activity = context.findActivity()
+    val googleSignInManager = LocalGoogleSignInManager.current
 
     uiEffect.collectWithLifecycle {
         when (it) {
@@ -72,6 +72,14 @@ fun LoginScreen(
                 )
             }
 
+            UiEffect.GoogleLogin -> {
+                googleSignInManager.getGoogleIdToken(context).onSuccess { idToken ->
+                    onAction(UiAction.OnSuccessfulGoogleLogin(idToken))
+                }.onFailure { error ->
+                    onAction(UiAction.OnGoogleSignInFailed(error.message ?: "Sign-in Cancelled"))
+                }
+            }
+
             is UiEffect.ShowToast -> {}
         }
     }
@@ -79,7 +87,6 @@ fun LoginScreen(
     LoginContent(
         uiState = uiState,
         onAction = onAction,
-        activityContext = activity
     )
 }
 
@@ -87,290 +94,302 @@ fun LoginScreen(
 private fun LoginContent(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
-    activityContext: Context,
 ) {
     val verticalScroll = rememberScrollState()
 
-    Column(
+    Box(
         Modifier
             .fillMaxSize()
-            .imePadding()
-            .background(color = TDTheme.colors.primary)
-            .statusBarsPadding()
-            .verticalScroll(verticalScroll),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(color = TDTheme.colors.background)
     ) {
-        Spacer(Modifier.height(32.dp))
-        Box(
-            modifier = Modifier
-                .size(70.dp)
-                .background(
-                    color = TDTheme.colors.background.copy(alpha = 0.25f),
-                    shape = RoundedCornerShape(16.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painterResource(R.drawable.ic_logo),
-                contentDescription = stringResource(R.string.logo),
-                modifier = Modifier.size(40.dp),
-                tint = TDTheme.colors.white
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-        TDText(
-            text = stringResource(R.string.login_header),
-            style = TDTheme.typography.heading1,
-            color = TDTheme.colors.white
-        )
-        TDText(
-            text = stringResource(R.string.elevate_your_productivity),
-            style = TDTheme.typography.heading4,
-            color = TDTheme.colors.white.copy(0.8f)
-        )
-        Spacer(Modifier.height(24.dp))
-
         Column(
             Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
-                .background(color = TDTheme.colors.background)
-                .padding(start = 32.dp, end = 32.dp, top = 32.dp, bottom = 16.dp),
+                .fillMaxSize()
+                .imePadding()
+                .verticalScroll(verticalScroll),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TDText(
-                text = stringResource(R.string.welcome_back),
-                style = TDTheme.typography.heading2,
-                color = TDTheme.colors.onBackground
-            )
-            Spacer(Modifier.height(4.dp))
-            TDText(
-                text = stringResource(R.string.please_sign_in_to_your_account),
-                style = TDTheme.typography.heading5,
-                color = TDTheme.colors.gray
-            )
-            Spacer(Modifier.height(24.dp))
-
-            TDCompactOutlinedTextField(
-                value = uiState.email,
-                enabled = uiState.isEmailFieldEnabled,
-                label = stringResource(R.string.email_address),
-                onValueChange = { onAction(UiAction.OnEmailChange(it)) },
-                placeholder = stringResource(R.string.email),
-                isError = !uiState.emailError.isNullOrBlank(),
-                leadingIcon = {
-                    Icon(
-                        painterResource(R.drawable.ic_mail_white),
-                        contentDescription = stringResource(R.string.email),
-                        tint = TDTheme.colors.onBackground.copy(0.5f)
-                    )
-                },
-                roundedCornerShape = RoundedCornerShape(12.dp),
-                height = 50.dp,
-                modifier = Modifier.clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(color = TDTheme.colors.primary)
+                    .statusBarsPadding(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(Modifier.height(32.dp))
+                Box(
+                    modifier = Modifier
+                        .size(70.dp)
+                        .background(
+                            color = TDTheme.colors.background.copy(alpha = 0.25f),
+                            shape = RoundedCornerShape(16.dp)
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    onAction(UiAction.OnEmailFieldTap)
+                    Icon(
+                        painterResource(R.drawable.ic_logo),
+                        contentDescription = stringResource(R.string.logo),
+                        modifier = Modifier.size(40.dp),
+                        tint = TDTheme.colors.white
+                    )
                 }
-            )
-            uiState.emailError
-                ?.takeIf { it.isNotBlank() }
-                ?.let { errorText ->
-                    TDText(text = errorText, color = TDTheme.colors.red)
-                }
+                Spacer(Modifier.height(12.dp))
+                TDText(
+                    text = stringResource(R.string.login_header),
+                    style = TDTheme.typography.heading1,
+                    color = TDTheme.colors.white
+                )
+                TDText(
+                    text = stringResource(R.string.elevate_your_productivity),
+                    style = TDTheme.typography.heading4,
+                    color = TDTheme.colors.white.copy(0.8f)
+                )
+                Spacer(Modifier.height(60.dp))
+            }
 
-            Spacer(Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .offset(y = (-36).dp)
+                    .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                    .background(color = TDTheme.colors.background)
+                    .padding(start = 32.dp, end = 32.dp, top = 32.dp, bottom = 16.dp),
             ) {
                 TDText(
-                    text = stringResource(R.string.password),
-                    style = TDTheme.typography.heading6,
+                    text = stringResource(R.string.welcome_back),
+                    style = TDTheme.typography.heading2,
                     color = TDTheme.colors.onBackground
                 )
+                Spacer(Modifier.height(4.dp))
                 TDText(
-                    text = stringResource(R.string.forgot_password),
-                    style = TDTheme.typography.subheading4,
-                    color = TDTheme.colors.primary,
-                    modifier = Modifier.clickable {
-                        onAction(UiAction.OnForgotPasswordTap)
+                    text = stringResource(R.string.please_sign_in_to_your_account),
+                    style = TDTheme.typography.heading5,
+                    color = TDTheme.colors.gray
+                )
+                Spacer(Modifier.height(24.dp))
+
+                TDCompactOutlinedTextField(
+                    value = uiState.email,
+                    enabled = uiState.isEmailFieldEnabled,
+                    label = stringResource(R.string.email_address),
+                    onValueChange = { onAction(UiAction.OnEmailChange(it)) },
+                    placeholder = stringResource(R.string.email),
+                    isError = !uiState.emailError.isNullOrBlank(),
+                    leadingIcon = {
+                        Icon(
+                            painterResource(R.drawable.ic_mail_white),
+                            contentDescription = stringResource(R.string.email),
+                            tint = TDTheme.colors.onBackground.copy(0.5f)
+                        )
+                    },
+                    roundedCornerShape = RoundedCornerShape(12.dp),
+                    height = 50.dp,
+                    modifier = Modifier.clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        onAction(UiAction.OnEmailFieldTap)
                     }
                 )
-            }
-            Spacer(Modifier.height(4.dp))
+                uiState.emailError
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { errorText ->
+                        TDText(text = errorText, color = TDTheme.colors.red)
+                    }
 
-            TDCompactOutlinedTextField(
-                value = uiState.password,
-                enabled = uiState.isPasswordFieldEnabled,
-                label = null,
-                visualTransformation = if (uiState.isPasswordVisible) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
-                onValueChange = { onAction(UiAction.OnPasswordChange(it)) },
-                placeholder = stringResource(R.string.password),
-                isError = !uiState.passwordError.isNullOrBlank(),
-                leadingIcon = {
-                    Icon(
-                        painterResource(R.drawable.ic_lock),
-                        contentDescription = stringResource(R.string.password),
-                        tint = TDTheme.colors.onBackground.copy(0.5f)
+                Spacer(Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TDText(
+                        text = stringResource(R.string.password),
+                        style = TDTheme.typography.heading6,
+                        color = TDTheme.colors.onBackground
                     )
-                },
-                trailingIcon = {
-                    IconButton(onClick = { onAction(UiAction.OnPasswordVisibilityTap) }) {
-                        Icon(
-                            painter = painterResource(
-                                if (uiState.isPasswordVisible) {
-                                    R.drawable.ic_visibility_on
-                                } else {
-                                    R.drawable.ic_visibility_close
-                                }
-                            ),
-                            contentDescription = stringResource(R.string.toggle_password_visibility),
-                            tint = TDTheme.colors.onBackground.copy(0.5f)
+                    TDText(
+                        text = stringResource(R.string.forgot_password),
+                        style = TDTheme.typography.subheading4,
+                        color = TDTheme.colors.primary,
+                        modifier = Modifier.clickable {
+                            onAction(UiAction.OnForgotPasswordTap)
+                        }
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
 
+                TDCompactOutlinedTextField(
+                    value = uiState.password,
+                    enabled = uiState.isPasswordFieldEnabled,
+                    label = null,
+                    visualTransformation = if (uiState.isPasswordVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                    onValueChange = { onAction(UiAction.OnPasswordChange(it)) },
+                    placeholder = stringResource(R.string.password),
+                    isError = !uiState.passwordError.isNullOrBlank(),
+                    leadingIcon = {
+                        Icon(
+                            painterResource(R.drawable.ic_lock),
+                            contentDescription = stringResource(R.string.password),
+                            tint = TDTheme.colors.onBackground.copy(0.5f)
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { onAction(UiAction.OnPasswordVisibilityTap) }) {
+                            Icon(
+                                painter = painterResource(
+                                    if (uiState.isPasswordVisible) {
+                                        R.drawable.ic_visibility_on
+                                    } else {
+                                        R.drawable.ic_visibility_close
+                                    }
+                                ),
+                                contentDescription = stringResource(R.string.toggle_password_visibility),
+                                tint = TDTheme.colors.onBackground.copy(0.5f)
+                            )
+                        }
+                    },
+                    roundedCornerShape = RoundedCornerShape(12.dp),
+                    height = 50.dp,
+                    modifier = Modifier.clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        onAction(UiAction.OnPasswordFieldTap)
+                    }
+                )
+                uiState.passwordError
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { errorText ->
+                        TDText(text = errorText, color = TDTheme.colors.red)
+                    }
+
+                Spacer(Modifier.height(24.dp))
+
+                TDButton(
+                    text = stringResource(R.string.login),
+                    fullWidth = true,
+                    modifier = Modifier.clip(RoundedCornerShape(12.dp))
+                ) {
+                    onAction(UiAction.OnLoginTap)
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f),
+                        color = TDTheme.colors.gray.copy(0.3f)
+                    )
+                    TDText(
+                        text = stringResource(R.string.or_continue_with),
+                        style = TDTheme.typography.subheading4,
+                        color = TDTheme.colors.gray,
+                        modifier = Modifier.padding(horizontal = 12.dp)
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f),
+                        color = TDTheme.colors.gray.copy(0.3f)
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TDButton(
+                        text = stringResource(R.string.google),
+                        fullWidth = false,
+                        type = TDButtonType.OUTLINE,
+                        icon = painterResource(R.drawable.ic_google_logo),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        onAction(UiAction.OnGoogleSignInTap)
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    TDButton(
+                        text = stringResource(R.string.facebook),
+                        fullWidth = false,
+                        type = TDButtonType.OUTLINE,
+                        icon = painterResource(R.drawable.ic_facebook_logo),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        onAction(UiAction.OnFacebookSignInTap)
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TDText(
+                        text = stringResource(R.string.dont_have_an_account),
+                        style = TDTheme.typography.heading6,
+                        color = TDTheme.colors.onBackground.copy(0.7f)
+                    )
+                    TDText(
+                        text = stringResource(R.string.register),
+                        color = TDTheme.colors.primary,
+                        style = TDTheme.typography.heading6.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.clickable {
+                            onAction(UiAction.OnRegisterTap)
+                        }
+                    )
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row {
+                        TDText(
+                            text = stringResource(R.string.by_signing_up_you_agree_to_our),
+                            style = TDTheme.typography.subheading4,
+                            color = TDTheme.colors.gray
+                        )
+                        TDText(
+                            text = stringResource(R.string.terms_of_service),
+                            style = TDTheme.typography.subheading4.copy(
+                                textDecoration = TextDecoration.Underline
+                            ),
+                            color = TDTheme.colors.gray,
+                            modifier = Modifier.clickable {
+                                onAction(UiAction.OnTermsOfServiceTap)
+                            }
                         )
                     }
-                },
-                roundedCornerShape = RoundedCornerShape(12.dp),
-                height = 50.dp,
-                modifier = Modifier.clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
-                    onAction(UiAction.OnPasswordFieldTap)
-                }
-            )
-            uiState.passwordError
-                ?.takeIf { it.isNotBlank() }
-                ?.let { errorText ->
-                    TDText(text = errorText, color = TDTheme.colors.red)
-                }
-
-            Spacer(Modifier.height(24.dp))
-
-            TDButton(
-                text = stringResource(R.string.login),
-                fullWidth = true,
-                modifier = Modifier.clip(RoundedCornerShape(12.dp))
-            ) {
-                onAction(UiAction.OnLoginTap)
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = TDTheme.colors.gray.copy(0.3f)
-                )
-                TDText(
-                    text = stringResource(R.string.or_continue_with),
-                    style = TDTheme.typography.subheading4,
-                    color = TDTheme.colors.gray,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = TDTheme.colors.gray.copy(0.3f)
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                TDButton(
-                    text = stringResource(R.string.google),
-                    fullWidth = false,
-                    type = TDButtonType.OUTLINE,
-                    icon = painterResource(R.drawable.ic_google_logo),
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    onAction(UiAction.OnGoogleSignInTap(activityContext))
-                }
-                Spacer(Modifier.width(12.dp))
-                TDButton(
-                    text = stringResource(R.string.facebook),
-                    fullWidth = false,
-                    type = TDButtonType.OUTLINE,
-                    icon = painterResource(R.drawable.ic_facebook_logo),
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    onAction(UiAction.OnFacebookSignInTap)
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                TDText(
-                    text = stringResource(R.string.dont_have_an_account),
-                    style = TDTheme.typography.heading6,
-                    color = TDTheme.colors.onBackground.copy(0.7f)
-                )
-                TDText(
-                    text = stringResource(R.string.register),
-                    color = TDTheme.colors.primary,
-                    style = TDTheme.typography.heading6.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.clickable {
-                        onAction(UiAction.OnRegisterTap)
+                    Row {
+                        TDText(
+                            text = stringResource(R.string.and),
+                            style = TDTheme.typography.subheading4,
+                            color = TDTheme.colors.gray
+                        )
+                        TDText(
+                            text = stringResource(R.string.privacy_policy),
+                            style = TDTheme.typography.subheading4.copy(
+                                textDecoration = TextDecoration.Underline
+                            ),
+                            color = TDTheme.colors.gray,
+                            modifier = Modifier.clickable {
+                                onAction(UiAction.OnPrivacyPolicyTap)
+                            }
+                        )
                     }
-                )
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Row {
-                    TDText(
-                        text = stringResource(R.string.by_signing_up_you_agree_to_our),
-                        style = TDTheme.typography.subheading4,
-                        color = TDTheme.colors.gray
-                    )
-                    TDText(
-                        text = stringResource(R.string.terms_of_service),
-                        style = TDTheme.typography.subheading4.copy(
-                            textDecoration = TextDecoration.Underline
-                        ),
-                        color = TDTheme.colors.gray,
-                        modifier = Modifier.clickable {
-                            onAction(UiAction.OnTermsOfServiceTap)
-                        }
-                    )
-                }
-                Row {
-                    TDText(
-                        text = stringResource(R.string.and),
-                        style = TDTheme.typography.subheading4,
-                        color = TDTheme.colors.gray
-                    )
-                    TDText(
-                        text = stringResource(R.string.privacy_policy),
-                        style = TDTheme.typography.subheading4.copy(
-                            textDecoration = TextDecoration.Underline
-                        ),
-                        color = TDTheme.colors.gray,
-                        modifier = Modifier.clickable {
-                            onAction(UiAction.OnPrivacyPolicyTap)
-                        }
-                    )
                 }
             }
         }
@@ -400,19 +419,9 @@ suspend fun handleFacebookLogin(
         }
 }
 
-fun Context.findActivity(): Context {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is ComponentActivity) return context
-        context = context.baseContext
-    }
-    error("Activity context not found")
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun LoginContentPreview() {
-    val context = LocalContext.current
     TDTheme {
         LoginContent(
             uiState = UiState(
@@ -421,7 +430,6 @@ private fun LoginContentPreview() {
                 isPasswordVisible = true,
             ),
             onAction = {},
-            activityContext = context
         )
     }
 }
@@ -429,7 +437,6 @@ private fun LoginContentPreview() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun LoginContentDarkPreview() {
-    val context = LocalContext.current
     TDTheme {
         LoginContent(
             uiState = UiState(
@@ -438,7 +445,6 @@ private fun LoginContentDarkPreview() {
                 isPasswordVisible = false
             ),
             onAction = {},
-            activityContext = context
         )
     }
 }

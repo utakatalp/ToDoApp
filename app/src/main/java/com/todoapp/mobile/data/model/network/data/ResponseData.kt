@@ -57,4 +57,11 @@ data class GoogleLoginUser(
     val emailVerified: Boolean,
     val providers: List<String>,
     val createdAt: String,
-    )
+)
+
+@Serializable
+data class FCMTokenResponseData(
+    val token: String,
+    val deviceId: String,
+    val deviceName: String,
+)

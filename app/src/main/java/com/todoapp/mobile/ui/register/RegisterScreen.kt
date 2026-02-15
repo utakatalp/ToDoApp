@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.todoapp.mobile.R
 import com.todoapp.mobile.common.loginWithFacebook
+import com.todoapp.mobile.di.LocalGoogleSignInManager
 import com.todoapp.mobile.ui.register.RegisterContract.UiAction
 import com.todoapp.mobile.ui.register.RegisterContract.UiEffect
 import com.todoapp.mobile.ui.register.RegisterContract.UiState
@@ -64,24 +65,28 @@ fun RegisterScreen(
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
+    val googleSignInManager = LocalGoogleSignInManager.current
+
     uiEffect.collectWithLifecycle {
         when (it) {
             UiEffect.FacebookLogin -> {
-                handleFacebookLogin(
-                    context = context,
-                    onAction = onAction,
-                )
+                handleFacebookLogin(context = context, onAction = onAction)
+            }
+
+            UiEffect.LaunchGoogleSignIn -> {
+                googleSignInManager.getGoogleIdToken(context)
+                    .onSuccess { token -> onAction(UiAction.OnGoogleSignInResult(token)) }
+                    .onFailure { error ->
+                        onAction(UiAction.OnGoogleSignInFailed(error.message ?: "Sign-in cancelled"))
+                    }
             }
 
             is UiEffect.ShowToast -> {}
         }
     }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        RegisterContent(
-            uiState = uiState,
-            onAction = onAction,
-            activityContext = context
-        )
+        RegisterContent(uiState = uiState, onAction = onAction)
 
         if (uiState.isRedirecting) {
             Box(
@@ -91,7 +96,7 @@ fun RegisterScreen(
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
-                    ) { /* consume clicks */ },
+                    ) { },
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
@@ -104,7 +109,6 @@ fun RegisterScreen(
 private fun RegisterContent(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
-    activityContext: Context,
 ) {
     val verticalScroll = rememberScrollState()
 
@@ -142,7 +146,7 @@ private fun RegisterContent(
         Column(
             Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
+                .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                 .background(color = TDTheme.colors.background)
                 .padding(start = 32.dp, end = 32.dp, top = 24.dp, bottom = 16.dp)
         ) {
@@ -203,12 +207,11 @@ private fun RegisterContent(
                 value = uiState.password,
                 enabled = uiState.isPasswordFieldEnabled,
                 label = stringResource(R.string.password),
-                visualTransformation =
-                    if (uiState.isPasswordVisible) {
-                        VisualTransformation.None
-                    } else {
-                        PasswordVisualTransformation()
-                    },
+                visualTransformation = if (uiState.isPasswordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
                 onValueChange = { onAction(UiAction.OnPasswordChange(it)) },
                 placeholder = stringResource(R.string.password),
                 isError = uiState.passwordError != null,
@@ -257,12 +260,11 @@ private fun RegisterContent(
             TDCompactOutlinedTextField(
                 value = uiState.confirmPassword,
                 enabled = uiState.isPasswordConfirmationFieldEnabled,
-                visualTransformation =
-                    if (uiState.isPasswordVisible) {
-                        VisualTransformation.None
-                    } else {
-                        PasswordVisualTransformation()
-                    },
+                visualTransformation = if (uiState.isPasswordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
                 label = stringResource(R.string.confirm_password),
                 onValueChange = { onAction(UiAction.OnConfirmPasswordChange(it)) },
                 placeholder = stringResource(R.string.confirm_password),
@@ -336,7 +338,7 @@ private fun RegisterContent(
                     icon = painterResource(R.drawable.ic_google_logo),
                     modifier = Modifier.weight(1f)
                 ) {
-                    onAction(UiAction.OnGoogleSignInTap(activityContext))
+                    onAction(UiAction.OnGoogleSignInTap)
                 }
                 Spacer(Modifier.width(12.dp))
                 TDButton(
@@ -367,7 +369,10 @@ private fun RegisterContent(
                 )
             }
             Spacer(Modifier.height(16.dp))
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Row {
                     TDText(
                         text = stringResource(R.string.by_signing_up_you_agree_to_our),
@@ -407,9 +412,6 @@ private fun RegisterContent(
     }
 }
 
-/**
- * Handles Facebook login with context safety and error reporting.
- */
 suspend fun handleFacebookLogin(
     context: Context,
     onAction: (UiAction) -> Unit,
@@ -438,7 +440,6 @@ suspend fun handleFacebookLogin(
 @Preview(showBackground = true)
 @Composable
 private fun RegisterContentPreview() {
-    val context = LocalContext.current
     TDTheme {
         RegisterContent(
             uiState = UiState(
@@ -449,7 +450,6 @@ private fun RegisterContentPreview() {
                 isPasswordVisible = true,
             ),
             onAction = {},
-            activityContext = context
         )
     }
 }
@@ -457,7 +457,6 @@ private fun RegisterContentPreview() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun RegisterContentDarkPreview() {
-    val context = LocalContext.current
     TDTheme {
         RegisterContent(
             uiState = UiState(
@@ -468,7 +467,6 @@ private fun RegisterContentDarkPreview() {
                 isPasswordVisible = false,
             ),
             onAction = {},
-            activityContext = context
         )
     }
 }

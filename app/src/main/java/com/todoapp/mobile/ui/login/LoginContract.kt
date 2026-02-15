@@ -1,7 +1,5 @@
 package com.todoapp.mobile.ui.login
 
-import android.content.Context
-
 object LoginContract {
 
     data class UiState(
@@ -25,7 +23,9 @@ object LoginContract {
         data object OnPasswordVisibilityTap : UiAction
         data object OnLoginTap : UiAction
         data object OnForgotPasswordTap : UiAction
-        data class OnGoogleSignInTap(val activityContext: Context) : UiAction
+        data object OnGoogleSignInTap : UiAction
+        data class OnSuccessfulGoogleLogin(val token: String) : UiAction
+        data class OnGoogleSignInFailed(val message: String) : UiAction
         data class OnSuccessfulFacebookLogin(val token: String) : UiAction
         data class OnFacebookLoginFail(val throwable: Throwable) : UiAction
         data object OnFacebookSignInTap : UiAction
@@ -35,6 +35,7 @@ object LoginContract {
     }
 
     sealed interface UiEffect {
+        data object GoogleLogin : UiEffect
         data object FacebookLogin : UiEffect
         data class ShowToast(val message: String) : UiEffect
     }
