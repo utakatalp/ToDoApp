@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,6 +44,8 @@ import com.todoapp.mobile.ui.register.RegisterViewModel
 import com.todoapp.mobile.ui.settings.SecretModeSettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
+import com.todoapp.mobile.ui.topbar.ShowTopBar
+import com.todoapp.mobile.ui.topbar.TopBarViewModel
 import com.todoapp.mobile.ui.webview.WebViewScreen
 import com.todoapp.mobile.ui.webview.WebViewViewModel
 import com.todoapp.uikit.extensions.collectWithLifecycle
@@ -208,12 +209,13 @@ fun NavGraph(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun ToDoApp() {
     val navController = rememberNavController()
     val bannerViewModel: BannerViewModel = hiltViewModel()
     val bannerState by bannerViewModel.uiState.collectAsStateWithLifecycle()
+    val topBarViewModel: TopBarViewModel = hiltViewModel()
+    val topBarState by topBarViewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier =
@@ -229,7 +231,8 @@ fun ToDoApp() {
                     bannerViewModel.uiEffect
                 )
                 NavigationEffectController(navController, bannerViewModel.navEffect)
-                ShowTopBar(navController, bannerState.isBannerActivated)
+                ShowTopBar(navController, bannerState.isBannerActivated, topBarViewModel::onAction, topBarState)
+                NavigationEffectController(navController, topBarViewModel.navEffect)
             }
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -250,7 +253,7 @@ sealed interface NavigationEffect {
         val popUpTo: Screen? = null,
         val isInclusive: Boolean = false,
     ) : NavigationEffect
-
+    data class NavigateClearingBackstack(val route: Screen,) : NavigationEffect
     data object Back : NavigationEffect
 }
 
@@ -273,6 +276,12 @@ private fun NavigationEffectController(
 
             is NavigationEffect.Back -> {
                 navController.popBackStack()
+            }
+
+            is NavigationEffect.NavigateClearingBackstack -> {
+                navController.navigate(effect.route) {
+                    popUpTo(0)
+                }
             }
         }
     }

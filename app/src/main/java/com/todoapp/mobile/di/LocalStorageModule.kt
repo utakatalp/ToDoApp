@@ -9,19 +9,10 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.todoapp.mobile.data.auth.AuthTokenManager
 import com.todoapp.mobile.data.auth.GoogleSignInManager
-import com.todoapp.mobile.data.repository.DailyPlanPreferencesImpl
 import com.todoapp.mobile.data.repository.DataStoreHelper
-import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
-import com.todoapp.mobile.data.repository.SecretPreferencesImpl
-import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
 import com.todoapp.mobile.data.source.local.PomodoroDao
 import com.todoapp.mobile.data.source.local.TaskDao
-import com.todoapp.mobile.domain.repository.DailyPlanPreferences
-import com.todoapp.mobile.domain.repository.PomodoroRepository
-import com.todoapp.mobile.domain.repository.SecretPreferences
-import com.todoapp.mobile.domain.repository.TaskRepository
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -97,32 +88,4 @@ object LocalStorageModule {
     fun provideAuthTokensManager(
         dataStoreHelper: DataStoreHelper
     ): AuthTokenManager = AuthTokenManager(dataStoreHelper)
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class LocalStorageModuleForBindings {
-    @Binds
-    @Singleton
-    abstract fun bindTaskRepository(
-        taskRepositoryImpl: TaskRepositoryImpl,
-    ): TaskRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindSecretModePreferences(
-        secretPreferencesImpl: SecretPreferencesImpl,
-    ): SecretPreferences
-
-    @Binds
-    @Singleton
-    abstract fun bindPomodoroRepository(
-        pomodoroRepositoryImpl: PomodoroRepositoryImpl,
-    ): PomodoroRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindDailyPlanPreferences(
-        dailyPlanPreferencesImpl: DailyPlanPreferencesImpl,
-    ): DailyPlanPreferences
 }

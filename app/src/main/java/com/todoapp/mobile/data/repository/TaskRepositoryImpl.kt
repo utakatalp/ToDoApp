@@ -1,6 +1,7 @@
 package com.todoapp.mobile.data.repository
 
 import android.util.Log
+import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.data.mapper.toDomain
 import com.todoapp.mobile.data.mapper.toEntity
 import com.todoapp.mobile.data.model.entity.SyncStatus
@@ -124,11 +125,13 @@ class TaskRepositoryImpl @Inject constructor(
 
     override suspend fun insert(task: Task) {
         remoteDataSource.addTask(task)
-            .onSuccess {
-                localDataSource.insert(it.toDomain().toEntity())
+            .onSuccess { remoteTask ->
+                val entity = remoteTask.toDomain().toEntity()
+                localDataSource.insert(withInitializedOrder(entity))
             }
             .onFailure {
-                localDataSource.insert(task.toEntity(SyncStatus.PENDING_CREATE))
+                val entity = task.toEntity(SyncStatus.PENDING_CREATE)
+                localDataSource.insert(withInitializedOrder(entity))
             }
     }
 
@@ -144,7 +147,6 @@ class TaskRepositoryImpl @Inject constructor(
                     localDataSource.delete(taskEntity)
                 }
                 .onFailure {
-                    Log.d("delete", "repo  ${it.message}")
                     localDataSource.update(taskEntity.copy(syncStatus = SyncStatus.PENDING_DELETE))
                 }
         }
@@ -163,23 +165,63 @@ class TaskRepositoryImpl @Inject constructor(
 
         if (taskEntity?.syncStatus != SyncStatus.SYNCED) {
             // no need to update remote because its not synced
-            localDataSource.update(task.toEntity(SyncStatus.PENDING_UPDATE))
+            localDataSource.update(task.toEntity(SyncStatus.PENDING_CREATE))
             return@withContext
         }
 
-        remoteDataSource.updateTask(taskEntity.remoteId!!)
+        remoteDataSource.updateTask(taskEntity.remoteId!!, taskEntity.toDomain())
             .onSuccess {
                 localDataSource.update(it.toDomain().toEntity(SyncStatus.SYNCED))
             }
             .onFailure {
-                localDataSource.update(task.toEntity(SyncStatus.PENDING_UPDATE))
+                localDataSource.update(task.toEntity().copy(syncStatus = SyncStatus.PENDING_UPDATE))
             }
+    }
+
+    override suspend fun syncRemoteTasksWithLocal(): Result<Unit> {
+        val remoteTasks = remoteDataSource.getTasks().fold(
+            onSuccess = { it },
+            onFailure = { return Result.failure(it) }
+        )
+
+        val localTasks = localDataSource.observeAll().first()
+        val remoteNotInLocalTasks = remoteTasks.tasks.filter { remoteTask ->
+            localTasks.none { localTask ->
+                localTask.remoteId == remoteTask.id
+            }
+        }
+        Log.d("syncRemoteTasksWithLocal", remoteNotInLocalTasks.toString())
+
+        suspend fun next(dateEpochDay: Long): Int {
+            val current = localDataSource
+                .observeByDate(date = dateEpochDay)
+                .first()
+                .maxOfOrNull { it.orderIndex }
+                ?: -1
+            val n = current + 1
+            return n
+        }
+
+        val addedTaskEntities = remoteNotInLocalTasks
+            .map { it.toDomain().toEntity() }
+            .map { entity ->
+                if (entity.orderIndex != 0) {
+                    entity
+                } else {
+                    entity.copy(orderIndex = next(entity.date))
+                }
+            }
+
+        localDataSource.insertAll(addedTaskEntities)
+
+        return Result.success(Unit)
     }
 
     override suspend fun syncLocalTasksToServer(): Result<Unit> = withContext(Dispatchers.IO) {
         val nonSyncedTasks = findNonSyncedTasks()
-        nonSyncedTasks.forEach { task ->
-            syncTask(task).onFailure {
+        nonSyncedTasks.forEach { taskEntity ->
+            syncTask(taskEntity).onFailure {
+                Log.e("syncLocalTasksToServer", it.message ?: "Unknown error")
                 return@withContext Result.failure(it)
             }
         }
@@ -188,11 +230,63 @@ class TaskRepositoryImpl @Inject constructor(
 
     override suspend fun syncTask(taskEntity: TaskEntity): Result<Unit> {
         return when (taskEntity.syncStatus) {
-            SyncStatus.SYNCED -> { Result.success(Unit) }
+            SyncStatus.SYNCED -> {
+                Result.success(Unit)
+            }
             SyncStatus.PENDING_CREATE -> syncCreatedTask(taskEntity)
             SyncStatus.PENDING_UPDATE -> syncUpdatedTask(taskEntity)
             SyncStatus.PENDING_DELETE -> syncDeletedTask(taskEntity)
         }
+    }
+
+    override suspend fun deleteAllTasks(): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            localDataSource.deleteAll()
+            Result.success(Unit)
+        } catch (t: Throwable) {
+            Result.failure(DomainException.fromThrowable(t))
+        }
+    }
+
+    override suspend fun getAllTasks(): Result<Unit> = withContext(Dispatchers.IO) {
+        remoteDataSource.getTasks().fold(
+            onSuccess = { tasks ->
+                runCatching {
+                    val nextByDate = mutableMapOf<Long, Int>()
+                    suspend fun next(dateEpochDay: Long): Int {
+                        val current = nextByDate[dateEpochDay]
+                            ?: (
+                                localDataSource.observeByDate(date = dateEpochDay)
+                                .first()
+                                .maxOfOrNull { it.orderIndex }
+                                ?: -1
+                            )
+                        val n = current + 1
+                        nextByDate[dateEpochDay] = n
+                        return n
+                    }
+
+                    val entities = tasks.tasks
+                        .map { it.toDomain().toEntity() }
+                        .map { entity ->
+                            if (entity.orderIndex != 0) {
+                                entity
+                            } else {
+                                entity.copy(orderIndex = next(entity.date))
+                            }
+                        }
+
+                    localDataSource.insertAll(entities)
+                    Unit
+                }.fold(
+                    onSuccess = { Result.success(Unit) },
+                    onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) }
+                )
+            },
+            onFailure = { t ->
+                Result.failure(DomainException.fromThrowable(t))
+            }
+        )
     }
 
     private suspend fun syncDeletedTask(taskEntity: TaskEntity): Result<Unit> {
@@ -209,7 +303,7 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     private suspend fun syncUpdatedTask(taskEntity: TaskEntity): Result<Unit> {
-        val remoteResult = remoteDataSource.updateTask(taskEntity.remoteId!!)
+        val remoteResult = remoteDataSource.updateTask(taskEntity.remoteId!!, taskEntity.toDomain())
 
         return remoteResult.fold(
             onSuccess = { remoteTask ->
@@ -232,6 +326,7 @@ class TaskRepositoryImpl @Inject constructor(
         return remoteResult.fold(
             onSuccess = { remoteTask ->
                 val updated = taskEntity.copy(
+                    id = remoteTask.id,
                     remoteId = remoteTask.id,
                     syncStatus = SyncStatus.SYNCED
                 )
@@ -250,6 +345,63 @@ class TaskRepositoryImpl @Inject constructor(
         val tasks = observeAllTaskEntities().first()
         val nonSyncedTasks = tasks.filter { it.syncStatus != SyncStatus.SYNCED }
         return nonSyncedTasks
+    }
+
+    private suspend fun nextOrderForDate(dateEpochDay: Long): Int {
+        val current = localDataSource.observeByDate(date = dateEpochDay)
+            .first()
+            .maxOfOrNull { it.orderIndex }
+            ?: -1
+        return current + 1
+    }
+
+    /**
+     * Assigns orderIndex if the entity doesn't already carry a meaningful order.
+     */
+    private suspend fun withInitializedOrder(entity: TaskEntity): TaskEntity {
+        return if (entity.orderIndex != 0) {
+            entity
+        } else {
+            entity.copy(
+            orderIndex = nextOrderForDate(
+                entity.date
+            )
+        )
+        }
+    }
+
+    override suspend fun reorderTasksForDate(
+        date: LocalDate,
+        fromIndex: Int,
+        toIndex: Int,
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            if (fromIndex == toIndex) return@runCatching
+
+            val current = localDataSource
+                .observeByDate(date.toEpochDay())
+                .first()
+
+            if (fromIndex !in current.indices || toIndex !in current.indices) {
+                return@runCatching
+            }
+
+            val reordered = current.toMutableList().apply {
+                add(toIndex, removeAt(fromIndex))
+            }
+
+            val start = minOf(fromIndex, toIndex)
+            val end = maxOf(fromIndex, toIndex)
+
+            val updates = (start..end).map { index ->
+                reordered[index].id to index
+            }
+
+            localDataSource.updateOrderIndices(updates)
+        }.fold(
+            onSuccess = { Result.success(Unit) },
+            onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) }
+        )
     }
 
     companion object {

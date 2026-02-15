@@ -13,3 +13,9 @@ data class TaskData(
     val isCompleted: Boolean,
     val isSecret: Boolean,
 )
+
+@Serializable
+data class TaskListData(
+    val tasks: List<TaskData>,
+    val count: Int
+)

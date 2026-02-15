@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,18 +21,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -40,6 +44,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
@@ -62,6 +70,7 @@ import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.components.TDWeeklyDatePicker
 import com.todoapp.uikit.extensions.collectWithLifecycle
+import com.todoapp.uikit.theme.Icon
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
@@ -190,7 +199,16 @@ fun HomeContent(
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
+    var tasks by remember(uiState.tasks) { mutableStateOf(uiState.tasks) }
+
+    LaunchedEffect(uiState.tasks) {
+        tasks = uiState.tasks
+    }
+
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        tasks = tasks.toMutableList().apply {
+            add(to.index, removeAt(from.index))
+        }
         onAction(UiAction.OnMoveTask(from.index, to.index))
         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
     }
@@ -229,30 +247,70 @@ fun HomeContent(
                 .weight(1f)
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize(),
                 state = lazyListState,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(
-                    items = uiState.tasks,
-                    key = { task -> task.id }
-                ) { task ->
+                itemsIndexed(
+                    items = tasks,
+                    key = { _, task -> task.id }
+                ) { index, task ->
                     ReorderableItem(
                         state = reorderableLazyListState,
                         key = task.id
                     ) { isDragging ->
-                        val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-                        Surface(
-                            shadowElevation = elevation,
-                            color = TDTheme.colors.background
+                        val interactionSource = remember { MutableInteractionSource() }
+
+                        Card(
+                            onClick = { onAction(UiAction.OnTaskClick(task)) },
+                            modifier = Modifier
+                                .semantics {
+                                    customActions = listOf(
+                                        CustomAccessibilityAction(
+                                            label = "Move Up",
+                                            action = {
+                                                if (index > 0) {
+                                                    tasks = tasks.toMutableList().apply {
+                                                        add(index - 1, removeAt(index))
+                                                    }
+                                                    onAction(UiAction.OnMoveTask(index, index - 1))
+                                                    true
+                                                } else {
+                                                    false
+                                                }
+                                            }
+                                        ),
+                                        CustomAccessibilityAction(
+                                            label = "Move Down",
+                                            action = {
+                                                if (index < tasks.lastIndex) {
+                                                    tasks = tasks.toMutableList().apply {
+                                                        add(index + 1, removeAt(index))
+                                                    }
+                                                    onAction(UiAction.OnMoveTask(index, index + 1))
+                                                    true
+                                                } else {
+                                                    false
+                                                }
+                                            }
+                                        ),
+                                    )
+                                },
+                            interactionSource = interactionSource,
                         ) {
                             TDTaskCardWithCheckbox(
-                                modifier = Modifier
-                                    .combinedClickable(
-                                        onLongClick = { onAction(UiAction.OnTaskLongPress(task)) },
-                                        onClick = { onAction(UiAction.OnTaskClick(task)) }
-                                    )
-                                    .draggableHandle(
+                                taskText = if (task.isSecret) task.title.maskTitle() else task.title,
+                                isChecked = task.isCompleted,
+                                onCheckBoxClick = {
+                                    onAction(UiAction.OnTaskCheck(task))
+                                },
+                                modifier = Modifier.combinedClickable(
+                                    onClick = { onAction(UiAction.OnTaskClick(task)) },
+                                    onLongClick = { onAction(UiAction.OnTaskLongPress(task)) }
+                                ),
+                                hamburgerModifier = Modifier
+                                    .longPressDraggableHandle(
                                         onDragStarted = {
                                             hapticFeedback.performHapticFeedback(
                                                 HapticFeedbackType.GestureThresholdActivate
@@ -260,13 +318,10 @@ fun HomeContent(
                                         },
                                         onDragStopped = {
                                             hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                        }
-                                    ),
-                                taskText = if (task.isSecret) task.title.maskTitle() else task.title,
-                                isChecked = task.isCompleted,
-                                onCheckBoxClick = {
-                                    onAction(UiAction.OnTaskCheck(task))
-                                },
+                                        },
+                                        interactionSource = interactionSource,
+                                    )
+                                    .clearAndSetSemantics { },
                             )
                         }
                     }

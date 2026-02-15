@@ -26,6 +26,7 @@ object HomeContract {
             val isTitleError: Boolean,
             val isTimeError: Boolean,
             val isDateError: Boolean,
+            val isUserAuthenticated: Boolean,
         ) : UiState
 
         data class Error(

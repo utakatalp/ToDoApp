@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
@@ -10,6 +11,7 @@ import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toAlarmItem
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.repository.TaskSyncRepository
 import com.todoapp.mobile.domain.security.SecretModeConditionFactory
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.navigation.NavigationEffect
@@ -37,6 +39,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
+    private val taskSyncRepository: TaskSyncRepository,
     private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
     private val pomodoroEngine: PomodoroEngine
@@ -61,6 +64,8 @@ class HomeViewModel @Inject constructor(
     private var fetchJob: Job? = null
 
     init {
+        taskSyncRepository.fetchTasks()
+        taskSyncRepository.syncPendingTasks()
         loadInitialData()
     }
 
@@ -172,6 +177,7 @@ class HomeViewModel @Inject constructor(
         isTitleError = false,
         isTimeError = false,
         isDateError = false,
+        isUserAuthenticated = false,
     )
 
     private fun changeSelectedDate(uiAction: UiAction.OnDateSelect) {
@@ -215,10 +221,25 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun updateTaskIndices(uiAction: UiAction.OnMoveTask) {
+        val currentState = _uiState.value
+        if (currentState !is UiState.Success) return
+
         updateSuccessState { state ->
             val list = state.tasks.toMutableList()
             list.move(uiAction.from, uiAction.to)
             state.copy(tasks = list)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            taskRepository
+                .reorderTasksForDate(
+                    date = currentState.selectedDate,
+                    fromIndex = uiAction.from,
+                    toIndex = uiAction.to,
+                )
+                .onFailure { t ->
+                    Log.e("HomeViewModel", "Failed to persist task reorder", t)
+                }
         }
     }
 

@@ -32,6 +32,7 @@ fun Task.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TaskEntity {
     val remoteIdOrNull = if (syncStatus == SyncStatus.SYNCED) id else null
 
     return TaskEntity(
+        id = id,
         title = title,
         description = description,
         date = date.toEpochDayLong(),

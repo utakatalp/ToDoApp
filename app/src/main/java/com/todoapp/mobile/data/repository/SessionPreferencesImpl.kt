@@ -50,6 +50,13 @@ class SessionPreferencesImpl @Inject constructor(
         }
     }
 
+    override suspend fun clear(): Boolean {
+        return withContext(Dispatchers.IO) {
+            sharedPreferences.edit { clear() }
+            true
+        }
+    }
+
     companion object {
         const val MILLIS_IN_SECOND = 1000L
         const val KEY_ACCESS_TOKEN = "access_token"
