@@ -147,7 +147,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                         )
                     }
 
-                    else -> {
+                    OVERLAY_TYPE_TASK -> {
                         TDOverlayNotificationCard(
                             message = message,
                             minutesBefore = minutesBefore,
@@ -168,7 +168,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 rescheduleNextDailyPlan()
             }
 
-            else -> taskOverlayView = newView
+            OVERLAY_TYPE_TASK -> taskOverlayView = newView
         }
         windowManager.addView(newView, layoutParams)
     }

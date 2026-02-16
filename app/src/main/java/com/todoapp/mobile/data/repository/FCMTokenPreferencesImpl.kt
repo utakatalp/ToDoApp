@@ -21,7 +21,7 @@ class FCMTokenPreferencesImpl @Inject constructor(
     }
 
     override fun getDeviceId(): String {
-        val stored = prefs.getString(KEY_DEVICE_NAME, null)
+        val stored = prefs.getString(KEY_DEVICE_ID, null)
         if (stored != null) return stored
 
         val newId = UUID.randomUUID().toString()
@@ -57,7 +57,6 @@ class FCMTokenPreferencesImpl @Inject constructor(
         private const val PREF_NAME = "fcm_token_prefs"
         private const val KEY_PENDING_TOKEN = "key_pending_token"
         private const val KEY_DEVICE_ID = "key_device_id"
-        private const val KEY_DEVICE_NAME = "key_device_name"
         private const val KEY_LAST_SENT_TOKEN = "key_last_sent_token"
     }
 }
