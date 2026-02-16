@@ -32,9 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -70,7 +68,6 @@ import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.components.TDWeeklyDatePicker
 import com.todoapp.uikit.extensions.collectWithLifecycle
-import com.todoapp.uikit.theme.Icon
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
@@ -131,7 +128,6 @@ private fun HomeLoadingContent() {
 private fun HomeErrorContent(
     message: String,
     onAction: (UiAction) -> Unit,
-
     ) {
     Column(
         modifier = Modifier
@@ -155,7 +151,9 @@ private fun HomeErrorContent(
             style = TDTheme.typography.heading3,
             color = TDTheme.colors.onBackground
         )
+
         Spacer(Modifier.height(24.dp))
+
         TDButton(
             text = stringResource(com.todoapp.mobile.R.string.retry),
             onClick = { onAction(UiAction.OnRetry) },
@@ -199,16 +197,7 @@ fun HomeContent(
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
-    var tasks by remember(uiState.tasks) { mutableStateOf(uiState.tasks) }
-
-    LaunchedEffect(uiState.tasks) {
-        tasks = uiState.tasks
-    }
-
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        tasks = tasks.toMutableList().apply {
-            add(to.index, removeAt(from.index))
-        }
         onAction(UiAction.OnMoveTask(from.index, to.index))
         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
     }
@@ -253,7 +242,7 @@ fun HomeContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 itemsIndexed(
-                    items = tasks,
+                    items = uiState.tasks,
                     key = { _, task -> task.id }
                 ) { index, task ->
                     ReorderableItem(
@@ -271,9 +260,6 @@ fun HomeContent(
                                             label = "Move Up",
                                             action = {
                                                 if (index > 0) {
-                                                    tasks = tasks.toMutableList().apply {
-                                                        add(index - 1, removeAt(index))
-                                                    }
                                                     onAction(UiAction.OnMoveTask(index, index - 1))
                                                     true
                                                 } else {
@@ -284,10 +270,7 @@ fun HomeContent(
                                         CustomAccessibilityAction(
                                             label = "Move Down",
                                             action = {
-                                                if (index < tasks.lastIndex) {
-                                                    tasks = tasks.toMutableList().apply {
-                                                        add(index + 1, removeAt(index))
-                                                    }
+                                                if (index < uiState.tasks.lastIndex) {
                                                     onAction(UiAction.OnMoveTask(index, index + 1))
                                                     true
                                                 } else {

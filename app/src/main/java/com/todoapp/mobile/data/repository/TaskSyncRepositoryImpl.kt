@@ -44,7 +44,7 @@ class TaskSyncRepositoryImpl @Inject constructor(@ApplicationContext context: Co
             FETCH_WORK,
             ExistingWorkPolicy.REPLACE,
             fetch
-                ).enqueue()
+        ).enqueue()
     }
 
     companion object {

@@ -230,9 +230,7 @@ class TaskRepositoryImpl @Inject constructor(
 
     override suspend fun syncTask(taskEntity: TaskEntity): Result<Unit> {
         return when (taskEntity.syncStatus) {
-            SyncStatus.SYNCED -> {
-                Result.success(Unit)
-            }
+            SyncStatus.SYNCED -> Result.success(Unit)
             SyncStatus.PENDING_CREATE -> syncCreatedTask(taskEntity)
             SyncStatus.PENDING_UPDATE -> syncUpdatedTask(taskEntity)
             SyncStatus.PENDING_DELETE -> syncDeletedTask(taskEntity)
@@ -277,7 +275,6 @@ class TaskRepositoryImpl @Inject constructor(
                         }
 
                     localDataSource.insertAll(entities)
-                    Unit
                 }.fold(
                     onSuccess = { Result.success(Unit) },
                     onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) }
@@ -355,9 +352,6 @@ class TaskRepositoryImpl @Inject constructor(
         return current + 1
     }
 
-    /**
-     * Assigns orderIndex if the entity doesn't already carry a meaningful order.
-     */
     private suspend fun withInitializedOrder(entity: TaskEntity): TaskEntity {
         return if (entity.orderIndex != 0) {
             entity

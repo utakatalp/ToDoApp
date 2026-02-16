@@ -47,7 +47,6 @@ object HomePreviewData {
         isTitleError = isTitleError,
         isTimeError = isTimeError,
         isDateError = isDateError,
-        isUserAuthenticated = false
     )
 
     val sampleTasks = listOf(

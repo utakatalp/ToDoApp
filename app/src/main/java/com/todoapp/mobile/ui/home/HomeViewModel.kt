@@ -177,7 +177,6 @@ class HomeViewModel @Inject constructor(
         isTitleError = false,
         isTimeError = false,
         isDateError = false,
-        isUserAuthenticated = false,
     )
 
     private fun changeSelectedDate(uiAction: UiAction.OnDateSelect) {

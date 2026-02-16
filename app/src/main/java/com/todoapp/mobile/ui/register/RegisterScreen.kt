@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -106,8 +107,6 @@ private fun RegisterContent(
     Column(
         Modifier
             .fillMaxSize()
-            // .imePadding()
-            .navigationBarsPadding()
             .background(color = TDTheme.colors.primary)
             .verticalScroll(verticalScroll),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -325,7 +324,13 @@ private fun RegisterContent(
                 )
             }
             Spacer(Modifier.height(16.dp))
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding()
+                    .navigationBarsPadding(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Row {
                     TDText(
                         text = stringResource(R.string.by_signing_up_you_agree_to_our),
