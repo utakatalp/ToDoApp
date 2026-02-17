@@ -31,7 +31,7 @@ import javax.inject.Inject
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val sessionPreferences: SessionPreferences,
-    private val dataStoreHelper: DataStoreHelper
+    private val dataStoreHelper: DataStoreHelper,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -192,7 +192,6 @@ class RegisterViewModel @Inject constructor(
             sessionPreferences.setAccessToken(registerResponseData.accessToken)
             sessionPreferences.setExpiresAt(registerResponseData.expiresIn)
             sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
-
             dataStoreHelper.setUser(registerResponseData.user)
 
             _navEffect.trySend(

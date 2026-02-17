@@ -42,7 +42,7 @@ class HomeViewModel @Inject constructor(
     private val taskSyncRepository: TaskSyncRepository,
     private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
-    private val pomodoroEngine: PomodoroEngine
+    private val pomodoroEngine: PomodoroEngine,
 ) : ViewModel() {
 
     private data class DailyData(

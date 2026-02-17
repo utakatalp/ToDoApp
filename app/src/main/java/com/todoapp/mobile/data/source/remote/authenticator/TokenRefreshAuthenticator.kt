@@ -38,7 +38,7 @@ class TokenRefreshAuthenticator @Inject constructor(
                         sessionPreferences.getRefreshToken().orEmpty()
                     )
                 )
-                Log.d("TokenRefresh", refreshed.toString())
+                Log.d("TokenRefresh", refreshed.isSuccess.toString())
                 if (refreshed.isSuccess) {
                     val newAccessToken = refreshed.getOrThrow().accessToken
                     val newRefreshToken = refreshed.getOrThrow().refreshToken
@@ -51,6 +51,9 @@ class TokenRefreshAuthenticator @Inject constructor(
                         .header("Authorization", "Bearer $newAccessToken")
                         .build()
                 } else {
+                    if (sessionPreferences.getRefreshToken() != null) {
+                        authRepository.forceLogout()
+                    }
                     null
                 }
             }

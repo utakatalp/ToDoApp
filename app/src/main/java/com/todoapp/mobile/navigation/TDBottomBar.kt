@@ -12,12 +12,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.todoapp.mobile.LocalNavController
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun TDBottomBar(navController: NavHostController) {
+fun TDBottomBar() {
+    val navController = LocalNavController.current
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val items = AppDestination.bottomBarItems

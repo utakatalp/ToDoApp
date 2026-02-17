@@ -3,9 +3,7 @@ package com.todoapp.mobile.ui.topbar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.repository.DataStoreHelper
-import com.todoapp.mobile.domain.engine.PomodoroEngine
-import com.todoapp.mobile.domain.repository.SessionPreferences
-import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -21,11 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TopBarViewModel @Inject constructor(
-    private val sessionPreferences: SessionPreferences,
     private val userRepository: UserRepository,
-    private val taskRepository: TaskRepository,
     private val dataStoreHelper: DataStoreHelper,
-    private val pomodoroEngine: PomodoroEngine,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TopBarContract.UiState(isUserAuthenticated = false))
@@ -59,11 +55,7 @@ class TopBarViewModel @Inject constructor(
 
     private fun handleLogout() {
         viewModelScope.launch {
-            sessionPreferences.clear()
-            dataStoreHelper.clearUser()
-            taskRepository.deleteAllTasks()
-            pomodoroEngine.finish()
-            _navEffect.trySend(NavigationEffect.NavigateClearingBackstack(Screen.Onboarding))
+            authRepository.logout()
         }
     }
 

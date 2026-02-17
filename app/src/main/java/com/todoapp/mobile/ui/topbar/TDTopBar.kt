@@ -14,9 +14,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.uikit.R
+import com.todoapp.mobile.LocalNavController
 import com.todoapp.mobile.navigation.AppDestination
 import com.todoapp.mobile.navigation.appDestinationFromRoute
 import com.todoapp.mobile.ui.topbar.TopBarContract.UiAction
@@ -58,11 +58,11 @@ fun TDTopBar(
 
 @Composable
 fun ShowTopBar(
-    navController: NavHostController,
     isBannerActivated: Boolean,
     onEvent: (UiAction) -> Unit,
     uiState: TopBarContract.UiState
 ) {
+    val navController = LocalNavController.current
     val route =
         navController
             .currentBackStackEntryAsState()

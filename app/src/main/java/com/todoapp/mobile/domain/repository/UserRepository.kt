@@ -7,6 +7,7 @@ import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.model.network.request.RefreshTokenRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
+import kotlinx.coroutines.flow.SharedFlow
 
 interface UserRepository {
     suspend fun register(request: RegisterRequest): Result<AuthResponseData>
@@ -17,5 +18,18 @@ interface UserRepository {
 }
 
 interface AuthRepository {
+
+    val events: SharedFlow<AuthEvent>
     suspend fun refresh(request: RefreshTokenRequest): Result<RefreshTokenData>
+
+    suspend fun logout(): Result<Unit>
+
+    suspend fun forceLogout(): Result<Unit>
+}
+
+sealed interface AuthEvent {
+
+    data object Logout : AuthEvent
+
+    data object ForceLogout : AuthEvent
 }

@@ -11,8 +11,12 @@ import com.todoapp.mobile.data.model.network.request.RefreshTokenRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.data.source.remote.api.ToDoApi
 import com.todoapp.mobile.data.source.remote.api.TodoAuthApi
+import com.todoapp.mobile.domain.repository.AuthEvent
 import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.UserRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
@@ -41,8 +45,22 @@ class UserRepositoryImpl @Inject constructor(
 }
 
 class AuthRepositoryImpl @Inject constructor(
-    private val authApi: TodoAuthApi
+    private val authApi: TodoAuthApi,
 ) : AuthRepository {
+
+    private val _events = MutableSharedFlow<AuthEvent>(replay = 0)
+    override val events: SharedFlow<AuthEvent> = _events.asSharedFlow()
+
+    override suspend fun logout(): Result<Unit> {
+        _events.emit(AuthEvent.Logout)
+        return Result.success(Unit)
+    }
+
+    override suspend fun forceLogout(): Result<Unit> {
+        _events.emit(AuthEvent.ForceLogout)
+        return Result.success(Unit)
+    }
+
     override suspend fun refresh(request: RefreshTokenRequest): Result<RefreshTokenData> {
         return handleRequest { authApi.refreshToken(request) }
     }
