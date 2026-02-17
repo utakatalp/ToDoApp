@@ -25,7 +25,13 @@ class SyncWorker @AssistedInject constructor(
                     Log.e("SyncWorker", "Failed to sync tasks $throwable", throwable)
                     when (throwable) {
                         is DomainException.NoInternet,
-                        is DomainException.Server -> Result.retry()
+                        is DomainException.Server -> {
+                            if (runAttemptCount <= MAX_ATTEMPT) {
+                                Result.retry()
+                            } else {
+                                Result.failure()
+                            }
+                        }
                         is DomainException.Unauthorized -> Result.failure()
                         else -> Result.failure()
                     }
@@ -33,3 +39,5 @@ class SyncWorker @AssistedInject constructor(
             )
     }
 }
+
+const val MAX_ATTEMPT = 2
