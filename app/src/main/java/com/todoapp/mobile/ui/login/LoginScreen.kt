@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.todoapp.mobile.R
 import com.todoapp.mobile.common.loginWithFacebook
-import com.todoapp.mobile.di.LocalGoogleSignInManager
+import com.todoapp.mobile.data.auth.GoogleSignInEntryPoint
 import com.todoapp.mobile.ui.login.LoginContract.UiAction
 import com.todoapp.mobile.ui.login.LoginContract.UiEffect
 import com.todoapp.mobile.ui.login.LoginContract.UiState
@@ -54,6 +54,7 @@ import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -63,7 +64,12 @@ fun LoginScreen(
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
-    val googleSignInManager = LocalGoogleSignInManager.current
+    val googleSignInManager = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            GoogleSignInEntryPoint::class.java
+        ).googleSignInManager()
+    }
 
     uiEffect.collectWithLifecycle {
         when (it) {

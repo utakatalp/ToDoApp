@@ -160,6 +160,7 @@ fun NavGraph(
             val viewModel: RegisterViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
+
             NavigationEffectController(navController, viewModel.navEffect)
             RegisterScreen(
                 uiState = uiState,
@@ -172,6 +173,7 @@ fun NavGraph(
             val viewModel: LoginViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
+
             NavigationEffectController(navController, viewModel.navEffect)
             LoginScreen(
                 uiState = uiState,

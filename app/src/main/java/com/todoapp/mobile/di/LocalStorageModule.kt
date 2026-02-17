@@ -90,9 +90,7 @@ object LocalStorageModule {
 
     @Provides
     @Singleton
-    fun provideGoogleSignInManager(
-        @ApplicationContext context: Context,
-    ): GoogleSignInManager = GoogleSignInManager(context)
+    fun provideGoogleSignInManager(): GoogleSignInManager = GoogleSignInManager
 
     @Provides
     @Singleton
