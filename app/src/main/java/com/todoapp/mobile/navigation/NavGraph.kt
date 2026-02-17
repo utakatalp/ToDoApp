@@ -25,6 +25,8 @@ import com.todoapp.mobile.ui.banner.BannerOverlay
 import com.todoapp.mobile.ui.banner.BannerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
+import com.todoapp.mobile.ui.createnewgroup.CreateNewGroupScreen
+import com.todoapp.mobile.ui.createnewgroup.CreateNewGroupViewModel
 import com.todoapp.mobile.ui.details.DetailsScreen
 import com.todoapp.mobile.ui.details.DetailsViewModel
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordScreen
@@ -206,6 +208,10 @@ fun NavGraph(
         }
 
         composable<Screen.CreateNewGroup> {
+            val viewModel: CreateNewGroupViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            CreateNewGroupScreen(uiState, viewModel::onAction)
         }
 
         composable<Screen.Groups> {

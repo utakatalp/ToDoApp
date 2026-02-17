@@ -3,6 +3,7 @@ package com.todoapp.mobile.di
 import com.todoapp.mobile.data.engine.PomodoroEngineImpl
 import com.todoapp.mobile.data.repository.AuthRepositoryImpl
 import com.todoapp.mobile.data.repository.DailyPlanPreferencesImpl
+import com.todoapp.mobile.data.repository.FamilyGroupRepositoryImpl
 import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.repository.SessionPreferencesImpl
@@ -12,11 +13,14 @@ import com.todoapp.mobile.data.repository.ThemeRepositoryImpl
 import com.todoapp.mobile.data.repository.UserRepositoryImpl
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSourceImpl
+import com.todoapp.mobile.data.source.remote.datasource.FamilyGroupRemoteDataSource
+import com.todoapp.mobile.data.source.remote.datasource.FamilyGroupRemoteDataSourceImpl
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSourceImpl
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.DailyPlanPreferences
+import com.todoapp.mobile.domain.repository.FamilyGroupRepository
 import com.todoapp.mobile.domain.repository.PomodoroRepository
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.SessionPreferences
@@ -73,6 +77,16 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSecretModePreferences(secretPreferencesImpl: SecretPreferencesImpl): SecretPreferences
+
+    @Binds
+    @Singleton
+    abstract fun bindFamilyGroupDataSource(
+        familyGroupRemoteDataSourceImpl: FamilyGroupRemoteDataSourceImpl
+    ): FamilyGroupRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindFamilyGroupRepository(familyGroupRepositoryImpl: FamilyGroupRepositoryImpl): FamilyGroupRepository
 
     @Binds
     @Singleton

@@ -1,10 +1,13 @@
 package com.todoapp.mobile.data.source.remote.api
 
 import com.todoapp.mobile.data.model.network.data.AuthResponseData
+import com.todoapp.mobile.data.model.network.data.FamilyGroupData
+import com.todoapp.mobile.data.model.network.data.FamilyGroupSummaryDataList
 import com.todoapp.mobile.data.model.network.data.RefreshTokenData
 import com.todoapp.mobile.data.model.network.data.TaskData
 import com.todoapp.mobile.data.model.network.data.TaskListData
 import com.todoapp.mobile.data.model.network.data.UserData
+import com.todoapp.mobile.data.model.network.request.CreateFamilyGroupRequest
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
@@ -63,6 +66,19 @@ interface ToDoApi {
 
     @GET("users/me")
     suspend fun getUserInfo(): Response<BaseResponse<UserData?>>
+
+    @POST("family-groups")
+    suspend fun createFamilyGroup(
+        @Body request: CreateFamilyGroupRequest
+    ): Response<BaseResponse<FamilyGroupData?>>
+
+    @GET("family-groups")
+    suspend fun getFamilyGroups(): Response<BaseResponse<FamilyGroupSummaryDataList?>>
+
+    @DELETE("family-groups/{id}")
+    suspend fun deleteFamilyGroup(
+        @Path("id") id: Long
+    ): Response<BaseResponse<Unit?>>
 }
 
 interface TodoAuthApi {
