@@ -53,4 +53,7 @@ interface Screen {
 
     @Serializable
     data object PomodoroFinish : Screen
+
+    @Serializable
+    data object Groups : Screen
 }
