@@ -40,7 +40,7 @@ class MainViewModel @Inject constructor(
                 when (event) {
                     is AuthEvent.Logout -> {
                         clearLocalSession()
-                        _navEffect.trySend(
+                        _navEffect.send(
                             NavigationEffect.NavigateClearingBackstack(Screen.Onboarding)
                         )
                     }
