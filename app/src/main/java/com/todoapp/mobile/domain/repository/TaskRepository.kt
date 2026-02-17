@@ -24,12 +24,14 @@ interface TaskRepository {
     suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean)
     suspend fun getTaskById(id: Long): Task?
     suspend fun update(task: Task)
-
+    suspend fun syncRemoteTasksWithLocal(): Result<Unit>
     suspend fun syncLocalTasksToServer(): Result<Unit>
-
     suspend fun findNonSyncedTasks(): List<TaskEntity>
     fun observeAllTaskEntities(): Flow<List<TaskEntity>>
     fun observeAllTasks(): Flow<List<Task>>
-
     suspend fun syncTask(taskEntity: TaskEntity): Result<Unit>
+    suspend fun deleteAllTasks(): Result<Unit>
+
+    suspend fun getAllTasks(): Result<Unit>
+    suspend fun reorderTasksForDate(date: LocalDate, fromIndex: Int, toIndex: Int): Result<Unit>
 }

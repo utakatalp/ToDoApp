@@ -8,7 +8,7 @@ object OnboardingContract {
     sealed interface UiAction {
         data object OnLoginClick : UiAction
 
-        data object OnRegisterClick : UiAction
+        data object OnGetStartedClick : UiAction
     }
 
     sealed interface UiEffect

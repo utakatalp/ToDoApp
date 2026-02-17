@@ -12,7 +12,7 @@ import com.todoapp.mobile.data.model.entity.SyncStatus
 import com.todoapp.mobile.data.model.entity.TaskEntity
 
 @Database(
-    version = 3,
+    version = 4,
     entities = [TaskEntity::class, PomodoroEntity::class],
     autoMigrations = [
         AutoMigration(
@@ -23,6 +23,11 @@ import com.todoapp.mobile.data.model.entity.TaskEntity
         AutoMigration(
             from = 2,
             to = 3,
+        ),
+        AutoMigration(
+            from = 3,
+            to = 4,
+            spec = AppDatabase.Migration3To4Spec::class
         )
     ]
 )
@@ -33,12 +38,15 @@ abstract class AppDatabase : RoomDatabase() {
             db.execSQL("ALTER TABLE tasks ADD COLUMN is_secret INTEGER NOT NULL DEFAULT 0")
         }
     }
-    class Migration2To3Spec : AutoMigrationSpec {
+
+    class Migration3To4Spec : AutoMigrationSpec {
         override fun onPostMigrate(db: SupportSQLiteDatabase) {
-            db.execSQL("ALTER TABLE tasks ADD COLUMN remote_id INTEGER")
-            db.execSQL("ALTER TABLE tasks ADD COLUMN sync_status TEXT NOT NULL")
+            super.onPostMigrate(db)
+            // db.execSQL("ALTER TABLE tasks ADD COLUMN order_info INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("UPDATE tasks SET order_info = id ")
         }
     }
+
     abstract fun taskDao(): TaskDao
     abstract fun pomodoroDao(): PomodoroDao
 }

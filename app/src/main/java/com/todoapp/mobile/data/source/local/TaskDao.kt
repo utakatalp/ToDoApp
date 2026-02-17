@@ -18,11 +18,14 @@ interface TaskDao {
     @Query("SELECT * FROM tasks")
     fun getAllTasks(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE date = :date")
+    @Query("SELECT * FROM tasks WHERE date = :date ORDER BY order_index ASC")
     fun getTasksByDate(date: Long): Flow<List<TaskEntity>>
 
     @Insert
     suspend fun insert(task: TaskEntity)
+
+    @Insert
+    suspend fun insertAll(task: List<TaskEntity>)
 
     @Query("UPDATE tasks SET is_completed = :isCompleted WHERE id = :id")
     fun updateTask(id: Long, isCompleted: Boolean)
@@ -63,4 +66,10 @@ interface TaskDao {
 
     @Delete
     suspend fun delete(task: TaskEntity)
+
+    @Delete
+    suspend fun deleteAll(tasks: List<TaskEntity>)
+
+    @Query("UPDATE tasks SET order_index = :orderIndex WHERE id = :id")
+    suspend fun updateOrderIndex(id: Long, orderIndex: Int)
 }

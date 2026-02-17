@@ -3,15 +3,15 @@ package com.todoapp.mobile.data.model.network.data
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RegisterResponseData(
+data class AuthResponseData(
     val accessToken: String,
     val refreshToken: String,
     val expiresIn: Long,
-    val user: RegisterUser,
+    val user: UserData,
 )
 
 @Serializable
-data class RegisterUser(
+data class UserData(
     val id: Long,
     val email: String,
     val displayName: String,
@@ -22,39 +22,8 @@ data class RegisterUser(
 )
 
 @Serializable
-data class LoginResponseData(
+data class RefreshTokenData(
     val accessToken: String,
     val refreshToken: String,
-    val expiresIn: Long,
-    val user: LoginUser,
+    val expiresIn: Long
 )
-
-@Serializable
-data class LoginUser(
-    val id: Long,
-    val email: String,
-    val displayName: String,
-    val avatarUrl: String?,
-    val emailVerified: Boolean,
-    val providers: List<String>,
-    val createdAt: String,
-)
-
-@Serializable
-data class GoogleLoginResponseData(
-    val accessToken: String,
-    val refreshToken: String,
-    val expiresIn: Long,
-    val user: GoogleLoginUser,
-)
-
-@Serializable
-data class GoogleLoginUser(
-    val id: Long,
-    val email: String,
-    val displayName: String,
-    val avatarUrl: String?,
-    val emailVerified: Boolean,
-    val providers: List<String>,
-    val createdAt: String,
-    )

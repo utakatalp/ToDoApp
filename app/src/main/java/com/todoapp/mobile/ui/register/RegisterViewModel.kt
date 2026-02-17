@@ -6,11 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.common.passwordValidation.ValidationManager
-import com.todoapp.mobile.data.model.network.data.RegisterResponseData
+import com.todoapp.mobile.data.model.network.data.AuthResponseData
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
+import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.repository.SessionPreferences
-import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -31,7 +31,7 @@ import javax.inject.Inject
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val sessionPreferences: SessionPreferences,
-    private val taskRepository: TaskRepository,
+    private val dataStoreHelper: DataStoreHelper,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -187,20 +187,15 @@ class RegisterViewModel @Inject constructor(
         _uiState.update { state -> state.copy(isRedirecting = isRedirecting) }
     }
 
-    private fun handleSuccessfulRegister(registerResponseData: RegisterResponseData) {
+    private fun handleSuccessfulRegister(registerResponseData: AuthResponseData) {
         viewModelScope.launch {
             sessionPreferences.setAccessToken(registerResponseData.accessToken)
             sessionPreferences.setExpiresAt(registerResponseData.expiresIn)
             sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
-
-            taskRepository.syncLocalTasksToServer()
+            dataStoreHelper.setUser(registerResponseData.user)
 
             _navEffect.trySend(
-                NavigationEffect.Navigate(
-                    route = Screen.Home,
-                    popUpTo = Screen.Onboarding,
-                    isInclusive = true
-                )
+                NavigationEffect.NavigateClearingBackstack(Screen.Home)
             )
         }
     }
