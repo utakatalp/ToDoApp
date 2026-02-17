@@ -203,7 +203,8 @@ fun NavGraph(
             PomodoroFinishScreen(viewModel::onAction)
         }
 
-        composable<Screen.Notifications> { }
+        composable<Screen.Groups> {
+        }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }
     }
