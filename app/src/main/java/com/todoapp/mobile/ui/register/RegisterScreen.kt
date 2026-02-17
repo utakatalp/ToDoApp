@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
 import com.todoapp.mobile.R
 import com.todoapp.mobile.common.loginWithFacebook
 import com.todoapp.mobile.ui.register.RegisterContract.UiAction
@@ -64,7 +65,7 @@ fun RegisterScreen(
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
-    uiEffect.collectWithLifecycle {
+    uiEffect.collectWithLifecycle(minActiveState = Lifecycle.State.CREATED) {
         when (it) {
             UiEffect.FacebookLogin -> {
                 handleFacebookLogin(
