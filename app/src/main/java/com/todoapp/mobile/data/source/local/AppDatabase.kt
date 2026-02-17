@@ -43,7 +43,7 @@ abstract class AppDatabase : RoomDatabase() {
         override fun onPostMigrate(db: SupportSQLiteDatabase) {
             super.onPostMigrate(db)
             // db.execSQL("ALTER TABLE tasks ADD COLUMN order_info INTEGER NOT NULL DEFAULT 0")
-            db.execSQL("UPDATE tasks SET order_info = id ")
+            db.execSQL("UPDATE tasks SET order_index = id ")
         }
     }
 
