@@ -118,5 +118,6 @@
     <string name="delete_task_message">Do you want to delete the task?</string>
     <string name="delete">Delete</string>
     <string name="groups">Groups</string>
+    <string name="new_group">New Group</string>
 
 </resources>

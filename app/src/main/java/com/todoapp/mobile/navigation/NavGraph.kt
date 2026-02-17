@@ -29,6 +29,8 @@ import com.todoapp.mobile.ui.details.DetailsScreen
 import com.todoapp.mobile.ui.details.DetailsViewModel
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordScreen
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordViewModel
+import com.todoapp.mobile.ui.groups.GroupScreen
+import com.todoapp.mobile.ui.groups.GroupsViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.login.LoginScreen
@@ -203,7 +205,14 @@ fun NavGraph(
             PomodoroFinishScreen(viewModel::onAction)
         }
 
+        composable<Screen.CreateNewGroup> {
+        }
+
         composable<Screen.Groups> {
+            val viewModel: GroupsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            GroupScreen(uiState, viewModel::onAction)
         }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }

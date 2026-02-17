@@ -56,4 +56,7 @@ interface Screen {
 
     @Serializable
     data object Groups : Screen
+
+    @Serializable
+    data object CreateNewGroup : Screen
 }
