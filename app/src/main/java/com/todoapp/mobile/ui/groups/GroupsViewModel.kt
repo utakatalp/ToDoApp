@@ -2,6 +2,7 @@ package com.todoapp.mobile.ui.groups
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.data.model.network.data.FamilyGroupSummaryData
 import com.todoapp.mobile.domain.repository.FamilyGroupRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -43,6 +44,9 @@ class GroupsViewModel @Inject constructor(
                         }
                 }
             }
+
+            is GroupsContract.UiAction.OnGroupTap -> {
+                } // grup detayına gidecek...
         }
     }
 
@@ -52,7 +56,7 @@ class GroupsViewModel @Inject constructor(
                 .getFamilyGroups()
                 .onSuccess { result ->
                     if (result.count > 0) {
-                        _uiState.update { UiState.Success(groups = result.familyGroups) }
+                        _uiState.update { UiState.Success(groups = result.familyGroups.map { it.toUiItem() }) }
                     } else {
                         _uiState.update { UiState.Empty }
                     }
@@ -61,5 +65,20 @@ class GroupsViewModel @Inject constructor(
                     _uiState.update { UiState.Empty }
                 }
         }
+    }
+
+    private fun FamilyGroupSummaryData.toUiItem() = GroupsContract.GroupUiItem(
+        id = id,
+        name = name,
+        role = role,
+        description = description,
+        memberCount = memberCount,
+        pendingTaskCount = pendingTaskCount,
+        createdAt = formatTimestamp(createdAt)
+    )
+
+    private fun formatTimestamp(timestamp: Long): String {
+        val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.ENGLISH)
+        return sdf.format(java.util.Date(timestamp))
     }
 }
