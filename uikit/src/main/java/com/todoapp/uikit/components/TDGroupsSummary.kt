@@ -179,18 +179,20 @@ fun TDFamilyGroupCard(
                 }
             }
 
-            IconButton(
-                onClick = onDeleteClick,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_delete),
-                    contentDescription = "Delete group",
-                    tint = TDTheme.colors.crossRed,
-                    modifier = Modifier.size(20.dp)
-                )
+            if (role.equals("Admin", ignoreCase = true)) {
+                IconButton(
+                    onClick = onDeleteClick,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_delete),
+                        contentDescription = "Delete group",
+                        tint = TDTheme.colors.crossRed,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

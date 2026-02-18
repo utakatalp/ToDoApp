@@ -89,7 +89,9 @@ private fun GroupsContent(
             onClick = { onAction(UiAction.OnCreateNewGroupTap) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(24.dp)
+                .padding(24.dp),
+            text = stringResource(com.todoapp.mobile.R.string.create_new_group),
+            shape = RoundedCornerShape(50),
         )
     }
 }

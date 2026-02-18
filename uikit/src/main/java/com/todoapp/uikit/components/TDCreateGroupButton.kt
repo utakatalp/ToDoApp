@@ -22,11 +22,13 @@ import com.todoapp.uikit.theme.TDTheme
 fun TDCreateGroupButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    text: String,
+    shape: RoundedCornerShape,
 ) {
     Button(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(50),
+        shape = shape,
         colors = ButtonDefaults.buttonColors(
             containerColor = TDTheme.colors.primary,
             contentColor = TDTheme.colors.white
@@ -40,7 +42,7 @@ fun TDCreateGroupButton(
         )
         Spacer(Modifier.width(8.dp))
         TDText(
-            text = stringResource(R.string.create_new_group),
+            text = text,
             color = TDTheme.colors.white,
             style = TDTheme.typography.regularTextStyle
 
@@ -52,7 +54,11 @@ fun TDCreateGroupButton(
 @Composable
 private fun TDCreateGroupButtonPreview() {
     TDTheme {
-        TDCreateGroupButton(onClick = {})
+        TDCreateGroupButton(
+            onClick = {},
+            text = stringResource(R.string.create_new_group),
+            shape = RoundedCornerShape(50),
+        )
     }
 }
 
@@ -60,6 +66,10 @@ private fun TDCreateGroupButtonPreview() {
 @Composable
 private fun TDCreateGroupButtonDarkPreview() {
     TDTheme {
-        TDCreateGroupButton(onClick = {})
+        TDCreateGroupButton(
+            onClick = {},
+            text = stringResource(R.string.create_new_group),
+            shape = RoundedCornerShape(50),
+        )
     }
 }
