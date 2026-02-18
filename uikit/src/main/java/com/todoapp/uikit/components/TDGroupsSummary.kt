@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,25 +16,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.uikit.R
 import com.todoapp.uikit.theme.TDTheme
 
@@ -80,21 +74,22 @@ fun TDFamilyGroupCard(
                             .background(TDTheme.colors.primary),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
+                        TDText(
                             text = initials,
                             color = TDTheme.colors.white,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                            style = TDTheme.typography.heading1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
 
                     Spacer(modifier = Modifier.width(14.dp))
 
                     Column {
-                        Text(
+                        TDText(
                             text = name,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = TDTheme.typography.heading3,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
                             color = TDTheme.colors.onBackground
                         )
                         Spacer(modifier = Modifier.height(4.dp))
@@ -103,10 +98,11 @@ fun TDFamilyGroupCard(
                                 .border(1.dp, roleColor, RoundedCornerShape(4.dp))
                                 .padding(horizontal = 10.dp, vertical = 2.dp)
                         ) {
-                            Text(
+                            TDText(
                                 text = role.uppercase(),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = TDTheme.typography.subheading4,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
                                 color = roleColor
                             )
                         }
@@ -115,11 +111,12 @@ fun TDFamilyGroupCard(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
+                TDText(
                     text = "\"$description\"",
-                    fontSize = 15.sp,
+                    style = TDTheme.typography.subheading3,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
                     color = TDTheme.colors.statusCardGray,
-                    lineHeight = 22.sp
                 )
 
                 Spacer(modifier = Modifier.height(18.dp))
@@ -151,31 +148,21 @@ fun TDFamilyGroupCard(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
+                    TDText(
                         text = "Created $createdDate",
-                        fontSize = 13.sp,
+                        style = TDTheme.typography.subheading4,
                         color = TDTheme.colors.statusCardGray
                     )
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    OutlinedButton(
+                    TDButton(
                         onClick = onViewDetailsClick,
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = TDTheme.colors.primary,
-                        ),
-                        border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                            brush = SolidColor(TDTheme.colors.primary)
-                        ),
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "View Details",
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
-                        )
-                    }
+                        text = "View Details",
+                        modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                        type = TDButtonType.OUTLINE,
+                        size = TDButtonSize.SMALL,
+                    )
                 }
             }
 
@@ -224,15 +211,14 @@ private fun StatBox(
                 modifier = Modifier.size(22.dp)
             )
             Column {
-                Text(
+                TDText(
                     text = value,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = TDTheme.typography.heading3,
                     color = TDTheme.colors.onBackground
                 )
-                Text(
+                TDText(
                     text = label,
-                    fontSize = 12.sp,
+                    style = TDTheme.typography.subheading4,
                     color = TDTheme.colors.statusCardGray
                 )
             }
