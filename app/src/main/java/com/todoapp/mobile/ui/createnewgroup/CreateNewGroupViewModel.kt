@@ -60,7 +60,7 @@ class CreateNewGroupViewModel @Inject constructor(
                     uiState.value.groupDescription ?: ""
                 )
             ).onSuccess {
-                _navEffect.send(NavigationEffect.Navigate(Screen.Groups, popUpTo = Screen.Groups))
+                _navEffect.send(NavigationEffect.Navigate(Screen.Groups, popUpTo = Screen.Groups, isInclusive = true))
             }.onFailure {
                 _uiState.update { it.copy(error = "Something went wrong. Try again later.") }
             }
