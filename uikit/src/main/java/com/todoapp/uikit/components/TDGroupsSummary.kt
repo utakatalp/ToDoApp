@@ -44,6 +44,7 @@ fun TDFamilyGroupCard(
     @DrawableRes membersIcon: Int,
     @DrawableRes tasksIcon: Int,
     modifier: Modifier = Modifier,
+    hamburgerModifier: Modifier = Modifier,
     onViewDetailsClick: () -> Unit = {},
     onDeleteClick: () -> Unit = {},
 ) {
@@ -65,7 +66,41 @@ fun TDFamilyGroupCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Box {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 20.dp)) {
+                val isAdmin = role.equals("Admin", ignoreCase = true)
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        modifier = hamburgerModifier,
+                        onClick = {},
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ic_hamburger),
+                            contentDescription = "reorder",
+                            modifier = Modifier.size(15.dp),
+                            tint = TDTheme.colors.onBackground
+                        )
+                    }
+
+                    if (isAdmin) {
+                        IconButton(
+                            onClick = onDeleteClick,
+                            modifier = Modifier
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_delete),
+                                contentDescription = "Delete group",
+                                modifier = Modifier.size(25.dp),
+                                tint = TDTheme.colors.crossRed,
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.size(48.dp))
+                    }
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
@@ -162,22 +197,6 @@ fun TDFamilyGroupCard(
                         modifier = Modifier.padding(start = 8.dp, end = 8.dp),
                         type = TDButtonType.OUTLINE,
                         size = TDButtonSize.SMALL,
-                    )
-                }
-            }
-
-            if (role.equals("Admin", ignoreCase = true)) {
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_delete),
-                        contentDescription = "Delete group",
-                        tint = TDTheme.colors.crossRed,
-                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

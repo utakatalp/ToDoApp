@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GroupsViewModel @Inject constructor(
-    private val familyGroupRepository: FamilyGroupRepository
+    private val familyGroupRepository: FamilyGroupRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -27,8 +27,14 @@ class GroupsViewModel @Inject constructor(
     private val _navEffect = Channel<NavigationEffect>()
     val navEffect = _navEffect.receiveAsFlow()
 
+    private val useMockData = true
+
     init {
-        loadFamilyGroups()
+        if (useMockData) {
+            _uiState.value = UiState.Success(groups = mockGroups)
+        } else {
+            loadFamilyGroups()
+        }
     }
 
     fun onAction(action: GroupsContract.UiAction) {
@@ -36,17 +42,30 @@ class GroupsViewModel @Inject constructor(
             GroupsContract.UiAction.OnCreateNewGroupTap -> _navEffect.trySend(
                 NavigationEffect.Navigate(Screen.CreateNewGroup)
             )
+
             is GroupsContract.UiAction.OnDeleteGroupTap -> {
-                viewModelScope.launch {
-                    familyGroupRepository.deleteFamilyGroup(action.id)
-                        .onSuccess {
-                            loadFamilyGroups()
-                        }
+                if (useMockData) {
+                    val current = (_uiState.value as? UiState.Success) ?: return
+                    val updated = current.groups.filter { it.id != action.id }
+                    _uiState.value = if (updated.isEmpty()) UiState.Empty else UiState.Success(updated)
+                } else {
+                    viewModelScope.launch {
+                        familyGroupRepository.deleteFamilyGroup(action.id)
+                            .onSuccess {
+                                loadFamilyGroups()
+                            }
+                    }
                 }
             }
 
-            is GroupsContract.UiAction.OnGroupTap -> {
-                } // grup detayına gidecek...
+            is GroupsContract.UiAction.OnGroupTap -> TODO("Grup Detayı gelecek...")
+            is GroupsContract.UiAction.OnMoveGroup -> {
+                val current = (_uiState.value as? UiState.Success) ?: return
+                val mutable = current.groups.toMutableList()
+                val item = mutable.removeAt(action.from)
+                mutable.add(action.to, item)
+                _uiState.value = current.copy(groups = mutable)
+            }
         }
     }
 

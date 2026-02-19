@@ -16,7 +16,7 @@ object GroupsContract {
         data object Loading : UiState
         data object Empty : UiState
         data class Success(
-            val groups: List<GroupUiItem> = emptyList()
+            val groups: List<GroupUiItem>,
         ) : UiState
 
         data class Error(val message: String) : UiState
@@ -25,6 +25,7 @@ object GroupsContract {
     sealed interface UiAction {
         data object OnCreateNewGroupTap : UiAction
         data class OnGroupTap(val id: Long) : UiAction
+        data class OnMoveGroup(val from: Int, val to: Int) : UiAction
         data class OnDeleteGroupTap(val id: Long) : UiAction
     }
 }
