@@ -88,7 +88,7 @@ private fun CreateNewGroupContent(
         )
         Spacer(Modifier.height(24.dp))
         TDButton(
-            text = stringResource(com.todoapp.mobile.R.string.create),
+            text = stringResource(R.string.create),
             fullWidth = true,
             modifier = Modifier.clip(RoundedCornerShape(9999.dp))
         ) {

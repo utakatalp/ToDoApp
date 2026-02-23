@@ -30,13 +30,13 @@ data class RefreshTokenData(
 )
 
 @Serializable
-data class FamilyGroupSummaryDataList(
-    @SerialName("familyGroups") val familyGroups: List<FamilyGroupSummaryData>,
+data class GroupSummaryDataList(
+    @SerialName("familyGroups") val groups: List<GroupSummaryData>,
     @SerialName("count") val count: Int
 )
 
 @Serializable
-data class FamilyGroupSummaryData(
+data class GroupSummaryData(
 
     @SerialName("id")
     val id: Long,
@@ -61,7 +61,7 @@ data class FamilyGroupSummaryData(
 )
 
 @Serializable
-data class FamilyGroupData(
+data class GroupData(
 
     @SerialName("id")
     val id: Long,
@@ -79,11 +79,11 @@ data class FamilyGroupData(
     val updatedAt: Long,
 
     @SerialName("members")
-    val members: List<FamilyGroupMemberData>
+    val members: List<GroupMemberData>
 )
 
 @Serializable
-data class FamilyGroupMemberData(
+data class GroupMemberData(
 
     @SerialName("userId")
     val userId: Long,
@@ -95,7 +95,7 @@ data class FamilyGroupMemberData(
     val email: String,
 
     @SerialName("avatarUrl")
-    val avatarUrl: String,
+    val avatarUrl: String?,
 
     @SerialName("role")
     val role: String,

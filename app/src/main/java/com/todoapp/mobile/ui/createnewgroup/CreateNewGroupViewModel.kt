@@ -2,8 +2,8 @@ package com.todoapp.mobile.ui.createnewgroup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.todoapp.mobile.data.model.network.request.CreateFamilyGroupRequest
-import com.todoapp.mobile.domain.repository.FamilyGroupRepository
+import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
+import com.todoapp.mobile.domain.repository.GroupRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.createnewgroup.CreateNewGroupContract.UiAction
@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateNewGroupViewModel @Inject constructor(
-    private val familyGroupRepository: FamilyGroupRepository
+    private val groupRepository: GroupRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -27,15 +27,15 @@ class CreateNewGroupViewModel @Inject constructor(
     private val _navEffect = Channel<NavigationEffect>()
     val navEffect = _navEffect.receiveAsFlow()
 
-    var isErrorFlagActive = false
+    private var isErrorFlagActive = false
 
     fun onAction(action: UiAction) {
         when (action) {
             is UiAction.OnCreateTap -> createGroup()
             is UiAction.OnGroupDescriptionChange -> _uiState.update {
                 it.copy(
-                groupDescription = action.groupDescription
-            )
+                    groupDescription = action.groupDescription
+                )
             }
             is UiAction.OnGroupNameChange -> updateGroupName(action.groupName)
         }
@@ -54,8 +54,8 @@ class CreateNewGroupViewModel @Inject constructor(
         if (!validateGroupName(uiStateSnapshot.groupName)) return
 
         viewModelScope.launch {
-            familyGroupRepository.createFamilyGroup(
-                CreateFamilyGroupRequest(
+            groupRepository.createGroup(
+                CreateGroupRequest(
                     uiState.value.groupName,
                     uiState.value.groupDescription ?: ""
                 )

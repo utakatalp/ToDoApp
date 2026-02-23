@@ -3,7 +3,7 @@ package com.todoapp.mobile.di
 import com.todoapp.mobile.data.engine.PomodoroEngineImpl
 import com.todoapp.mobile.data.repository.AuthRepositoryImpl
 import com.todoapp.mobile.data.repository.DailyPlanPreferencesImpl
-import com.todoapp.mobile.data.repository.FamilyGroupRepositoryImpl
+import com.todoapp.mobile.data.repository.GroupRepositoryImpl
 import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.repository.SessionPreferencesImpl
@@ -11,16 +11,18 @@ import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.repository.TaskSyncRepositoryImpl
 import com.todoapp.mobile.data.repository.ThemeRepositoryImpl
 import com.todoapp.mobile.data.repository.UserRepositoryImpl
+import com.todoapp.mobile.data.source.local.datasource.GroupLocalDataSource
+import com.todoapp.mobile.data.source.local.datasource.GroupLocalDataSourceImpl
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSourceImpl
-import com.todoapp.mobile.data.source.remote.datasource.FamilyGroupRemoteDataSource
-import com.todoapp.mobile.data.source.remote.datasource.FamilyGroupRemoteDataSourceImpl
+import com.todoapp.mobile.data.source.remote.datasource.GroupRemoteDataSource
+import com.todoapp.mobile.data.source.remote.datasource.GroupRemoteDataSourceImpl
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSourceImpl
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.DailyPlanPreferences
-import com.todoapp.mobile.domain.repository.FamilyGroupRepository
+import com.todoapp.mobile.domain.repository.GroupRepository
 import com.todoapp.mobile.domain.repository.PomodoroRepository
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.SessionPreferences
@@ -45,6 +47,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindTaskLocalDataSource(impl: TaskLocalDataSourceImpl): TaskLocalDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindGroupLocalDataSource(impl: GroupLocalDataSourceImpl): GroupLocalDataSource
 
     @Binds
     @Singleton
@@ -80,13 +86,13 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindFamilyGroupDataSource(
-        familyGroupRemoteDataSourceImpl: FamilyGroupRemoteDataSourceImpl
-    ): FamilyGroupRemoteDataSource
+    abstract fun bindGroupDataSource(
+        groupRemoteDataSourceImpl: GroupRemoteDataSourceImpl
+    ): GroupRemoteDataSource
 
     @Binds
     @Singleton
-    abstract fun bindFamilyGroupRepository(familyGroupRepositoryImpl: FamilyGroupRepositoryImpl): FamilyGroupRepository
+    abstract fun bindGroupRepository(groupRepositoryImpl: GroupRepositoryImpl): GroupRepository
 
     @Binds
     @Singleton
