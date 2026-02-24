@@ -13,6 +13,8 @@ interface GroupRepository {
 
     suspend fun deleteGroup(id: Long): Result<Unit>
 
+    suspend fun deleteAllLocalGroups(): Result<Unit>
+
     fun observeAllGroups(): Flow<List<Group>>
 
     suspend fun reorderGroups(fromIndex: Int, toIndex: Int): Result<Unit>

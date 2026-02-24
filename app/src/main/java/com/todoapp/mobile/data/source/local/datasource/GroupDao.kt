@@ -23,6 +23,9 @@ interface GroupDao {
     @Delete
     suspend fun delete(group: GroupEntity)
 
+    @Query("DELETE FROM `groups`")
+    suspend fun deleteAll()
+
     @Query("SELECT * FROM `groups` WHERE id = :id LIMIT 1")
     suspend fun getGroupById(id: Long): GroupEntity?
 

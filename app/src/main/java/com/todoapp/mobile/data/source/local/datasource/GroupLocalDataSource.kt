@@ -10,6 +10,8 @@ interface GroupLocalDataSource {
 
     suspend fun delete(group: GroupEntity)
 
+    suspend fun deleteAll(group: GroupEntity)
+
     suspend fun update(group: GroupEntity)
 
     suspend fun getGroupById(id: Long): GroupEntity?

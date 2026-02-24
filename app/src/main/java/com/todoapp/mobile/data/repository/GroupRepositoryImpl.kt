@@ -50,6 +50,13 @@ class GroupRepositoryImpl @Inject constructor(
             }
     }
 
+    override suspend fun deleteAllLocalGroups(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val all = groupLocalDataSource.getAllGroupsOrdered().first()
+            all.forEach { groupLocalDataSource.delete(it) }
+        }
+    }
+
     override fun observeAllGroups(): Flow<List<Group>> {
         return groupLocalDataSource.getAllGroupsOrdered().map { list ->
             list.map { it.toDomain() }

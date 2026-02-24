@@ -42,6 +42,7 @@ class GroupsViewModel @Inject constructor(
         when (action) {
             UiAction.OnCreateNewGroupTap ->
                 _navEffect.trySend(NavigationEffect.Navigate(Screen.CreateNewGroup))
+
             is UiAction.OnDeleteGroupTap -> deleteGroup(action)
             is UiAction.OnGroupTap -> TODO("Grup Detayı gelecek...")
             is UiAction.OnMoveGroup -> reorderGroups(action)

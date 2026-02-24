@@ -10,7 +10,6 @@ import javax.inject.Inject
 class SessionPreferencesImpl @Inject constructor(
     private val sharedPreferences: SharedPreferences
 ) : SessionPreferences {
-
     override suspend fun setAccessToken(token: String) {
         return withContext(Dispatchers.IO) {
             sharedPreferences.edit { putString(KEY_ACCESS_TOKEN, token) }
