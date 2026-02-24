@@ -50,7 +50,7 @@ class GroupsViewModel @Inject constructor(
 
     private fun fetchRemoteGroups() {
         viewModelScope.launch {
-            groupRepository.getFamilyGroups()
+            groupRepository.getGroups()
                 .onSuccess { result ->
                     remoteSummaryCache = result.groups.associateBy { it.id }
                 }
@@ -76,7 +76,7 @@ class GroupsViewModel @Inject constructor(
 
     private fun deleteGroup(action: UiAction.OnDeleteGroupTap) {
         viewModelScope.launch {
-            groupRepository.deleteFamilyGroup(action.id)
+            groupRepository.deleteGroup(action.id)
                 .onFailure { t ->
                     Log.e("GroupsViewModel", "Failed to delete group", t)
                 }

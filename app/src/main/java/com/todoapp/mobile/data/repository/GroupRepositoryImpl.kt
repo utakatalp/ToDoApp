@@ -31,7 +31,7 @@ class GroupRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun getFamilyGroups(): Result<GroupSummaryDataList> {
+    override suspend fun getGroups(): Result<GroupSummaryDataList> {
         return groupRemoteDataSource.getGroups()
             .onSuccess { result ->
                 val entities = result.groups.map { summary ->
@@ -41,7 +41,7 @@ class GroupRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun deleteFamilyGroup(id: Long): Result<Unit> {
+    override suspend fun deleteGroup(id: Long): Result<Unit> {
         val localEntity =
             groupLocalDataSource.getGroupById(id) ?: return Result.failure(Exception("Group not found"))
         return groupRemoteDataSource.deleteGroup(localEntity.remoteId!!)

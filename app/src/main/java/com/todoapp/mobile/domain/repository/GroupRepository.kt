@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.Flow
 interface GroupRepository {
     suspend fun createGroup(request: CreateGroupRequest): Result<GroupData>
 
-    suspend fun getFamilyGroups(): Result<GroupSummaryDataList>
+    suspend fun getGroups(): Result<GroupSummaryDataList>
 
-    suspend fun deleteFamilyGroup(id: Long): Result<Unit>
+    suspend fun deleteGroup(id: Long): Result<Unit>
 
     fun observeAllGroups(): Flow<List<Group>>
 
