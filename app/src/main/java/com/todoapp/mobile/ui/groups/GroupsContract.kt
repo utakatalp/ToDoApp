@@ -14,8 +14,12 @@ object GroupsContract {
 
     sealed interface UiState {
         data object Loading : UiState
-        data object Empty : UiState
+        data class Empty(
+            val isUserAuthenticated: Boolean,
+        ) : UiState
+
         data class Success(
+            val isUserAuthenticated: Boolean,
             val groups: List<GroupUiItem>,
         ) : UiState
 

@@ -132,5 +132,5 @@
     <string name="create_a_group_to_start_collaborating_on">Create a group to start collaborating on</string>
     <string name="tasks_with_your_family">tasks with your family.</string>
     <string name="create_new_group">Create New Group</string>
-
+    <string name="login_to_create_a_group">Login to create a group</string>
 </resources>

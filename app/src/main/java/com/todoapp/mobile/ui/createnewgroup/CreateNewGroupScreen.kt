@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.createnewgroup
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -39,15 +40,16 @@ import com.todoapp.uikit.theme.TDTheme
 @Composable
 fun CreateNewGroupScreen(
     uiState: UiState,
-    onAction: (UiAction) -> Unit
+    onAction: (UiAction) -> Unit,
 ) {
+    BackHandler { onAction(UiAction.OnBackClick) }
     CreateNewGroupContent(uiState, onAction)
 }
 
 @Composable
 private fun CreateNewGroupContent(
     uiState: UiState,
-    onAction: (UiAction) -> Unit
+    onAction: (UiAction) -> Unit,
 ) {
     val verticalScroll = rememberScrollState()
     Column(
@@ -111,7 +113,9 @@ private fun CreateNewGroupScreenPreview() {
         CreateNewGroupScreen(
             uiState = UiState(
                 groupName = "YTU Family",
-                groupDescription = "Weekend chores and shared tasks"
+                groupDescription = "Weekend chores and shared tasks",
+                error = null,
+                isUserAuthenticated = true
             ),
             onAction = {}
         )
@@ -125,7 +129,9 @@ private fun CreateNewGroupScreenPreview2() {
         CreateNewGroupScreen(
             uiState = UiState(
                 groupName = "",
-                groupDescription = ""
+                groupDescription = "",
+                error = "Group name is required.",
+                isUserAuthenticated = true
             ),
             onAction = {}
         )

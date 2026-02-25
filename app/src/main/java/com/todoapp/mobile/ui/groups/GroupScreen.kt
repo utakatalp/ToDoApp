@@ -51,7 +51,11 @@ fun GroupScreen(
     onAction: (UiAction) -> Unit,
 ) {
     when (uiState) {
-        UiState.Empty -> GroupEmptyContent(onCreateNewGroup = { onAction(UiAction.OnCreateNewGroupTap) })
+        is UiState.Empty -> GroupEmptyContent(
+            onCreateNewGroup = { onAction(UiAction.OnCreateNewGroupTap) },
+            uiState = uiState
+        )
+
         is UiState.Error -> {}
         UiState.Loading -> {}
         is UiState.Success -> GroupsContent(uiState, onAction)
@@ -172,6 +176,7 @@ private fun GroupsContent(
 
 @Composable
 private fun GroupEmptyContent(
+    uiState: UiState.Empty,
     onCreateNewGroup: () -> Unit = {},
 ) {
     Column(
@@ -217,7 +222,13 @@ private fun GroupEmptyContent(
         Spacer(Modifier.height(32.dp))
         TDButton(
             modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-            text = stringResource(com.todoapp.mobile.R.string.create_new_group),
+            text = if (uiState.isUserAuthenticated) {
+                stringResource(com.todoapp.mobile.R.string.create_new_group)
+            } else {
+                stringResource(
+                com.todoapp.mobile.R.string.login_to_create_a_group
+            )
+            },
             fullWidth = true
         ) { onCreateNewGroup() }
     }

@@ -1,6 +1,7 @@
 package com.todoapp.mobile.ui.login
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.R
@@ -33,8 +34,11 @@ class LoginViewModel @Inject constructor(
     private val googleSignInManager: GoogleSignInManager,
     private val sessionPreferences: SessionPreferences,
     private val dataStoreHelper: DataStoreHelper,
+    savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
+
+    private val redirectAfterLogin: String? = savedStateHandle["redirectAfterLogin"]
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -61,7 +65,6 @@ class LoginViewModel @Inject constructor(
             UiAction.OnTermsOfServiceTap -> showTermsOfService()
         }
     }
-
     private fun googleLogin(activityContext: Context) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -125,7 +128,7 @@ class LoginViewModel @Inject constructor(
     private fun navigateToRegister() {
         _navEffect.trySend(
             NavigationEffect.Navigate(
-                route = Screen.Register
+                route = Screen.Register(redirectAfterRegister = redirectAfterLogin)
             )
         )
     }
@@ -164,7 +167,16 @@ class LoginViewModel @Inject constructor(
             sessionPreferences.setExpiresAt(loginResponseData.expiresIn)
             dataStoreHelper.setUser(userData = loginResponseData.user)
 
-            _navEffect.trySend(NavigationEffect.NavigateClearingBackstack(Screen.Home))
+            val destination = resolveRedirectDestination()
+            _navEffect.trySend(NavigationEffect.Navigate(destination))
+        }
+    }
+
+    private fun resolveRedirectDestination(): Screen {
+        return when (redirectAfterLogin) {
+            Screen.CreateNewGroup::class.qualifiedName -> Screen.CreateNewGroup(cameFromAuth = true)
+            Screen.Groups::class.qualifiedName -> Screen.Groups
+            else -> Screen.Home
         }
     }
 

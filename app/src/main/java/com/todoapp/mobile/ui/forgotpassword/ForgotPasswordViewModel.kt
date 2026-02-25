@@ -53,7 +53,7 @@ class ForgotPasswordViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun navigateToBackToLogin() {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.Login))
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Login()))
     }
 
     private fun validateEmail(email: String): String? {

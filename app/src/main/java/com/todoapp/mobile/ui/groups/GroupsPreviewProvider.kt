@@ -4,8 +4,11 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 
 class GroupsPreviewProvider : PreviewParameterProvider<GroupsContract.UiState> {
     override val values: Sequence<GroupsContract.UiState> = sequenceOf(
-        GroupsContract.UiState.Empty,
-        GroupsContract.UiState.Success(groups = mockGroups),
+        GroupsContract.UiState.Empty(isUserAuthenticated = true),
+        GroupsContract.UiState.Success(
+            groups = mockGroups,
+            isUserAuthenticated = true
+        ),
     )
 }
 

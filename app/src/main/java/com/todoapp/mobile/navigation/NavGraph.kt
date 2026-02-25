@@ -1,5 +1,6 @@
 package com.todoapp.mobile.navigation
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -37,6 +38,7 @@ import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.login.LoginScreen
 import com.todoapp.mobile.ui.login.LoginViewModel
+import com.todoapp.mobile.ui.login.findActivity
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
@@ -271,11 +273,12 @@ sealed interface NavigationEffect {
 
     data class NavigateClearingBackstack(val route: Screen) : NavigationEffect
     data object Back : NavigationEffect
+    data object SystemBack : NavigationEffect
 }
 
 @Composable
 fun NavigationEffectController(
-    navEffect: Flow<NavigationEffect>
+    navEffect: Flow<NavigationEffect>,
 ) {
     val navController = LocalNavController.current
     navEffect.collectWithLifecycle { effect ->
@@ -298,6 +301,11 @@ fun NavigationEffectController(
                 navController.navigate(effect.route) {
                     popUpTo(0)
                 }
+            }
+
+            NavigationEffect.SystemBack -> {
+                val activity = navController.context.findActivity() as? ComponentActivity
+                activity?.onBackPressedDispatcher?.onBackPressed()
             }
         }
     }

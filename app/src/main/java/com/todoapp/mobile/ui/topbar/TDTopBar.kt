@@ -124,8 +124,7 @@ data class TDTopBarAction(
 )
 
 private fun normalizeRoute(route: String?): String? {
-    val normalizedRoute = route?.substringBefore("/")
-    return normalizedRoute
+    return route?.substringBefore("/")?.substringBefore("?")
 }
 
 @Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, widthDp = 360)

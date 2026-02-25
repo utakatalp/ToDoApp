@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.model.network.data.GroupSummaryData
 import com.todoapp.mobile.domain.model.Group
 import com.todoapp.mobile.domain.repository.GroupRepository
+import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.groups.GroupsContract.UiAction
@@ -18,11 +19,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class GroupsViewModel @Inject constructor(
     private val groupRepository: GroupRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -40,12 +45,26 @@ class GroupsViewModel @Inject constructor(
 
     fun onAction(action: UiAction) {
         when (action) {
-            UiAction.OnCreateNewGroupTap ->
-                _navEffect.trySend(NavigationEffect.Navigate(Screen.CreateNewGroup))
-
+            UiAction.OnCreateNewGroupTap -> createNewGroup()
             is UiAction.OnDeleteGroupTap -> deleteGroup(action)
             is UiAction.OnGroupTap -> TODO("Grup Detayı gelecek...")
             is UiAction.OnMoveGroup -> reorderGroups(action)
+        }
+    }
+
+    private fun createNewGroup() {
+        viewModelScope.launch {
+            val isUserAuthenticated = userRepository.getUserInfo().isSuccess
+
+            if (isUserAuthenticated) {
+                _navEffect.trySend(NavigationEffect.Navigate(Screen.CreateNewGroup()))
+            } else {
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(
+                        Screen.Login(redirectAfterLogin = Screen.CreateNewGroup::class.qualifiedName)
+                    )
+                )
+            }
         }
     }
 
@@ -65,11 +84,16 @@ class GroupsViewModel @Inject constructor(
         viewModelScope.launch {
             groupRepository.observeAllGroups().collect { groups ->
                 _uiState.update {
-                    if (groups.isEmpty()) {
-                        UiState.Empty
+                    (
+                        if (groups.isEmpty()) {
+                        UiState.Empty(isUserAuthenticated = userRepository.getUserInfo().isSuccess)
                     } else {
-                        UiState.Success(groups = groups.map { it.toUiItem() })
+                        UiState.Success(
+                            groups = groups.map { it.toUiItem() },
+                            isUserAuthenticated = userRepository.getUserInfo().isSuccess
+                        )
                     }
+                    )
                 }
             }
         }
@@ -116,7 +140,7 @@ class GroupsViewModel @Inject constructor(
     }
 
     private fun formatTimestamp(timestamp: Long): String {
-        val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.ENGLISH)
-        return sdf.format(java.util.Date(timestamp))
+        val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH)
+        return sdf.format(Date(timestamp))
     }
 }
