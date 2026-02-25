@@ -2,6 +2,7 @@ package com.todoapp.mobile.ui.forgotpassword
 
 import androidx.lifecycle.ViewModel
 import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordContract.UiAction
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,10 +32,9 @@ class ForgotPasswordViewModel @Inject constructor() : ViewModel() {
                     error = validateEmail(uiAction.email)
                 )
             }
+
             UiAction.OnForgotPasswordTap -> handleForgotPassword()
-            UiAction.OnBackToLoginTap -> {
-                /* _navEffect.trySend(NavigationEffect.Navigate(Screen.Login))*/
-            }
+            UiAction.OnBackToLoginTap -> navigateToBackToLogin()
             UiAction.OnEmailFieldTap -> _uiState.update { it.copy(isEmailFieldEnabled = true) }
         }
     }
@@ -50,6 +50,10 @@ class ForgotPasswordViewModel @Inject constructor() : ViewModel() {
         if (emailError != null) return
 
         // Api request vb.
+    }
+
+    private fun navigateToBackToLogin() {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Login))
     }
 
     private fun validateEmail(email: String): String? {

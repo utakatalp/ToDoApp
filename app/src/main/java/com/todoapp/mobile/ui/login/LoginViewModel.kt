@@ -51,7 +51,7 @@ class LoginViewModel @Inject constructor(
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.value)
             UiAction.OnEmailFieldTap -> enableEmailField()
             UiAction.OnFacebookSignInTap -> {}
-            UiAction.OnForgotPasswordTap -> {}
+            UiAction.OnForgotPasswordTap -> navigateToForgotPassword()
             is UiAction.OnGoogleSignInTap -> googleLogin(uiAction.activityContext)
             UiAction.OnLoginTap -> handleLoginClick()
             UiAction.OnPasswordFieldTap -> enablePasswordField()
@@ -72,8 +72,8 @@ class LoginViewModel @Inject constructor(
                         .onSuccess { responseData ->
                             _uiState.update { it.copy(isLoading = false) }
 
-                        handleSuccessfulLogin(responseData)
-                    }
+                            handleSuccessfulLogin(responseData)
+                        }
                         .onFailure { error ->
                             _uiState.update { it.copy(isLoading = false) }
                             _uiEffect.trySend(
@@ -126,6 +126,14 @@ class LoginViewModel @Inject constructor(
         _navEffect.trySend(
             NavigationEffect.Navigate(
                 route = Screen.Register
+            )
+        )
+    }
+
+    private fun navigateToForgotPassword() {
+        _navEffect.trySend(
+            NavigationEffect.Navigate(
+                route = Screen.ForgotPassword
             )
         )
     }
