@@ -2,6 +2,7 @@ package com.todoapp.mobile.ui.register
 
 import android.util.Log
 import android.util.Patterns
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.DomainException
@@ -32,7 +33,11 @@ class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val sessionPreferences: SessionPreferences,
     private val dataStoreHelper: DataStoreHelper,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    private val redirectAfterRegister: String? = savedStateHandle["redirectAfterRegister"]
+
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
@@ -67,8 +72,9 @@ class RegisterViewModel @Inject constructor(
     }
 
     private fun navigateToLogin() {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.Login))
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Login()))
     }
+
     private fun updateWebViewVisibility(isVisible: Boolean) {
         _uiState.update { state ->
             state.copy(
@@ -194,9 +200,26 @@ class RegisterViewModel @Inject constructor(
             sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
             dataStoreHelper.setUser(registerResponseData.user)
 
-            _navEffect.trySend(
-                NavigationEffect.NavigateClearingBackstack(Screen.Home)
-            )
+            val destination = resolveRedirectDestination()
+            if (redirectAfterRegister != null) {
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(
+                        route = destination,
+                        popUpTo = Screen.Register(),
+                        isInclusive = true
+                    )
+                )
+            } else {
+                _navEffect.trySend(NavigationEffect.Navigate(Screen.Home))
+            }
+        }
+    }
+
+    private fun resolveRedirectDestination(): Screen {
+        return when (redirectAfterRegister) {
+            Screen.CreateNewGroup::class.qualifiedName -> Screen.CreateNewGroup(cameFromAuth = true)
+            Screen.Groups::class.qualifiedName -> Screen.Groups
+            else -> Screen.Home
         }
     }
 

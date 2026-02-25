@@ -10,8 +10,9 @@ object LoginContract {
         val isPasswordVisible: Boolean = false,
         val isEmailFieldEnabled: Boolean = false,
         val isPasswordFieldEnabled: Boolean = false,
-        val emailError: String? = null,
-        val passwordError: String? = null,
+        val emailError: LoginError? = null,
+        val passwordError: LoginError? = null,
+        val generalError: LoginError? = null,
         val isLoading: Boolean = false,
         val hasSubmittedOnce: Boolean = false,
     )
@@ -34,4 +35,6 @@ object LoginContract {
     sealed interface UiEffect {
         data class ShowToast(val message: String) : UiEffect
     }
+
+    data class LoginError(val message: String)
 }

@@ -36,10 +36,17 @@ class TopBarViewModel @Inject constructor(
 
     fun onAction(action: UiAction) {
         when (action) {
-            UiAction.OnBackClick -> sendNavEffect(NavigationEffect.Back)
+            UiAction.OnBackClick -> sendNavEffect(NavigationEffect.SystemBack)
             UiAction.OnLogoutClick -> handleLogout()
             UiAction.OnNotificationClick -> handleNotificationClick()
-            UiAction.OnProfileClick -> sendNavEffect(NavigationEffect.NavigateClearingBackstack(Screen.Login))
+            UiAction.OnProfileClick -> sendNavEffect(
+                NavigationEffect.NavigateClearingBackstack(
+                    Screen.Login(
+                        redirectAfterLogin = Screen.Home::class.qualifiedName
+                    )
+                )
+            )
+
             UiAction.OnSettingsClick -> sendNavEffect(NavigationEffect.Navigate(Screen.Settings))
             UiAction.OnAuthenticationUpdate -> refreshAuthenticationState()
         }

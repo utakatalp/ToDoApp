@@ -40,10 +40,10 @@ interface Screen {
     data class Task(val taskId: Long) : Screen
 
     @Serializable
-    data object Register : Screen
+    data class Register(val redirectAfterRegister: String? = null) : Screen
 
     @Serializable
-    data object Login : Screen
+    data class Login(val redirectAfterLogin: String? = null) : Screen
 
     @Serializable
     data class WebView(val url: String) : Screen
@@ -58,5 +58,5 @@ interface Screen {
     data object Groups : Screen
 
     @Serializable
-    data object CreateNewGroup : Screen
+    data class CreateNewGroup(val cameFromAuth: Boolean = false) : Screen
 }

@@ -1,14 +1,26 @@
 package com.todoapp.mobile.ui.groups
 
-import com.todoapp.mobile.data.model.network.data.FamilyGroupSummaryData
-
 object GroupsContract {
+
+    data class GroupUiItem(
+        val id: Long,
+        val name: String,
+        val role: String,
+        val description: String,
+        val memberCount: Int,
+        val pendingTaskCount: Int,
+        val createdAt: String,
+    )
 
     sealed interface UiState {
         data object Loading : UiState
-        data object Empty : UiState
+        data class Empty(
+            val isUserAuthenticated: Boolean,
+        ) : UiState
+
         data class Success(
-            val groups: List<FamilyGroupSummaryData> = emptyList()
+            val isUserAuthenticated: Boolean,
+            val groups: List<GroupUiItem>,
         ) : UiState
 
         data class Error(val message: String) : UiState
@@ -16,6 +28,8 @@ object GroupsContract {
 
     sealed interface UiAction {
         data object OnCreateNewGroupTap : UiAction
+        data class OnGroupTap(val id: Long) : UiAction
+        data class OnMoveGroup(val from: Int, val to: Int) : UiAction
         data class OnDeleteGroupTap(val id: Long) : UiAction
     }
 }

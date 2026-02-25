@@ -7,6 +7,7 @@ import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.AuthEvent
 import com.todoapp.mobile.domain.repository.AuthRepository
+import com.todoapp.mobile.domain.repository.GroupRepository
 import com.todoapp.mobile.domain.repository.SessionPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.UserRepository
@@ -19,10 +20,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Suppress("LongParameterList")
 class MainViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val sessionPreferences: SessionPreferences,
     private val taskRepository: TaskRepository,
+    private val groupRepository: GroupRepository,
     private val dataStoreHelper: DataStoreHelper,
     private val userRepository: UserRepository,
     private val pomodoroEngine: PomodoroEngine,
@@ -74,6 +77,7 @@ class MainViewModel @Inject constructor(
     private suspend fun clearLocalSession() {
         sessionPreferences.clear()
         taskRepository.deleteAllTasks()
+        groupRepository.deleteAllLocalGroups()
         pomodoroEngine.finish()
         dataStoreHelper.clearUser()
     }
