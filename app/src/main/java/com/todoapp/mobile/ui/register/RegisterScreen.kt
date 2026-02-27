@@ -11,14 +11,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,6 +48,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
 import com.todoapp.mobile.R
 import com.todoapp.mobile.common.loginWithFacebook
 import com.todoapp.mobile.data.auth.GoogleSignInManager
@@ -66,8 +71,7 @@ fun RegisterScreen(
 
     ) {
     val context = LocalContext.current
-
-    uiEffect.collectWithLifecycle {
+    uiEffect.collectWithLifecycle(minActiveState = Lifecycle.State.CREATED) {
         when (it) {
             UiEffect.FacebookLogin -> {
                 handleFacebookLogin(context = context, onAction = onAction)
@@ -115,12 +119,14 @@ private fun RegisterContent(
     Column(
         Modifier
             .fillMaxSize()
-            .imePadding()
             .background(color = TDTheme.colors.primary)
-            .statusBarsPadding()
             .verticalScroll(verticalScroll),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(
+            modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars)
+        )
+        Spacer(Modifier.height(32.dp))
         Box(
             modifier = Modifier
                 .size(70.dp)
@@ -142,7 +148,7 @@ private fun RegisterContent(
             textAlign = TextAlign.Center,
             color = TDTheme.colors.white.copy(0.8f)
         )
-
+        Spacer(Modifier.weight(1f))
         Column(
             Modifier
                 .fillMaxSize()
@@ -370,7 +376,10 @@ private fun RegisterContent(
             }
             Spacer(Modifier.height(16.dp))
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding()
+                    .navigationBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row {

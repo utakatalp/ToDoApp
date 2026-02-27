@@ -117,5 +117,20 @@
     <string name="delete_task_title">Delete task?</string>
     <string name="delete_task_message">Do you want to delete the task?</string>
     <string name="delete">Delete</string>
-
+    <string name="groups">Groups</string>
+    <string name="new_group">New Group</string>
+    <string name="my_groups">My Groups</string>
+    <string name="let_s_get_started">Let\'s get started</string>
+    <string name="bring_your_group_together_in_one_place">Bring your group together in one place</string>
+    <string name="group_name">Group Name</string>
+    <string name="e_g_the_johnsons_summer_vacation">e.g. The Johnsons, Summer Vacation</string>
+    <string name="what_is_this_group_for_collaborating_on_chores_planning_trips_or_daily_tasks">What is this group for? Collaborating on chores, planning trips, or daily tasks...</string>
+    <string name="text_field_description">You\'ll be able to invite your group members and assign tasks to them immediately after creating the group.</string>
+    <string name="create">Create</string>
+    <string name="you_don_t_have_any">You don\'t have any</string>
+    <string name="groups_yet">groups yet.</string>
+    <string name="create_a_group_to_start_collaborating_on">Create a group to start collaborating on</string>
+    <string name="tasks_with_your_family">tasks with your family.</string>
+    <string name="create_new_group">Create New Group</string>
+    <string name="login_to_create_a_group">Login to create a group</string>
 </resources>

@@ -144,7 +144,7 @@ fun OnboardingScreen(
                     type = TDButtonType.PRIMARY,
                     size = TDButtonSize.MEDIUM,
                     icon = null,
-                    onClick = { onAction(UiAction.OnRegisterClick) },
+                    onClick = { onAction(UiAction.OnGetStartedClick) },
                 )
 
                 TDSpannableText(
@@ -268,7 +268,7 @@ fun OnboardingScreen(
                     size = TDButtonSize.MEDIUM,
                     icon = null,
                     onClick = {
-                        onAction(UiAction.OnRegisterClick)
+                        onAction(UiAction.OnGetStartedClick)
                     },
                 )
 

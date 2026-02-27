@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,11 +30,12 @@ fun TDTaskCardWithCheckbox(
     isChecked: Boolean,
     taskText: String,
     onCheckBoxClick: (Boolean) -> Unit,
+    hamburgerModifier: Modifier = Modifier
 ) {
     Column(modifier.background(TDTheme.colors.background)) {
         Row(
             modifier =
-                modifier
+                Modifier
                     .fillMaxWidth()
                     .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -55,11 +57,16 @@ fun TDTaskCardWithCheckbox(
             )
             Spacer(Modifier.weight(2f))
 
-            Icon(
-                painter = painterResource(R.drawable.ic_drag),
-                tint = TDTheme.colors.onBackground,
-                contentDescription = "drag",
-            )
+            IconButton(
+                modifier = hamburgerModifier,
+                onClick = {},
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_hamburger),
+                    contentDescription = "Reorder",
+                    tint = TDTheme.colors.onBackground
+                )
+            }
         }
         HorizontalDivider(
             modifier = Modifier.padding(start = 32.dp),
@@ -78,7 +85,7 @@ private fun TDCheckBox(
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-            modifier
+            modifier.padding(start = 5.dp)
                 .background(TDTheme.colors.onBackground)
                 .clickable(
                     onClick = { onCheckBoxClick(isChecked) },

@@ -1,5 +1,6 @@
 package com.todoapp.mobile.navigation
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -10,14 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.todoapp.mobile.LocalNavController
 import com.todoapp.mobile.ui.activity.ActivityScreen
 import com.todoapp.mobile.ui.activity.ActivityViewModel
 import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerScreen
@@ -26,14 +26,19 @@ import com.todoapp.mobile.ui.banner.BannerOverlay
 import com.todoapp.mobile.ui.banner.BannerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
+import com.todoapp.mobile.ui.createnewgroup.CreateNewGroupScreen
+import com.todoapp.mobile.ui.createnewgroup.CreateNewGroupViewModel
 import com.todoapp.mobile.ui.details.DetailsScreen
 import com.todoapp.mobile.ui.details.DetailsViewModel
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordScreen
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordViewModel
+import com.todoapp.mobile.ui.groups.GroupScreen
+import com.todoapp.mobile.ui.groups.GroupsViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.login.LoginScreen
 import com.todoapp.mobile.ui.login.LoginViewModel
+import com.todoapp.mobile.ui.login.findActivity
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
@@ -45,6 +50,8 @@ import com.todoapp.mobile.ui.register.RegisterViewModel
 import com.todoapp.mobile.ui.settings.SecretModeSettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
+import com.todoapp.mobile.ui.topbar.ShowTopBar
+import com.todoapp.mobile.ui.topbar.TopBarViewModel
 import com.todoapp.mobile.ui.webview.WebViewScreen
 import com.todoapp.mobile.ui.webview.WebViewViewModel
 import com.todoapp.uikit.extensions.collectWithLifecycle
@@ -70,7 +77,7 @@ fun NavGraph(
                 uiState = uiState,
                 onAction = viewModel::onAction,
             )
-            NavigationEffectController(navController, navEffect)
+            NavigationEffectController(navEffect)
         }
         composable<Screen.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
@@ -82,7 +89,7 @@ fun NavGraph(
                 uiEffect = uiEffect,
                 onAction = viewModel::onAction,
             )
-            NavigationEffectController(navController, navEffect)
+            NavigationEffectController(navEffect)
         }
         composable<Screen.Calendar> {
             val viewModel: CalendarViewModel = hiltViewModel()
@@ -105,7 +112,7 @@ fun NavGraph(
             val viewModel: SettingsViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val context = LocalContext.current
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             SettingsScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
@@ -117,7 +124,7 @@ fun NavGraph(
         composable<Screen.SecretMode> {
             val viewModel: SettingsViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             SecretModeSettingsScreen(
                 uiState,
                 viewModel::onAction,
@@ -127,7 +134,7 @@ fun NavGraph(
         composable<Screen.AddPomodoroTimer> {
             val viewModel: AddPomodoroTimerViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             AddPomodoroTimerScreen(
                 uiState,
                 viewModel::onAction
@@ -137,7 +144,7 @@ fun NavGraph(
             val viewModel: PomodoroViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             PomodoroScreen(
                 uiState,
                 uiEffect,
@@ -149,7 +156,7 @@ fun NavGraph(
             val viewModel: DetailsViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             DetailsScreen(
                 uiState,
                 uiEffect,
@@ -160,8 +167,7 @@ fun NavGraph(
             val viewModel: RegisterViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
-
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             RegisterScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
@@ -173,8 +179,7 @@ fun NavGraph(
             val viewModel: LoginViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
-
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             LoginScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
@@ -185,7 +190,7 @@ fun NavGraph(
         composable<Screen.WebView> {
             val viewModel: WebViewViewModel = hiltViewModel()
             val uiEffect = viewModel.uiEffect
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             WebViewScreen(
                 onAction = viewModel::onAction,
                 uiEffect = uiEffect
@@ -195,35 +200,47 @@ fun NavGraph(
         composable<Screen.ForgotPassword> {
             val viewModel: ForgotPasswordViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             ForgotPasswordScreen(uiState, viewModel::onAction)
         }
 
         composable<Screen.PomodoroFinish> {
             val viewModel: PomodoroFinishViewModel = hiltViewModel()
-            NavigationEffectController(navController, viewModel.navEffect)
+            NavigationEffectController(viewModel.navEffect)
             PomodoroFinishScreen(viewModel::onAction)
         }
 
-        composable<Screen.Notifications> { }
+        composable<Screen.CreateNewGroup> {
+            val viewModel: CreateNewGroupViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            CreateNewGroupScreen(uiState, viewModel::onAction)
+        }
+
+        composable<Screen.Groups> {
+            val viewModel: GroupsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            GroupScreen(uiState, viewModel::onAction)
+        }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun ToDoApp() {
-    val navController = rememberNavController()
     val bannerViewModel: BannerViewModel = hiltViewModel()
     val bannerState by bannerViewModel.uiState.collectAsStateWithLifecycle()
+    val topBarViewModel: TopBarViewModel = hiltViewModel()
+    val topBarState by topBarViewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier =
             Modifier
                 .fillMaxSize()
                 .background(TDTheme.colors.background),
-        bottomBar = { TDBottomBar(navController) },
+        bottomBar = { TDBottomBar() },
         topBar = {
             Column {
                 BannerOverlay(
@@ -231,15 +248,16 @@ fun ToDoApp() {
                     bannerViewModel::onAction,
                     bannerViewModel.uiEffect
                 )
-                NavigationEffectController(navController, bannerViewModel.navEffect)
-                ShowTopBar(navController, bannerState.isBannerActivated)
+                NavigationEffectController(bannerViewModel.navEffect)
+                ShowTopBar(bannerState.isBannerActivated, topBarViewModel::onAction, topBarState)
+                NavigationEffectController(topBarViewModel.navEffect)
             }
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
 
         NavGraph(
-            navController = navController,
+            navController = LocalNavController.current,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
@@ -254,14 +272,16 @@ sealed interface NavigationEffect {
         val isInclusive: Boolean = false,
     ) : NavigationEffect
 
+    data class NavigateClearingBackstack(val route: Screen) : NavigationEffect
     data object Back : NavigationEffect
+    data object SystemBack : NavigationEffect
 }
 
 @Composable
-private fun NavigationEffectController(
-    navController: NavHostController,
+fun NavigationEffectController(
     navEffect: Flow<NavigationEffect>,
 ) {
+    val navController = LocalNavController.current
     navEffect.collectWithLifecycle { effect ->
         when (effect) {
             is NavigationEffect.Navigate -> {
@@ -276,6 +296,17 @@ private fun NavigationEffectController(
 
             is NavigationEffect.Back -> {
                 navController.popBackStack()
+            }
+
+            is NavigationEffect.NavigateClearingBackstack -> {
+                navController.navigate(effect.route) {
+                    popUpTo(0)
+                }
+            }
+
+            NavigationEffect.SystemBack -> {
+                val activity = navController.context.findActivity() as? ComponentActivity
+                activity?.onBackPressedDispatcher?.onBackPressed()
             }
         }
     }

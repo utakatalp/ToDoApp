@@ -84,7 +84,6 @@ tasks.withType<DetektCreateBaselineTask>().configureEach {
 }
 
 dependencies {
-    implementation("com.facebook.android:facebook-android-sdk:latest.release")
     implementation(project(":uikit"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -101,6 +100,11 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.appcompat)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.common)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.androidx.compose.material.icons.extended)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -109,10 +113,13 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+
     // Dependency Injection (Hilt)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
+
 
     // Network (Retrofit & KotlinX Serialization)
     implementation(libs.kotlinx.serialization.json)
@@ -126,6 +133,7 @@ dependencies {
     // Local Storage (Room)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.androidx.sqlite)
     ksp(libs.room.compiler)
 
     // Utils

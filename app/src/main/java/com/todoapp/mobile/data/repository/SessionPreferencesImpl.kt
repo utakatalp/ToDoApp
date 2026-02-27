@@ -10,7 +10,6 @@ import javax.inject.Inject
 class SessionPreferencesImpl @Inject constructor(
     private val sharedPreferences: SharedPreferences
 ) : SessionPreferences {
-
     override suspend fun setAccessToken(token: String) {
         return withContext(Dispatchers.IO) {
             sharedPreferences.edit { putString(KEY_ACCESS_TOKEN, token) }
@@ -47,6 +46,13 @@ class SessionPreferencesImpl @Inject constructor(
     override suspend fun getExpiresAt(): Long {
         return withContext(Dispatchers.IO) {
             sharedPreferences.getLong(KEY_EXPIRES_AT, 0)
+        }
+    }
+
+    override suspend fun clear(): Boolean {
+        return withContext(Dispatchers.IO) {
+            sharedPreferences.edit { clear() }
+            true
         }
     }
 

@@ -4,6 +4,7 @@ import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.data.source.local.DayCount
 import com.todoapp.mobile.data.source.local.TaskDao
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class TaskLocalDataSourceImpl @Inject constructor(
@@ -50,4 +51,22 @@ class TaskLocalDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getTaskById(id: Long): TaskEntity? = taskDao.getTaskById(id)
+
+    override suspend fun deleteAll() {
+        val tasks = taskDao.getAllTasks().first()
+        taskDao.deleteAll(tasks)
+    }
+
+    override suspend fun insertAll(tasks: List<TaskEntity>) {
+        taskDao.insertAll(tasks)
+    }
+    override suspend fun updateOrderIndex(id: Long, orderIndex: Int) {
+        taskDao.updateOrderIndex(id = id, orderIndex = orderIndex)
+    }
+
+    override suspend fun updateOrderIndices(orderUpdates: List<Pair<Long, Int>>) {
+        for ((id, orderIndex) in orderUpdates) {
+            taskDao.updateOrderIndex(id = id, orderIndex = orderIndex)
+        }
+    }
 }
