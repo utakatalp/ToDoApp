@@ -7,10 +7,23 @@ import okhttp3.Response
 import javax.inject.Inject
 
 class AuthInterceptor @Inject constructor(
-    private val sessionPreferences: SessionPreferences
+    private val sessionPreferences: SessionPreferences,
 ) : Interceptor {
+
+    private val noAuthPaths = listOf(
+        "/auth/register",
+        "/auth/login",
+        "/auth/google",
+        "/auth/facebook",
+    )
+
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
+
+        if (noAuthPaths.any { original.url.encodedPath.contains(it) }) {
+            return chain.proceed(original)
+        }
+
         val token = runBlocking {
             sessionPreferences.getAccessToken()
         }

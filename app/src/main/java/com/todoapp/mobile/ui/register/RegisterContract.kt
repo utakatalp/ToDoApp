@@ -29,6 +29,9 @@ object RegisterContract {
         data object OnPrivacyPolicyTap : UiAction
         data object OnLoginTap : UiAction
         data object OnFacebookSignInTap : UiAction
+        data object OnGoogleSignInTap : UiAction
+        data class OnGoogleSignInResult(val token: String) : UiAction
+        data class OnGoogleSignInFailed(val message: String) : UiAction
         data object OnPasswordVisibilityTap : UiAction
         data object OnPasswordFieldTap : UiAction
         data object OnConfirmPasswordFieldTap : UiAction
@@ -45,6 +48,8 @@ object RegisterContract {
 
     sealed interface UiEffect {
         data object FacebookLogin : UiEffect
+        data object LaunchGoogleSignIn : UiEffect
+        data class ShowToast(val message: String) : UiEffect
     }
 
     data class RegisterError(val message: String)

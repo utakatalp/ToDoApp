@@ -1,17 +1,21 @@
 package com.todoapp.mobile.ui.login
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.R
 import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.common.passwordValidation.ValidationManager
-import com.todoapp.mobile.data.auth.GoogleSignInManager
+import com.todoapp.mobile.data.auth.AuthModel
+import com.todoapp.mobile.data.auth.AuthTokenManager
 import com.todoapp.mobile.data.model.network.data.AuthResponseData
+import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.repository.SessionPreferences
+import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -31,7 +35,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val googleSignInManager: GoogleSignInManager,
+    private val authTokenManager: AuthTokenManager,
+    private val taskRepository: TaskRepository,
     private val sessionPreferences: SessionPreferences,
     private val dataStoreHelper: DataStoreHelper,
     savedStateHandle: SavedStateHandle,
@@ -54,9 +59,13 @@ class LoginViewModel @Inject constructor(
             is UiAction.OnEmailChange -> onEmailChange(uiAction.value)
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.value)
             UiAction.OnEmailFieldTap -> enableEmailField()
-            UiAction.OnFacebookSignInTap -> {}
+            UiAction.OnFacebookSignInTap -> _uiEffect.trySend(UiEffect.FacebookLogin)
             UiAction.OnForgotPasswordTap -> navigateToForgotPassword()
-            is UiAction.OnGoogleSignInTap -> googleLogin(uiAction.activityContext)
+            is UiAction.OnGoogleSignInTap -> _uiEffect.trySend(UiEffect.GoogleLogin)
+            is UiAction.OnGoogleSignInFailed -> _uiEffect.trySend(UiEffect.ShowToast(uiAction.message))
+            is UiAction.OnSuccessfulGoogleLogin -> googleLogin(uiAction.token)
+            is UiAction.OnSuccessfulFacebookLogin -> loginWithFacebook(uiAction.token)
+            is UiAction.OnFacebookLoginFail -> handleFacebookLoginFailure(uiAction.throwable)
             UiAction.OnLoginTap -> handleLoginClick()
             UiAction.OnPasswordFieldTap -> enablePasswordField()
             UiAction.OnPasswordVisibilityTap -> togglePasswordVisibility()
@@ -65,33 +74,82 @@ class LoginViewModel @Inject constructor(
             UiAction.OnTermsOfServiceTap -> showTermsOfService()
         }
     }
-    private fun googleLogin(activityContext: Context) {
+
+    private fun handleSuccessfulLogin(
+        accessToken: String,
+        refreshToken: String,
+        expiresIn: Long,
+    ) {
+        viewModelScope.launch {
+            sessionPreferences.setAccessToken(accessToken)
+            sessionPreferences.setExpiresAt(expiresIn)
+            sessionPreferences.setRefreshToken(refreshToken)
+            userRepository.syncPendingFcmToken()
+                .onFailure { Log.d("FCM_SYNC", "syncPendingFcmToken failed: ${it.message}") }
+
+            taskRepository.syncLocalTasksToServer()
+
+            _navEffect.trySend(
+                NavigationEffect.Navigate(
+                    route = Screen.Home,
+                    popUpTo = Screen.Onboarding,
+                    isInclusive = true
+                )
+            )
+        }
+    }
+
+    private fun loginWithFacebook(token: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            googleSignInManager.getGoogleIdToken(activityContext)
-                .onSuccess { idToken ->
-                    userRepository.googleLogin(idToken)
-                        .onSuccess { responseData ->
-                            _uiState.update { it.copy(isLoading = false) }
+            userRepository.facebookLogin(FacebookLoginRequest(token))
+                .onSuccess { handleSuccessfulLogin(it.accessToken, it.refreshToken, it.expiresIn) }
+                .onFailure { throwable ->
+                    Log.d("facebook_login", throwable.message.orEmpty())
+                    handleFacebookLoginFailure(throwable)
+                }
+        }
+    }
 
-                            handleSuccessfulLogin(responseData)
-                        }
-                        .onFailure { error ->
-                            _uiState.update { it.copy(isLoading = false) }
-                            _uiEffect.trySend(
-                                UiEffect.ShowToast(
-                                    error.message ?: "Goggle login error"
-                                )
-                            )
-                        }
-                }.onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false) }
-                    _uiEffect.trySend(
-                        UiEffect.ShowToast(
-                            error.message ?: "Goggle Sign-in Cancelled"
+    private fun handleFacebookLoginFailure(throwable: Throwable) {
+        _uiState.update { it.copy(isLoading = false) }
+
+        val message = when (throwable) {
+            is DomainException.NoInternet -> "No internet connection."
+            is DomainException.Unauthorized -> "Facebook session expired. Please try again."
+            is DomainException.Server -> throwable.message ?: "Try again later."
+            else -> throwable.message ?: "Try again later."
+        }
+
+        _uiState.update { state ->
+            state.copy(
+                generalError = LoginContract.LoginError(message)
+            )
+        }
+    }
+
+    private fun googleLogin(idToken: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            userRepository.googleLogin(idToken)
+                .onSuccess { loginData ->
+                    authTokenManager.saveTokens(
+                        AuthModel(
+                            accessToken = loginData.accessToken,
+                            refreshToken = loginData.refreshToken,
+                            userId = loginData.user.id,
+                            email = loginData.user.email,
+                            displayName = loginData.user.displayName,
+                            avatarUrl = loginData.user.avatarUrl,
                         )
                     )
+                    handleSuccessfulLogin(loginData.accessToken, loginData.refreshToken, loginData.expiresIn)
+                }.onFailure { error ->
+                    Log.e("GOOGLE_LOGIN", "Token retrieval FAILED", error)
+                    _uiState.update { it.copy(isLoading = false) }
+                    _uiEffect.trySend(UiEffect.ShowToast(error.message ?: "Google login error"))
                 }
         }
     }
@@ -105,10 +163,22 @@ class LoginViewModel @Inject constructor(
                 password = uiState.value.password,
             )
         ).fold(
-            onSuccess = { responseData ->
+            onSuccess = { loginData ->
                 _uiState.update { it.copy(isLoading = false) }
+                sessionPreferences.setAccessToken(loginData.accessToken)
+                sessionPreferences.setExpiresAt(loginData.expiresIn)
+                sessionPreferences.setRefreshToken(loginData.refreshToken)
 
-                handleSuccessfulLogin(responseData)
+                userRepository.syncPendingFcmToken()
+                    .onFailure { Log.d("FCM_SYNC", "syncPendingFcmToken failed: ${it.message}") }
+
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(
+                        route = Screen.Home,
+                        popUpTo = Screen.Onboarding,
+                        isInclusive = true
+                    )
+                )
             },
             onFailure = { throwable ->
                 _uiState.update { it.copy(isLoading = false) }

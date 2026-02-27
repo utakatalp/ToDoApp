@@ -1,6 +1,7 @@
 package com.todoapp.mobile.data.source.remote.api
 
 import com.todoapp.mobile.data.model.network.data.AuthResponseData
+import com.todoapp.mobile.data.model.network.data.FCMTokenResponseData
 import com.todoapp.mobile.data.model.network.data.GroupData
 import com.todoapp.mobile.data.model.network.data.GroupSummaryDataList
 import com.todoapp.mobile.data.model.network.data.RefreshTokenData
@@ -8,6 +9,7 @@ import com.todoapp.mobile.data.model.network.data.TaskData
 import com.todoapp.mobile.data.model.network.data.TaskListData
 import com.todoapp.mobile.data.model.network.data.UserData
 import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
+import com.todoapp.mobile.data.model.network.request.FCMTokenRequest
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
@@ -41,13 +43,13 @@ interface ToDoApi {
 
     @POST("tasks")
     suspend fun addTask(
-        @Body request: TaskRequest
+        @Body request: TaskRequest,
     ): Response<BaseResponse<TaskData?>>
 
     @PUT("tasks/{id}")
     suspend fun updateTask(
         @Path("id") taskId: Long,
-        @Body request: TaskRequest
+        @Body request: TaskRequest,
     ): Response<BaseResponse<TaskData?>>
 
     @GET("tasks")
@@ -61,15 +63,20 @@ interface ToDoApi {
 
     @POST("auth/facebook")
     suspend fun facebookLogin(
-        @Body request: FacebookLoginRequest
+        @Body request: FacebookLoginRequest,
     ): Response<BaseResponse<AuthResponseData?>>
+
+    @POST("devices/fcm-token")
+    suspend fun fcmToken(
+        @Body request: FCMTokenRequest,
+    ): Response<BaseResponse<FCMTokenResponseData?>>
 
     @GET("users/me")
     suspend fun getUserInfo(): Response<BaseResponse<UserData?>>
 
     @POST("family-groups")
     suspend fun createGroup(
-        @Body request: CreateGroupRequest
+        @Body request: CreateGroupRequest,
     ): Response<BaseResponse<GroupData?>>
 
     @GET("family-groups")
@@ -77,13 +84,13 @@ interface ToDoApi {
 
     @DELETE("family-groups/{id}")
     suspend fun deleteGroup(
-        @Path("id") id: Long
+        @Path("id") id: Long,
     ): Response<BaseResponse<Unit?>>
 }
 
 interface TodoAuthApi {
     @POST("auth/refresh")
     suspend fun refreshToken(
-        @Body request: RefreshTokenRequest
+        @Body request: RefreshTokenRequest,
     ): Response<BaseResponse<RefreshTokenData?>>
 }

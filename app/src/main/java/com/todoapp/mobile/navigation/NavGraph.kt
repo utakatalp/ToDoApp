@@ -1,6 +1,5 @@
 package com.todoapp.mobile.navigation
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -38,7 +37,6 @@ import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.login.LoginScreen
 import com.todoapp.mobile.ui.login.LoginViewModel
-import com.todoapp.mobile.ui.login.findActivity
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
@@ -171,7 +169,7 @@ fun NavGraph(
             RegisterScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
-                uiEffect = uiEffect
+                uiEffect = uiEffect,
             )
         }
 
@@ -182,7 +180,8 @@ fun NavGraph(
             NavigationEffectController(viewModel.navEffect)
             LoginScreen(
                 uiState = uiState,
-                onAction = viewModel::onAction
+                onAction = viewModel::onAction,
+                uiEffect = uiEffect,
             )
         }
 
@@ -304,8 +303,8 @@ fun NavigationEffectController(
             }
 
             NavigationEffect.SystemBack -> {
-                val activity = navController.context.findActivity() as? ComponentActivity
-                activity?.onBackPressedDispatcher?.onBackPressed()
+//                val activity = navController.context.findActivity() as? ComponentActivity
+//                activity?.onBackPressedDispatcher?.onBackPressed()
             }
         }
     }

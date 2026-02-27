@@ -2,10 +2,8 @@ package com.todoapp.mobile.di
 
 import com.todoapp.mobile.data.engine.PomodoroEngineImpl
 import com.todoapp.mobile.data.repository.AuthRepositoryImpl
-import com.todoapp.mobile.data.repository.DailyPlanPreferencesImpl
 import com.todoapp.mobile.data.repository.GroupRepositoryImpl
 import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
-import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.repository.SessionPreferencesImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.repository.TaskSyncRepositoryImpl
@@ -21,10 +19,8 @@ import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSourceImpl
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.AuthRepository
-import com.todoapp.mobile.domain.repository.DailyPlanPreferences
 import com.todoapp.mobile.domain.repository.GroupRepository
 import com.todoapp.mobile.domain.repository.PomodoroRepository
-import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.SessionPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.TaskSyncRepository
@@ -82,10 +78,6 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindSecretModePreferences(secretPreferencesImpl: SecretPreferencesImpl): SecretPreferences
-
-    @Binds
-    @Singleton
     abstract fun bindGroupDataSource(
         groupRemoteDataSourceImpl: GroupRemoteDataSourceImpl
     ): GroupRemoteDataSource
@@ -97,8 +89,4 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPomodoroRepository(pomodoroRepositoryImpl: PomodoroRepositoryImpl): PomodoroRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindDailyPlanPreferences(dailyPlanPreferencesImpl: DailyPlanPreferencesImpl): DailyPlanPreferences
 }

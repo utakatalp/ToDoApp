@@ -1,9 +1,7 @@
 package com.todoapp.mobile.ui.login
 
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.res.Configuration
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,27 +41,53 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import com.todoapp.mobile.R
+import com.todoapp.mobile.common.loginWithFacebook
+import com.todoapp.mobile.data.auth.GoogleSignInManager
 import com.todoapp.mobile.ui.login.LoginContract.UiAction
+import com.todoapp.mobile.ui.login.LoginContract.UiEffect
 import com.todoapp.mobile.ui.login.LoginContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDText
+import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun LoginScreen(
     uiState: UiState,
+    uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
-    val activity = context.findActivity()
+
+    uiEffect.collectWithLifecycle {
+        when (it) {
+            UiEffect.FacebookLogin -> {
+                handleFacebookLogin(
+                    context = context,
+                    onAction = onAction,
+                )
+            }
+
+            UiEffect.GoogleLogin -> {
+                GoogleSignInManager.getGoogleIdToken(context).onSuccess { idToken ->
+                    onAction(UiAction.OnSuccessfulGoogleLogin(idToken))
+                }.onFailure { error ->
+                    onAction(UiAction.OnGoogleSignInFailed(error.message ?: "Sign-in Cancelled"))
+                }
+            }
+
+            is UiEffect.ShowToast -> {}
+        }
+    }
 
     LoginContent(
         uiState = uiState,
         onAction = onAction,
-        activityContext = activity
     )
 }
 
@@ -71,7 +95,6 @@ fun LoginScreen(
 private fun LoginContent(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
-    activityContext: Context,
 ) {
     val verticalScroll = rememberScrollState()
 
@@ -113,14 +136,15 @@ private fun LoginContent(
             style = TDTheme.typography.heading4,
             color = TDTheme.colors.white.copy(0.8f)
         )
-        // Spacer(Modifier.height(24.dp))
         Spacer(Modifier.weight(1f))
+
         Column(
             Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
                 .background(color = TDTheme.colors.background)
-                .padding(start = 32.dp, end = 32.dp, top = 32.dp, bottom = 16.dp),
+                .navigationBarsPadding()
+                .padding(start = 32.dp, end = 32.dp, top = 32.dp),
         ) {
             TDText(
                 text = stringResource(R.string.welcome_back),
@@ -216,7 +240,6 @@ private fun LoginContent(
                             ),
                             contentDescription = stringResource(R.string.toggle_password_visibility),
                             tint = TDTheme.colors.onBackground.copy(0.5f)
-
                         )
                     }
                 },
@@ -277,10 +300,9 @@ private fun LoginContent(
                     fullWidth = false,
                     type = TDButtonType.OUTLINE,
                     icon = painterResource(R.drawable.ic_google_logo),
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier = Modifier.weight(1f)
                 ) {
-                    onAction(UiAction.OnGoogleSignInTap(activityContext))
+                    onAction(UiAction.OnGoogleSignInTap)
                 }
                 Spacer(Modifier.width(12.dp))
                 TDButton(
@@ -288,8 +310,7 @@ private fun LoginContent(
                     fullWidth = false,
                     type = TDButtonType.OUTLINE,
                     icon = painterResource(R.drawable.ic_facebook_logo),
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier = Modifier.weight(1f)
                 ) {
                     onAction(UiAction.OnFacebookSignInTap)
                 }
@@ -316,9 +337,12 @@ private fun LoginContent(
                 )
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
 
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Row {
                     TDText(
                         text = stringResource(R.string.by_signing_up_you_agree_to_our),
@@ -358,19 +382,32 @@ private fun LoginContent(
     }
 }
 
-fun Context.findActivity(): Context {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is ComponentActivity) return context
-        context = context.baseContext
-    }
-    error("Activity context not found")
+suspend fun handleFacebookLogin(
+    context: Context,
+    onAction: (UiAction) -> Unit,
+) {
+    val activity = context as? FragmentActivity
+        ?: run {
+            onAction(
+                UiAction.OnFacebookLoginFail(
+                    IllegalStateException("Facebook login requires a FragmentActivity context")
+                )
+            )
+            return
+        }
+
+    loginWithFacebook(activity = activity)
+        .onSuccess { token ->
+            onAction(UiAction.OnSuccessfulFacebookLogin(token))
+        }
+        .onFailure { throwable ->
+            onAction(UiAction.OnFacebookLoginFail(throwable))
+        }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LoginContentPreview() {
-    val context = LocalContext.current
     TDTheme {
         LoginContent(
             uiState = UiState(
@@ -379,7 +416,6 @@ private fun LoginContentPreview() {
                 isPasswordVisible = true,
             ),
             onAction = {},
-            activityContext = context
         )
     }
 }
@@ -387,7 +423,6 @@ private fun LoginContentPreview() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun LoginContentDarkPreview() {
-    val context = LocalContext.current
     TDTheme {
         LoginContent(
             uiState = UiState(
@@ -396,7 +431,6 @@ private fun LoginContentDarkPreview() {
                 isPasswordVisible = false
             ),
             onAction = {},
-            activityContext = context
         )
     }
 }

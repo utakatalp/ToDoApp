@@ -9,11 +9,18 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.todoapp.mobile.data.auth.AuthTokenManager
 import com.todoapp.mobile.data.auth.GoogleSignInManager
+import com.todoapp.mobile.data.repository.DailyPlanPreferencesImpl
 import com.todoapp.mobile.data.repository.DataStoreHelper
+import com.todoapp.mobile.data.repository.FCMTokenPreferencesImpl
+import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
 import com.todoapp.mobile.data.source.local.PomodoroDao
 import com.todoapp.mobile.data.source.local.TaskDao
 import com.todoapp.mobile.data.source.local.datasource.GroupDao
+import com.todoapp.mobile.domain.repository.DailyPlanPreferences
+import com.todoapp.mobile.domain.repository.FCMTokenPreferences
+import com.todoapp.mobile.domain.repository.SecretPreferences
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -84,13 +91,34 @@ object LocalStorageModule {
 
     @Provides
     @Singleton
-    fun provideGoogleSignInManager(
-        @ApplicationContext context: Context,
-    ): GoogleSignInManager = GoogleSignInManager(context)
+    fun provideGoogleSignInManager(): GoogleSignInManager = GoogleSignInManager
 
     @Provides
     @Singleton
     fun provideAuthTokensManager(
-        dataStoreHelper: DataStoreHelper
+        dataStoreHelper: DataStoreHelper,
     ): AuthTokenManager = AuthTokenManager(dataStoreHelper)
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class LocalStorageModuleForBindings {
+
+    @Binds
+    @Singleton
+    abstract fun bindSecretModePreferences(
+        secretPreferencesImpl: SecretPreferencesImpl,
+    ): SecretPreferences
+
+    @Binds
+    @Singleton
+    abstract fun bindDailyPlanPreferences(
+        dailyPlanPreferencesImpl: DailyPlanPreferencesImpl,
+    ): DailyPlanPreferences
+
+    @Binds
+    @Singleton
+    abstract fun bindFcmTokenPreferences(
+        impl: FCMTokenPreferencesImpl,
+    ): FCMTokenPreferences
 }

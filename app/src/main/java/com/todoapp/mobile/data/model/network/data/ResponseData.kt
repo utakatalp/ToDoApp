@@ -96,10 +96,21 @@ data class GroupMemberData(
 
     @SerialName("avatarUrl")
     val avatarUrl: String?,
+    val emailVerified: Boolean,
+    val providers: List<String>,
+    val createdAt: String,
 
     @SerialName("role")
     val role: String,
 
     @SerialName("joinedAt")
     val joinedAt: Long
+)
+
+@Serializable
+data class FCMTokenResponseData(
+    val token: String,
+    val deviceId: String,
+    val deviceName: String,
+
 )

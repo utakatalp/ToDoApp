@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.common.passwordValidation.ValidationManager
+import com.todoapp.mobile.data.auth.AuthModel
+import com.todoapp.mobile.data.auth.AuthTokenManager
 import com.todoapp.mobile.data.model.network.data.AuthResponseData
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
@@ -32,6 +34,7 @@ import javax.inject.Inject
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val sessionPreferences: SessionPreferences,
+    private val authTokenManager: AuthTokenManager,
     private val dataStoreHelper: DataStoreHelper,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -68,6 +71,11 @@ class RegisterViewModel @Inject constructor(
             UiAction.OnPasswordFieldTap -> enablePasswordField()
             is UiAction.OnSuccessfulFacebookLogin -> loginWithFacebook(uiAction.token)
             is UiAction.OnFacebookLoginFail -> handleFacebookLoginFailure(uiAction.throwable)
+            UiAction.OnGoogleSignInTap -> _uiEffect.trySend(UiEffect.LaunchGoogleSignIn)
+            is UiAction.OnGoogleSignInResult -> googleLogin(uiAction.token)
+            is UiAction.OnGoogleSignInFailed -> {
+                _uiEffect.trySend(UiEffect.ShowToast(uiAction.message))
+            }
         }
     }
 
@@ -77,9 +85,7 @@ class RegisterViewModel @Inject constructor(
 
     private fun updateWebViewVisibility(isVisible: Boolean) {
         _uiState.update { state ->
-            state.copy(
-                isWebViewAvailable = isVisible,
-            )
+            state.copy(isWebViewAvailable = isVisible)
         }
     }
 
@@ -92,7 +98,6 @@ class RegisterViewModel @Inject constructor(
     }
 
     private fun updateValidationMode() {
-        // OVER ENGINEERING FARKINDAYIM
         validationMode = ValidationMode.AfterSubmit(
             getState = { uiState.value },
             validateEmail = { validateEmail(it) },
@@ -114,17 +119,14 @@ class RegisterViewModel @Inject constructor(
 
         if (hasEmptyField) {
             _uiState.update {
-                it.copy(
-                    confirmPasswordError = RegisterError("Please fill in the required fields.")
-                )
+                it.copy(confirmPasswordError = RegisterError("Please fill in the required fields."))
             }
             return
         }
 
         val emailError = validationMode.validate(field = Field.Email(state.email))
         val passwordError = validationMode.validate(field = Field.Password(state.password))
-        val confirmPasswordError =
-            validationMode.validate(field = Field.ConfirmPassword(state.confirmPassword))
+        val confirmPasswordError = validationMode.validate(field = Field.ConfirmPassword(state.confirmPassword))
 
         _uiState.update {
             it.copy(
@@ -141,7 +143,6 @@ class RegisterViewModel @Inject constructor(
 
         if (hasAnyError) return
 
-        // sign-up flow devamı, api request vb.
         viewModelScope.launch {
             userRepository.register(RegisterRequest(state.email, state.password, state.fullName))
                 .onSuccess { handleSuccessfulRegister(it) }
@@ -183,9 +184,33 @@ class RegisterViewModel @Inject constructor(
         }
 
         _uiState.update { state ->
-            state.copy(
-                generalError = RegisterError(message)
-            )
+            state.copy(generalError = RegisterError(message))
+        }
+    }
+
+    private fun googleLogin(idToken: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isRedirecting = true) }
+
+            userRepository.googleLogin(idToken)
+                .onSuccess { loginData ->
+                    authTokenManager.saveTokens(
+                        AuthModel(
+                            accessToken = loginData.accessToken,
+                            refreshToken = loginData.refreshToken,
+                            userId = loginData.user.id,
+                            email = loginData.user.email,
+                            displayName = loginData.user.displayName,
+                            avatarUrl = loginData.user.avatarUrl,
+                        )
+                    )
+                    handleSuccessfulRegister(loginData)
+                }
+                .onFailure { error ->
+                    Log.e("GOOGLE_LOGIN", "Google login failed", error)
+                    _uiState.update { it.copy(isRedirecting = false) }
+                    _uiEffect.trySend(UiEffect.ShowToast(error.message ?: "Google login error"))
+                }
         }
     }
 
@@ -199,6 +224,9 @@ class RegisterViewModel @Inject constructor(
             sessionPreferences.setExpiresAt(registerResponseData.expiresIn)
             sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
             dataStoreHelper.setUser(registerResponseData.user)
+
+            userRepository.syncPendingFcmToken()
+                .onFailure { Log.d("FCM_SYNC", "syncPendingFcmToken failed: ${it.message}") }
 
             val destination = resolveRedirectDestination()
             if (redirectAfterRegister != null) {
@@ -253,9 +281,7 @@ class RegisterViewModel @Inject constructor(
 
     private fun onFullNameChange(fullName: String) {
         _uiState.update { state ->
-            state.copy(
-                fullName = fullName
-            )
+            state.copy(fullName = fullName)
         }
     }
 
@@ -288,15 +314,12 @@ class RegisterViewModel @Inject constructor(
         fun validate(password: String): RegisterError?
     }
 
-    private val passwordRules: List<PasswordRule> =
-        listOf(
-            MinLengthPasswordRule(minLength = MIN_PASSWORD_LENGTH),
-            ContainsDigitOrSymbolPasswordRule(),
-        )
+    private val passwordRules: List<PasswordRule> = listOf(
+        MinLengthPasswordRule(minLength = MIN_PASSWORD_LENGTH),
+        ContainsDigitOrSymbolPasswordRule(),
+    )
 
-    private class MinLengthPasswordRule(
-        private val minLength: Int,
-    ) : PasswordRule {
+    private class MinLengthPasswordRule(private val minLength: Int) : PasswordRule {
         override fun validate(password: String): RegisterError? {
             return if (password.length >= minLength) {
                 null
@@ -310,7 +333,6 @@ class RegisterViewModel @Inject constructor(
         override fun validate(password: String): RegisterError? {
             val hasDigit = password.any { it.isDigit() }
             val hasSymbol = password.any { !it.isLetterOrDigit() }
-
             return if (hasDigit || hasSymbol) {
                 null
             } else {
@@ -320,15 +342,10 @@ class RegisterViewModel @Inject constructor(
     }
 
     private fun validatePassword(password: String): RegisterError? {
-        if (password.isBlank()) {
-            return null
-        }
-
+        if (password.isBlank()) return null
         for (rule in passwordRules) {
             val error = rule.validate(password)
-            if (error != null) {
-                return error
-            }
+            if (error != null) return error
         }
         return null
     }
@@ -361,7 +378,6 @@ sealed interface ValidationMode {
         private val validatePassword: (String) -> RegisterError?,
         private val validateConfirm: (String, String) -> RegisterError?,
     ) : ValidationMode {
-
         override fun validate(field: Field): RegisterError? {
             return when (field) {
                 is Field.Email -> validateEmail(field.email)
@@ -372,10 +388,7 @@ sealed interface ValidationMode {
     }
 
     data object Pristine : ValidationMode {
-
-        override fun validate(field: Field): RegisterError? {
-            return null
-        }
+        override fun validate(field: Field): RegisterError? = null
     }
 }
 

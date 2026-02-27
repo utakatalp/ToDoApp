@@ -67,6 +67,7 @@ suspend fun <T> handleRequest(
         Result.success(data)
     } catch (t: Throwable) {
         if (t is CancellationException) throw t
+        Log.e("HANDLE_REQUEST", "Original exception: ${t.javaClass.simpleName}: ${t.message}", t)
         Result.failure(DomainException.fromThrowable(t))
     }
 }

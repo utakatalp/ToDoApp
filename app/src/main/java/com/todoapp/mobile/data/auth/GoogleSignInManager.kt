@@ -8,22 +8,18 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.todoapp.mobile.R
-import dagger.hilt.android.qualifiers.ApplicationContext
 import okio.IOException
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GoogleSignInManager @Inject constructor(
-    @ApplicationContext private val context: Context,
-) {
-    private val credentialManager = CredentialManager.create(context)
+object GoogleSignInManager {
 
     suspend fun getGoogleIdToken(activityContext: Context): Result<String> {
         return try {
+            val credentialManager = CredentialManager.create(activityContext)
             val googleIdOption = GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(false)
-                .setServerClientId(context.getString(R.string.default_web_client_id))
+                .setServerClientId(activityContext.getString(R.string.default_web_client_id))
                 .setAutoSelectEnabled(false)
                 .build()
 
