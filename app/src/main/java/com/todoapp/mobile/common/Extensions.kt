@@ -1,6 +1,7 @@
 package com.todoapp.mobile.common
 
 import android.content.Context
+import android.database.sqlite.SQLiteException
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
@@ -53,7 +54,7 @@ suspend fun <T> handleRequest(
                 }
                 ?: response.message()
                 ?: "Something went wrong"
-                Log.d("error", message)
+            Log.d("error", message)
             return Result.failure(DomainException.Server(message))
         }
 
@@ -79,6 +80,8 @@ sealed class DomainException(message: String) : Exception(message) {
 
     class Server(message: String) : DomainException(message)
 
+    class Database(message: String) : DomainException(message)
+
     class Unknown(cause: Throwable) : DomainException(cause.message ?: "Unknown error")
 
     companion object {
@@ -94,6 +97,7 @@ sealed class DomainException(message: String) : Exception(message) {
                     Server("Server error")
                 }
             }
+            is SQLiteException -> Database(t.message ?: "Database error")
             else -> Unknown(t)
         }
     }

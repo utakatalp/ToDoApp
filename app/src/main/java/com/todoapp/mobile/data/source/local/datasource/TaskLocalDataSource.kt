@@ -34,4 +34,10 @@ interface TaskLocalDataSource {
     suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean)
 
     suspend fun getTaskById(id: Long): TaskEntity?
+
+    suspend fun deleteAll()
+
+    suspend fun insertAll(tasks: List<TaskEntity>)
+    suspend fun updateOrderIndex(id: Long, orderIndex: Int)
+    suspend fun updateOrderIndices(orderUpdates: List<Pair<Long, Int>>)
 }

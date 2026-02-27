@@ -13,4 +13,6 @@ interface SessionPreferences {
     suspend fun setExpiresAt(expiresIn: Long)
 
     suspend fun getExpiresAt(): Long?
+
+    suspend fun clear(): Boolean
 }

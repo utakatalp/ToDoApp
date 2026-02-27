@@ -12,17 +12,14 @@ import com.todoapp.mobile.data.auth.GoogleSignInManager
 import com.todoapp.mobile.data.repository.DailyPlanPreferencesImpl
 import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.data.repository.FCMTokenPreferencesImpl
-import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.SecretPreferencesImpl
-import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
 import com.todoapp.mobile.data.source.local.PomodoroDao
 import com.todoapp.mobile.data.source.local.TaskDao
+import com.todoapp.mobile.data.source.local.datasource.GroupDao
 import com.todoapp.mobile.domain.repository.DailyPlanPreferences
 import com.todoapp.mobile.domain.repository.FCMTokenPreferences
-import com.todoapp.mobile.domain.repository.PomodoroRepository
 import com.todoapp.mobile.domain.repository.SecretPreferences
-import com.todoapp.mobile.domain.repository.TaskRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -71,6 +68,13 @@ object LocalStorageModule {
 
     @Provides
     @Singleton
+    fun provideDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<androidx.datastore.preferences.core.Preferences> =
+        context.dataStore
+
+    @Provides
+    @Singleton
     fun provideClock(): Clock = Clock.systemUTC()
 
     @Provides
@@ -79,10 +83,7 @@ object LocalStorageModule {
 
     @Provides
     @Singleton
-    fun provideDataStore(
-        @ApplicationContext context: Context,
-    ): DataStore<androidx.datastore.preferences.core.Preferences> =
-        context.dataStore
+    fun provideGroupDao(database: AppDatabase): GroupDao = database.groupDao()
 
     @Provides
     @Singleton
@@ -102,23 +103,12 @@ object LocalStorageModule {
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class LocalStorageModuleForBindings {
-    @Binds
-    @Singleton
-    abstract fun bindTaskRepository(
-        taskRepositoryImpl: TaskRepositoryImpl,
-    ): TaskRepository
 
     @Binds
     @Singleton
     abstract fun bindSecretModePreferences(
         secretPreferencesImpl: SecretPreferencesImpl,
     ): SecretPreferences
-
-    @Binds
-    @Singleton
-    abstract fun bindPomodoroRepository(
-        pomodoroRepositoryImpl: PomodoroRepositoryImpl,
-    ): PomodoroRepository
 
     @Binds
     @Singleton

@@ -1,4 +1,4 @@
-package com.todoapp.mobile.navigation
+package com.todoapp.mobile.ui.topbar
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,9 +14,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.uikit.R
+import com.todoapp.mobile.LocalNavController
+import com.todoapp.mobile.navigation.AppDestination
+import com.todoapp.mobile.navigation.appDestinationFromRoute
+import com.todoapp.mobile.ui.topbar.TopBarContract.UiAction
 import com.todoapp.uikit.theme.TDTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,9 +58,11 @@ fun TDTopBar(
 
 @Composable
 fun ShowTopBar(
-    navController: NavHostController,
-    isBannerActivated: Boolean
+    isBannerActivated: Boolean,
+    onEvent: (UiAction) -> Unit,
+    uiState: TopBarContract.UiState
 ) {
+    val navController = LocalNavController.current
     val route =
         navController
             .currentBackStackEntryAsState()
@@ -72,13 +77,24 @@ fun ShowTopBar(
         AppDestination.Home ->
             TDTopBarState(
                 title = titleText,
-                onNavigationClick = { navController.navigate(Screen.Settings) },
+                onNavigationClick = { onEvent(UiAction.OnSettingsClick) },
                 navigationIcon = R.drawable.ic_settings,
                 actions =
                     listOf(
+                        if (uiState.isUserAuthenticated) {
+                            TDTopBarAction(
+                                icon = com.todoapp.mobile.R.drawable.ic_logout,
+                                onClick = { onEvent(UiAction.OnLogoutClick) }
+                            )
+                        } else {
+                            TDTopBarAction(
+                                icon = com.todoapp.mobile.R.drawable.ic_person,
+                                onClick = { onEvent(UiAction.OnProfileClick) }
+                            )
+                        },
                         TDTopBarAction(
                             icon = R.drawable.ic_notification,
-                            onClick = { navController.navigate(Screen.Notifications) },
+                            onClick = { onEvent(UiAction.OnNotificationClick) },
                         ),
                     ),
             )
@@ -86,7 +102,7 @@ fun ShowTopBar(
         else -> {
             TDTopBarState(
                 title = titleText,
-                onNavigationClick = { navController.popBackStack() },
+                onNavigationClick = { onEvent(UiAction.OnBackClick) },
                 navigationIcon = R.drawable.ic_arrow_back,
             )
         }
@@ -108,8 +124,7 @@ data class TDTopBarAction(
 )
 
 private fun normalizeRoute(route: String?): String? {
-    val normalizedRoute = route?.substringBefore("/")
-    return normalizedRoute
+    return route?.substringBefore("/")?.substringBefore("?")
 }
 
 @Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, widthDp = 360)

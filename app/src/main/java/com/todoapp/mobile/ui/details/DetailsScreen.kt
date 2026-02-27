@@ -34,10 +34,10 @@ import com.todoapp.mobile.ui.details.DetailsContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
-import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
 import com.todoapp.uikit.components.TDLoadingBar
 import com.todoapp.uikit.components.TDText
+import com.todoapp.uikit.components.TDTextField
 import com.todoapp.uikit.components.TDTimePickerDialog
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
@@ -128,7 +128,6 @@ private fun DetailsSuccessContent(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .systemBarsPadding()
@@ -144,13 +143,14 @@ private fun DetailsSuccessContent(
                     .verticalScroll(verticalScroll),
                 verticalArrangement = Arrangement.Center,
             ) {
-                TDCompactOutlinedTextField(
+                TDTextField(
                     label = stringResource(R.string.task_title),
                     value = uiState.taskTitle,
                     onValueChange = { onAction(UiAction.OnTaskTitleEdit(it)) },
                     isError = uiState.titleError != null,
                     supportingText = uiState.titleError?.let { stringResource(it) },
-                )
+
+                    )
 
                 Spacer(Modifier.height(12.dp))
 
@@ -179,8 +179,7 @@ private fun DetailsSuccessContent(
                     )
                 }
                 Spacer(Modifier.height(12.dp))
-
-                TDCompactOutlinedTextField(
+                TDTextField(
                     label = stringResource(R.string.description),
                     value = uiState.taskDescription,
                     onValueChange = { onAction(UiAction.OnTaskDescriptionEdit(it)) },

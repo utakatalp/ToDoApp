@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>LongParameterList:LoginViewModel.kt$LoginViewModel$( private val userRepository: UserRepository, private val authTokenManager: AuthTokenManager, private val taskRepository: TaskRepository, private val sessionPreferences: SessionPreferences, private val dataStoreHelper: DataStoreHelper, savedStateHandle: SavedStateHandle, @ApplicationContext private val context: Context, )</ID>
+  </CurrentIssues>
+</SmellBaseline>

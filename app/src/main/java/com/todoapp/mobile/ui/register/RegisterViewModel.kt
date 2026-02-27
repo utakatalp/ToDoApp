@@ -2,16 +2,18 @@ package com.todoapp.mobile.ui.register
 
 import android.util.Log
 import android.util.Patterns
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.common.passwordValidation.ValidationManager
 import com.todoapp.mobile.data.auth.AuthModel
 import com.todoapp.mobile.data.auth.AuthTokenManager
+import com.todoapp.mobile.data.model.network.data.AuthResponseData
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
+import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.repository.SessionPreferences
-import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -33,8 +35,11 @@ class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val sessionPreferences: SessionPreferences,
     private val authTokenManager: AuthTokenManager,
-    private val taskRepository: TaskRepository,
+    private val dataStoreHelper: DataStoreHelper,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    private val redirectAfterRegister: String? = savedStateHandle["redirectAfterRegister"]
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -75,7 +80,7 @@ class RegisterViewModel @Inject constructor(
     }
 
     private fun navigateToLogin() {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.Login))
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.Login()))
     }
 
     private fun updateWebViewVisibility(isVisible: Boolean) {
@@ -140,7 +145,7 @@ class RegisterViewModel @Inject constructor(
 
         viewModelScope.launch {
             userRepository.register(RegisterRequest(state.email, state.password, state.fullName))
-                .onSuccess { handleSuccessfulRegister(it.accessToken, it.expiresIn, it.refreshToken) }
+                .onSuccess { handleSuccessfulRegister(it) }
                 .onFailure { throwable ->
                     if (throwable is DomainException.Server) {
                         _uiState.update {
@@ -160,7 +165,7 @@ class RegisterViewModel @Inject constructor(
             setRedirecting(true)
 
             userRepository.facebookLogin(FacebookLoginRequest(token))
-                .onSuccess { handleSuccessfulRegister(it.accessToken, it.expiresIn, it.refreshToken) }
+                .onSuccess { handleSuccessfulRegister(it) }
                 .onFailure { throwable ->
                     Log.d("facebook_login", throwable.message.orEmpty())
                     handleFacebookLoginFailure(throwable)
@@ -199,7 +204,7 @@ class RegisterViewModel @Inject constructor(
                             avatarUrl = loginData.user.avatarUrl,
                         )
                     )
-                    handleSuccessfulRegister(loginData.accessToken, loginData.expiresIn, loginData.refreshToken)
+                    handleSuccessfulRegister(loginData)
                 }
                 .onFailure { error ->
                     Log.e("GOOGLE_LOGIN", "Google login failed", error)
@@ -213,24 +218,36 @@ class RegisterViewModel @Inject constructor(
         _uiState.update { state -> state.copy(isRedirecting = isRedirecting) }
     }
 
-    private fun handleSuccessfulRegister(accessToken: String, expiresIn: Long, refreshToken: String) {
+    private fun handleSuccessfulRegister(registerResponseData: AuthResponseData) {
         viewModelScope.launch {
-            sessionPreferences.setAccessToken(accessToken)
-            sessionPreferences.setExpiresAt(expiresIn)
-            sessionPreferences.setRefreshToken(refreshToken)
+            sessionPreferences.setAccessToken(registerResponseData.accessToken)
+            sessionPreferences.setExpiresAt(registerResponseData.expiresIn)
+            sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
+            dataStoreHelper.setUser(registerResponseData.user)
 
             userRepository.syncPendingFcmToken()
                 .onFailure { Log.d("FCM_SYNC", "syncPendingFcmToken failed: ${it.message}") }
 
-            taskRepository.syncLocalTasksToServer()
-
-            _navEffect.trySend(
-                NavigationEffect.Navigate(
-                    route = Screen.Home,
-                    popUpTo = Screen.Onboarding,
-                    isInclusive = true
+            val destination = resolveRedirectDestination()
+            if (redirectAfterRegister != null) {
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(
+                        route = destination,
+                        popUpTo = Screen.Register(),
+                        isInclusive = true
+                    )
                 )
-            )
+            } else {
+                _navEffect.trySend(NavigationEffect.Navigate(Screen.Home))
+            }
+        }
+    }
+
+    private fun resolveRedirectDestination(): Screen {
+        return when (redirectAfterRegister) {
+            Screen.CreateNewGroup::class.qualifiedName -> Screen.CreateNewGroup(cameFromAuth = true)
+            Screen.Groups::class.qualifiedName -> Screen.Groups
+            else -> Screen.Home
         }
     }
 

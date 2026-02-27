@@ -23,6 +23,8 @@ data class TaskEntity(
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Long = 0L,
+    @ColumnInfo(name = "order_index", defaultValue = "0") val orderIndex: Int = 0,
+
 )
 
 enum class SyncStatus {

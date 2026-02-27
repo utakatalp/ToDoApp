@@ -2,6 +2,7 @@ package com.todoapp.mobile.ui.login
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.R
@@ -9,8 +10,10 @@ import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.common.passwordValidation.ValidationManager
 import com.todoapp.mobile.data.auth.AuthModel
 import com.todoapp.mobile.data.auth.AuthTokenManager
+import com.todoapp.mobile.data.model.network.data.AuthResponseData
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
+import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.repository.SessionPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.UserRepository
@@ -33,10 +36,14 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val authTokenManager: AuthTokenManager,
-    private val sessionPreferences: SessionPreferences,
     private val taskRepository: TaskRepository,
+    private val sessionPreferences: SessionPreferences,
+    private val dataStoreHelper: DataStoreHelper,
+    savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
+
+    private val redirectAfterLogin: String? = savedStateHandle["redirectAfterLogin"]
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -53,7 +60,7 @@ class LoginViewModel @Inject constructor(
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.value)
             UiAction.OnEmailFieldTap -> enableEmailField()
             UiAction.OnFacebookSignInTap -> _uiEffect.trySend(UiEffect.FacebookLogin)
-            UiAction.OnForgotPasswordTap -> {}
+            UiAction.OnForgotPasswordTap -> navigateToForgotPassword()
             is UiAction.OnGoogleSignInTap -> _uiEffect.trySend(UiEffect.GoogleLogin)
             is UiAction.OnGoogleSignInFailed -> _uiEffect.trySend(UiEffect.ShowToast(uiAction.message))
             is UiAction.OnSuccessfulGoogleLogin -> googleLogin(uiAction.token)
@@ -175,7 +182,15 @@ class LoginViewModel @Inject constructor(
             },
             onFailure = { throwable ->
                 _uiState.update { it.copy(isLoading = false) }
-                _uiEffect.trySend(UiEffect.ShowToast(throwable.message.orEmpty()))
+                if (throwable is DomainException.Server) {
+                    _uiState.update {
+                        it.copy(emailError = LoginContract.LoginError(throwable.message ?: "Try again later"))
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(generalError = LoginContract.LoginError(throwable.message ?: "Try again later"))
+                    }
+                }
             }
         )
     }
@@ -183,7 +198,15 @@ class LoginViewModel @Inject constructor(
     private fun navigateToRegister() {
         _navEffect.trySend(
             NavigationEffect.Navigate(
-                route = Screen.Register
+                route = Screen.Register(redirectAfterRegister = redirectAfterLogin)
+            )
+        )
+    }
+
+    private fun navigateToForgotPassword() {
+        _navEffect.trySend(
+            NavigationEffect.Navigate(
+                route = Screen.ForgotPassword
             )
         )
     }
@@ -198,12 +221,32 @@ class LoginViewModel @Inject constructor(
         } else {
             _uiState.update { current ->
                 current.copy(
-                    emailError = emailError,
-                    passwordError = passwordError,
+                    emailError = emailError?.let { LoginContract.LoginError(it) },
+                    passwordError = passwordError?.let { LoginContract.LoginError(it) },
                     isLoading = false,
                     hasSubmittedOnce = true
                 )
             }
+        }
+    }
+
+    private fun handleSuccessfulLogin(loginResponseData: AuthResponseData) {
+        viewModelScope.launch {
+            sessionPreferences.setAccessToken(loginResponseData.accessToken)
+            sessionPreferences.setRefreshToken(loginResponseData.refreshToken)
+            sessionPreferences.setExpiresAt(loginResponseData.expiresIn)
+            dataStoreHelper.setUser(userData = loginResponseData.user)
+
+            val destination = resolveRedirectDestination()
+            _navEffect.trySend(NavigationEffect.Navigate(destination))
+        }
+    }
+
+    private fun resolveRedirectDestination(): Screen {
+        return when (redirectAfterLogin) {
+            Screen.CreateNewGroup::class.qualifiedName -> Screen.CreateNewGroup(cameFromAuth = true)
+            Screen.Groups::class.qualifiedName -> Screen.Groups
+            else -> Screen.Home
         }
     }
 
@@ -212,11 +255,8 @@ class LoginViewModel @Inject constructor(
             current.copy(
                 email = email,
                 emailError = if (current.hasSubmittedOnce) {
-                    if (email.isBlank()) {
-                        ValidationManager.validateEmail(email).toLocalizedError()
-                    } else {
-                        null
-                    }
+                    ValidationManager.validateEmail(email).toLocalizedError()
+                        ?.let { LoginContract.LoginError(it) }
                 } else {
                     null
                 }
@@ -230,6 +270,7 @@ class LoginViewModel @Inject constructor(
                 password = password,
                 passwordError = if (current.hasSubmittedOnce) {
                     ValidationManager.validatePassword(password).toLocalizedError()
+                        ?.let { LoginContract.LoginError(it) }
                 } else {
                     null
                 }
@@ -251,7 +292,10 @@ class LoginViewModel @Inject constructor(
                 context.getString(R.string.error_password_blank)
 
             ValidationManager.ValidationErrors.PASSWORD_MIN_LENGTH ->
-                context.getString(R.string.error_password_min_length, ValidationManager.PasswordRules.MIN_LENGTH)
+                context.getString(
+                    R.string.error_password_min_length,
+                    ValidationManager.PasswordRules.MIN_LENGTH
+                )
 
             else -> this
         }

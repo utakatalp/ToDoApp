@@ -102,6 +102,7 @@ private fun LoginContent(
         Modifier
             .fillMaxSize()
             .imePadding()
+            .navigationBarsPadding()
             .background(color = TDTheme.colors.primary)
             .verticalScroll(verticalScroll),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -164,7 +165,7 @@ private fun LoginContent(
                 label = stringResource(R.string.email_address),
                 onValueChange = { onAction(UiAction.OnEmailChange(it)) },
                 placeholder = stringResource(R.string.email),
-                isError = !uiState.emailError.isNullOrBlank(),
+                isError = uiState.emailError != null,
                 leadingIcon = {
                     Icon(
                         painterResource(R.drawable.ic_mail_white),
@@ -181,11 +182,9 @@ private fun LoginContent(
                     onAction(UiAction.OnEmailFieldTap)
                 }
             )
-            uiState.emailError
-                ?.takeIf { it.isNotBlank() }
-                ?.let { errorText ->
-                    TDText(text = errorText, color = TDTheme.colors.red)
-                }
+            uiState.emailError?.let {
+                TDText(text = it.message, color = TDTheme.colors.red)
+            }
 
             Spacer(Modifier.height(8.dp))
 
@@ -221,7 +220,7 @@ private fun LoginContent(
                 },
                 onValueChange = { onAction(UiAction.OnPasswordChange(it)) },
                 placeholder = stringResource(R.string.password),
-                isError = !uiState.passwordError.isNullOrBlank(),
+                isError = uiState.passwordError != null,
                 leadingIcon = {
                     Icon(
                         painterResource(R.drawable.ic_lock),
@@ -253,11 +252,9 @@ private fun LoginContent(
                     onAction(UiAction.OnPasswordFieldTap)
                 }
             )
-            uiState.passwordError
-                ?.takeIf { it.isNotBlank() }
-                ?.let { errorText ->
-                    TDText(text = errorText, color = TDTheme.colors.red)
-                }
+            uiState.passwordError?.let {
+                TDText(text = it.message, color = TDTheme.colors.red)
+            }
 
             Spacer(Modifier.height(24.dp))
 
