@@ -162,7 +162,8 @@ fun TDLabeledTextField(
     placeholder: String? = null,
     enabled: Boolean = true,
     isError: Boolean = false,
-    singleLine: Boolean = true,
+    singleLine: Boolean = false,
+    minLines: Int = 1,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     style: TextStyle = TDTheme.typography.regularTextStyle,
     color: Color = TDTheme.colors.gray,
@@ -183,10 +184,11 @@ fun TDLabeledTextField(
             enabled = enabled,
             isError = isError,
             singleLine = singleLine,
+            minLines = minLines,
             colors = textFieldColors(),
             visualTransformation = visualTransformation,
             placeholder = {
-                if (placeholder != null) TDText(text = placeholder, color = TDTheme.colors.onBackground)
+                if (placeholder != null) TDText(text = placeholder, color = TDTheme.colors.lightGray)
             },
             textStyle = TDTheme.typography.regularTextStyle,
         )

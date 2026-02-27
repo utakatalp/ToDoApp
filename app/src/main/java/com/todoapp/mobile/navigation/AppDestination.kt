@@ -66,11 +66,21 @@ sealed class AppDestination(
         selectedIcon = R.drawable.ic_selected_groups,
     )
 
+    data object CreateNewGroup : AppDestination(
+        title = R.string.new_group,
+        route = Screen.CreateNewGroup::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
     companion object {
         val bottomBarItems = listOf(Home, Groups, Calendar, Activity)
-        val items = listOf(Home, Calendar, Activity, PomodoroAddTimer, Settings, Task, SecretMode, Groups)
+        val topBarItems = listOf(
+            Home, Calendar, Activity, PomodoroAddTimer, Settings, Task, SecretMode, Groups,
+            CreateNewGroup
+        )
     }
 }
 
 fun bottomBarAppDestinationFromRoute(route: String?) = AppDestination.bottomBarItems.firstOrNull { it.route == route }
-fun appDestinationFromRoute(route: String?) = AppDestination.items.firstOrNull { it.route == route }
+fun appDestinationFromRoute(route: String?) = AppDestination.topBarItems.firstOrNull { it.route == route }

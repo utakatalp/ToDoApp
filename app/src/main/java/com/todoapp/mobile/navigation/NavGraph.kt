@@ -1,5 +1,6 @@
 package com.todoapp.mobile.navigation
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -25,14 +26,19 @@ import com.todoapp.mobile.ui.banner.BannerOverlay
 import com.todoapp.mobile.ui.banner.BannerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
+import com.todoapp.mobile.ui.createnewgroup.CreateNewGroupScreen
+import com.todoapp.mobile.ui.createnewgroup.CreateNewGroupViewModel
 import com.todoapp.mobile.ui.details.DetailsScreen
 import com.todoapp.mobile.ui.details.DetailsViewModel
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordScreen
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordViewModel
+import com.todoapp.mobile.ui.groups.GroupScreen
+import com.todoapp.mobile.ui.groups.GroupsViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
 import com.todoapp.mobile.ui.login.LoginScreen
 import com.todoapp.mobile.ui.login.LoginViewModel
+import com.todoapp.mobile.ui.login.findActivity
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.pomodoro.PomodoroScreen
@@ -203,7 +209,18 @@ fun NavGraph(
             PomodoroFinishScreen(viewModel::onAction)
         }
 
+        composable<Screen.CreateNewGroup> {
+            val viewModel: CreateNewGroupViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            CreateNewGroupScreen(uiState, viewModel::onAction)
+        }
+
         composable<Screen.Groups> {
+            val viewModel: GroupsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            GroupScreen(uiState, viewModel::onAction)
         }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }
@@ -256,11 +273,12 @@ sealed interface NavigationEffect {
 
     data class NavigateClearingBackstack(val route: Screen) : NavigationEffect
     data object Back : NavigationEffect
+    data object SystemBack : NavigationEffect
 }
 
 @Composable
 fun NavigationEffectController(
-    navEffect: Flow<NavigationEffect>
+    navEffect: Flow<NavigationEffect>,
 ) {
     val navController = LocalNavController.current
     navEffect.collectWithLifecycle { effect ->
@@ -283,6 +301,11 @@ fun NavigationEffectController(
                 navController.navigate(effect.route) {
                     popUpTo(0)
                 }
+            }
+
+            NavigationEffect.SystemBack -> {
+                val activity = navController.context.findActivity() as? ComponentActivity
+                activity?.onBackPressedDispatcher?.onBackPressed()
             }
         }
     }

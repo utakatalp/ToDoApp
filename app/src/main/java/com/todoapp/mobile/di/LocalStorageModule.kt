@@ -13,6 +13,7 @@ import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.data.source.local.AppDatabase
 import com.todoapp.mobile.data.source.local.PomodoroDao
 import com.todoapp.mobile.data.source.local.TaskDao
+import com.todoapp.mobile.data.source.local.datasource.GroupDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -60,6 +61,13 @@ object LocalStorageModule {
 
     @Provides
     @Singleton
+    fun provideDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<androidx.datastore.preferences.core.Preferences> =
+        context.dataStore
+
+    @Provides
+    @Singleton
     fun provideClock(): Clock = Clock.systemUTC()
 
     @Provides
@@ -68,10 +76,7 @@ object LocalStorageModule {
 
     @Provides
     @Singleton
-    fun provideDataStore(
-        @ApplicationContext context: Context,
-    ): DataStore<androidx.datastore.preferences.core.Preferences> =
-        context.dataStore
+    fun provideGroupDao(database: AppDatabase): GroupDao = database.groupDao()
 
     @Provides
     @Singleton

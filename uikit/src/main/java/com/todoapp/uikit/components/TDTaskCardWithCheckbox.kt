@@ -85,7 +85,7 @@ private fun TDCheckBox(
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-            modifier
+            modifier.padding(start = 5.dp)
                 .background(TDTheme.colors.onBackground)
                 .clickable(
                     onClick = { onCheckBoxClick(isChecked) },
