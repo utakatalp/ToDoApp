@@ -10,6 +10,7 @@ internal val LocalLightColors = staticCompositionLocalOf { lightColors() }
 internal val LocalDarkColors = staticCompositionLocalOf { darkColors() }
 
 internal fun lightColors(
+    groupBgColor: Color = Color(0xFFF8FAFC),
     infoCardBgColor: Color = Color(0xFFEEF2FF),
     lightRed: Color = Color(0xFFFFE6E7),
     red: Color = Color(0xFFFFB1B5),
@@ -24,7 +25,7 @@ internal fun lightColors(
     primary: Color = Color(0xFF4566EC),
     onPrimary: Color = Color(0xFFFFFAF0),
     lightPurple: Color = Color(0xFFA9BAFF),
-    gray: Color = Color(0xFF717171),
+    gray: Color = Color(0xFFF3F4F6),
     darkPurple: Color = Color(0xFF1C3082),
     purple: Color = Color(0xFF4566EC),
     black: Color = Color(0xFF090E23),
@@ -36,11 +37,12 @@ internal fun lightColors(
     beige: Color = Color(0xFFE6DCCD),
     lightOrange: Color = Color(0xFFFFE2CD),
     lightYellow: Color = Color(0xFFCDBC2A),
-    white: Color = Color(0xFFFFFAF0),
+    white: Color = Color(0xFFFFFFFF),
     softPink: Color = Color(0xFFF5D3BB),
     lightGray: Color = Color(0xFFC0C0C0),
 ): TDColor =
     TDColor(
+        groupBgColor = groupBgColor,
         infoCardBgColor = infoCardBgColor,
         lightRed = lightRed,
         red = red,
@@ -73,6 +75,7 @@ internal fun lightColors(
     )
 
 internal fun darkColors(
+    groupBgColor: Color = Color(0xFFF8FAFC),
     infoCardBgColor: Color = Color(0xFFEEF2FF),
     lightRed: Color = Color(0xFF7A1F2B),
     red: Color = Color(0xFFFFB1B5),
@@ -99,11 +102,12 @@ internal fun darkColors(
     beige: Color = Color(0xFFE6DCCD),
     lightOrange: Color = Color(0xFFFFE2CD),
     lightYellow: Color = Color(0xFFFFF5E0),
-    white: Color = Color(0xFFFFFAF0),
+    white: Color = Color(0xFFFFFFFF),
     softPink: Color = Color(0xFFF5D3BB),
     lightGray: Color = Color(0xFFC0C0C0),
 ): TDColor =
     TDColor(
+        groupBgColor = groupBgColor,
         infoCardBgColor = infoCardBgColor,
         lightRed = lightRed,
         red = red,
@@ -136,6 +140,7 @@ internal fun darkColors(
     )
 
 class TDColor(
+    groupBgColor: Color,
     infoCardBgColor: Color,
     lightRed: Color,
     red: Color,
@@ -166,6 +171,9 @@ class TDColor(
     softPink: Color,
     lightGray: Color,
 ) {
+
+    private var _groupBgColor: Color by mutableStateOf(groupBgColor)
+    val groupBgColor: Color = _groupBgColor
     private var _infoCardBgColor: Color by mutableStateOf(infoCardBgColor)
     val infoCardBgColor: Color = _infoCardBgColor
     private var _lightRed: Color by mutableStateOf(lightRed)

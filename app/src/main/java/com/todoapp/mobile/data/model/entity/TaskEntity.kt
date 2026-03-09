@@ -15,6 +15,19 @@ data class TaskEntity(
     @ColumnInfo(name = "is_secret") val isSecret: Boolean = false,
     @ColumnInfo(name = "remote_id") val remoteId: Long? = null,
 
+    // --- Remote user fields (flattened from TaskUserData) ---
+    @ColumnInfo(name = "created_by_user_id") val createdByUserId: Long? = null,
+    @ColumnInfo(name = "created_by_display_name") val createdByDisplayName: String? = null,
+
+    @ColumnInfo(name = "assigned_to_user_id") val assignedToUserId: Long? = null,
+    @ColumnInfo(name = "assigned_to_display_name") val assignedToDisplayName: String? = null,
+
+    @ColumnInfo(name = "completed_by_user_id") val completedByUserId: Long? = null,
+    @ColumnInfo(name = "completed_by_display_name") val completedByDisplayName: String? = null,
+
+    // --- Remote timestamps ---
+    @ColumnInfo(name = "created_at", defaultValue = "0") val createdAt: Long = 0L,
+
     @ColumnInfo(
         name = "sync_status",
         defaultValue = "PENDING_CREATE"
@@ -24,6 +37,7 @@ data class TaskEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Long = 0L,
     @ColumnInfo(name = "order_index", defaultValue = "0") val orderIndex: Int = 0,
+    @ColumnInfo(name = "family_group_id") val familyGroupId: Long? = null,
 
 )
 

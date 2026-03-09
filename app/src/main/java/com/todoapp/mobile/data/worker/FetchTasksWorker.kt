@@ -1,11 +1,12 @@
 package com.todoapp.mobile.data.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.todoapp.mobile.common.DomainException
-import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.repository.personal.PersonalTaskRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -13,17 +14,36 @@ import dagger.assisted.AssistedInject
 class FetchTasksWorker @AssistedInject constructor(
     @Assisted ctx: Context,
     @Assisted params: WorkerParameters,
-    private val taskRepository: TaskRepository
+    private val taskRepository: PersonalTaskRepository
 ) : CoroutineWorker(ctx, params) {
+    companion object {
+        private const val TAG = "FetchTasksWorker"
+    }
+
     override suspend fun doWork(): Result {
-        return taskRepository.syncRemoteTasksWithLocal()
+        Log.d(TAG, "doWork: started, id=$id, runAttemptCount=$runAttemptCount")
+
+        return taskRepository.syncRemoteTasksToLocal()
             .fold(
-                onSuccess = { Result.success() },
+                onSuccess = {
+                    Log.d(TAG, "doWork: syncRemoteTasksWithLocal SUCCESS")
+                    Result.success()
+                },
                 onFailure = { throwable ->
+                    Log.e(TAG, "doWork: syncRemoteTasksWithLocal FAILED", throwable)
                     when (throwable) {
-                        is DomainException.NoInternet,
-                        is DomainException.Server -> Result.retry()
-                        else -> Result.failure()
+                        is DomainException.NoInternet -> {
+                            Log.d(TAG, "doWork: NoInternet -> RETRY")
+                            Result.retry()
+                        }
+                        is DomainException.Server -> {
+                            Log.d(TAG, "doWork: Server error -> RETRY")
+                            Result.retry()
+                        }
+                        else -> {
+                            Log.d(TAG, "doWork: Unknown error -> FAILURE")
+                            Result.failure()
+                        }
                     }
                 }
             )

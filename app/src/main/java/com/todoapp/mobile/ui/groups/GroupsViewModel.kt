@@ -1,9 +1,10 @@
 package com.todoapp.mobile.ui.groups
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.todoapp.mobile.data.model.network.data.FamilyGroupSummaryData
-import com.todoapp.mobile.domain.repository.FamilyGroupRepository
+import com.todoapp.mobile.data.model.network.data.GroupSummaryData
+import com.todoapp.mobile.domain.repository.group.GroupManagementRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.groups.GroupsContract.UiState
@@ -18,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GroupsViewModel @Inject constructor(
-    private val familyGroupRepository: FamilyGroupRepository
+    private val groupManagementRepository: GroupManagementRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -29,6 +30,9 @@ class GroupsViewModel @Inject constructor(
 
     init {
         loadFamilyGroups()
+        viewModelScope.launch {
+            groupManagementRepository.updateGroupSummaries()
+        }
     }
 
     fun onAction(action: GroupsContract.UiAction) {
@@ -38,36 +42,32 @@ class GroupsViewModel @Inject constructor(
             )
             is GroupsContract.UiAction.OnDeleteGroupTap -> {
                 viewModelScope.launch {
-                    familyGroupRepository.deleteFamilyGroup(action.id)
-                        .onSuccess {
-                            loadFamilyGroups()
-                        }
+                    groupManagementRepository.deleteGroup(action.id)
                 }
             }
 
             is GroupsContract.UiAction.OnGroupTap -> {
-                } // grup detayına gidecek...
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(Screen.GroupDetails.Overview(action.id.toString()))
+                )
+            }
         }
     }
 
     private fun loadFamilyGroups() {
         viewModelScope.launch {
-            familyGroupRepository
-                .getFamilyGroups()
-                .onSuccess { result ->
-                    if (result.count > 0) {
-                        _uiState.update { UiState.Success(groups = result.familyGroups.map { it.toUiItem() }) }
-                    } else {
-                        _uiState.update { UiState.Empty }
-                    }
-                }
-                .onFailure {
+            groupManagementRepository.observeGroupSummaries().collect { data ->
+                Log.d("GroupsViewModel", "loadFamilyGroups: $data")
+                if (data.isNotEmpty()) {
+                    _uiState.update { UiState.Success(groups = data.map { it.toUiItem() }) }
+                } else {
                     _uiState.update { UiState.Empty }
                 }
+            }
         }
     }
 
-    private fun FamilyGroupSummaryData.toUiItem() = GroupsContract.GroupUiItem(
+    private fun GroupSummaryData.toUiItem() = GroupsContract.GroupUiItem(
         id = id,
         name = name,
         role = role,

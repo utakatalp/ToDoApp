@@ -2,7 +2,7 @@ package com.todoapp.mobile.ui.activity
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.repository.personal.PersonalTaskRepository
 import com.todoapp.mobile.ui.activity.ActivityContract.UiAction
 import com.todoapp.mobile.ui.activity.ActivityContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ActivityViewModel @Inject constructor(
-    private val taskRepository: TaskRepository,
+    private val taskRepository: PersonalTaskRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
@@ -44,7 +44,7 @@ class ActivityViewModel @Inject constructor(
             delay(LOADING_DELAY)
             combine(
                 taskRepository.observePendingTasksInAWeek(date),
-                taskRepository.countCompletedTasksInAWeek(date),
+                taskRepository.observeCompletedTasksInAWeek(date),
                 taskRepository.observeCompletedCountsByDayInAWeek(date),
                 taskRepository.observePendingTasksYearToDate(date),
                 taskRepository.countCompletedTasksYearToDate(date)

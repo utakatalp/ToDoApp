@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "fbad5c0bdcf40d38360c9f050f7926dc",
+    "identityHash": "f9ac37bd52dcfc2595cc9e5f29e6e5ff",
     "entities": [
       {
         "tableName": "tasks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`title` TEXT NOT NULL, `description` TEXT, `date` INTEGER NOT NULL, `time_start` INTEGER NOT NULL, `time_end` INTEGER NOT NULL, `is_completed` INTEGER NOT NULL, `is_secret` INTEGER NOT NULL, `remote_id` INTEGER, `sync_status` TEXT NOT NULL DEFAULT 'PENDING_CREATE', `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `order_index` INTEGER NOT NULL DEFAULT 0)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`title` TEXT NOT NULL, `description` TEXT, `date` INTEGER NOT NULL, `time_start` INTEGER NOT NULL, `time_end` INTEGER NOT NULL, `is_completed` INTEGER NOT NULL, `is_secret` INTEGER NOT NULL, `remote_id` INTEGER, `created_by_user_id` INTEGER, `created_by_display_name` TEXT, `assigned_to_user_id` INTEGER, `assigned_to_display_name` TEXT, `completed_by_user_id` INTEGER, `completed_by_display_name` TEXT, `created_at` INTEGER NOT NULL DEFAULT 0, `sync_status` TEXT NOT NULL DEFAULT 'PENDING_CREATE', `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `order_index` INTEGER NOT NULL DEFAULT 0, `family_group_id` INTEGER)",
         "fields": [
           {
             "fieldPath": "title",
@@ -55,6 +55,43 @@
             "affinity": "INTEGER"
           },
           {
+            "fieldPath": "createdByUserId",
+            "columnName": "created_by_user_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createdByDisplayName",
+            "columnName": "created_by_display_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "assignedToUserId",
+            "columnName": "assigned_to_user_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "assignedToDisplayName",
+            "columnName": "assigned_to_display_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "completedByUserId",
+            "columnName": "completed_by_user_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "completedByDisplayName",
+            "columnName": "completed_by_display_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
             "fieldPath": "syncStatus",
             "columnName": "sync_status",
             "affinity": "TEXT",
@@ -73,6 +110,11 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
+          },
+          {
+            "fieldPath": "familyGroupId",
+            "columnName": "family_group_id",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -133,7 +175,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fbad5c0bdcf40d38360c9f050f7926dc')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f9ac37bd52dcfc2595cc9e5f29e6e5ff')"
     ]
   }
 }

@@ -9,7 +9,7 @@ object HomeContract {
         data object Loading : UiState
         data class Success(
             val selectedDate: LocalDate,
-            val tasks: List<Task>,
+            val tasks: List<Task.Personal>,
             val completedTaskCountThisWeek: Int,
             val pendingTaskCountThisWeek: Int,
             val dialogSelectedDate: LocalDate?,
@@ -37,7 +37,7 @@ object HomeContract {
     sealed interface UiAction {
         data class OnDateSelect(val date: LocalDate) : UiAction
         data object OnDialogDateDeselect : UiAction
-        data class OnTaskCheck(val task: Task) : UiAction
+        data class OnTaskCheck(val task: Task.Personal) : UiAction
         data class OnTaskTitleChange(val title: String) : UiAction
         data class OnTaskTimeStartChange(val time: LocalTime) : UiAction
         data class OnTaskTimeEndChange(val time: LocalTime) : UiAction
@@ -46,7 +46,7 @@ object HomeContract {
         data object OnShowBottomSheet : UiAction
         data object OnDismissBottomSheet : UiAction
         data object OnTaskCreate : UiAction
-        data class OnTaskLongPress(val task: Task) : UiAction
+        data class OnTaskLongPress(val task: Task.Personal) : UiAction
         data object OnDeleteDialogDismiss : UiAction
         data object OnDeleteDialogConfirm : UiAction
         data object OnRetry : UiAction
@@ -59,7 +59,7 @@ object HomeContract {
         data object OnPomodoroTap : UiAction
         data object OnToggleAdvancedSettings : UiAction
         data class OnTaskSecretChange(val isSecret: Boolean) : UiAction
-        data class OnTaskClick(val task: Task) : UiAction
+        data class OnTaskClick(val task: Task.Personal) : UiAction
         data object OnSuccessfulBiometricAuthenticationHandle : UiAction
     }
 

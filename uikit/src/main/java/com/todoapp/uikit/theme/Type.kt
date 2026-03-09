@@ -217,4 +217,32 @@ class TDTypography {
                     ),
                 color = TDTheme.colors.brown,
             )
+    val number: TextStyle
+        @Composable
+        get() =
+            TextStyle(
+                fontFamily = Poppins,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeightStyle =
+                    LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.None,
+                    ),
+                color = TDTheme.colors.brown,
+            )
+    val cardText: TextStyle
+        @Composable
+        get() =
+            TextStyle(
+                fontFamily = Poppins,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                lineHeightStyle =
+                    LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.None,
+                    ),
+                color = TDTheme.colors.brown,
+            )
 }

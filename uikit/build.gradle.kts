@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.compose.testing)
     debugImplementation(libs.androidx.ui.tooling)
     detektPlugins(libs.detekt.formatting)
 }

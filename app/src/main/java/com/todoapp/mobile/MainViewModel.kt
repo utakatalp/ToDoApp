@@ -8,8 +8,9 @@ import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.AuthEvent
 import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.SessionPreferences
-import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.UserRepository
+import com.todoapp.mobile.domain.repository.group.GroupManagementRepository
+import com.todoapp.mobile.domain.repository.personal.PersonalTaskRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,10 +23,11 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val sessionPreferences: SessionPreferences,
-    private val taskRepository: TaskRepository,
+    private val taskRepository: PersonalTaskRepository,
     private val dataStoreHelper: DataStoreHelper,
     private val userRepository: UserRepository,
     private val pomodoroEngine: PomodoroEngine,
+    private val groupManagementRepository: GroupManagementRepository,
 ) : ViewModel() {
 
     private val _uiEffect = Channel<UiEffect>()
@@ -72,6 +74,7 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun clearLocalSession() {
+        groupManagementRepository.clearGroups()
         sessionPreferences.clear()
         taskRepository.deleteAllTasks()
         pomodoroEngine.finish()
@@ -81,6 +84,6 @@ class MainViewModel @Inject constructor(
     private suspend fun refreshUserCache() {
         userRepository.getUserInfo()
             .onSuccess { dataStoreHelper.setUser(it) }
-            .onFailure { dataStoreHelper.clearUser() }
+            .onFailure { }
     }
 }

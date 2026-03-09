@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.maskTitle
 import com.todoapp.mobile.domain.model.Task
-import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.repository.personal.PersonalTaskRepository
 import com.todoapp.mobile.ui.calendar.CalendarContract.UiAction
 import com.todoapp.mobile.ui.calendar.CalendarContract.UiState
 import com.todoapp.uikit.components.TaskCardItem
@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
-    private val taskRepository: TaskRepository,
+    private val taskRepository: PersonalTaskRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Success())
     val uiState = _uiState.asStateFlow()
@@ -77,7 +77,7 @@ class CalendarViewModel @Inject constructor(
     private fun observeTasks(
         startDate: LocalDate?,
         endDate: LocalDate?,
-    ): Flow<List<Task>> = when {
+    ): Flow<List<Task.Personal>> = when {
         startDate == null && endDate == null -> flowOf(emptyList())
         startDate != null && endDate == null -> taskRepository.observeTasksByDate(startDate)
         startDate == null && endDate != null -> taskRepository.observeTasksByDate(endDate)

@@ -1,5 +1,6 @@
 package com.todoapp.mobile.navigation
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -31,6 +32,8 @@ import com.todoapp.mobile.ui.details.DetailsScreen
 import com.todoapp.mobile.ui.details.DetailsViewModel
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordScreen
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordViewModel
+import com.todoapp.mobile.ui.groupdetails.GroupDetailsScreen
+import com.todoapp.mobile.ui.groupdetails.GroupDetailsViewModel
 import com.todoapp.mobile.ui.groups.GroupScreen
 import com.todoapp.mobile.ui.groups.GroupsViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
@@ -45,6 +48,8 @@ import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishScreen
 import com.todoapp.mobile.ui.pomoodorofinish.PomodoroFinishViewModel
 import com.todoapp.mobile.ui.register.RegisterScreen
 import com.todoapp.mobile.ui.register.RegisterViewModel
+import com.todoapp.mobile.ui.secondarytopbar.TDSecondaryTopBar
+import com.todoapp.mobile.ui.secondarytopbar.rememberShowSecondaryTopBar
 import com.todoapp.mobile.ui.settings.SecretModeSettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsScreen
 import com.todoapp.mobile.ui.settings.SettingsViewModel
@@ -220,6 +225,18 @@ fun NavGraph(
             NavigationEffectController(viewModel.navEffect)
             GroupScreen(uiState, viewModel::onAction)
         }
+
+        composable<Screen.GroupDetails.Overview> {
+            val viewModel: GroupDetailsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            GroupDetailsScreen(uiState, viewModel::onAction)
+        }
+
+        composable<Screen.GroupDetails.Members> {
+        }
+        composable<Screen.GroupDetails.Activity> {
+        }
         composable<Screen.Search> { }
         composable<Screen.Profile> { }
     }
@@ -231,6 +248,7 @@ fun ToDoApp() {
     val bannerState by bannerViewModel.uiState.collectAsStateWithLifecycle()
     val topBarViewModel: TopBarViewModel = hiltViewModel()
     val topBarState by topBarViewModel.uiState.collectAsStateWithLifecycle()
+    val showSecondaryTopBar = rememberShowSecondaryTopBar()
 
     Scaffold(
         modifier =
@@ -248,6 +266,11 @@ fun ToDoApp() {
                 NavigationEffectController(bannerViewModel.navEffect)
                 ShowTopBar(bannerState.isBannerActivated, topBarViewModel::onAction, topBarState)
                 NavigationEffectController(topBarViewModel.navEffect)
+                Log.d("showSecondary", showSecondaryTopBar.toString())
+                if (showSecondaryTopBar) {
+                    // şimdilik placeholder
+                    TDSecondaryTopBar()
+                }
             }
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),

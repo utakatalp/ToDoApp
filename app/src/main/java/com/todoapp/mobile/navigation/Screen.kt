@@ -59,4 +59,17 @@ interface Screen {
 
     @Serializable
     data object CreateNewGroup : Screen
+
+    @Serializable
+    sealed class GroupDetails : Screen {
+
+        @Serializable
+        data class Overview(val groupId: String) : GroupDetails()
+
+        @Serializable
+        data class Members(val groupId: String) : GroupDetails()
+
+        @Serializable
+        data class Activity(val groupId: String) : GroupDetails()
+    }
 }

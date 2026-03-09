@@ -4,14 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.move
-import com.todoapp.mobile.domain.alarm.AlarmScheduler
-import com.todoapp.mobile.domain.alarm.AlarmType
+import com.todoapp.mobile.data.model.network.request.TaskRequest
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.model.Task
-import com.todoapp.mobile.domain.model.toAlarmItem
 import com.todoapp.mobile.domain.repository.SecretPreferences
-import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.TaskSyncRepository
+import com.todoapp.mobile.domain.repository.personal.PersonalTaskRepository
 import com.todoapp.mobile.domain.security.SecretModeConditionFactory
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.navigation.NavigationEffect
@@ -38,15 +36,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val taskRepository: TaskRepository,
+    // private val personalTaskRepository: PersonalTaskRepository,
+    private val taskRepository: PersonalTaskRepository,
     private val taskSyncRepository: TaskSyncRepository,
     private val secretModePreferences: SecretPreferences,
-    private val alarmScheduler: AlarmScheduler,
     private val pomodoroEngine: PomodoroEngine,
 ) : ViewModel() {
 
     private data class DailyData(
-        val tasks: List<Task>,
+        val tasks: List<Task.Personal>,
         val pendingTaskCountThisWeek: Int,
         val completedTaskCountThisWeek: Int,
     )
@@ -60,7 +58,7 @@ class HomeViewModel @Inject constructor(
     private val _navEffect by lazy { Channel<NavigationEffect>() }
     val navEffect by lazy { _navEffect.receiveAsFlow() }
 
-    private lateinit var selectedTask: Task
+    private lateinit var selectedTask: Task.Personal
     private var fetchJob: Job? = null
 
     init {
@@ -139,19 +137,24 @@ class HomeViewModel @Inject constructor(
             combine(
                 taskRepository.observeTasksByDate(date),
                 taskRepository.observePendingTasksInAWeek(date),
-                taskRepository.countCompletedTasksInAWeek(date)
+                taskRepository.observeCompletedTasksInAWeek(date)
             ) { tasks, pendingTaskCount, completedTaskCount ->
                 DailyData(tasks, pendingTaskCount, completedTaskCount)
             }.collect { data ->
                 _uiState.update { current ->
                     when (current) {
-                        is UiState.Success -> current.copy(
-                            tasks = data.tasks,
-                            pendingTaskCountThisWeek = data.pendingTaskCountThisWeek,
-                            completedTaskCountThisWeek = data.completedTaskCountThisWeek
-                        )
-
-                        else -> createInitialState(date, data)
+                        is UiState.Success -> {
+                            Log.d("HomeViewModel", "fetchDailyTask: updating existing Success state")
+                            current.copy(
+                                tasks = data.tasks,
+                                pendingTaskCountThisWeek = data.pendingTaskCountThisWeek,
+                                completedTaskCountThisWeek = data.completedTaskCountThisWeek
+                            )
+                        }
+                        else -> {
+                            Log.d("HomeViewModel", "fetchDailyTask: creating initial Success state")
+                            createInitialState(date, data)
+                        }
                     }
                 }
             }
@@ -163,7 +166,7 @@ class HomeViewModel @Inject constructor(
         tasks = data.tasks,
         completedTaskCountThisWeek = data.completedTaskCountThisWeek,
         pendingTaskCountThisWeek = data.pendingTaskCountThisWeek,
-        dialogSelectedDate = null,
+        dialogSelectedDate = date,
         taskTitle = "",
         taskTimeStart = null,
         taskTimeEnd = null,
@@ -190,20 +193,20 @@ class HomeViewModel @Inject constructor(
         if (!validateTaskForm(currentState)) return
 
         viewModelScope.launch {
-            val task = Task(
+            val taskRequest = TaskRequest(
                 title = currentState.taskTitle,
                 description = currentState.taskDescription,
-                date = currentState.dialogSelectedDate!!,
-                timeStart = currentState.taskTimeStart!!,
-                timeEnd = currentState.taskTimeEnd!!,
+                date = currentState.taskDate.toEpochDay(),
+                timeStart = currentState.taskTimeStart!!.toSecondOfDay(),
+                timeEnd = currentState.taskTimeEnd!!.toSecondOfDay(),
                 isCompleted = false,
-                isSecret = currentState.isTaskSecret
+                isSecret = currentState.isTaskSecret,
             )
-            taskRepository.insert(task)
-            scheduleTaskReminders(task)
-            clearTaskForm()
-            dismissBottomSheet()
+
+            taskRepository.createTask(taskRequest)
         }
+        clearTaskForm()
+        dismissBottomSheet()
     }
 
     private fun checkTask(uiAction: UiAction.OnTaskCheck) {
@@ -215,8 +218,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun deleteTask(task: Task) {
-        viewModelScope.launch { taskRepository.delete(task) }
+    private fun deleteTask(task: Task.Personal) {
+        viewModelScope.launch { taskRepository.deleteTask(task) }
     }
 
     private fun updateTaskIndices(uiAction: UiAction.OnMoveTask) {
@@ -232,7 +235,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             taskRepository
                 .reorderTasksForDate(
-                    date = currentState.selectedDate,
+                    dateEpochDay = currentState.selectedDate.toEpochDay(),
                     fromIndex = uiAction.from,
                     toIndex = uiAction.to,
                 )
@@ -321,18 +324,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun scheduleTaskReminders(
-        task: Task,
-        remindBeforeMinutes: List<Long> = DEFAULT_REMINDER_MINUTES,
-    ) {
-        remindBeforeMinutes.forEach { minutes ->
-            alarmScheduler.schedule(
-                task.toAlarmItem(remindBeforeMinutes = minutes),
-                type = AlarmType.TASK
-            )
-        }
-    }
-
     private fun showTransientError(
         durationMs: Long = 2000L,
         setFlag: (UiState.Success, Boolean) -> UiState.Success,
@@ -364,7 +355,7 @@ class HomeViewModel @Inject constructor(
         updateSuccessState { it.copy(isDeleteDialogOpen = false) }
     }
 
-    private fun openTaskDetail(task: Task) {
+    private fun openTaskDetail(task: Task.Personal) {
         selectedTask = task
 
         if (!task.isSecret) {
@@ -405,7 +396,6 @@ class HomeViewModel @Inject constructor(
     }
 
     companion object {
-        private val DEFAULT_REMINDER_MINUTES = listOf(0L, 1L, 2L, 5L, 10L)
         private const val LOADING_DELAY = 200L
     }
 }

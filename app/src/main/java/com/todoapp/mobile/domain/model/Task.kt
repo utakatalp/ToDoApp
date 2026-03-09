@@ -1,51 +1,67 @@
 package com.todoapp.mobile.domain.model
 
-import com.todoapp.mobile.data.model.network.data.TaskData
-import com.todoapp.mobile.data.model.network.request.TaskRequest
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 
-data class Task(
-    val id: Long = 0L,
-    val title: String,
-    val description: String?,
-    val date: LocalDate,
-    val timeStart: LocalTime,
-    val timeEnd: LocalTime,
-    val isCompleted: Boolean,
-    val isSecret: Boolean
-)
-
-fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem {
-    return AlarmItem(
-        time = LocalDateTime.of(date, timeStart.minusMinutes(remindBeforeMinutes)),
-        message = title,
-        minutesBefore = remindBeforeMinutes,
-    )
-}
-
-fun Task.toCreateTaskRequestDto(): TaskRequest {
-    return TaskRequest(
-        title = title,
-        description = description,
-        date = date.toEpochDay(),
-        timeStart = timeStart.toSecondOfDay().toLong(),
-        timeEnd = timeEnd.toSecondOfDay().toLong(),
-        isCompleted = isCompleted,
-        isSecret = isSecret,
-    )
-}
-
-fun TaskData.toDomain(): Task {
-    return Task(
+sealed class Task(
+    open val id: Long,
+    open val title: String,
+    open val description: String?,
+    open val date: LocalDate,
+    open val timeStart: LocalTime,
+    open val timeEnd: LocalTime,
+    open val isCompleted: Boolean,
+    open val isSecret: Boolean,
+    open val orderIndex: Int,
+) {
+    data class Personal(
+        override val id: Long,
+        override val title: String,
+        override val description: String?,
+        override val date: LocalDate,
+        override val timeStart: LocalTime,
+        override val timeEnd: LocalTime,
+        override val isCompleted: Boolean,
+        override val isSecret: Boolean,
+        override val orderIndex: Int,
+    ) : Task(
         id = id,
         title = title,
         description = description,
-        date = LocalDate.ofEpochDay(date),
-        timeStart = LocalTime.ofSecondOfDay(timeStart),
-        timeEnd = LocalTime.ofSecondOfDay(timeEnd),
+        date = date,
+        timeStart = timeStart,
+        timeEnd = timeEnd,
         isCompleted = isCompleted,
         isSecret = isSecret,
+        orderIndex = orderIndex
+    )
+
+    data class Group(
+        override val id: Long,
+        override val title: String,
+        override val description: String?,
+        override val date: LocalDate,
+        override val timeStart: LocalTime,
+        override val timeEnd: LocalTime,
+        override val isCompleted: Boolean,
+        override val isSecret: Boolean,
+        override val orderIndex: Int,
+        val groupId: Long,
+        val assignedToUserId: Long,
+        val assignedToDisplayName: String,
+        val createdByUserId: Long,
+        val createdByDisplayName: String,
+        val completedByUserId: Long?,
+        val completedByDisplayName: String?,
+    ) : Task(
+        id = id,
+        title = title,
+        description = description,
+        date = date,
+        timeStart = timeStart,
+        timeEnd = timeEnd,
+        isCompleted = isCompleted,
+        isSecret = isSecret,
+        orderIndex = orderIndex
     )
 }

@@ -100,9 +100,6 @@
     <string name="error_email_invalid">Invalid email address</string>
     <string name="error_password_blank">Password cannot be blank</string>
     <string name="error_password_min_length">Password must be at least %1$d characters long</string>
-    <string name="facebook_app_id">909034501717310</string>
-    <string name="fb_login_protocol_scheme">fb909034501717310</string>
-    <string name="facebook_client_token">eae8e9d82cc25dfc659ef2cf8892171b</string>
     <string name="forgot_password">Forgot Password</string>
     <string name="recover_access">Recover Access</string>
     <string name="enter_your_email_address_and_we_will_send_you_a_link_to_reset_your_password">Enter your email address and we will send you a link to reset your password.</string>
@@ -132,5 +129,9 @@
     <string name="create_a_group_to_start_collaborating_on">Create a group to start collaborating on</string>
     <string name="tasks_with_your_family">tasks with your family.</string>
     <string name="create_new_group">Create New Group</string>
+    <string name="group_details">Group Details</string>
+    <string name="activity">Activity</string>
+    <string name="members">Members</string>
+    <string name="overview">Overview</string>
 
 </resources>

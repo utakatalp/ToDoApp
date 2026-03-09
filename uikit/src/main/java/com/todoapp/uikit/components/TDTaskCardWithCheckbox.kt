@@ -77,7 +77,7 @@ fun TDTaskCardWithCheckbox(
 }
 
 @Composable
-private fun TDCheckBox(
+fun TDCheckBox(
     modifier: Modifier = Modifier,
     isChecked: Boolean,
     onCheckBoxClick: (Boolean) -> Unit,

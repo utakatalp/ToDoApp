@@ -319,9 +319,9 @@ fun TDDatePickerSingleInput(
                             text = currentDate.dayOfMonth.toString(),
                             color =
                                 when {
-                                    !isFromCurrentMonth -> TDTheme.colors.gray.copy(alpha = 0.35f)
+                                    !isFromCurrentMonth -> TDTheme.colors.gray.copy(alpha = 0.8f)
                                     isSelected -> Color.White
-                                    else -> TDTheme.colors.gray
+                                    else -> TDTheme.colors.black
                                 },
                             style = TDTheme.typography.subheading4,
                         )

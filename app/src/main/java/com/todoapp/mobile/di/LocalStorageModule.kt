@@ -88,4 +88,28 @@ object LocalStorageModule {
     fun provideAuthTokensManager(
         dataStoreHelper: DataStoreHelper
     ): AuthTokenManager = AuthTokenManager(dataStoreHelper)
+
+    @Provides
+    @Singleton
+    fun providePersonalTaskDao(database: AppDatabase) = database.personalTaskDao()
+
+    @Provides
+    @Singleton
+    fun provideGroupTaskDao(database: AppDatabase) = database.groupTaskDao()
+
+    @Provides
+    @Singleton
+    fun provideGroupDao(database: AppDatabase) = database.groupDao()
+
+    @Provides
+    @Singleton
+    fun provideUserGroupDao(database: AppDatabase) = database.userGroupDao()
+
+    @Provides
+    @Singleton
+    fun provideGroupSummaryDao(database: AppDatabase) = database.groupSummaryDao()
+
+    @Provides
+    @Singleton
+    fun provideUserDao(database: AppDatabase) = database.userDao()
 }

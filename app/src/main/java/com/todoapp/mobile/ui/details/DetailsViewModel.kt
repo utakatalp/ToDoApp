@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.model.Task
-import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.repository.personal.PersonalTaskRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.ui.details.DetailsContract.UiAction
 import com.todoapp.mobile.ui.details.DetailsContract.UiEffect
@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DetailsViewModel @Inject constructor(
-    private val taskRepository: TaskRepository,
+    private val taskRepository: PersonalTaskRepository,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -39,7 +39,7 @@ class DetailsViewModel @Inject constructor(
     private val _navEffect by lazy { Channel<NavigationEffect>() }
     val navEffect by lazy { _navEffect.receiveAsFlow() }
 
-    private var originalTask: Task? = null
+    private var originalTask: Task.Personal? = null
     private var currentTaskId: Long? = null
 
     init {
@@ -153,7 +153,7 @@ class DetailsViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                taskRepository.update(updatedTask)
+                taskRepository.updateTask(updatedTask)
                 onSaveSuccess(updatedTask)
             } catch (e: IOException) {
                 Log.e("EditViewModel", "Failed to save changes", e)
@@ -188,7 +188,7 @@ class DetailsViewModel @Inject constructor(
         _uiEffect.trySend(UiEffect.ShowToast(R.string.changes_cancelled))
     }
 
-    private suspend fun onSaveSuccess(updatedTask: Task) {
+    private suspend fun onSaveSuccess(updatedTask: Task.Personal) {
         originalTask = updatedTask
         updateSuccessState { it.copy(isDirty = false) }
         _uiEffect.send(UiEffect.ShowToast(R.string.changes_saved))
@@ -217,7 +217,7 @@ class DetailsViewModel @Inject constructor(
         _navEffect.trySend(NavigationEffect.Back)
     }
 
-    private fun buildUpdatedTask(current: UiState.Success, existingTask: Task): Task {
+    private fun buildUpdatedTask(current: UiState.Success, existingTask: Task.Personal): Task.Personal {
         return existingTask.copy(
             title = current.taskTitle,
             description = current.taskDescription.ifBlank { null },

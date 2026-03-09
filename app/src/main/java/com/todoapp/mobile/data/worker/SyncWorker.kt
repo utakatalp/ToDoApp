@@ -6,7 +6,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.todoapp.mobile.common.DomainException
-import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.repository.personal.PersonalTaskRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -14,7 +14,7 @@ import dagger.assisted.AssistedInject
 class SyncWorker @AssistedInject constructor(
     @Assisted ctx: Context,
     @Assisted params: WorkerParameters,
-    private val taskRepository: TaskRepository
+    private val taskRepository: PersonalTaskRepository
 ) : CoroutineWorker(ctx, params) {
 
     override suspend fun doWork(): Result {

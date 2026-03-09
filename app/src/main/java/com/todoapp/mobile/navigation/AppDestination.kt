@@ -73,11 +73,39 @@ sealed class AppDestination(
         selectedIcon = null,
     )
 
+    data object GroupDetails : AppDestination(
+        title = R.string.group_details,
+        route = Screen.GroupDetails::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object GroupDetailsOverView : AppDestination(
+        title = R.string.group_details,
+        route = Screen.GroupDetails.Overview::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object GroupDetailsActivity : AppDestination(
+        title = R.string.group_details,
+        route = Screen.GroupDetails.Activity::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object GroupDetailsMembers : AppDestination(
+        title = R.string.group_details,
+        route = Screen.GroupDetails.Members::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
     companion object {
         val bottomBarItems = listOf(Home, Groups, Calendar, Activity)
         val topBarItems = listOf(
             Home, Calendar, Activity, PomodoroAddTimer, Settings, Task, SecretMode, Groups,
-            CreateNewGroup
+            CreateNewGroup, GroupDetails, GroupDetailsActivity, GroupDetailsMembers, GroupDetailsOverView
         )
     }
 }

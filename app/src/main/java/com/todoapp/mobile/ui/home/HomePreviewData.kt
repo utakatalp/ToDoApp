@@ -11,7 +11,7 @@ object HomePreviewData {
 
     fun successState(
         selectedDate: LocalDate = LocalDate.now(),
-        tasks: List<Task> = emptyList(),
+        tasks: List<Task.Personal> = emptyList(),
         completedTaskCountThisWeek: Int = 0,
         pendingTaskCountThisWeek: Int = 0,
         dialogSelectedDate: LocalDate? = null,
@@ -49,8 +49,8 @@ object HomePreviewData {
         isDateError = isDateError,
     )
 
-    val sampleTasks = listOf(
-        Task(
+    val sampleTasks: List<Task.Personal> = listOf(
+        Task.Personal(
             id = 1L,
             title = "Design the main screen",
             description = "Draft layout & components",
@@ -59,8 +59,9 @@ object HomePreviewData {
             timeEnd = LocalTime.of(10, 15),
             isCompleted = false,
             isSecret = false,
+            orderIndex = 0,
         ),
-        Task(
+        Task.Personal(
             id = 2L,
             title = "Develop the API client",
             description = "Retrofit + serialization setup",
@@ -68,9 +69,10 @@ object HomePreviewData {
             timeStart = LocalTime.of(11, 0),
             timeEnd = LocalTime.of(12, 0),
             isCompleted = true,
-            isSecret = false
+            isSecret = false,
+            orderIndex = 1,
         ),
-        Task(
+        Task.Personal(
             id = 3L,
             title = "Fix the login bug",
             description = null,
@@ -78,7 +80,8 @@ object HomePreviewData {
             timeStart = LocalTime.of(14, 0),
             timeEnd = LocalTime.of(14, 30),
             isCompleted = false,
-            isSecret = false
+            isSecret = false,
+            orderIndex = 2,
         ),
     )
 }

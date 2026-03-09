@@ -1,0 +1,389 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 6,
+    "identityHash": "5cd58ce56246726fad0960cee3302e50",
+    "entities": [
+      {
+        "tableName": "tasks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`title` TEXT NOT NULL, `description` TEXT, `date` INTEGER NOT NULL, `time_start` INTEGER NOT NULL, `time_end` INTEGER NOT NULL, `is_completed` INTEGER NOT NULL, `is_secret` INTEGER NOT NULL, `remote_id` INTEGER, `created_by_user_id` INTEGER, `created_by_display_name` TEXT, `assigned_to_user_id` INTEGER, `assigned_to_display_name` TEXT, `completed_by_user_id` INTEGER, `completed_by_display_name` TEXT, `created_at` INTEGER NOT NULL DEFAULT 0, `sync_status` TEXT NOT NULL DEFAULT 'PENDING_CREATE', `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `order_index` INTEGER NOT NULL DEFAULT 0, `family_group_id` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeStart",
+            "columnName": "time_start",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEnd",
+            "columnName": "time_end",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCompleted",
+            "columnName": "is_completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSecret",
+            "columnName": "is_secret",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteId",
+            "columnName": "remote_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createdByUserId",
+            "columnName": "created_by_user_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createdByDisplayName",
+            "columnName": "created_by_display_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "assignedToUserId",
+            "columnName": "assigned_to_user_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "assignedToDisplayName",
+            "columnName": "assigned_to_display_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "completedByUserId",
+            "columnName": "completed_by_user_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "completedByDisplayName",
+            "columnName": "completed_by_display_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'PENDING_CREATE'"
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orderIndex",
+            "columnName": "order_index",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "familyGroupId",
+            "columnName": "family_group_id",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "pomodoro",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_count` INTEGER NOT NULL, `focus_time` INTEGER NOT NULL, `short_break` INTEGER NOT NULL, `long_break` INTEGER NOT NULL, `section_count` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionCount",
+            "columnName": "session_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "focusTime",
+            "columnName": "focus_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shortBreak",
+            "columnName": "short_break",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longBreak",
+            "columnName": "long_break",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sectionCount",
+            "columnName": "section_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "personal_tasks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `remote_id` INTEGER, `title` TEXT NOT NULL, `description` TEXT, `date` INTEGER NOT NULL, `time_start` INTEGER NOT NULL, `time_end` INTEGER NOT NULL, `is_completed` INTEGER NOT NULL, `is_secret` INTEGER NOT NULL, `created_at` INTEGER NOT NULL DEFAULT 0, `order_index` INTEGER NOT NULL DEFAULT 0, `sync_status` TEXT NOT NULL DEFAULT 'PENDING_CREATE')",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteId",
+            "columnName": "remote_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeStart",
+            "columnName": "time_start",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEnd",
+            "columnName": "time_end",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCompleted",
+            "columnName": "is_completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSecret",
+            "columnName": "is_secret",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "orderIndex",
+            "columnName": "order_index",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'PENDING_CREATE'"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "group_tasks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `remote_id` INTEGER, `group_id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `date` INTEGER NOT NULL, `time_start` INTEGER NOT NULL, `time_end` INTEGER NOT NULL, `is_completed` INTEGER NOT NULL, `is_secret` INTEGER NOT NULL, `created_by_user_id` INTEGER NOT NULL, `created_by_display_name` TEXT NOT NULL, `assigned_to_user_id` INTEGER, `assigned_to_display_name` TEXT, `completed_by_user_id` INTEGER, `completed_by_display_name` TEXT, `created_at` INTEGER NOT NULL DEFAULT 0, `order_index` INTEGER NOT NULL DEFAULT 0, `sync_status` TEXT NOT NULL DEFAULT 'PENDING_CREATE')",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteId",
+            "columnName": "remote_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "groupId",
+            "columnName": "group_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeStart",
+            "columnName": "time_start",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEnd",
+            "columnName": "time_end",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCompleted",
+            "columnName": "is_completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSecret",
+            "columnName": "is_secret",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdByUserId",
+            "columnName": "created_by_user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdByDisplayName",
+            "columnName": "created_by_display_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assignedToUserId",
+            "columnName": "assigned_to_user_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "assignedToDisplayName",
+            "columnName": "assigned_to_display_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "completedByUserId",
+            "columnName": "completed_by_user_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "completedByDisplayName",
+            "columnName": "completed_by_display_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "orderIndex",
+            "columnName": "order_index",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'PENDING_CREATE'"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5cd58ce56246726fad0960cee3302e50')"
+    ]
+  }
+}
