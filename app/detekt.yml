@@ -4,6 +4,10 @@ config:
   excludes: ''
 
 complexity:
+  LongParameterList:
+    active: true
+    constructorThreshold: 12
+    functionThreshold: 12
   LongMethod:
     active: true
     threshold: 62
@@ -13,6 +17,7 @@ complexity:
     active: true
     thresholdInClasses: 30
     thresholdInInterfaces: 30
+    thresholdInObjects: 30
     ignoreAnnotated:
       - HiltViewModel
     ignorePrivate: true
