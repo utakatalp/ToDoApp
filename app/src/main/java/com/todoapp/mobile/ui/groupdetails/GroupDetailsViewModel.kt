@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -64,8 +65,8 @@ class GroupDetailsViewModel @Inject constructor(
 
     fun onAction(action: UiAction) {
         when (action) {
-            UiAction.OnAllTap -> _assignedToMeChecked.value = false
-            UiAction.OnAssignedToMeTap -> _assignedToMeChecked.value = true
+            UiAction.OnAllTap -> _assignedToMeChecked.update { false }
+            UiAction.OnAssignedToMeTap -> _assignedToMeChecked.update { true }
             is UiAction.OnTaskCardTap -> TODO()
             is UiAction.OnTaskCheckboxTap -> TODO()
             is UiAction.OnTaskLongPress -> TODO()
@@ -111,7 +112,7 @@ class GroupDetailsViewModel @Inject constructor(
         emitAll(taskRepository.observeTasks(groupId))
     }
 
-    fun filterTasks(userId: Long, list: List<Task.Group>): List<Task.Group> {
+    private fun filterTasks(userId: Long, list: List<Task.Group>): List<Task.Group> {
         val filteredList = list.filter {
             it.assignedToUserId == userId
         }

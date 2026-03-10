@@ -49,4 +49,32 @@ class GroupTaskLocalDataSourceImpl @Inject constructor(
     override suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity? {
         return groupTaskDao.getByRemoteId(remoteId)
     }
+
+    override fun filterTasks(
+        groupId: Long,
+        userId: Long
+    ): Flow<List<Task.Group>> {
+        return groupTaskDao.filterTasks(groupId, userId).map { entities ->
+            entities.map {
+                Task.Group(
+                    id = it.id,
+                    title = it.title,
+                    description = it.description,
+                    date = LocalDate.ofEpochDay(it.date),
+                    timeStart = LocalTime.ofSecondOfDay(it.timeStart.toLong()),
+                    timeEnd = LocalTime.ofSecondOfDay(it.timeEnd.toLong()),
+                    isCompleted = it.isCompleted,
+                    isSecret = it.isSecret,
+                    groupId = it.groupId,
+                    orderIndex = it.orderIndex,
+                    createdByUserId = it.createdByUserId,
+                    createdByDisplayName = it.createdByDisplayName,
+                    assignedToUserId = it.assignedToUserId!!,
+                    assignedToDisplayName = it.assignedToDisplayName!!,
+                    completedByUserId = it.completedByUserId,
+                    completedByDisplayName = it.completedByDisplayName,
+                )
+            }
+        }
+    }
 }

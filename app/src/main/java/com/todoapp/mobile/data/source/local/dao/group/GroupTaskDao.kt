@@ -20,4 +20,7 @@ interface GroupTaskDao {
 
     @Query("SELECT * FROM group_tasks WHERE remote_id = :remoteId")
     suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity?
+
+    @Query("SELECT * FROM group_tasks WHERE group_id = :groupId AND assigned_to_user_id = :userId")
+    fun filterTasks(groupId: Long, userId: Long): Flow<List<GroupTaskEntity>>
 }

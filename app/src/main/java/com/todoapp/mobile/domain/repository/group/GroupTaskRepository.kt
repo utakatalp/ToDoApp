@@ -10,5 +10,7 @@ interface GroupTaskRepository {
 
     fun observeTasks(groupId: Long): Flow<List<Task.Group>>
 
+    fun filterTasks(groupId: Long, userId: Long): Flow<List<Task.Group>>
+
     suspend fun syncRemoteTasksToLocal(groupId: Long): Result<Unit>
 }

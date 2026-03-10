@@ -40,6 +40,13 @@ class GroupTaskRepositoryImpl @Inject constructor(
         return groupTaskLocalDataSource.observeTasks(groupId)
     }
 
+    override fun filterTasks(
+        groupId: Long,
+        userId: Long
+    ): Flow<List<Task.Group>> {
+        return groupTaskLocalDataSource.filterTasks(groupId, userId)
+    }
+
     override suspend fun syncRemoteTasksToLocal(groupId: Long): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val remoteTasks = groupTaskRemoteDataSource.getTasks(groupId).getOrThrow()
