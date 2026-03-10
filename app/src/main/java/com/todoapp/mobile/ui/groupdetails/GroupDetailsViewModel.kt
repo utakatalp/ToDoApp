@@ -39,9 +39,11 @@ class GroupDetailsViewModel @Inject constructor(
     private val _navEffect = Channel<NavigationEffect>()
     val navEffect = _navEffect.receiveAsFlow()
 
-    // UI filter selection (Assigned-to-me toggle)
     private val _assignedToMeChecked = MutableStateFlow(false)
     val assignedToMeChecked: StateFlow<Boolean> = _assignedToMeChecked.asStateFlow()
+
+    val groupId: Long =
+        checkNotNull(savedStateHandle.get<String>("groupId")).toLong()
 
     val userId: StateFlow<Long?> =
         dataStoreHelper.observeUser()
@@ -51,12 +53,6 @@ class GroupDetailsViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = null
             )
-    val groupId: Long =
-        checkNotNull(savedStateHandle.get<String>("groupId")).toLong()
-
-    private fun observeTasksFlow(groupId: Long): Flow<List<Task.Group>> = flow {
-        emitAll(taskRepository.observeTasks(groupId))
-    }
 
     val tasks: StateFlow<List<Task.Group>> =
         observeTasksFlow(groupId)
@@ -65,6 +61,17 @@ class GroupDetailsViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = emptyList()
             )
+
+    fun onAction(action: UiAction) {
+        when (action) {
+            UiAction.OnAllTap -> _assignedToMeChecked.value = false
+            UiAction.OnAssignedToMeTap -> _assignedToMeChecked.value = true
+            is UiAction.OnTaskCardTap -> TODO()
+            is UiAction.OnTaskCheckboxTap -> TODO()
+            is UiAction.OnTaskLongPress -> TODO()
+            is UiAction.OnAddTaskTap -> TODO()
+        }
+    }
 
     init {
         viewModelScope.launch {
@@ -100,15 +107,8 @@ class GroupDetailsViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: UiAction) {
-        when (action) {
-            UiAction.OnAllTap -> _assignedToMeChecked.value = false
-            UiAction.OnAssignedToMeTap -> _assignedToMeChecked.value = true
-            is UiAction.OnTaskCardTap -> TODO()
-            is UiAction.OnTaskCheckboxTap -> TODO()
-            is UiAction.OnTaskLongPress -> TODO()
-            is UiAction.OnAddTaskTap -> TODO()
-        }
+    private fun observeTasksFlow(groupId: Long): Flow<List<Task.Group>> = flow {
+        emitAll(taskRepository.observeTasks(groupId))
     }
 
     fun filterTasks(userId: Long, list: List<Task.Group>): List<Task.Group> {
