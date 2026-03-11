@@ -18,7 +18,7 @@ import java.time.LocalTime
 fun Task.Personal.toEntity(orderIndex: Int): PersonalTaskEntity {
     return PersonalTaskEntity(
         id = id,
-        remoteId = null,
+        remoteId = remoteId,
         title = title,
         description = description,
         date = date.toEpochDay(),
@@ -35,7 +35,7 @@ fun Task.Personal.toEntity(orderIndex: Int): PersonalTaskEntity {
 fun Task.Group.toEntity(orderIndex: Int): GroupTaskEntity {
     return GroupTaskEntity(
         id = id,
-        remoteId = null,
+        remoteId = remoteId,
         title = title,
         description = description,
         date = date.toEpochDay(),
@@ -196,6 +196,7 @@ fun PersonalTaskData.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED, orderI
 fun PersonalTaskEntity.toTaskPersonal(): Task.Personal {
     return Task.Personal(
         id = id,
+        remoteId = remoteId,
         title = title,
         description = description,
         date = LocalDate.ofEpochDay(date),

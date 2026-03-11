@@ -17,12 +17,14 @@ import com.todoapp.mobile.data.model.network.request.RefreshTokenRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.data.model.network.request.TaskRequest
 import com.todoapp.mobile.data.model.network.request.TaskUpdateRequest
+import com.todoapp.mobile.data.model.network.request.ToggleTaskCompletionRequest
 import com.todoapp.mobile.data.model.network.request.UpdateGroupRequest
 import com.todoapp.mobile.data.model.network.response.BaseResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -105,6 +107,11 @@ interface ToDoApi {
         @Path("userId") userId: Long,
         @Path("groupId") groupId: Long
     ): Response<BaseResponse<Boolean?>>
+
+    @PATCH("tasks/complete")
+    suspend fun toggleTaskCompletion(
+        @Body request: ToggleTaskCompletionRequest
+    ): Response<BaseResponse<TaskData?>>
 }
 
 interface TodoAuthApi {

@@ -21,6 +21,7 @@ class GroupTaskRepositoryImpl @Inject constructor(
     companion object {
         private const val TAG = "GroupTaskRepository"
     }
+
     override suspend fun createTask(task: Task.Group): Result<GroupTaskData> {
         val orderIndex = groupTaskLocalDataSource.getTaskCount(task.groupId)
 
@@ -28,12 +29,12 @@ class GroupTaskRepositoryImpl @Inject constructor(
 
         return result
             .onSuccess {
-            groupTaskLocalDataSource.insert(it.toEntity(groupId = task.groupId, orderIndex = orderIndex))
-            return Result.success(it)
-        }.onFailure {
-            groupTaskLocalDataSource.insert(task.toEntity(orderIndex))
-            return Result.failure(it)
-        }
+                groupTaskLocalDataSource.insert(it.toEntity(groupId = task.groupId, orderIndex = orderIndex))
+                return Result.success(it)
+            }.onFailure {
+                groupTaskLocalDataSource.insert(task.toEntity(orderIndex))
+                return Result.failure(it)
+            }
     }
 
     override fun observeTasks(groupId: Long): Flow<List<Task.Group>> {
@@ -72,5 +73,46 @@ class GroupTaskRepositoryImpl @Inject constructor(
                 Result.failure(DomainException.fromThrowable(t))
             },
         )
+    }
+
+    override suspend fun updateTaskCompletion(taskId: Long): Result<Unit> {
+        Log.d(TAG, "updateTaskCompletion() called with taskId=$taskId")
+
+        return groupTaskRemoteDataSource.updateTaskCompletion(taskId)
+            .fold(
+                onSuccess = { response ->
+                    Log.d(TAG, "updateTaskCompletion() remote success, response=$response")
+                    val isCompleted = response!!.isCompleted
+                    Log.d(TAG, "updateTaskCompletion() parsed isCompleted=$isCompleted for taskId=$taskId")
+                    groupTaskLocalDataSource.updateTaskCompletion(taskId, isCompleted)
+                    Log.d(TAG, "updateTaskCompletion() local update done for taskId=$taskId")
+                    Result.success(Unit)
+                },
+                onFailure = { throwable ->
+                    Log.e(TAG, "updateTaskCompletion() failed for taskId=$taskId", throwable)
+                    Result.failure(DomainException.fromThrowable(throwable))
+                },
+            )
+    }
+
+    override suspend fun deleteTask(taskId: Long, taskRemoteId: Long?): Result<Unit> {
+        Log.d(TAG, "deleteTask() called with taskId=$taskId")
+        if (taskRemoteId != null) {
+            return groupTaskRemoteDataSource.deleteTask(taskRemoteId).fold(
+                onSuccess = {
+                    Log.d(TAG, "deleteTask() remote success for taskId=$taskRemoteId")
+                    groupTaskLocalDataSource.deleteTask(taskId)
+                    Log.d(TAG, "deleteTask() local delete done for taskId=$taskId")
+                    Result.success(Unit)
+                },
+                onFailure = { throwable ->
+                    Log.e(TAG, "deleteTask() failed for taskId=$taskId", throwable)
+                    Result.failure(DomainException.fromThrowable(throwable))
+                },
+            )
+        }
+        groupTaskLocalDataSource.deleteTask(taskId)
+        Log.d(TAG, "deleteTask() local delete done for taskId=$taskId")
+        return Result.failure(DomainException.Server("Task remote id is null"))
     }
 }

@@ -64,7 +64,6 @@ private fun GroupDetailsContent(
             text = "Organizing our chaotic but lovely life. Chores, grocery lists, and family events go here! ❤",
             color = TDTheme.colors.lightGray,
             modifier = Modifier.fillMaxWidth(),
-            // overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
@@ -119,7 +118,7 @@ private fun GroupDetailsContent(
             itemsIndexed(
                 items = uiState.groupTasks,
                 key = { _, task -> task.id }
-            ) { index, task ->
+            ) { _, task ->
                 TDGroupTaskCard(
                     taskTitle = task.title,
                     taskDescription = task.description,
@@ -128,7 +127,8 @@ private fun GroupDetailsContent(
                     date = task.date.toString(),
                     timeStart = task.timeStart.toString(),
                     timeEnd = task.timeEnd.toString(),
-                    onCheckboxClick = { onAction(GroupDetailsContract.UiAction.OnTaskCheckboxTap(task)) }
+                    onCheckboxClick = { onAction(GroupDetailsContract.UiAction.OnTaskCheckboxTap(task)) },
+                    onLongPress = { onAction(GroupDetailsContract.UiAction.OnTaskLongPress(task)) }
                 )
             }
         }
@@ -214,6 +214,7 @@ private fun GroupDetailsSuccessPreview() {
                 groupTasks = listOf(
                     Task.Group(
                         id = 1,
+                        remoteId = 1,
                         title = "Prepare presentation",
                         description = "Prepare slides for Monday meeting",
                         date = LocalDate.of(2026, 2, 18),
@@ -232,8 +233,9 @@ private fun GroupDetailsSuccessPreview() {
                     ),
                     Task.Group(
                         id = 2,
+                        remoteId = 2,
                         title = "Review PR",
-                        description = "asdasd",
+                        description = "damn",
                         date = LocalDate.of(2026, 2, 19),
                         timeStart = LocalTime.of(14, 0),
                         timeEnd = LocalTime.of(15, 0),

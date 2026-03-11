@@ -27,7 +27,18 @@ class GroupRemoteDataSourceImpl @Inject constructor(
         return handleRequest { todoApi.deleteGroup(id) }
     }
 
+    override suspend fun updateTaskCompletion(
+        taskId: Long,
+        isCompleted: Boolean
+    ): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getGroupByRemoteId(remoteId: Long): Result<GroupData> {
         return handleRequest { todoApi.getGroupDetails(remoteId) }
+    }
+
+    override suspend fun deleteTask(id: Long): Result<Unit> {
+        return handleRequest { todoApi.deleteGroup(id) }
     }
 }

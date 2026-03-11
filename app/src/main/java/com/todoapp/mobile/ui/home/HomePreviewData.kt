@@ -52,6 +52,7 @@ object HomePreviewData {
     val sampleTasks: List<Task.Personal> = listOf(
         Task.Personal(
             id = 1L,
+            remoteId = 2,
             title = "Design the main screen",
             description = "Draft layout & components",
             date = LocalDate.now(),
@@ -63,6 +64,7 @@ object HomePreviewData {
         ),
         Task.Personal(
             id = 2L,
+            remoteId = 2,
             title = "Develop the API client",
             description = "Retrofit + serialization setup",
             date = LocalDate.now().minusDays(1),
@@ -74,6 +76,7 @@ object HomePreviewData {
         ),
         Task.Personal(
             id = 3L,
+            remoteId = 2,
             title = "Fix the login bug",
             description = null,
             date = LocalDate.now(),

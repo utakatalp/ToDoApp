@@ -4,6 +4,7 @@ import com.todoapp.mobile.common.handleRequest
 import com.todoapp.mobile.data.model.network.data.GroupTaskData
 import com.todoapp.mobile.data.model.network.data.toGroupTaskData
 import com.todoapp.mobile.data.model.network.request.TaskRequest
+import com.todoapp.mobile.data.model.network.request.ToggleTaskCompletionRequest
 import com.todoapp.mobile.data.source.remote.api.ToDoApi
 import javax.inject.Inject
 
@@ -22,11 +23,28 @@ class GroupTaskRemoteDataSourceImpl @Inject constructor(private val todoApi: ToD
             onSuccess = { list ->
                 Result.success(
                     list.tasks.map { item ->
-                    item.toGroupTaskData()
-                }
+                        item.toGroupTaskData()
+                    }
                 )
             },
             onFailure = { Result.failure(it) }
         )
+    }
+
+    override suspend fun updateTaskCompletion(taskId: Long): Result<GroupTaskData?> {
+        return handleRequest {
+            todoApi.toggleTaskCompletion(ToggleTaskCompletionRequest(taskId))
+        }.fold(
+            onSuccess = {
+                Result.success(it.toGroupTaskData())
+            },
+            onFailure = {
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun deleteTask(taskId: Long): Result<Unit> {
+        return handleRequest { todoApi.deleteTask(taskId) }
     }
 }

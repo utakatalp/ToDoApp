@@ -23,4 +23,10 @@ interface GroupTaskDao {
 
     @Query("SELECT * FROM group_tasks WHERE group_id = :groupId AND assigned_to_user_id = :userId")
     fun filterTasks(groupId: Long, userId: Long): Flow<List<GroupTaskEntity>>
+
+    @Query("UPDATE group_tasks SET is_completed = :isCompleted WHERE remote_id = :taskId")
+    suspend fun updateTaskCompletion(taskId: Long, isCompleted: Boolean)
+
+    @Query("DELETE FROM group_tasks WHERE id = :taskId")
+    suspend fun deleteTask(taskId: Long)
 }

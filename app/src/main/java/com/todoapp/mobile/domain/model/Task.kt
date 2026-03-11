@@ -5,6 +5,7 @@ import java.time.LocalTime
 
 sealed class Task(
     open val id: Long,
+    open val remoteId: Long?,
     open val title: String,
     open val description: String?,
     open val date: LocalDate,
@@ -16,6 +17,7 @@ sealed class Task(
 ) {
     data class Personal(
         override val id: Long,
+        override val remoteId: Long?,
         override val title: String,
         override val description: String?,
         override val date: LocalDate,
@@ -26,6 +28,7 @@ sealed class Task(
         override val orderIndex: Int,
     ) : Task(
         id = id,
+        remoteId = remoteId,
         title = title,
         description = description,
         date = date,
@@ -38,6 +41,7 @@ sealed class Task(
 
     data class Group(
         override val id: Long,
+        override val remoteId: Long?,
         override val title: String,
         override val description: String?,
         override val date: LocalDate,
@@ -55,6 +59,7 @@ sealed class Task(
         val completedByDisplayName: String?,
     ) : Task(
         id = id,
+        remoteId = remoteId,
         title = title,
         description = description,
         date = date,

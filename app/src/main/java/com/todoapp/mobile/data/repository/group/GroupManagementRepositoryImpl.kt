@@ -247,6 +247,15 @@ class GroupManagementRepositoryImpl @Inject constructor(
         return Result.success(Unit)
     }
 
+    override suspend fun updateTaskCompletion(
+        taskId: Long,
+        isCompleted: Boolean
+    ): Result<Unit> {
+        groupRemoteDataSource.updateTaskCompletion(taskId, isCompleted)
+
+        return Result.success(Unit)
+    }
+
     private suspend fun fetchRemoteGroupOrNull(groupId: Long) =
         groupRemoteDataSource.getGroupByRemoteId(groupId).fold(
             onSuccess = { it },

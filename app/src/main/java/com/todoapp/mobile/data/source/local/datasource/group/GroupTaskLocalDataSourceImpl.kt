@@ -22,6 +22,7 @@ class GroupTaskLocalDataSourceImpl @Inject constructor(
             entities.map {
                 Task.Group(
                     id = it.id,
+                    remoteId = it.remoteId,
                     title = it.title,
                     description = it.description,
                     date = LocalDate.ofEpochDay(it.date),
@@ -58,6 +59,7 @@ class GroupTaskLocalDataSourceImpl @Inject constructor(
             entities.map {
                 Task.Group(
                     id = it.id,
+                    remoteId = it.remoteId,
                     title = it.title,
                     description = it.description,
                     date = LocalDate.ofEpochDay(it.date),
@@ -76,5 +78,18 @@ class GroupTaskLocalDataSourceImpl @Inject constructor(
                 )
             }
         }
+    }
+
+    override suspend fun updateTaskCompletion(
+        taskId: Long,
+        isCompleted: Boolean
+    ): Result<Unit> {
+        groupTaskDao.updateTaskCompletion(taskId, isCompleted)
+        return Result.success(Unit)
+    }
+
+    override suspend fun deleteTask(taskId: Long): Result<Unit> {
+        groupTaskDao.deleteTask(taskId)
+        return Result.success(Unit)
     }
 }

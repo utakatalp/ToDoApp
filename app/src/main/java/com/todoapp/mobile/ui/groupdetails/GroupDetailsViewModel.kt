@@ -18,8 +18,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -32,7 +30,7 @@ class GroupDetailsViewModel @Inject constructor(
     private val taskRepository: GroupTaskRepository,
     private val groupManagementRepository: GroupManagementRepository,
     savedStateHandle: SavedStateHandle,
-    private val dataStoreHelper: DataStoreHelper,
+    dataStoreHelper: DataStoreHelper,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
@@ -67,10 +65,18 @@ class GroupDetailsViewModel @Inject constructor(
         when (action) {
             UiAction.OnAllTap -> _assignedToMeChecked.update { false }
             UiAction.OnAssignedToMeTap -> _assignedToMeChecked.update { true }
-            is UiAction.OnTaskCardTap -> TODO()
-            is UiAction.OnTaskCheckboxTap -> TODO()
-            is UiAction.OnTaskLongPress -> TODO()
-            is UiAction.OnAddTaskTap -> TODO()
+            is UiAction.OnTaskCardTap -> TODO() // task detail
+            is UiAction.OnTaskCheckboxTap -> {
+                viewModelScope.launch {
+                    taskRepository.updateTaskCompletion(action.task.id)
+                }
+            }
+            is UiAction.OnTaskLongPress -> {
+                viewModelScope.launch {
+                    taskRepository.deleteTask(action.task.id, action.task.remoteId)
+                }
+            }
+            is UiAction.OnAddTaskTap -> TODO() // task ekleme ekranı daha yok
         }
     }
 
@@ -86,6 +92,10 @@ class GroupDetailsViewModel @Inject constructor(
                 assignedToMeChecked,
             ) { tasks, memberCount, userId, assignedToMeChecked ->
 
+                if (tasks.isEmpty()) {
+                    _uiState.value = UiState.Empty(groupId)
+                    return@combine UiState.Empty(groupId)
+                }
                 val visibleTasks = if (assignedToMeChecked) {
                     userId?.let { id -> filterTasks(id, tasks) } ?: emptyList()
                 } else {
@@ -108,9 +118,7 @@ class GroupDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun observeTasksFlow(groupId: Long): Flow<List<Task.Group>> = flow {
-        emitAll(taskRepository.observeTasks(groupId))
-    }
+    private fun observeTasksFlow(groupId: Long): Flow<List<Task.Group>> = taskRepository.observeTasks(groupId)
 
     private fun filterTasks(userId: Long, list: List<Task.Group>): List<Task.Group> {
         val filteredList = list.filter {

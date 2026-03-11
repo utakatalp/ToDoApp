@@ -1,6 +1,7 @@
 package com.todoapp.uikit.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,7 @@ fun TDGroupTaskCard(
     timeEnd: String,
     date: String,
     onCheckboxClick: () -> Unit,
+    onLongPress: () -> Unit,
 ) {
     val initial = assignedTo.first().uppercaseChar()
     var backGroundColor = TDTheme.colors.background
@@ -48,7 +50,11 @@ fun TDGroupTaskCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .combinedClickable(
+                onClick = {},
+                onLongClick = onLongPress
+            ),
         shape = RoundedCornerShape(25.dp)
     ) {
         Row(
@@ -132,7 +138,8 @@ private fun TDGroupTaskCardPreview_NotCompleted() {
             timeStart = "09:00",
             timeEnd = "10:00",
             date = "19 Feb 2026",
-            onCheckboxClick = {}
+            onCheckboxClick = {},
+            onLongPress = {}
         )
     }
 }
@@ -149,7 +156,8 @@ private fun TDGroupTaskCardPreview_Completed() {
             timeStart = "07:00",
             timeEnd = "08:00",
             date = "18 Feb 2026",
-            onCheckboxClick = {}
+            onCheckboxClick = {},
+            onLongPress = {}
         )
     }
 }

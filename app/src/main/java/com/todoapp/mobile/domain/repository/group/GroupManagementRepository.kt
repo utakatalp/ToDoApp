@@ -21,4 +21,6 @@ interface GroupManagementRepository {
     suspend fun deleteMember(userEntity: UserEntity): Result<Boolean>
     suspend fun syncGroupDetails(groupId: Long): Result<Unit>
     suspend fun clearGroups(): Result<Unit>
+
+    suspend fun updateTaskCompletion(taskId: Long, isCompleted: Boolean): Result<Unit>
 }

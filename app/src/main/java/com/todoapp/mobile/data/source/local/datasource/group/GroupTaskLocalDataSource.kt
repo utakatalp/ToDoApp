@@ -11,4 +11,6 @@ interface GroupTaskLocalDataSource {
     suspend fun getTaskCount(groupId: Long): Int
     suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity?
     fun filterTasks(groupId: Long, userId: Long): Flow<List<Task.Group>>
+    suspend fun updateTaskCompletion(taskId: Long, isCompleted: Boolean): Result<Unit>
+    suspend fun deleteTask(taskId: Long): Result<Unit>
 }
