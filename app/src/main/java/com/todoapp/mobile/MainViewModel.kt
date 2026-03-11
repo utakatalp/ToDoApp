@@ -23,7 +23,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val sessionPreferences: SessionPreferences,
-    private val taskRepository: PersonalTaskRepository,
+    private val personalTaskRepository: PersonalTaskRepository,
     private val dataStoreHelper: DataStoreHelper,
     private val userRepository: UserRepository,
     private val pomodoroEngine: PomodoroEngine,
@@ -76,7 +76,7 @@ class MainViewModel @Inject constructor(
     private suspend fun clearLocalSession() {
         groupManagementRepository.clearGroups()
         sessionPreferences.clear()
-        taskRepository.deleteAllTasks()
+        personalTaskRepository.deleteAllTasks()
         pomodoroEngine.finish()
         dataStoreHelper.clearUser()
     }
