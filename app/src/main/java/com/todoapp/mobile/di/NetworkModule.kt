@@ -31,12 +31,12 @@ object NetworkModule {
         okHttpClient: OkHttpClient
     ): Retrofit {
         val json = Json {
-            ignoreUnknownKeys = false
+            ignoreUnknownKeys = true
             isLenient = true
             encodeDefaults = true
         }
         return Retrofit.Builder()
-            .baseUrl("https://api.candroid.dev/todos/")
+            .baseUrl(com.todoapp.mobile.BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -47,12 +47,12 @@ object NetworkModule {
     @Named("token")
     fun provideTokenRetrofit(): Retrofit {
         val json = Json {
-            ignoreUnknownKeys = false
+            ignoreUnknownKeys = true
             isLenient = true
             encodeDefaults = true
         }
         return Retrofit.Builder()
-            .baseUrl("https://api.candroid.dev/todos/")
+            .baseUrl(com.todoapp.mobile.BuildConfig.BASE_URL)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
