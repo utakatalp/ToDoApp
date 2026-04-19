@@ -22,6 +22,9 @@ interface Screen {
     data object SecretMode : Screen
 
     @Serializable
+    data object PlanYourDay : Screen
+
+    @Serializable
     data object Notifications : Screen
 
     @Serializable
@@ -52,11 +55,45 @@ interface Screen {
     data object ForgotPassword : Screen
 
     @Serializable
-    data object PomodoroFinish : Screen
+    data class PomodoroSummary(
+        val focusSessions: Int,
+        val totalFocusMinutes: Int,
+        val totalBreakMinutes: Int,
+    ) : Screen
 
     @Serializable
-    data object Groups : Screen
+    data object PomodoroLaunch : Screen
 
     @Serializable
-    data class CreateNewGroup(val cameFromAuth: Boolean = false) : Screen
+    data class Groups(val pendingDeleteGroupId: Long = -1L) : Screen
+
+    @Serializable
+    data object CreateNewGroup : Screen
+
+    @Serializable
+    data class FilteredTasks(
+        val isCompleted: Boolean,
+        val weekDateEpochDay: Long,
+    ) : Screen
+
+    @Serializable
+    data class GroupDetail(val groupId: Long, val groupName: String) : Screen
+
+    @Serializable
+    data class GroupSettings(val groupId: Long) : Screen
+
+    @Serializable
+    data class InviteMember(val groupId: Long) : Screen
+
+    @Serializable
+    data class ManageMembers(val groupId: Long) : Screen
+
+    @Serializable
+    data class GroupTaskDetail(val groupId: Long, val taskId: Long) : Screen
+
+    @Serializable
+    data class MemberProfile(val groupId: Long, val userId: Long) : Screen
+
+    @Serializable
+    data class TransferOwnership(val groupId: Long) : Screen
 }
