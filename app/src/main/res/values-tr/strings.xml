@@ -52,6 +52,8 @@
     <string name="save_changes">Değişiklikleri Kaydet</string>
     <string name="cancel">İptal</string>
     <string name="ok">Tamam</string>
+    <string name="only_assignee_can_complete">Bu görevi yalnızca görevin atandığı kişi veya bir yönetici tamamlayabilir</string>
+    <string name="only_admin_can_edit_task">Bu görevi yalnızca yöneticiler düzenleyebilir</string>
     <string name="home">Ana Sayfa</string>
     <string name="settings">Ayarlar</string>
     <string name="search">Ara</string>

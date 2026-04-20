@@ -175,6 +175,11 @@ class GroupDetailViewModel @Inject constructor(
     private fun handleTaskChecked(taskId: Long, isChecked: Boolean) {
         val state = _uiState.value as? UiState.Success ?: return
         val task = state.tasks.find { it.id == taskId } ?: return
+        val isAdmin = state.currentUserRole.uppercase() == "ADMIN"
+        if (!isAdmin && !task.isAssignedToMe) {
+            _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.only_assignee_can_complete)))
+            return
+        }
         updateSuccessState { s ->
             s.copy(
                 tasks = s.tasks.map { t ->
@@ -258,6 +263,10 @@ class GroupDetailViewModel @Inject constructor(
 
     private fun openEditSheet(taskId: Long) {
         val state = _uiState.value as? UiState.Success ?: return
+        if (state.currentUserRole.uppercase() != "ADMIN") {
+            _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.only_admin_can_edit_task)))
+            return
+        }
         val task = state.tasks.find { it.id == taskId } ?: return
         val date = task.rawDueDate?.let {
             java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
