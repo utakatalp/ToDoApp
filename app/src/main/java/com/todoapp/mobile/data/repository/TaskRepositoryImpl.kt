@@ -157,18 +157,31 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertWithPhotos(task: Task, photos: List<Pair<ByteArray, String>>): Result<Unit> {
-        // Unlike insert(), this requires a successful server create so we have a remoteId to
-        // attach the photos to. If the network call fails, we surface the failure upwards.
-        return remoteDataSource.addTask(task).mapCatching { remoteTask ->
-            val remoteId = remoteTask.id
-            val entity = remoteTask.toDomain().toEntity().copy(id = 0L)
-            localDataSource.insert(withInitializedOrder(entity))
-            for ((bytes, mime) in photos) {
-                uploadTaskPhoto(remoteId, bytes, mime).getOrNull()  // best effort per photo
-            }
-            // final refresh once all uploads attempted
-            refreshPhotoUrlsForTask(remoteId)
-        }
+        // Mirror insert()'s offline-tolerant behavior: always persist locally. If the backend
+        // create succeeds we also upload photos; if it fails we fall back to PENDING_CREATE so
+        // Home still renders the task (and a later sync will pick it up).
+        val remoteResult = remoteDataSource.addTask(task)
+        return remoteResult.fold(
+            onSuccess = { remoteTask ->
+                runCatching {
+                    val entity = remoteTask.toDomain().toEntity().copy(id = 0L)
+                    localDataSource.insert(withInitializedOrder(entity))
+                    for ((bytes, mime) in photos) {
+                        uploadTaskPhoto(remoteTask.id, bytes, mime).getOrNull()
+                    }
+                    refreshPhotoUrlsForTask(remoteTask.id)
+                }
+            },
+            onFailure = {
+                runCatching {
+                    val entity = task.toEntity(SyncStatus.PENDING_CREATE)
+                    localDataSource.insert(withInitializedOrder(entity))
+                    // Photos can't be uploaded until the task has a remote id. The worker-driven
+                    // sync will eventually create it on the server; photos picked now are lost.
+                    // Acceptable trade-off vs. failing the whole create.
+                }
+            },
+        )
     }
 
     override suspend fun delete(task: Task) {
