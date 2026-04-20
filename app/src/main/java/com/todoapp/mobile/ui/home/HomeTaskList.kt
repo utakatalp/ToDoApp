@@ -168,7 +168,13 @@ fun HomeTaskList(
                                 interactionSource = interactionSource,
                             ) {
                                 val firstPhoto = task.photoUrls.firstOrNull()
-                                if (firstPhoto != null) {
+                                if (task.isSecret) {
+                                    SecretTaskRow(
+                                        isChecked = task.isCompleted,
+                                        onCheckBoxClick = { onTaskCheck(task) },
+                                        onTap = { onTaskClick(task) },
+                                    )
+                                } else if (firstPhoto != null) {
                                     androidx.compose.foundation.layout.Column(
                                         modifier = Modifier
                                             .fillMaxWidth()

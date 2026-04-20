@@ -62,6 +62,7 @@
     <string name="delete_photo_message">Bu fotoğrafı görevden kaldırmak istiyor musunuz?</string>
     <string name="photo_requires_sync">Görev sunucuya eşitlenene kadar fotoğraf eklenemez</string>
     <string name="failed_to_upload_photo">Fotoğraf yüklenemedi</string>
+    <string name="secret_task_hint">Bu görev gizli — görüntülemek için dokunun</string>
     <string name="home">Ana Sayfa</string>
     <string name="settings">Ayarlar</string>
     <string name="search">Ara</string>

@@ -62,6 +62,7 @@
     <string name="delete_photo_message">Do you want to remove this photo from the task?</string>
     <string name="photo_requires_sync">Can\'t add photos until the task is synced</string>
     <string name="failed_to_upload_photo">Failed to upload photo</string>
+    <string name="secret_task_hint">This task is secret — tap to reveal</string>
     <string name="home">Home</string>
     <string name="settings">Settings</string>
     <string name="search">Search</string>

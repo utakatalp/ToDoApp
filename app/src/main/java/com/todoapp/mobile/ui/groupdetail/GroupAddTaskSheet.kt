@@ -146,13 +146,6 @@ fun GroupAddTaskSheet(
             )
         }
         Spacer(Modifier.height(12.dp))
-        GroupTaskAdvancedSettings(
-            isExpanded = formState.isAdvancedSettingsExpanded,
-            isSecret = formState.isTaskSecret,
-            onToggleExpanded = { onAction(TaskFormUiAction.ToggleAdvancedSettings) },
-            onSecretChange = { onAction(TaskFormUiAction.SecretChange(it)) },
-        )
-        Spacer(Modifier.height(12.dp))
         TDButton(
             text = submitLabel,
             onClick = { onAction(TaskFormUiAction.Create) },
@@ -252,61 +245,3 @@ private fun GroupTaskAssigneeSelector(
     }
 }
 
-@Composable
-private fun GroupTaskAdvancedSettings(
-    isExpanded: Boolean,
-    isSecret: Boolean,
-    onToggleExpanded: () -> Unit,
-    onSecretChange: (Boolean) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onToggleExpanded() }
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            TDText(
-                text = stringResource(com.todoapp.mobile.R.string.advanced_settings),
-                style = TDTheme.typography.heading3,
-                color = TDTheme.colors.onBackground.copy(alpha = 0.7f),
-            )
-            Icon(
-                painter = painterResource(
-                    if (isExpanded) {
-                        R.drawable.ic_outline_expand_circle_down_24
-                    } else {
-                        R.drawable.ic_outline_expand_circle_right_24
-                    }
-                ),
-                contentDescription = null,
-                tint = TDTheme.colors.onBackground.copy(alpha = 0.7f),
-            )
-        }
-        AnimatedVisibility(visible = isExpanded) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Checkbox(
-                    checked = isSecret,
-                    onCheckedChange = { onSecretChange(it) },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = TDTheme.colors.pendingGray,
-                        uncheckedColor = TDTheme.colors.onBackground.copy(alpha = 0.6f),
-                    ),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                TDText(
-                    text = stringResource(com.todoapp.mobile.R.string.secret_task),
-                    style = TDTheme.typography.heading6,
-                    color = TDTheme.colors.onBackground,
-                )
-            }
-        }
-    }
-}
