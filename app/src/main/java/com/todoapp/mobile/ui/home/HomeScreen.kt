@@ -84,7 +84,8 @@ private fun HomeErrorContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(24.dp),
@@ -132,22 +133,27 @@ private fun HomeSuccessContent(
                         is TaskFormUiAction.DateDeselect -> onAction(UiAction.OnDialogDateDeselect)
                         is TaskFormUiAction.TimeStartChange -> onAction(UiAction.OnTaskTimeStartChange(action.time))
                         is TaskFormUiAction.TimeEndChange -> onAction(UiAction.OnTaskTimeEndChange(action.time))
-                        is TaskFormUiAction.DescriptionChange -> onAction(
-                            UiAction.OnTaskDescriptionChange(action.description)
-                        )
+                        is TaskFormUiAction.DescriptionChange ->
+                            onAction(
+                                UiAction.OnTaskDescriptionChange(action.description),
+                            )
                         is TaskFormUiAction.ToggleAdvancedSettings -> onAction(UiAction.OnToggleAdvancedSettings)
                         is TaskFormUiAction.SecretChange -> onAction(UiAction.OnTaskSecretChange(action.isSecret))
-                        is TaskFormUiAction.GroupSelectionChanged -> onAction(
-                            UiAction.OnGroupSelectionChanged(action.groupId)
-                        )
+                        is TaskFormUiAction.GroupSelectionChanged ->
+                            onAction(
+                                UiAction.OnGroupSelectionChanged(action.groupId),
+                            )
                         is TaskFormUiAction.PriorityChange -> Unit
                         is TaskFormUiAction.AssigneeChange -> Unit
-                        is TaskFormUiAction.PhotoPicked -> onAction(
-                            UiAction.OnPendingPhotoAdd(action.bytes, action.mimeType)
-                        )
-                        is TaskFormUiAction.PhotoRemoveAt -> onAction(
-                            UiAction.OnPendingPhotoRemove(action.index)
-                        )
+                        is TaskFormUiAction.PhotoPicked ->
+                            onAction(
+                                UiAction.OnPendingPhotoAdd(action.bytes, action.mimeType),
+                            )
+                        is TaskFormUiAction.PhotoRemoveAt ->
+                            onAction(
+                                UiAction.OnPendingPhotoRemove(action.index),
+                            )
+                        is TaskFormUiAction.ExistingPhotoToggleDelete -> Unit
                     }
                 },
             )
@@ -155,7 +161,8 @@ private fun HomeSuccessContent(
         onDismissSheet = { onAction(UiAction.OnDismissBottomSheet) },
     ) {
         HomeContent(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .background(TDTheme.colors.background)
                 .padding(horizontal = 16.dp),

@@ -1,6 +1,5 @@
 package com.todoapp.mobile.ui.groupdetail
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,8 +18,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,7 +60,8 @@ fun GroupAddTaskSheet(
     var showStartTimePicker by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
@@ -117,7 +115,8 @@ fun GroupAddTaskSheet(
         Spacer(Modifier.height(12.dp))
         TDPickerField(
             title = stringResource(com.todoapp.mobile.R.string.set_time),
-            value = formState.taskTimeStart?.format(timeFormatter)
+            value =
+            formState.taskTimeStart?.format(timeFormatter)
                 ?: stringResource(com.todoapp.mobile.R.string.starts),
             onClick = { showStartTimePicker = true },
             isError = formState.isTimeError,
@@ -146,6 +145,14 @@ fun GroupAddTaskSheet(
             )
         }
         Spacer(Modifier.height(12.dp))
+        if (formState.existingPhotos.isNotEmpty()) {
+            ExistingPhotosRow(
+                photos = formState.existingPhotos,
+                markedForDelete = formState.photoIdsToDelete,
+                onToggle = { id -> onAction(TaskFormUiAction.ExistingPhotoToggleDelete(id)) },
+            )
+            Spacer(Modifier.height(12.dp))
+        }
         com.todoapp.mobile.ui.home.PendingPhotosRow(
             pending = formState.pendingPhotos,
             onPick = { bytes, mime -> onAction(TaskFormUiAction.PhotoPicked(bytes, mime)) },
@@ -206,15 +213,23 @@ private fun GroupTaskAssigneeSelector(
                 val isSelected = member.userId == selectedAssigneeId
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .clickable {
                             onAssigneeSelected(if (isSelected) null else member.userId)
-                        }
-                        .padding(4.dp),
+                        }.padding(4.dp),
                 ) {
+                    val absoluteAvatarUrl =
+                        member.avatarUrl?.takeIf { it.isNotBlank() }?.let {
+                            val base =
+                                com.todoapp.mobile.BuildConfig.BASE_URL
+                                    .trimEnd('/')
+                            "$base/${it.trimStart('/')}"
+                        }
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(40.dp)
                             .clip(CircleShape)
                             .background(
@@ -222,22 +237,30 @@ private fun GroupTaskAssigneeSelector(
                                     TDTheme.colors.pendingGray
                                 } else {
                                     TDTheme.colors.lightPending
-                                }
-                            )
-                            .then(
+                                },
+                            ).then(
                                 if (isSelected) {
                                     Modifier.border(2.dp, TDTheme.colors.pendingGray, CircleShape)
                                 } else {
                                     Modifier
-                                }
+                                },
                             ),
                     ) {
-                        TDText(
-                            text = member.initials,
-                            style = TDTheme.typography.subheading2,
-                            color = if (isSelected) TDTheme.colors.surface else TDTheme.colors.pendingGray,
-                            textAlign = TextAlign.Center,
-                        )
+                        if (absoluteAvatarUrl != null) {
+                            coil.compose.AsyncImage(
+                                model = absoluteAvatarUrl,
+                                contentDescription = null,
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                modifier = Modifier.size(40.dp).clip(CircleShape),
+                            )
+                        } else {
+                            TDText(
+                                text = member.initials,
+                                style = TDTheme.typography.subheading2,
+                                color = if (isSelected) TDTheme.colors.surface else TDTheme.colors.pendingGray,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
                     Spacer(Modifier.height(4.dp))
                     TDText(
@@ -251,3 +274,62 @@ private fun GroupTaskAssigneeSelector(
     }
 }
 
+@Composable
+private fun ExistingPhotosRow(
+    photos: List<com.todoapp.mobile.ui.home.ExistingPhoto>,
+    markedForDelete: Set<Long>,
+    onToggle: (Long) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth()) {
+        TDText(
+            text = stringResource(com.todoapp.mobile.R.string.photos),
+            style = TDTheme.typography.subheading2,
+            color = TDTheme.colors.onBackground,
+        )
+        Spacer(Modifier.height(8.dp))
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(photos, key = { it.id }) { photo ->
+                val marked = photo.id in markedForDelete
+                val absoluteUrl =
+                    run {
+                        val base =
+                            com.todoapp.mobile.BuildConfig.BASE_URL
+                                .trimEnd('/')
+                        "$base/${photo.url.trimStart('/')}"
+                    }
+                Box(
+                    modifier =
+                    Modifier
+                        .size(72.dp)
+                        .clip(
+                            androidx.compose.foundation.shape
+                                .RoundedCornerShape(12.dp),
+                        ).background(TDTheme.colors.lightPending)
+                        .clickable { onToggle(photo.id) },
+                ) {
+                    coil.compose.AsyncImage(
+                        model = absoluteUrl,
+                        contentDescription = null,
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                        modifier = Modifier.size(72.dp),
+                    )
+                    if (marked) {
+                        Box(
+                            modifier =
+                            Modifier
+                                .size(72.dp)
+                                .background(TDTheme.colors.crossRed.copy(alpha = 0.55f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_delete),
+                                contentDescription = null,
+                                tint = TDTheme.colors.surface,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

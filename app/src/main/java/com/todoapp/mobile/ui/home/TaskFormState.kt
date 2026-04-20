@@ -20,6 +20,8 @@ data class TaskFormState(
     val selectedPriority: String? = null,
     val selectedAssigneeId: Long? = null,
     val pendingPhotos: List<PendingPhoto> = emptyList(),
+    val existingPhotos: List<ExistingPhoto> = emptyList(),
+    val photoIdsToDelete: Set<Long> = emptySet(),
 )
 
 data class PendingPhoto(
@@ -27,20 +29,66 @@ data class PendingPhoto(
     val mimeType: String,
 )
 
+data class ExistingPhoto(
+    val id: Long,
+    val url: String,
+)
+
 sealed interface TaskFormUiAction {
     data object Dismiss : TaskFormUiAction
+
     data object Create : TaskFormUiAction
-    data class TitleChange(val title: String) : TaskFormUiAction
-    data class DateSelect(val date: LocalDate) : TaskFormUiAction
+
+    data class TitleChange(
+        val title: String,
+    ) : TaskFormUiAction
+
+    data class DateSelect(
+        val date: LocalDate,
+    ) : TaskFormUiAction
+
     data object DateDeselect : TaskFormUiAction
-    data class TimeStartChange(val time: LocalTime) : TaskFormUiAction
-    data class TimeEndChange(val time: LocalTime) : TaskFormUiAction
-    data class DescriptionChange(val description: String) : TaskFormUiAction
+
+    data class TimeStartChange(
+        val time: LocalTime,
+    ) : TaskFormUiAction
+
+    data class TimeEndChange(
+        val time: LocalTime,
+    ) : TaskFormUiAction
+
+    data class DescriptionChange(
+        val description: String,
+    ) : TaskFormUiAction
+
     data object ToggleAdvancedSettings : TaskFormUiAction
-    data class SecretChange(val isSecret: Boolean) : TaskFormUiAction
-    data class GroupSelectionChanged(val groupId: Long?) : TaskFormUiAction
-    data class PriorityChange(val priority: String?) : TaskFormUiAction
-    data class AssigneeChange(val userId: Long?) : TaskFormUiAction
-    data class PhotoPicked(val bytes: ByteArray, val mimeType: String) : TaskFormUiAction
-    data class PhotoRemoveAt(val index: Int) : TaskFormUiAction
+
+    data class SecretChange(
+        val isSecret: Boolean,
+    ) : TaskFormUiAction
+
+    data class GroupSelectionChanged(
+        val groupId: Long?,
+    ) : TaskFormUiAction
+
+    data class PriorityChange(
+        val priority: String?,
+    ) : TaskFormUiAction
+
+    data class AssigneeChange(
+        val userId: Long?,
+    ) : TaskFormUiAction
+
+    data class PhotoPicked(
+        val bytes: ByteArray,
+        val mimeType: String,
+    ) : TaskFormUiAction
+
+    data class PhotoRemoveAt(
+        val index: Int,
+    ) : TaskFormUiAction
+
+    data class ExistingPhotoToggleDelete(
+        val photoId: Long,
+    ) : TaskFormUiAction
 }

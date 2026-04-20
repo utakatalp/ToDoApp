@@ -69,7 +69,8 @@ fun GroupDetailOverviewTab(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -81,7 +82,8 @@ fun GroupDetailOverviewTab(
                         text = uiState.description,
                         style = TDTheme.typography.subheading2,
                         color = TDTheme.colors.gray,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(bottom = 8.dp),
                     )
@@ -100,10 +102,11 @@ fun GroupDetailOverviewTab(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            val displayedTasks = when (uiState.taskFilter) {
-                TaskFilter.ALL -> uiState.tasks
-                TaskFilter.ASSIGNED_TO_ME -> uiState.tasks.filter { it.isAssignedToMe }
-            }.filter { it.id != uiState.undoDeleteTaskId }
+            val displayedTasks =
+                when (uiState.taskFilter) {
+                    TaskFilter.ALL -> uiState.tasks
+                    TaskFilter.ASSIGNED_TO_ME -> uiState.tasks.filter { it.isAssignedToMe }
+                }.filter { it.id != uiState.undoDeleteTaskId }
 
             if (displayedTasks.isEmpty()) {
                 item {
@@ -117,7 +120,6 @@ fun GroupDetailOverviewTab(
                         onLongPress = { onAction(UiAction.OnTaskLongPress(task.id)) },
                         onDelete = { onAction(UiAction.OnDeleteTask(task.id)) },
                         onAssignToMe = { onAction(UiAction.OnAssignToMe(task.id)) },
-                        onTap = { onAction(UiAction.OnTaskTapped(task.id)) },
                     )
                 }
             }
@@ -126,7 +128,8 @@ fun GroupDetailOverviewTab(
         }
 
         TDButton(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.BottomEnd)
                 .padding(24.dp),
             text = stringResource(R.string.new_task),
@@ -135,7 +138,8 @@ fun GroupDetailOverviewTab(
         )
 
         AnimatedVisibility(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
             visible = uiState.undoDeleteTaskId != null,
@@ -153,7 +157,8 @@ fun GroupDetailOverviewTab(
 @Composable
 private fun GroupTasksEmptyState() {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -181,7 +186,8 @@ private fun GroupStatsRow(
     pendingCount: Int,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -227,7 +233,8 @@ private fun GroupStatCard(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
+        modifier =
+        modifier
             .clip(RoundedCornerShape(12.dp))
             .background(cardBg)
             .padding(12.dp),
@@ -235,7 +242,8 @@ private fun GroupStatCard(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(36.dp)
                 .clip(CircleShape)
                 .background(iconBg),
@@ -264,7 +272,8 @@ private fun TaskFilterRow(
     onFilterSelected: (TaskFilter) -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -290,7 +299,8 @@ private fun FilterChip(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .clip(RoundedCornerShape(20.dp))
             .background(if (selected) TDTheme.colors.darkPending else TDTheme.colors.lightPending)
             .clickable(onClick = onClick)
@@ -312,7 +322,6 @@ private fun SwipeableGroupTaskCard(
     onLongPress: () -> Unit,
     onDelete: () -> Unit,
     onAssignToMe: () -> Unit,
-    onTap: () -> Unit,
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
     val hasAssignee = task.assigneeId != null
@@ -349,7 +358,6 @@ private fun SwipeableGroupTaskCard(
             task = task,
             onChecked = onChecked,
             onLongPress = onLongPress,
-            onTap = onTap,
         )
     }
 }
@@ -360,38 +368,44 @@ private fun GroupTaskSwipeBackground(
     hasAssignee: Boolean,
 ) {
     val color by animateColorAsState(
-        targetValue = when (direction) {
+        targetValue =
+        when (direction) {
             SwipeToDismissBoxValue.EndToStart -> TDTheme.colors.crossRed
             SwipeToDismissBoxValue.StartToEnd -> if (hasAssignee) TDTheme.colors.lightOrange else TDTheme.colors.pendingGray
             else -> Color.Transparent
         },
         label = "group_swipe_bg",
     )
-    val alignment = when (direction) {
-        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-        else -> Alignment.CenterStart
-    }
+    val alignment =
+        when (direction) {
+            SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+            else -> Alignment.CenterStart
+        }
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(color, RoundedCornerShape(12.dp))
             .padding(horizontal = 20.dp),
         contentAlignment = alignment,
     ) {
         when (direction) {
-            SwipeToDismissBoxValue.EndToStart -> Icon(
-                painter = painterResource(UiKitR.drawable.ic_delete),
-                contentDescription = null,
-                tint = Color.White,
-            )
+            SwipeToDismissBoxValue.EndToStart ->
+                Icon(
+                    painter = painterResource(UiKitR.drawable.ic_delete),
+                    contentDescription = null,
+                    tint = Color.White,
+                )
 
-            SwipeToDismissBoxValue.StartToEnd -> Icon(
-                painter = painterResource(UiKitR.drawable.ic_members),
-                contentDescription = stringResource(
-                    if (hasAssignee) R.string.unassign_task else R.string.assign_to_me
-                ),
-                tint = if (hasAssignee) TDTheme.colors.orange else Color.White,
-            )
+            SwipeToDismissBoxValue.StartToEnd ->
+                Icon(
+                    painter = painterResource(UiKitR.drawable.ic_members),
+                    contentDescription =
+                    stringResource(
+                        if (hasAssignee) R.string.unassign_task else R.string.assign_to_me,
+                    ),
+                    tint = if (hasAssignee) TDTheme.colors.orange else Color.White,
+                )
 
             else -> {}
         }
@@ -404,7 +418,6 @@ private fun FlippableGroupTaskCard(
     task: GroupTaskUiItem,
     onChecked: (Boolean) -> Unit,
     onLongPress: () -> Unit,
-    onTap: () -> Unit,
 ) {
     var isFlipped by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
@@ -414,16 +427,18 @@ private fun FlippableGroupTaskCard(
     )
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .combinedClickable(
-                onClick = onTap,
+                onClick = { isFlipped = !isFlipped },
                 onLongClick = { onLongPress() },
             ),
     ) {
         // Front face
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .graphicsLayer {
                     rotationY = rotation
@@ -437,7 +452,8 @@ private fun FlippableGroupTaskCard(
 
         // Back face — matchParentSize() ensures it never exceeds front face dimensions
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .matchParentSize()
                 .graphicsLayer {
                     rotationY = rotation - 180f
@@ -453,7 +469,8 @@ private fun FlippableGroupTaskCard(
 @Composable
 private fun AssigneeBackFace(task: GroupTaskUiItem) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(12.dp))
             .background(TDTheme.colors.infoCardBgColor)
@@ -470,6 +487,7 @@ private fun AssigneeBackFace(task: GroupTaskUiItem) {
                 MemberAvatar(
                     initials = task.assigneeInitials ?: task.assigneeName?.take(2)?.uppercase() ?: "?",
                     size = 32,
+                    avatarUrl = task.assigneeAvatarUrl,
                 )
                 TDText(
                     text = task.assigneeName ?: "",
@@ -516,17 +534,53 @@ private fun GroupTaskCard(
     task: GroupTaskUiItem,
     onChecked: (Boolean) -> Unit,
 ) {
+    val firstPhoto = task.photoUrls.firstOrNull()
     Box {
-        TDTaskCardWithCheckbox(
-            isChecked = task.isCompleted,
-            taskText = task.title,
-            taskDescription = task.description,
-            onCheckBoxClick = onChecked,
-        )
+        if (firstPhoto != null) {
+            Column(
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(TDTheme.colors.lightPending),
+            ) {
+                com.todoapp.mobile.ui.home.SecretOrNormalPhotoBanner(
+                    url =
+                    run {
+                        val base =
+                            com.todoapp.mobile.BuildConfig.BASE_URL
+                                .trimEnd('/')
+                        "$base/${firstPhoto.trimStart('/')}"
+                    },
+                    isSecret = false,
+                )
+                TDTaskCardWithCheckbox(
+                    isChecked = task.isCompleted,
+                    taskText = task.title,
+                    taskDescription = task.description,
+                    onCheckBoxClick = onChecked,
+                    shape =
+                    RoundedCornerShape(
+                        topStart = 0.dp,
+                        topEnd = 0.dp,
+                        bottomStart = 12.dp,
+                        bottomEnd = 12.dp,
+                    ),
+                )
+            }
+        } else {
+            TDTaskCardWithCheckbox(
+                isChecked = task.isCompleted,
+                taskText = task.title,
+                taskDescription = task.description,
+                onCheckBoxClick = onChecked,
+            )
+        }
         if (!task.priority.isNullOrBlank()) {
             PriorityBadge(
                 priority = task.priority,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.TopEnd)
                     .padding(top = 8.dp, end = 12.dp),
             )
@@ -540,14 +594,16 @@ private fun PriorityBadge(
     modifier: Modifier = Modifier,
 ) {
     val normalized = priority.uppercase()
-    val (bg, fg, label) = when (normalized) {
-        "HIGH" -> Triple(TDTheme.colors.lightRed, TDTheme.colors.crossRed, "HIGH")
-        "MEDIUM" -> Triple(TDTheme.colors.lightOrange, TDTheme.colors.orange, "MED")
-        "LOW" -> Triple(TDTheme.colors.lightPending, TDTheme.colors.darkPending, "LOW")
-        else -> Triple(TDTheme.colors.lightPending, TDTheme.colors.pendingGray, normalized)
-    }
+    val (bg, fg, label) =
+        when (normalized) {
+            "HIGH" -> Triple(TDTheme.colors.lightRed, TDTheme.colors.crossRed, "HIGH")
+            "MEDIUM" -> Triple(TDTheme.colors.lightOrange, TDTheme.colors.orange, "MED")
+            "LOW" -> Triple(TDTheme.colors.lightPending, TDTheme.colors.darkPending, "LOW")
+            else -> Triple(TDTheme.colors.lightPending, TDTheme.colors.pendingGray, normalized)
+        }
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .clip(RoundedCornerShape(8.dp))
             .background(bg)
             .padding(horizontal = 8.dp, vertical = 4.dp),
@@ -567,7 +623,8 @@ fun AssigneeAvatar(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .size(20.dp)
             .clip(CircleShape)
             .background(TDTheme.colors.lightPending),
@@ -587,7 +644,8 @@ fun AssigneeAvatar(
 private fun GroupDetailOverviewTabWithTasksPreview() {
     TDTheme {
         GroupDetailOverviewTab(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 groupId = 1L,
                 groupName = "The Smith Family",
                 description = "Daily chores, grocery lists, and vacation planning for 2024.",
@@ -611,8 +669,9 @@ private fun GroupDetailOverviewTabWithTasksPreview() {
 private fun GroupDetailOverviewTaskAssigneeBackFacePreview() {
     TDTheme {
         Box(
-            modifier = Modifier
-                .height(75.dp)
+            modifier =
+            Modifier
+                .height(75.dp),
         ) {
             AssigneeBackFace(
                 task = mockGroupTasks.first(),

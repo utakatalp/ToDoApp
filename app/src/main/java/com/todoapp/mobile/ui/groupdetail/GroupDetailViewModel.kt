@@ -42,14 +42,15 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
-class GroupDetailViewModel @Inject constructor(
+class GroupDetailViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
     private val languageRepository: LanguageRepository,
     savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
-
     private val route = savedStateHandle.toRoute<Screen.GroupDetail>()
     private val groupId = route.groupId
 
@@ -79,26 +80,28 @@ class GroupDetailViewModel @Inject constructor(
             is UiAction.OnTaskFilterSelected -> updateSuccessState { it.copy(taskFilter = action.filter) }
             is UiAction.OnTaskChecked -> handleTaskChecked(action.taskId, action.isChecked)
             UiAction.OnNewTaskTap -> updateSuccessState { it.copy(isTaskSheetOpen = true) }
-            UiAction.OnDismissGroupTaskSheet -> updateSuccessState {
-                it.copy(
-                    isTaskSheetOpen = false,
-                    taskFormState = TaskFormState(),
-                    editingTaskId = null
-                )
-            }
+            UiAction.OnDismissGroupTaskSheet ->
+                updateSuccessState {
+                    it.copy(
+                        isTaskSheetOpen = false,
+                        taskFormState = TaskFormState(),
+                        editingTaskId = null,
+                    )
+                }
 
             UiAction.OnGroupTaskCreate -> createGroupTask()
             is UiAction.OnGroupTaskFormAction -> handleTaskFormAction(action.action)
             UiAction.OnInviteTap -> _navEffect.trySend(NavigationEffect.Navigate(Screen.InviteMember(groupId)))
             is UiAction.OnRemoveMemberTap -> removeMember(action.userId)
-            is UiAction.OnTaskTapped -> _navEffect.trySend(
-                NavigationEffect.Navigate(
-                    Screen.GroupTaskDetail(
-                        groupId,
-                        action.taskId
-                    )
+            is UiAction.OnTaskTapped ->
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(
+                        Screen.GroupTaskDetail(
+                            groupId,
+                            action.taskId,
+                        ),
+                    ),
                 )
-            )
 
             is UiAction.OnTaskLongPress -> openEditSheet(action.taskId)
             is UiAction.OnDeleteTask -> updateSuccessState { it.copy(pendingDeleteTaskId = action.taskId) }
@@ -122,11 +125,12 @@ class GroupDetailViewModel @Inject constructor(
             userResult.getOrNull()?.let { user ->
                 currentUserId = user.id
                 currentUserName = user.displayName
-                currentUserInitials = user.displayName
-                    .split(" ")
-                    .filter { it.isNotBlank() }
-                    .take(2)
-                    .joinToString("") { it.first().uppercase() }
+                currentUserInitials =
+                    user.displayName
+                        .split(" ")
+                        .filter { it.isNotBlank() }
+                        .take(2)
+                        .joinToString("") { it.first().uppercase() }
             }
 
             val detailResult = detailDeferred.await()
@@ -141,38 +145,48 @@ class GroupDetailViewModel @Inject constructor(
 
             val tasks = tasksResult.getOrNull() ?: emptyList()
             val activities = activityResult.getOrNull() ?: emptyList()
-            val members = detail.members.map { member ->
-                GroupMember(
-                    userId = member.userId,
-                    displayName = member.displayName,
-                    email = member.email,
-                    avatarUrl = member.avatarUrl,
-                    role = member.role,
-                    joinedAt = member.joinedAt,
-                )
-            }
+            val members =
+                detail.members.map { member ->
+                    GroupMember(
+                        userId = member.userId,
+                        displayName = member.displayName,
+                        email = member.email,
+                        avatarUrl = member.avatarUrl,
+                        role = member.role,
+                        joinedAt = member.joinedAt,
+                    )
+                }
 
             val currentUserRole = members.find { it.userId == currentUserId }?.role?.uppercase() ?: ""
             val previousState = _uiState.value as? UiState.Success
 
-            _uiState.value = UiState.Success(
-                groupId = groupId,
-                groupName = detail.name,
-                description = detail.description,
-                memberCount = members.size,
-                completedCount = tasks.count { it.isCompleted },
-                pendingCount = tasks.count { !it.isCompleted },
-                tasks = tasks.map { it.toUiItem(currentUserRole) },
-                members = members.map { it.toUiItem(currentUserId) },
-                activities = activities.map { it.toUiItem() },
-                currentUserRole = currentUserRole,
-                selectedTab = previousState?.selectedTab ?: 0,
-                taskFilter = previousState?.taskFilter ?: GroupDetailContract.TaskFilter.ALL,
-            )
+            _uiState.value =
+                UiState.Success(
+                    groupId = groupId,
+                    groupName = detail.name,
+                    description = detail.description,
+                    memberCount = members.size,
+                    completedCount = tasks.count { it.isCompleted },
+                    pendingCount = tasks.count { !it.isCompleted },
+                    tasks = tasks.map { it.toUiItem(currentUserRole) },
+                    members = members.map { it.toUiItem(currentUserId) },
+                    activities = activities.map { it.toUiItem() },
+                    currentUserRole = currentUserRole,
+                    selectedTab = previousState?.selectedTab ?: 0,
+                    taskFilter = previousState?.taskFilter ?: GroupDetailContract.TaskFilter.ALL,
+                    isTaskSheetOpen = previousState?.isTaskSheetOpen ?: false,
+                    taskFormState = previousState?.taskFormState ?: TaskFormState(),
+                    editingTaskId = previousState?.editingTaskId,
+                    pendingDeleteTaskId = previousState?.pendingDeleteTaskId,
+                    pendingAssignTaskId = previousState?.pendingAssignTaskId,
+                )
         }
     }
 
-    private fun handleTaskChecked(taskId: Long, isChecked: Boolean) {
+    private fun handleTaskChecked(
+        taskId: Long,
+        isChecked: Boolean,
+    ) {
         val state = _uiState.value as? UiState.Success ?: return
         val task = state.tasks.find { it.id == taskId } ?: return
         val isAdmin = state.currentUserRole.uppercase() == "ADMIN"
@@ -182,28 +196,32 @@ class GroupDetailViewModel @Inject constructor(
         }
         updateSuccessState { s ->
             s.copy(
-                tasks = s.tasks.map { t ->
+                tasks =
+                s.tasks.map { t ->
                     if (t.id == taskId) t.copy(isCompleted = isChecked) else t
                 },
                 completedCount = if (isChecked) s.completedCount + 1 else s.completedCount - 1,
                 pendingCount = if (isChecked) s.pendingCount - 1 else s.pendingCount + 1,
             )
         }
-        val groupTask = GroupTask(
-            id = task.id,
-            title = task.title,
-            description = task.description,
-            isCompleted = task.isCompleted,
-            priority = task.priority,
-            dueDate = task.rawDueDate,
-            assignee = null,
-        )
+        val groupTask =
+            GroupTask(
+                id = task.id,
+                title = task.title,
+                description = task.description,
+                isCompleted = task.isCompleted,
+                priority = task.priority,
+                dueDate = task.rawDueDate,
+                assignee = null,
+            )
         viewModelScope.launch {
-            groupRepository.updateGroupTaskStatus(groupId, taskId, groupTask, isChecked)
+            groupRepository
+                .updateGroupTaskStatus(groupId, taskId, groupTask, isChecked)
                 .onFailure {
                     updateSuccessState { s ->
                         s.copy(
-                            tasks = s.tasks.map { t ->
+                            tasks =
+                            s.tasks.map { t ->
                                 if (t.id == taskId) t.copy(isCompleted = !isChecked) else t
                             },
                             completedCount = if (isChecked) s.completedCount - 1 else s.completedCount + 1,
@@ -217,7 +235,8 @@ class GroupDetailViewModel @Inject constructor(
 
     private fun removeMember(userId: Long) {
         viewModelScope.launch {
-            groupRepository.removeMember(groupId, userId)
+            groupRepository
+                .removeMember(groupId, userId)
                 .onSuccess {
                     updateSuccessState { state ->
                         state.copy(
@@ -226,8 +245,7 @@ class GroupDetailViewModel @Inject constructor(
                         )
                     }
                     _uiEffect.trySend(UiEffect.ShowToast("Member removed"))
-                }
-                .onFailure {
+                }.onFailure {
                     _uiEffect.trySend(UiEffect.ShowToast("Failed to remove member"))
                 }
         }
@@ -236,33 +254,49 @@ class GroupDetailViewModel @Inject constructor(
     private fun handleTaskFormAction(action: TaskFormUiAction) {
         updateSuccessState { s ->
             val f = s.taskFormState
-            val updated = when (action) {
-                is TaskFormUiAction.TitleChange -> f.copy(taskTitle = action.title)
-                is TaskFormUiAction.DateSelect -> f.copy(dialogSelectedDate = action.date)
-                TaskFormUiAction.DateDeselect -> f.copy(dialogSelectedDate = null)
-                is TaskFormUiAction.TimeStartChange -> f.copy(taskTimeStart = action.time)
-                is TaskFormUiAction.TimeEndChange -> f.copy(taskTimeEnd = action.time)
-                is TaskFormUiAction.DescriptionChange -> f.copy(taskDescription = action.description)
-                TaskFormUiAction.ToggleAdvancedSettings -> f.copy(
-                    isAdvancedSettingsExpanded = !f.isAdvancedSettingsExpanded
-                )
-                is TaskFormUiAction.SecretChange -> f.copy(isTaskSecret = action.isSecret)
-                is TaskFormUiAction.PriorityChange -> f.copy(selectedPriority = action.priority)
-                is TaskFormUiAction.AssigneeChange -> f.copy(selectedAssigneeId = action.userId)
-                TaskFormUiAction.Dismiss -> return@updateSuccessState s.copy(
-                    isTaskSheetOpen = false,
-                    taskFormState = TaskFormState()
-                )
+            val updated =
+                when (action) {
+                    is TaskFormUiAction.TitleChange -> f.copy(taskTitle = action.title)
+                    is TaskFormUiAction.DateSelect -> f.copy(dialogSelectedDate = action.date)
+                    TaskFormUiAction.DateDeselect -> f.copy(dialogSelectedDate = null)
+                    is TaskFormUiAction.TimeStartChange -> f.copy(taskTimeStart = action.time)
+                    is TaskFormUiAction.TimeEndChange -> f.copy(taskTimeEnd = action.time)
+                    is TaskFormUiAction.DescriptionChange -> f.copy(taskDescription = action.description)
+                    TaskFormUiAction.ToggleAdvancedSettings ->
+                        f.copy(
+                            isAdvancedSettingsExpanded = !f.isAdvancedSettingsExpanded,
+                        )
+                    is TaskFormUiAction.SecretChange -> f.copy(isTaskSecret = action.isSecret)
+                    is TaskFormUiAction.PriorityChange -> f.copy(selectedPriority = action.priority)
+                    is TaskFormUiAction.AssigneeChange -> f.copy(selectedAssigneeId = action.userId)
+                    TaskFormUiAction.Dismiss -> return@updateSuccessState s.copy(
+                        isTaskSheetOpen = false,
+                        taskFormState = TaskFormState(),
+                    )
 
-                TaskFormUiAction.Create -> return@updateSuccessState s
-                is TaskFormUiAction.GroupSelectionChanged -> return@updateSuccessState s
-                is TaskFormUiAction.PhotoPicked -> f.copy(
-                    pendingPhotos = f.pendingPhotos + com.todoapp.mobile.ui.home.PendingPhoto(action.bytes, action.mimeType),
-                )
-                is TaskFormUiAction.PhotoRemoveAt -> f.copy(
-                    pendingPhotos = f.pendingPhotos.filterIndexed { i, _ -> i != action.index },
-                )
-            }
+                    TaskFormUiAction.Create -> return@updateSuccessState s
+                    is TaskFormUiAction.GroupSelectionChanged -> return@updateSuccessState s
+                    is TaskFormUiAction.PhotoPicked ->
+                        f.copy(
+                            pendingPhotos =
+                            f.pendingPhotos +
+                                com.todoapp.mobile.ui.home
+                                    .PendingPhoto(action.bytes, action.mimeType),
+                        )
+                    is TaskFormUiAction.PhotoRemoveAt ->
+                        f.copy(
+                            pendingPhotos = f.pendingPhotos.filterIndexed { i, _ -> i != action.index },
+                        )
+                    is TaskFormUiAction.ExistingPhotoToggleDelete ->
+                        f.copy(
+                            photoIdsToDelete =
+                            if (action.photoId in f.photoIdsToDelete) {
+                                f.photoIdsToDelete - action.photoId
+                            } else {
+                                f.photoIdsToDelete + action.photoId
+                            },
+                        )
+                }
             s.copy(taskFormState = updated)
         }
     }
@@ -274,17 +308,26 @@ class GroupDetailViewModel @Inject constructor(
             return
         }
         val task = state.tasks.find { it.id == taskId } ?: return
-        val date = task.rawDueDate?.let {
-            java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-        }
-        val time = task.rawDueDate?.let {
-            java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalTime()
-        }
+        val date =
+            task.rawDueDate?.let {
+                java.time.Instant
+                    .ofEpochMilli(it)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalDate()
+            }
+        val time =
+            task.rawDueDate?.let {
+                java.time.Instant
+                    .ofEpochMilli(it)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalTime()
+            }
         updateSuccessState {
             it.copy(
                 isTaskSheetOpen = true,
                 editingTaskId = taskId,
-                taskFormState = TaskFormState(
+                taskFormState =
+                TaskFormState(
                     taskTitle = task.title,
                     taskDescription = task.description ?: "",
                     dialogSelectedDate = date,
@@ -292,6 +335,12 @@ class GroupDetailViewModel @Inject constructor(
                     taskTimeEnd = time,
                     selectedPriority = task.priority,
                     selectedAssigneeId = task.assigneeId,
+                    existingPhotos =
+                    task.photoUrls.mapNotNull { url ->
+                        val id = url.substringAfterLast('/').toLongOrNull() ?: return@mapNotNull null
+                        com.todoapp.mobile.ui.home
+                            .ExistingPhoto(id = id, url = url)
+                    },
                 ),
             )
         }
@@ -305,67 +354,78 @@ class GroupDetailViewModel @Inject constructor(
             return
         }
         val timeStart = form.taskTimeStart ?: java.time.LocalTime.MIDNIGHT
-        val dueDate = form.dialogSelectedDate.atTime(timeStart)
-            ?.atZone(java.time.ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+        val dueDate =
+            form.dialogSelectedDate
+                .atTime(timeStart)
+                ?.atZone(java.time.ZoneId.systemDefault())
+                ?.toInstant()
+                ?.toEpochMilli()
 
         val editingId = state.editingTaskId
         if (editingId != null) {
             viewModelScope.launch {
-                groupRepository.updateGroupTask(
-                    groupId = groupId,
-                    taskId = editingId,
-                    title = form.taskTitle,
-                    description = form.taskDescription.ifBlank { null },
-                    dueDate = dueDate,
-                    priority = form.selectedPriority,
-                    assignedToUserId = form.selectedAssigneeId,
-                ).onSuccess {
-                    updateSuccessState {
-                        it.copy(
-                            isTaskSheetOpen = false,
-                            taskFormState = TaskFormState(),
-                            editingTaskId = null
+                groupRepository
+                    .updateGroupTask(
+                        groupId = groupId,
+                        taskId = editingId,
+                        title = form.taskTitle,
+                        description = form.taskDescription.ifBlank { null },
+                        dueDate = dueDate,
+                        priority = form.selectedPriority,
+                        assignedToUserId = form.selectedAssigneeId,
+                    ).onSuccess {
+                        form.photoIdsToDelete.forEach { photoId ->
+                            groupRepository.deleteTaskPhoto(editingId, photoId)
+                        }
+                        form.pendingPhotos.forEach { photo ->
+                            groupRepository.uploadTaskPhoto(editingId, photo.bytes, photo.mimeType)
+                        }
+                        updateSuccessState {
+                            it.copy(
+                                isTaskSheetOpen = false,
+                                taskFormState = TaskFormState(),
+                                editingTaskId = null,
+                            )
+                        }
+                        _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.task_updated)))
+                        loadGroupData()
+                    }.onFailure {
+                        _uiEffect.trySend(
+                            UiEffect.ShowToast(
+                                it.message ?: context.getString(R.string.failed_to_update_task),
+                            ),
                         )
                     }
-                    _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.task_updated)))
-                    loadGroupData()
-                }.onFailure {
-                    _uiEffect.trySend(
-                        UiEffect.ShowToast(
-                            it.message ?: context.getString(R.string.failed_to_update_task)
-                        )
-                    )
-                }
             }
             return
         }
 
-        val task = Task(
-            title = form.taskTitle,
-            description = form.taskDescription.ifBlank { null },
-            date = form.dialogSelectedDate,
-            timeStart = timeStart,
-            timeEnd = form.taskTimeEnd ?: timeStart,
-            isCompleted = false,
-            isSecret = form.isTaskSecret,
-        )
+        val task =
+            Task(
+                title = form.taskTitle,
+                description = form.taskDescription.ifBlank { null },
+                date = form.dialogSelectedDate,
+                timeStart = timeStart,
+                timeEnd = form.taskTimeEnd ?: timeStart,
+                isCompleted = false,
+                isSecret = form.isTaskSecret,
+            )
         val pendingPhotos = form.pendingPhotos
         viewModelScope.launch {
-            groupRepository.createGroupTask(
-                groupId,
-                task,
-                priority = form.selectedPriority,
-                assignedToUserId = form.selectedAssigneeId
-            )
-                .onSuccess { newTaskId ->
+            groupRepository
+                .createGroupTask(
+                    groupId,
+                    task,
+                    priority = form.selectedPriority,
+                    assignedToUserId = form.selectedAssigneeId,
+                ).onSuccess { newTaskId ->
                     pendingPhotos.forEach { photo ->
                         groupRepository.uploadTaskPhoto(newTaskId, photo.bytes, photo.mimeType)
                     }
                     updateSuccessState { it.copy(isTaskSheetOpen = false, taskFormState = TaskFormState()) }
                     _uiEffect.trySend(UiEffect.ShowToast("Task added to group"))
                     loadGroupData()
-                }
-                .onFailure {
+                }.onFailure {
                     _uiEffect.trySend(UiEffect.ShowToast(it.message ?: "Failed to create task"))
                 }
         }
@@ -387,15 +447,17 @@ class GroupDetailViewModel @Inject constructor(
         }
 
         pendingDeleteJob?.cancel()
-        pendingDeleteJob = viewModelScope.launch {
-            delay(UNDO_DELAY_MS)
-            updateSuccessState { it.copy(undoDeleteTaskId = null) }
-            groupRepository.deleteGroupTask(groupId, taskId)
-                .onFailure {
-                    _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.failed_to_delete_task)))
-                    loadGroupData()
-                }
-        }
+        pendingDeleteJob =
+            viewModelScope.launch {
+                delay(UNDO_DELAY_MS)
+                updateSuccessState { it.copy(undoDeleteTaskId = null) }
+                groupRepository
+                    .deleteGroupTask(groupId, taskId)
+                    .onFailure {
+                        _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.failed_to_delete_task)))
+                        loadGroupData()
+                    }
+            }
     }
 
     private fun undoDeleteTask() {
@@ -430,19 +492,20 @@ class GroupDetailViewModel @Inject constructor(
     private fun applyUnassignOther(taskId: Long) {
         updateSuccessState { s ->
             s.copy(
-                tasks = s.tasks.map { t ->
+                tasks =
+                s.tasks.map { t ->
                     if (t.id == taskId) {
                         t.copy(
-                        isAssignedToMe = false,
-                        assigneeName = null,
-                        assigneeInitials = null,
-                        assigneeId = null,
-                        assigneeAvatarUrl = null,
-                    )
+                            isAssignedToMe = false,
+                            assigneeName = null,
+                            assigneeInitials = null,
+                            assigneeId = null,
+                            assigneeAvatarUrl = null,
+                        )
                     } else {
                         t
                     }
-                }
+                },
             )
         }
         viewModelScope.launch {
@@ -460,29 +523,34 @@ class GroupDetailViewModel @Inject constructor(
         applyAssignToggle(taskId, isCurrentlyAssignedToMe = false)
     }
 
-    private fun applyAssignToggle(taskId: Long, isCurrentlyAssignedToMe: Boolean) {
+    private fun applyAssignToggle(
+        taskId: Long,
+        isCurrentlyAssignedToMe: Boolean,
+    ) {
         updateSuccessState { s ->
             s.copy(
-                tasks = s.tasks.map { t ->
+                tasks =
+                s.tasks.map { t ->
                     if (t.id == taskId) {
                         t.copy(
-                        isAssignedToMe = !isCurrentlyAssignedToMe,
-                        assigneeName = if (isCurrentlyAssignedToMe) null else currentUserName,
-                        assigneeInitials = if (isCurrentlyAssignedToMe) null else currentUserInitials,
-                        assigneeId = if (isCurrentlyAssignedToMe) null else currentUserId,
-                    )
+                            isAssignedToMe = !isCurrentlyAssignedToMe,
+                            assigneeName = if (isCurrentlyAssignedToMe) null else currentUserName,
+                            assigneeInitials = if (isCurrentlyAssignedToMe) null else currentUserInitials,
+                            assigneeId = if (isCurrentlyAssignedToMe) null else currentUserId,
+                        )
                     } else {
                         t
                     }
-                }
+                },
             )
         }
         viewModelScope.launch {
-            val result = if (isCurrentlyAssignedToMe) {
-                groupRepository.unassignGroupTask(groupId, taskId)
-            } else {
-                groupRepository.assignGroupTask(groupId, taskId, currentUserId)
-            }
+            val result =
+                if (isCurrentlyAssignedToMe) {
+                    groupRepository.unassignGroupTask(groupId, taskId)
+                } else {
+                    groupRepository.assignGroupTask(groupId, taskId, currentUserId)
+                }
             result.onFailure {
                 _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.failed_to_update_task)))
                 loadGroupData()
@@ -495,11 +563,13 @@ class GroupDetailViewModel @Inject constructor(
     }
 
     private fun GroupTask.toUiItem(currentUserRole: String = ""): GroupTaskUiItem {
-        val assigneeInitials = assignee?.displayName
-            ?.split(" ")
-            ?.mapNotNull { it.firstOrNull()?.toString() }
-            ?.take(2)
-            ?.joinToString("")
+        val assigneeInitials =
+            assignee
+                ?.displayName
+                ?.split(" ")
+                ?.mapNotNull { it.firstOrNull()?.toString() }
+                ?.take(2)
+                ?.joinToString("")
         val isAssignedToMe = assignee?.userId == currentUserId
         return GroupTaskUiItem(
             id = id,
@@ -515,15 +585,17 @@ class GroupDetailViewModel @Inject constructor(
             isCompleted = isCompleted,
             isAssignedToMe = isAssignedToMe,
             canDelete = currentUserRole.uppercase() == "ADMIN",
+            photoUrls = photoUrls,
         )
     }
 
     private fun GroupMember.toUiItem(currentUserId: Long): GroupMemberUiItem {
-        val initials = displayName
-            .split(" ")
-            .mapNotNull { it.firstOrNull()?.toString() }
-            .take(2)
-            .joinToString("")
+        val initials =
+            displayName
+                .split(" ")
+                .mapNotNull { it.firstOrNull()?.toString() }
+                .take(2)
+                .joinToString("")
         return GroupMemberUiItem(
             userId = userId,
             displayName = displayName,
@@ -538,11 +610,12 @@ class GroupDetailViewModel @Inject constructor(
     }
 
     private fun GroupActivity.toUiItem(): GroupActivityUiItem {
-        val initials = actorName
-            .split(" ")
-            .mapNotNull { it.firstOrNull()?.toString() }
-            .take(2)
-            .joinToString("")
+        val initials =
+            actorName
+                .split(" ")
+                .mapNotNull { it.firstOrNull()?.toString() }
+                .take(2)
+                .joinToString("")
         return GroupActivityUiItem(
             id = id,
             type = type,
@@ -593,15 +666,17 @@ class GroupDetailViewModel @Inject constructor(
         val now = System.currentTimeMillis()
         val diff = now - timestamp
         return when {
-            diff < TimeUnit.MINUTES.toMillis(60) -> context.getString(
-                R.string.minutes_ago,
-                TimeUnit.MILLISECONDS.toMinutes(diff).toInt()
-            )
+            diff < TimeUnit.MINUTES.toMillis(60) ->
+                context.getString(
+                    R.string.minutes_ago,
+                    TimeUnit.MILLISECONDS.toMinutes(diff).toInt(),
+                )
 
-            diff < TimeUnit.HOURS.toMillis(24) -> context.getString(
-                R.string.hours_ago,
-                TimeUnit.MILLISECONDS.toHours(diff).toInt()
-            )
+            diff < TimeUnit.HOURS.toMillis(24) ->
+                context.getString(
+                    R.string.hours_ago,
+                    TimeUnit.MILLISECONDS.toHours(diff).toInt(),
+                )
 
             diff < TimeUnit.HOURS.toMillis(48) -> context.getString(R.string.yesterday)
             else -> context.getString(R.string.days_ago, TimeUnit.MILLISECONDS.toDays(diff).toInt())

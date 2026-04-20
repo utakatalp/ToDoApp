@@ -16,12 +16,15 @@ fun TaskData.toGroupTask(): GroupTask = GroupTask(
     description = description,
     isCompleted = isCompleted,
     priority = priority,
-    dueDate = LocalDate.ofEpochDay(date)
+    dueDate =
+    LocalDate
+        .ofEpochDay(date)
         .atTime(LocalTime.ofSecondOfDay(timeStart))
         .atZone(ZoneId.systemDefault())
         .toInstant()
         .toEpochMilli(),
-    assignee = assignedTo?.let { user ->
+    assignee =
+    assignedTo?.let { user ->
         GroupMember(
             userId = user.userId,
             displayName = user.displayName,
@@ -31,6 +34,7 @@ fun TaskData.toGroupTask(): GroupTask = GroupTask(
             joinedAt = 0L,
         )
     },
+    photoUrls = photoUrls,
 )
 
 fun GroupTaskData.toDomain(): GroupTask = GroupTask(
@@ -53,39 +57,41 @@ fun GroupMemberData.toDomain(): GroupMember = GroupMember(
     joinedAt = joinedAt,
 )
 
-fun GroupTaskEntity.toDomain(): GroupTask =
-    GroupTask(
-        id = remoteId ?: id,
-        title = title,
-        description = description,
-        isCompleted = isCompleted,
-        priority = priority,
-        dueDate = dueDate,
-        assignee = if (assigneeUserId != null && assigneeDisplayName != null) {
-            GroupMember(
-                userId = assigneeUserId,
-                displayName = assigneeDisplayName,
-                email = "",
-                avatarUrl = assigneeAvatarUrl,
-                role = "",
-                joinedAt = 0L,
-            )
-        } else {
-            null
-        },
-    )
+fun GroupTaskEntity.toDomain(): GroupTask = GroupTask(
+    id = remoteId ?: id,
+    title = title,
+    description = description,
+    isCompleted = isCompleted,
+    priority = priority,
+    dueDate = dueDate,
+    assignee =
+    if (assigneeUserId != null && assigneeDisplayName != null) {
+        GroupMember(
+            userId = assigneeUserId,
+            displayName = assigneeDisplayName,
+            email = "",
+            avatarUrl = assigneeAvatarUrl,
+            role = "",
+            joinedAt = 0L,
+        )
+    } else {
+        null
+    },
+)
 
-fun GroupTask.toEntity(localGroupId: Long, remoteGroupId: Long): GroupTaskEntity =
-    GroupTaskEntity(
-        remoteId = id,
-        localGroupId = localGroupId,
-        remoteGroupId = remoteGroupId,
-        title = title,
-        description = description,
-        isCompleted = isCompleted,
-        priority = priority,
-        dueDate = dueDate,
-        assigneeUserId = assignee?.userId,
-        assigneeDisplayName = assignee?.displayName,
-        assigneeAvatarUrl = assignee?.avatarUrl,
-    )
+fun GroupTask.toEntity(
+    localGroupId: Long,
+    remoteGroupId: Long,
+): GroupTaskEntity = GroupTaskEntity(
+    remoteId = id,
+    localGroupId = localGroupId,
+    remoteGroupId = remoteGroupId,
+    title = title,
+    description = description,
+    isCompleted = isCompleted,
+    priority = priority,
+    dueDate = dueDate,
+    assigneeUserId = assignee?.userId,
+    assigneeDisplayName = assignee?.displayName,
+    assigneeAvatarUrl = assignee?.avatarUrl,
+)
