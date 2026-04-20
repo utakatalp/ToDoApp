@@ -8,4 +8,5 @@ data class GroupTask(
     val priority: String?,
     val dueDate: Long?,
     val assignee: GroupMember?,
+    val photoUrls: List<String> = emptyList(),
 )

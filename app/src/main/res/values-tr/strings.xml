@@ -56,6 +56,10 @@
     <string name="only_admin_can_edit_task">Bu görevi yalnızca yöneticiler düzenleyebilir</string>
     <string name="profile">Profil</string>
     <string name="change_photo">Fotoğrafı değiştir</string>
+    <string name="photos">Fotoğraflar</string>
+    <string name="add_photo">Fotoğraf ekle</string>
+    <string name="delete_photo_title">Fotoğrafı sil?</string>
+    <string name="delete_photo_message">Bu fotoğrafı görevden kaldırmak istiyor musunuz?</string>
     <string name="home">Ana Sayfa</string>
     <string name="settings">Ayarlar</string>
     <string name="search">Ara</string>

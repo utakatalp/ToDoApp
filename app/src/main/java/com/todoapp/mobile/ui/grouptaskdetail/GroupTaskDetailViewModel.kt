@@ -74,6 +74,24 @@ class GroupTaskDetailViewModel @Inject constructor(
             UiAction.OnEditDateDeselect -> updateSuccess { it.copy(editDate = null) }
             is UiAction.OnEditTimeChange -> updateSuccess { it.copy(editTime = action.time) }
             is UiAction.OnEditAssigneeChange -> updateSuccess { it.copy(editAssigneeId = action.userId) }
+            is UiAction.OnPhotoPicked -> uploadPhoto(action.bytes, action.mimeType)
+            is UiAction.OnPhotoDelete -> deletePhoto(action.photoId)
+        }
+    }
+
+    private fun uploadPhoto(bytes: ByteArray, mimeType: String) {
+        viewModelScope.launch {
+            groupRepository.uploadTaskPhoto(taskId, bytes, mimeType)
+                .onSuccess { loadTask() }
+                .onFailure { _uiEffect.trySend(UiEffect.ShowToast(it.message ?: "Failed to upload photo")) }
+        }
+    }
+
+    private fun deletePhoto(photoId: Long) {
+        viewModelScope.launch {
+            groupRepository.deleteTaskPhoto(taskId, photoId)
+                .onSuccess { loadTask() }
+                .onFailure { _uiEffect.trySend(UiEffect.ShowToast(it.message ?: "Failed to delete photo")) }
         }
     }
 
@@ -219,6 +237,7 @@ class GroupTaskDetailViewModel @Inject constructor(
             assigneeUserId = assignee?.userId,
             isAssignedToMe = isAssignedToMe,
             canDelete = isAssignedToMe || currentUserRole == "ADMIN",
+            photoUrls = photoUrls,
         )
     }
 

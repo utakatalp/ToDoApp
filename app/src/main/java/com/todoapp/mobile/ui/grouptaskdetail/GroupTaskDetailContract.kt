@@ -20,6 +20,7 @@ object GroupTaskDetailContract {
         val assigneeUserId: Long?,
         val isAssignedToMe: Boolean,
         val canDelete: Boolean,
+        val photoUrls: List<String> = emptyList(),
     )
 
     sealed interface UiState {
@@ -51,6 +52,8 @@ object GroupTaskDetailContract {
         data object OnEditDateDeselect : UiAction
         data class OnEditTimeChange(val time: LocalTime) : UiAction
         data class OnEditAssigneeChange(val userId: Long?) : UiAction
+        data class OnPhotoPicked(val bytes: ByteArray, val mimeType: String) : UiAction
+        data class OnPhotoDelete(val photoId: Long) : UiAction
     }
 
     sealed interface UiEffect {

@@ -204,6 +204,14 @@ private fun TaskDetailBody(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        TaskPhotosSection(
+            photoUrls = task.photoUrls,
+            onPick = { bytes, mime -> onAction(UiAction.OnPhotoPicked(bytes, mime)) },
+            onDelete = { photoId -> onAction(UiAction.OnPhotoDelete(photoId)) },
+        )
     }
 }
 

@@ -41,6 +41,7 @@ fun GroupTaskData.toDomain(): GroupTask = GroupTask(
     priority = priority,
     dueDate = dueDate,
     assignee = assignee?.toDomain(),
+    photoUrls = photoUrls,
 )
 
 fun GroupMemberData.toDomain(): GroupMember = GroupMember(
