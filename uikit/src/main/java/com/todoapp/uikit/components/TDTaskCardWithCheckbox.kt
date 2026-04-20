@@ -56,6 +56,11 @@ fun TDTaskCardWithCheckbox(
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(12.dp),
 ) {
     var showConfetti by remember { mutableStateOf(false) }
+    var prevChecked by remember { mutableStateOf(isChecked) }
+    LaunchedEffect(isChecked) {
+        if (isChecked && !prevChecked) showConfetti = true
+        prevChecked = isChecked
+    }
 
     val cardBg by animateColorAsState(
         targetValue = if (isChecked) TDTheme.colors.lightGreen else TDTheme.colors.lightPending,
@@ -63,7 +68,8 @@ fun TDTaskCardWithCheckbox(
         label = "cardBg",
     )
     val idleBorderColor by animateColorAsState(
-        targetValue = if (isChecked) {
+        targetValue =
+        if (isChecked) {
             TDTheme.colors.mediumGreen.copy(alpha = 0.3f)
         } else {
             TDTheme.colors.pendingGray.copy(alpha = 0.25f)
@@ -74,65 +80,59 @@ fun TDTaskCardWithCheckbox(
     val dragScale by animateFloatAsState(
         targetValue = if (isDragging) 1.03f else 1f,
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
-        label = "dragScale"
+        label = "dragScale",
     )
     val cardAlpha by animateFloatAsState(
         targetValue = if (isAnyDragging && !isDragging) 0.72f else 1f,
         animationSpec = tween(200),
-        label = "cardAlpha"
+        label = "cardAlpha",
     )
     val effectiveBorderColor by animateColorAsState(
         targetValue = if (isDragging) TDTheme.colors.pendingGray else idleBorderColor,
         animationSpec = tween(150),
-        label = "effectiveBorderColor"
+        label = "effectiveBorderColor",
     )
     val effectiveBorderWidth by animateDpAsState(
         targetValue = if (isDragging) 2.dp else 1.dp,
         animationSpec = tween(150),
-        label = "effectiveBorderWidth"
+        label = "effectiveBorderWidth",
     )
     val density = LocalDensity.current
 
     Box(
         modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .border(
                     width = effectiveBorderWidth,
                     color = effectiveBorderColor,
                     shape = shape,
-                )
-                .graphicsLayer {
+                ).graphicsLayer {
                     scaleX = dragScale
                     scaleY = dragScale
                     alpha = cardAlpha
                     shadowElevation = if (isDragging) with(density) { 12.dp.toPx() } else 0f
-                }
-                .background(
+                }.background(
                     color = cardBg,
                     shape = shape,
-                )
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                ).padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TDTaskCheckBox(
                 isChecked = isChecked,
-                onToggle = {
-                    if (!isChecked) {
-                        showConfetti = true
-                    }
-                    onCheckBoxClick(!isChecked)
-                }
+                onToggle = { onCheckBoxClick(!isChecked) },
             )
             Spacer(Modifier.width(10.dp))
             Column {
                 TDText(
                     text = taskText,
                     color = TDTheme.colors.onBackground,
-                    style = TDTheme.typography.regularTextStyle.copy(
+                    style =
+                    TDTheme.typography.regularTextStyle.copy(
                         textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None,
                     ),
                 )
@@ -142,7 +142,8 @@ fun TDTaskCardWithCheckbox(
                         text = taskDescription,
                         color = TDTheme.colors.onBackground.copy(alpha = 0.6f),
                         overflow = TextOverflow.Ellipsis,
-                        style = TDTheme.typography.subheading1.copy(
+                        style =
+                        TDTheme.typography.subheading1.copy(
                             textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None,
                         ),
                     )
@@ -152,10 +153,11 @@ fun TDTaskCardWithCheckbox(
 
         if (showConfetti) {
             ConfettiEffect(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .matchParentSize()
                     .clip(shape),
-                onAnimFinished = { showConfetti = false }
+                onAnimFinished = { showConfetti = false },
             )
         }
     }
@@ -169,7 +171,7 @@ private fun ConfettiEffect(
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.confetti))
     val progress by animateLottieCompositionAsState(
         composition = composition,
-        iterations = 1
+        iterations = 1,
     )
 
     LottieAnimation(
@@ -212,7 +214,8 @@ private fun TDTaskCheckBox(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier
+        modifier =
+        modifier
             .size(28.dp)
             .clip(shape)
             .background(checkboxBg, shape)
@@ -221,7 +224,8 @@ private fun TDTaskCheckBox(
     ) {
         if (isChecked) {
             Icon(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(16.dp)
                     .scale(checkScale),
                 painter = painterResource(R.drawable.ic_check_svg),
@@ -265,7 +269,8 @@ private fun TDTaskCardUncheckedPreview() {
 @Composable
 private fun TDTaskCard_ListPreview() {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .background(TDTheme.colors.background)
             .padding(16.dp),
     ) {
