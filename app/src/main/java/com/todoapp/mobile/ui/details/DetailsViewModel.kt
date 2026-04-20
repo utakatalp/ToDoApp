@@ -59,7 +59,7 @@ class DetailsViewModel @Inject constructor(
                 }
                 originalTask = task
                 _uiState.value = UiState.Success(
-                    taskId = task.id,
+                    taskId = task.remoteId ?: -1L,
                     taskTitle = task.title,
                     taskTimeStart = task.timeStart,
                     taskTimeEnd = task.timeEnd,
@@ -71,9 +71,11 @@ class DetailsViewModel @Inject constructor(
                     isSaving = false,
                     photoUrls = task.photoUrls,
                 )
-                // Fetch remote task to get authoritative photoUrls (local cache doesn't store them)
-                taskRepository.fetchRemoteTask(task.id).onSuccess { remote ->
-                    updateSuccessState { it.copy(photoUrls = remote.photoUrls) }
+                // Photos live server-side; fetch authoritative list via remoteId
+                task.remoteId?.let { remoteId ->
+                    taskRepository.fetchRemoteTask(remoteId).onSuccess { remote ->
+                        updateSuccessState { it.copy(photoUrls = remote.photoUrls) }
+                    }
                 }
             } catch (e: IOException) {
                 _uiState.value = UiState.Error(message = "Failed to load task", throwable = e)
@@ -102,14 +104,20 @@ class DetailsViewModel @Inject constructor(
     private fun uploadPhoto(bytes: ByteArray, mimeType: String) {
         viewModelScope.launch {
             val state = _uiState.value as? UiState.Success ?: return@launch
+            if (state.taskId <= 0) {
+                _uiEffect.trySend(UiEffect.ShowToast(R.string.photo_requires_sync))
+                return@launch
+            }
             taskRepository.uploadTaskPhoto(state.taskId, bytes, mimeType)
                 .onSuccess { refreshPhotos(state.taskId) }
+                .onFailure { _uiEffect.trySend(UiEffect.ShowToast(R.string.failed_to_upload_photo)) }
         }
     }
 
     private fun deletePhoto(photoId: Long) {
         viewModelScope.launch {
             val state = _uiState.value as? UiState.Success ?: return@launch
+            if (state.taskId <= 0) return@launch
             taskRepository.deleteTaskPhoto(state.taskId, photoId)
                 .onSuccess { refreshPhotos(state.taskId) }
         }
@@ -205,7 +213,7 @@ class DetailsViewModel @Inject constructor(
         }
 
         _uiState.value = UiState.Success(
-            taskId = existingTask.id,
+            taskId = existingTask.remoteId ?: -1L,
             taskTitle = existingTask.title,
             titleError = null,
             taskTimeStart = existingTask.timeStart,

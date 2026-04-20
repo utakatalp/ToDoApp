@@ -19,6 +19,7 @@ private fun LocalTime.toMinuteOfDayLong(): Long =
 fun TaskEntity.toDomain(): Task =
     Task(
         id = id,
+        remoteId = remoteId,
         title = title,
         description = description,
         date = date.toLocalDate(),

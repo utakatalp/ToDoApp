@@ -8,6 +8,7 @@ import java.time.LocalTime
 
 data class Task(
     val id: Long = 0L,
+    val remoteId: Long? = null,
     val title: String,
     val description: String?,
     val date: LocalDate,
