@@ -349,6 +349,7 @@ class GroupDetailViewModel @Inject constructor(
             isCompleted = false,
             isSecret = form.isTaskSecret,
         )
+        val pendingPhotos = form.pendingPhotos
         viewModelScope.launch {
             groupRepository.createGroupTask(
                 groupId,
@@ -356,7 +357,10 @@ class GroupDetailViewModel @Inject constructor(
                 priority = form.selectedPriority,
                 assignedToUserId = form.selectedAssigneeId
             )
-                .onSuccess {
+                .onSuccess { newTaskId ->
+                    pendingPhotos.forEach { photo ->
+                        groupRepository.uploadTaskPhoto(newTaskId, photo.bytes, photo.mimeType)
+                    }
                     updateSuccessState { it.copy(isTaskSheetOpen = false, taskFormState = TaskFormState()) }
                     _uiEffect.trySend(UiEffect.ShowToast("Task added to group"))
                     loadGroupData()

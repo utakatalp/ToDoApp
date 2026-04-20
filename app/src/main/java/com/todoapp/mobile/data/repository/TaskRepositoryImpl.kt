@@ -302,6 +302,13 @@ class TaskRepositoryImpl @Inject constructor(
             }
 
         return runCatching {
+            // Pre-delete any local row already holding a remoteId we're about to insert. Closes
+            // the race window where a just-created task hadn't committed in Room yet when this
+            // sync read its snapshot — without this, the same remoteId ends up in two rows.
+            val incomingRemoteIds = addedTaskEntities.mapNotNull { it.remoteId }
+            if (incomingRemoteIds.isNotEmpty()) {
+                localDataSource.deleteByRemoteIds(incomingRemoteIds)
+            }
             localDataSource.insertAll(addedTaskEntities)
             // Safety net: purge any personal-task rows whose remoteId actually belongs to a
             // group task (from stale data on earlier builds). Keeps Home free of dups.

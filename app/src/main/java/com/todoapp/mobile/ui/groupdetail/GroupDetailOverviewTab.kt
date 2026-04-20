@@ -516,12 +516,48 @@ private fun GroupTaskCard(
     task: GroupTaskUiItem,
     onChecked: (Boolean) -> Unit,
 ) {
-    TDTaskCardWithCheckbox(
-        isChecked = task.isCompleted,
-        taskText = task.title,
-        taskDescription = task.description,
-        onCheckBoxClick = onChecked,
-    )
+    Box {
+        TDTaskCardWithCheckbox(
+            isChecked = task.isCompleted,
+            taskText = task.title,
+            taskDescription = task.description,
+            onCheckBoxClick = onChecked,
+        )
+        if (!task.priority.isNullOrBlank()) {
+            PriorityBadge(
+                priority = task.priority,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 8.dp, end = 12.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun PriorityBadge(
+    priority: String,
+    modifier: Modifier = Modifier,
+) {
+    val normalized = priority.uppercase()
+    val (bg, fg, label) = when (normalized) {
+        "HIGH" -> Triple(TDTheme.colors.lightRed, TDTheme.colors.crossRed, "HIGH")
+        "MEDIUM" -> Triple(TDTheme.colors.lightOrange, TDTheme.colors.orange, "MED")
+        "LOW" -> Triple(TDTheme.colors.lightPending, TDTheme.colors.darkPending, "LOW")
+        else -> Triple(TDTheme.colors.lightPending, TDTheme.colors.pendingGray, normalized)
+    }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(bg)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        TDText(
+            text = label,
+            style = TDTheme.typography.subheading1,
+            color = fg,
+        )
+    }
 }
 
 @Composable

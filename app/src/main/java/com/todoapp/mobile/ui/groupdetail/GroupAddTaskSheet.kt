@@ -146,6 +146,12 @@ fun GroupAddTaskSheet(
             )
         }
         Spacer(Modifier.height(12.dp))
+        com.todoapp.mobile.ui.home.PendingPhotosRow(
+            pending = formState.pendingPhotos,
+            onPick = { bytes, mime -> onAction(TaskFormUiAction.PhotoPicked(bytes, mime)) },
+            onRemoveAt = { idx -> onAction(TaskFormUiAction.PhotoRemoveAt(idx)) },
+        )
+        Spacer(Modifier.height(12.dp))
         TDButton(
             text = submitLabel,
             onClick = { onAction(TaskFormUiAction.Create) },

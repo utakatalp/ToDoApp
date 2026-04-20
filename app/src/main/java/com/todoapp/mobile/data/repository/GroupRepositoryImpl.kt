@@ -211,14 +211,14 @@ class GroupRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun createGroupTask(groupId: Long, task: Task, priority: String?, assignedToUserId: Long?): Result<Unit> {
+    override suspend fun createGroupTask(groupId: Long, task: Task, priority: String?, assignedToUserId: Long?): Result<Long> {
         return taskRemoteDataSource.addTask(
             task,
             familyGroupId = groupId,
             assignedToUserId = assignedToUserId,
             priority = priority
         )
-            .map { }
+            .map { it.id }
             .onSuccess { syncGroupTasks(groupId) }
     }
 
