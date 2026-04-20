@@ -119,7 +119,7 @@ interface ToDoApi {
 
     @PUT("family-groups/{groupId}/transfer-ownership")
     suspend fun transferOwnership(
-        @Path("id") id: Long,
+        @Path("groupId") groupId: Long,
         @Body request: TransferOwnershipRequest,
     ): Response<BaseResponse<Unit?>>
 
