@@ -43,7 +43,8 @@ fun TDTaskCard(
     val accentColor = if (isCompleted) TDTheme.colors.mediumGreen else TDTheme.colors.purple
 
     Row(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(cardBg)
@@ -60,7 +61,8 @@ fun TDTaskCard(
         Column(modifier = Modifier.weight(1f)) {
             TDText(
                 text = taskTitle,
-                style = TDTheme.typography.heading7.copy(
+                style =
+                TDTheme.typography.heading7.copy(
                     textDecoration = if (isCompleted) TextDecoration.LineThrough else TextDecoration.None,
                 ),
                 color = TDTheme.colors.onBackground,

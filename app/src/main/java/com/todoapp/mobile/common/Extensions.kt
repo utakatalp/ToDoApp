@@ -29,45 +29,47 @@ import retrofit2.Response
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
-fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
+fun <T> MutableList<T>.move(
+    fromIndex: Int,
+    toIndex: Int,
+) {
     if (fromIndex == toIndex) return
     val item = removeAt(fromIndex)
     add(toIndex, item)
 }
 
-fun String.maskTitle(): String {
-    return this.first() + "*".repeat(this.length - 1)
-}
+fun String.maskTitle(): String = this.first() + "*".repeat(this.length - 1)
 
 fun String.maskDescription(): String {
     if (length <= 3) return this
     return take(3) + "*".repeat(length - 3)
 }
 
-suspend fun <T> handleRequest(
-    request: suspend () -> Response<BaseResponse<T?>>,
-): Result<T> {
+suspend fun <T> handleRequest(request: suspend () -> Response<BaseResponse<T?>>): Result<T> {
     return try {
         val response = request()
 
         if (response.isSuccessful.not()) {
             val errorBody = response.errorBody()?.string()
             Log.d("error", errorBody.toString())
-            val message = errorBody
-                ?.let {
-                    runCatching { Json.decodeFromString<ErrorResponse>(it).message }.getOrNull()
-                }
-                ?: response.message()
-                ?: "Something went wrong"
+            val message =
+                errorBody
+                    ?.let {
+                        runCatching { Json.decodeFromString<ErrorResponse>(it).message }.getOrNull()
+                    }
+                    ?: response.message()
+                    ?: "Something went wrong"
             Log.d("error", message)
             return Result.failure(DomainException.Server(message))
         }
 
-        val body = response.body()
-            ?: return Result.failure(DomainException.Server("Empty response"))
+        val body =
+            response.body()
+                ?: return Result.failure(DomainException.Server("Empty response"))
 
-        val data = body.data
-            ?: return Result.failure(DomainException.Server(body.message))
+        val data =
+            body.data
+                ?: return Result.failure(DomainException.Server(body.message))
 
         Result.success(data)
     } catch (t: Throwable) {
@@ -77,17 +79,24 @@ suspend fun <T> handleRequest(
     }
 }
 
-sealed class DomainException(message: String) : Exception(message) {
-
+sealed class DomainException(
+    message: String,
+) : Exception(message) {
     class NoInternet : DomainException("No internet connection")
 
     class Unauthorized : DomainException("Unauthorized")
 
-    class Server(message: String) : DomainException(message)
+    class Server(
+        message: String,
+    ) : DomainException(message)
 
-    class Database(message: String) : DomainException(message)
+    class Database(
+        message: String,
+    ) : DomainException(message)
 
-    class Unknown(cause: Throwable) : DomainException(cause.message ?: "Unknown error")
+    class Unknown(
+        cause: Throwable,
+    ) : DomainException(cause.message ?: "Unknown error")
 
     companion object {
         private const val HTTP_STATUS_UNAUTHORIZED = 401
@@ -95,7 +104,7 @@ sealed class DomainException(message: String) : Exception(message) {
         fun fromThrowable(t: Throwable): DomainException = when (t) {
             is UnknownHostException,
             is SocketTimeoutException,
-                -> NoInternet()
+            -> NoInternet()
 
             is HttpException -> {
                 if (t.code() == HTTP_STATUS_UNAUTHORIZED) {
@@ -112,9 +121,7 @@ sealed class DomainException(message: String) : Exception(message) {
 }
 
 @OptIn(InternalCoroutinesApi::class)
-suspend fun loginWithFacebook(
-    activity: FragmentActivity,
-): Result<String> = suspendCancellableCoroutine { cont ->
+suspend fun loginWithFacebook(activity: FragmentActivity): Result<String> = suspendCancellableCoroutine { cont ->
 
     val callbackManager = CallbackManager.Factory.create()
 
@@ -135,7 +142,6 @@ suspend fun loginWithFacebook(
     LoginManager.getInstance().registerCallback(
         callbackManager,
         object : FacebookCallback<LoginResult> {
-
             override fun onCancel() {
                 resumeOnce(Result.failure(Exception("User cancelled")))
             }
@@ -147,13 +153,13 @@ suspend fun loginWithFacebook(
             override fun onSuccess(result: LoginResult) {
                 resumeOnce(Result.success(result.accessToken.token))
             }
-        }
+        },
     )
 
     LoginManager.getInstance().logInWithReadPermissions(
         activity,
         callbackManager,
-        listOf("public_profile", "email")
+        listOf("public_profile", "email"),
     )
 
     cont.invokeOnCancellation {
@@ -162,13 +168,11 @@ suspend fun loginWithFacebook(
 }
 
 @Composable
-fun PomodoroModeUi.resolveTextColor(): Color {
-    return when (colorKey) {
-        ModeColorKey.Focus -> TDTheme.colors.pendingGray
-        ModeColorKey.ShortBreak -> TDTheme.colors.softPink
-        ModeColorKey.LongBreak -> TDTheme.colors.green
-        ModeColorKey.OverTime -> TDTheme.colors.red
-    }
+fun PomodoroModeUi.resolveTextColor(): Color = when (colorKey) {
+    ModeColorKey.Focus -> TDTheme.colors.pendingGray
+    ModeColorKey.ShortBreak -> TDTheme.colors.softPink
+    ModeColorKey.LongBreak -> TDTheme.colors.green
+    ModeColorKey.OverTime -> TDTheme.colors.red
 }
 
 fun PomodoroMode.toUiMode(): PomodoroModeUi = when (this) {
@@ -178,5 +182,4 @@ fun PomodoroMode.toUiMode(): PomodoroModeUi = when (this) {
     PomodoroMode.OverTime -> PomodoroModeUiPreset.OverTime.value
 }
 
-fun <T> ArrayDeque<T>.pollFirst(): T? =
-    if (isEmpty()) null else removeFirst()
+fun <T> ArrayDeque<T>.pollFirst(): T? = if (isEmpty()) null else removeFirst()

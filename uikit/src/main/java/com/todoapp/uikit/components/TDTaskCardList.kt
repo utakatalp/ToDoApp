@@ -46,10 +46,12 @@ fun TDTaskCardListPreview() {
     TDTheme {
         TDTaskCardList(
             modifier = Modifier.padding(16.dp),
-            tasks = listOf(
+            tasks =
+            listOf(
                 TaskDayItem(
                     date = LocalDate.of(2025, 1, 12),
-                    tasks = listOf(
+                    tasks =
+                    listOf(
                         TaskCardItem(
                             taskId = 1L,
                             taskTitle = "Read Book",
@@ -60,16 +62,17 @@ fun TDTaskCardListPreview() {
                 ),
                 TaskDayItem(
                     date = LocalDate.of(2025, 1, 13),
-                    tasks = listOf(
+                    tasks =
+                    listOf(
                         TaskCardItem(
                             taskId = 2L,
                             taskTitle = "Study Kotlin",
                             taskTimeStart = "10:00",
                             taskTimeEnd = "12:00",
                         ),
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         )
     }
 }

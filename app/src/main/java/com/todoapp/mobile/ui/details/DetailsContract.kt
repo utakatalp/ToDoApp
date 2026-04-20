@@ -30,21 +30,52 @@ object DetailsContract {
 
     sealed interface UiAction {
         data object OnBackClick : UiAction
+
         data object OnCancelClick : UiAction
-        data class OnTaskTitleEdit(val title: String) : UiAction
-        data class OnTaskTimeStartEdit(val time: LocalTime) : UiAction
-        data class OnTaskTimeEndEdit(val time: LocalTime) : UiAction
-        data class OnTaskDateEdit(val date: LocalDate) : UiAction
-        data class OnTaskDescriptionEdit(val description: String) : UiAction
-        data class OnDialogDateSelect(val date: LocalDate) : UiAction
+
+        data class OnTaskTitleEdit(
+            val title: String,
+        ) : UiAction
+
+        data class OnTaskTimeStartEdit(
+            val time: LocalTime,
+        ) : UiAction
+
+        data class OnTaskTimeEndEdit(
+            val time: LocalTime,
+        ) : UiAction
+
+        data class OnTaskDateEdit(
+            val date: LocalDate,
+        ) : UiAction
+
+        data class OnTaskDescriptionEdit(
+            val description: String,
+        ) : UiAction
+
+        data class OnDialogDateSelect(
+            val date: LocalDate,
+        ) : UiAction
+
         data object OnDialogDateDeselect : UiAction
+
         data object OnSaveChanges : UiAction
+
         data object OnRetry : UiAction
-        data class OnPhotoPicked(val bytes: ByteArray, val mimeType: String) : UiAction
-        data class OnPhotoDelete(val photoId: Long) : UiAction
+
+        data class OnPhotoPicked(
+            val bytes: ByteArray,
+            val mimeType: String,
+        ) : UiAction
+
+        data class OnPhotoDelete(
+            val photoId: Long,
+        ) : UiAction
     }
 
     sealed interface UiEffect {
-        data class ShowToast(@StringRes val message: Int) : UiEffect
+        data class ShowToast(
+            @StringRes val message: Int,
+        ) : UiEffect
     }
 }

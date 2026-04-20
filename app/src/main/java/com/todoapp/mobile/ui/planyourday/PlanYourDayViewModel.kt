@@ -27,11 +27,12 @@ import javax.inject.Inject
 private val DEFAULT_TIME: LocalTime = LocalTime.of(9, 0)
 
 @HiltViewModel
-class PlanYourDayViewModel @Inject constructor(
+class PlanYourDayViewModel
+@Inject
+constructor(
     private val dailyPlanPreferences: DailyPlanPreferences,
     private val alarmScheduler: AlarmScheduler,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
@@ -66,15 +67,17 @@ class PlanYourDayViewModel @Inject constructor(
 
     private fun observeData() {
         viewModelScope.launch {
-            dailyPlanPreferences.observePlanTime().onEach { savedTime ->
-                val time = savedTime ?: DEFAULT_TIME
-                _uiState.update {
-                    it.copy(
-                        selectedTime = time,
-                        savedTime = savedTime,
-                    )
-                }
-            }.collect {}
+            dailyPlanPreferences
+                .observePlanTime()
+                .onEach { savedTime ->
+                    val time = savedTime ?: DEFAULT_TIME
+                    _uiState.update {
+                        it.copy(
+                            selectedTime = time,
+                            savedTime = savedTime,
+                        )
+                    }
+                }.collect {}
         }
     }
 
@@ -90,11 +93,12 @@ class PlanYourDayViewModel @Inject constructor(
 
     private fun scheduleDailyPlanAlarm(time: LocalTime) {
         val now = LocalDateTime.now()
-        val alarmItem = buildDailyPlanAlarmItem(
-            selectedTime = time,
-            now = now,
-            message = "",
-        )
+        val alarmItem =
+            buildDailyPlanAlarmItem(
+                selectedTime = time,
+                now = now,
+                message = "",
+            )
         alarmScheduler.schedule(alarmItem, AlarmType.DAILY_PLAN)
     }
 

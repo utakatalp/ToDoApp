@@ -11,5 +11,5 @@ data class PomodoroEntity(
     @ColumnInfo(name = "focus_time") val focusTime: Int,
     @ColumnInfo(name = "short_break") val shortBreak: Int,
     @ColumnInfo(name = "long_break") val longBreak: Int,
-    @ColumnInfo(name = "section_count") val sectionCount: Int
+    @ColumnInfo(name = "section_count") val sectionCount: Int,
 )

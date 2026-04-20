@@ -44,10 +44,11 @@ fun TDBottomBar() {
 
             NavigationBarItem(
                 selected = selected,
-                colors = NavigationBarItemDefaults.colors(
+                colors =
+                NavigationBarItemDefaults.colors(
                     selectedIconColor = TDTheme.colors.pendingGray,
                     selectedTextColor = TDTheme.colors.pendingGray,
-                    indicatorColor = TDTheme.colors.pendingGray.copy(alpha = 0.2f)
+                    indicatorColor = TDTheme.colors.pendingGray.copy(alpha = 0.2f),
                 ),
                 onClick = {
                     if (selected) return@NavigationBarItem

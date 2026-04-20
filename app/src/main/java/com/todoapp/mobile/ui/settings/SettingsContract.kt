@@ -23,25 +23,52 @@ object SettingsContract {
     )
 
     sealed interface UiAction {
-        data class OnSelectedSecretModeChange(val label: SecretModeReopenOption) : UiAction
-        data class OnThemeChange(val theme: ThemePreference) : UiAction
-        data class OnLanguageChange(val language: LanguagePreference) : UiAction
+        data class OnSelectedSecretModeChange(
+            val label: SecretModeReopenOption,
+        ) : UiAction
+
+        data class OnThemeChange(
+            val theme: ThemePreference,
+        ) : UiAction
+
+        data class OnLanguageChange(
+            val language: LanguagePreference,
+        ) : UiAction
+
         data object OnSettingsSave : UiAction
+
         data object OnNavigateToPlanYourDay : UiAction
+
         data object OnNavigateToPomodoroSettings : UiAction
+
         data object OnDisableSecretModeTap : UiAction
-        data class OnDailyPlanTimeChange(val time: LocalTime) : UiAction
+
+        data class OnDailyPlanTimeChange(
+            val time: LocalTime,
+        ) : UiAction
+
         data object OnNavigateToSecretModeSettings : UiAction
+
         data object OnNavigateToProfile : UiAction
+
         data object OnLogoutClick : UiAction
+
         data object OnLogoutConfirm : UiAction
+
         data object OnLogoutDismiss : UiAction
+
         data object OnLoginOrRegisterClick : UiAction
     }
 
     sealed interface UiEffect {
-        data class ShowToast(val message: String) : UiEffect
+        data class ShowToast(
+            val message: String,
+        ) : UiEffect
+
         data object RecreateActivity : UiEffect
-        data class ApplyLocale(val tag: String) : UiEffect
+
+        data class ApplyLocale(
+            val tag: String,
+        ) : UiEffect
     }
 }

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GroupDao {
-
     @Query("SELECT * FROM `groups`")
     fun getAllGroups(): Flow<List<GroupEntity>>
 
@@ -33,7 +32,10 @@ interface GroupDao {
     suspend fun getGroupByName(name: String): GroupEntity
 
     @Query("UPDATE `groups` SET order_index = :orderIndex WHERE id = :id")
-    suspend fun updateOrderIndex(id: Long, orderIndex: Int)
+    suspend fun updateOrderIndex(
+        id: Long,
+        orderIndex: Int,
+    )
 
     @Query("SELECT * FROM `groups` ORDER BY order_index ASC")
     fun getAllGroupsOrdered(): Flow<List<GroupEntity>>

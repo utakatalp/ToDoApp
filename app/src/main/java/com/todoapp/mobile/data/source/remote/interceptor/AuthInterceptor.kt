@@ -7,16 +7,18 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
 
-class AuthInterceptor @Inject constructor(
+class AuthInterceptor
+@Inject
+constructor(
     private val sessionPreferences: SessionPreferences,
 ) : Interceptor {
-
-    private val noAuthPaths = listOf(
-        "/auth/register",
-        "/auth/login",
-        "/auth/google",
-        "/auth/facebook",
-    )
+    private val noAuthPaths =
+        listOf(
+            "/auth/register",
+            "/auth/login",
+            "/auth/google",
+            "/auth/facebook",
+        )
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
@@ -25,22 +27,25 @@ class AuthInterceptor @Inject constructor(
             return chain.proceed(original)
         }
 
-        val token = runBlocking {
-            sessionPreferences.getAccessToken()
-        }
+        val token =
+            runBlocking {
+                sessionPreferences.getAccessToken()
+            }
         if (token == null) {
             Log.w(
                 "AuthInterceptor",
-                "Access token is null — request will be unauthenticated: ${original.url.encodedPath}"
+                "Access token is null — request will be unauthenticated: ${original.url.encodedPath}",
             )
         }
-        val request = if (token != null) {
-            original.newBuilder()
-                .addHeader("Authorization", "Bearer $token")
-                .build()
-        } else {
-            original
-        }
+        val request =
+            if (token != null) {
+                original
+                    .newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+            } else {
+                original
+            }
         return chain.proceed(request)
     }
 }

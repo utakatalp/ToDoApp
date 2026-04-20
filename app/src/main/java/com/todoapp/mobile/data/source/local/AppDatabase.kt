@@ -34,7 +34,7 @@ import com.todoapp.mobile.data.source.local.datasource.GroupDao
         AutoMigration(from = 4, to = 5, spec = AppDatabase.Migration4To5Spec::class),
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7),
-    ]
+    ],
 )
 @TypeConverters(AppDatabase.SyncStatusConverter::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -62,22 +62,22 @@ abstract class AppDatabase : RoomDatabase() {
     }
 
     abstract fun taskDao(): TaskDao
+
     abstract fun groupDao(): GroupDao
+
     abstract fun groupTaskDao(): GroupTaskDao
+
     abstract fun groupMemberDao(): GroupMemberDao
+
     abstract fun groupActivityDao(): GroupActivityDao
+
     abstract fun pomodoroDao(): PomodoroDao
 
     class SyncStatusConverter {
+        @TypeConverter
+        fun fromSyncStatus(status: SyncStatus?): String? = status?.name
 
         @TypeConverter
-        fun fromSyncStatus(status: SyncStatus?): String? {
-            return status?.name
-        }
-
-        @TypeConverter
-        fun toSyncStatus(value: String?): SyncStatus? {
-            return value?.let { SyncStatus.valueOf(it) }
-        }
+        fun toSyncStatus(value: String?): SyncStatus? = value?.let { SyncStatus.valueOf(it) }
     }
 }

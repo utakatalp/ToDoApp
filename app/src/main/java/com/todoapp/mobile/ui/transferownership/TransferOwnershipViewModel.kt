@@ -23,12 +23,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TransferOwnershipViewModel @Inject constructor(
+class TransferOwnershipViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val groupId = savedStateHandle.toRoute<Screen.TransferOwnership>().groupId
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -55,18 +56,19 @@ class TransferOwnershipViewModel @Inject constructor(
     private fun loadMembers() {
         viewModelScope.launch {
             val currentUserId = userRepository.getUserInfo().getOrNull()?.id ?: -1L
-            groupRepository.getGroupMembers(groupId)
+            groupRepository
+                .getGroupMembers(groupId)
                 .onSuccess { members ->
                     val filtered = members.filter { it.userId != currentUserId }
                     val uiItems = filtered.map { it.toUiItem() }
-                    _uiState.value = UiState.Success(
-                        members = uiItems,
-                        filteredMembers = uiItems,
-                        searchQuery = "",
-                        selectedUserId = null,
-                    )
-                }
-                .onFailure {
+                    _uiState.value =
+                        UiState.Success(
+                            members = uiItems,
+                            filteredMembers = uiItems,
+                            searchQuery = "",
+                            selectedUserId = null,
+                        )
+                }.onFailure {
                     _uiState.value = UiState.Error(it.message ?: "Failed to load members")
                 }
         }
@@ -74,13 +76,14 @@ class TransferOwnershipViewModel @Inject constructor(
 
     private fun filterMembers(query: String) {
         val current = _uiState.value as? UiState.Success ?: return
-        val filtered = if (query.isBlank()) {
-            current.members
-        } else {
-            current.members.filter {
-                it.displayName.contains(query, ignoreCase = true) || it.subtitle.contains(query, ignoreCase = true)
+        val filtered =
+            if (query.isBlank()) {
+                current.members
+            } else {
+                current.members.filter {
+                    it.displayName.contains(query, ignoreCase = true) || it.subtitle.contains(query, ignoreCase = true)
+                }
             }
-        }
         _uiState.update { _ -> current.copy(searchQuery = query, filteredMembers = filtered) }
     }
 
@@ -93,26 +96,27 @@ class TransferOwnershipViewModel @Inject constructor(
         val current = _uiState.value as? UiState.Success ?: return
         val selectedId = current.selectedUserId ?: return
         viewModelScope.launch {
-            groupRepository.transferOwnership(groupId, selectedId)
+            groupRepository
+                .transferOwnership(groupId, selectedId)
                 .onSuccess {
                     _uiEffect.trySend(UiEffect.ShowToast("Ownership transferred"))
                     _navEffect.trySend(
-                        NavigationEffect.Navigate(Screen.Groups(), popUpTo = Screen.Groups(), isInclusive = false)
+                        NavigationEffect.Navigate(Screen.Groups(), popUpTo = Screen.Groups(), isInclusive = false),
                     )
-                }
-                .onFailure {
+                }.onFailure {
                     _uiEffect.trySend(UiEffect.ShowToast(it.message ?: "Failed to transfer ownership"))
                 }
         }
     }
 
     private fun GroupMember.toUiItem(): TransferMemberUiItem {
-        val initials = displayName
-            .split(" ")
-            .mapNotNull { it.firstOrNull()?.toString() }
-            .take(2)
-            .joinToString("")
-            .uppercase()
+        val initials =
+            displayName
+                .split(" ")
+                .mapNotNull { it.firstOrNull()?.toString() }
+                .take(2)
+                .joinToString("")
+                .uppercase()
         return TransferMemberUiItem(
             userId = userId,
             displayName = displayName,

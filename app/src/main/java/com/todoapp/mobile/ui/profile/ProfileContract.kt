@@ -1,7 +1,6 @@
 package com.todoapp.mobile.ui.profile
 
 object ProfileContract {
-
     data class UiState(
         val isLoading: Boolean = true,
         val userId: Long = 0L,
@@ -16,13 +15,23 @@ object ProfileContract {
     )
 
     sealed interface UiAction {
-        data class OnDisplayNameChange(val value: String) : UiAction
+        data class OnDisplayNameChange(
+            val value: String,
+        ) : UiAction
+
         data object OnSaveName : UiAction
-        data class OnAvatarPicked(val bytes: ByteArray, val mimeType: String) : UiAction
+
+        data class OnAvatarPicked(
+            val bytes: ByteArray,
+            val mimeType: String,
+        ) : UiAction
+
         data object OnBack : UiAction
     }
 
     sealed interface UiEffect {
-        data class ShowToast(val message: String) : UiEffect
+        data class ShowToast(
+            val message: String,
+        ) : UiEffect
     }
 }

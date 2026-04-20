@@ -37,14 +37,16 @@ fun SecretOrNormalPhotoBanner(
     isSecret: Boolean,
 ) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .height(140.dp),
     ) {
-        val imgModifier = Modifier.fillMaxSize().let {
-            // Compose blur only works on API 31+; on older devices we fall back to a heavy dim.
-            if (isSecret && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) it.blur(28.dp) else it
-        }
+        val imgModifier =
+            Modifier.fillMaxSize().let {
+                // Compose blur only works on API 31+; on older devices we fall back to a heavy dim.
+                if (isSecret && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) it.blur(28.dp) else it
+            }
         AsyncImage(
             model = url,
             contentDescription = null,
@@ -53,7 +55,8 @@ fun SecretOrNormalPhotoBanner(
         )
         if (isSecret) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.45f)),
                 contentAlignment = Alignment.Center,

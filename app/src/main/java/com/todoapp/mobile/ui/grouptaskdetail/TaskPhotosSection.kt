@@ -19,12 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,11 +28,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.todoapp.mobile.BuildConfig
 import com.todoapp.mobile.R
@@ -51,16 +49,18 @@ fun TaskPhotosSection(
     onDelete: (Long) -> Unit,
 ) {
     val context = LocalContext.current
-    val picker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        val cr = context.contentResolver
-        val mime = cr.getType(uri) ?: "image/jpeg"
-        val bytes = runCatching { cr.openInputStream(uri)?.use { it.readBytes() } }
-            .getOrNull() ?: return@rememberLauncherForActivityResult
-        onPick(bytes, mime)
-    }
+    val picker =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia(),
+        ) { uri ->
+            uri ?: return@rememberLauncherForActivityResult
+            val cr = context.contentResolver
+            val mime = cr.getType(uri) ?: "image/jpeg"
+            val bytes =
+                runCatching { cr.openInputStream(uri)?.use { it.readBytes() } }
+                    .getOrNull() ?: return@rememberLauncherForActivityResult
+            onPick(bytes, mime)
+        }
     var viewerUrl by remember { mutableStateOf<String?>(null) }
     var viewerPhotoId by remember { mutableStateOf<Long?>(null) }
 
@@ -113,7 +113,8 @@ fun TaskPhotosSection(
                 viewerUrl = null
                 viewerPhotoId = null
             },
-            onDelete = viewerPhotoId?.let {
+            onDelete =
+            viewerPhotoId?.let {
                 {
                     onDelete(it)
                     viewerUrl = null
@@ -135,13 +136,18 @@ private fun PhotoViewerDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
-                .background(androidx.compose.ui.graphics.Color(0xEE000000)),
+                .background(
+                    androidx.compose.ui.graphics
+                        .Color(0xEE000000),
+                ),
         ) {
             // Image (tap anywhere on it to dismiss)
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .clickable(onClick = onDismiss),
                 contentAlignment = Alignment.Center,
@@ -157,13 +163,15 @@ private fun PhotoViewerDialog(
             // Solid-red Delete button at the bottom (prominent, thumb-friendly)
             if (onDelete != null) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
                         .padding(horizontal = 24.dp, vertical = 32.dp),
                     contentAlignment = Alignment.BottomCenter,
                 ) {
                     Row(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .height(56.dp)
                             .clip(RoundedCornerShape(16.dp))
@@ -195,7 +203,8 @@ private fun PhotoViewerDialog(
 @Composable
 private fun AddPhotoTile(onClick: () -> Unit) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(80.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(TDTheme.colors.lightPending)
@@ -211,9 +220,13 @@ private fun AddPhotoTile(onClick: () -> Unit) {
 }
 
 @Composable
-private fun PhotoTile(url: String, onLongPress: () -> Unit) {
+private fun PhotoTile(
+    url: String,
+    onLongPress: () -> Unit,
+) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(80.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(TDTheme.colors.lightPending)
@@ -239,5 +252,4 @@ private fun absoluteUrl(relative: String): String {
     return "$base/$path"
 }
 
-private fun photoIdFromUrl(url: String): Long? =
-    url.trimEnd('/').substringAfterLast('/').toLongOrNull()
+private fun photoIdFromUrl(url: String): Long? = url.trimEnd('/').substringAfterLast('/').toLongOrNull()

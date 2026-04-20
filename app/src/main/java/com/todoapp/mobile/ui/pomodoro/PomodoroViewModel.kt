@@ -22,11 +22,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PomodoroViewModel @Inject constructor(
+class PomodoroViewModel
+@Inject
+constructor(
     private val pomodoroRepository: PomodoroRepository,
     private val engine: PomodoroEngine,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(PomodoroContract.UiState())
     val uiState = _uiState.asStateFlow()
 
@@ -130,7 +131,9 @@ class PomodoroViewModel @Inject constructor(
                     it.copy(
                         totalSessions = engineState.totalSessions,
                         currentSessionIndex = engineState.currentSessionIndex,
-                        totalSessionSeconds = sessionQueue.getOrNull(currentSessionIndex)
+                        totalSessionSeconds =
+                        sessionQueue
+                            .getOrNull(currentSessionIndex)
                             ?.durationSeconds ?: it.totalSessionSeconds,
                     )
                 }
@@ -141,13 +144,14 @@ class PomodoroViewModel @Inject constructor(
     private fun navigateToFinishScreen() {
         _navEffect.trySend(
             NavigationEffect.Navigate(
-                route = Screen.PomodoroSummary(
+                route =
+                Screen.PomodoroSummary(
                     focusSessions = sessionQueue.count { it.mode == PomodoroMode.Focus },
                     totalFocusMinutes = (totalFocusSeconds / SECONDS_PER_MINUTE).toInt(),
                     totalBreakMinutes = (totalBreakSeconds / SECONDS_PER_MINUTE).toInt(),
                 ),
                 popUpTo = Screen.Home,
-            )
+            ),
         )
     }
 
@@ -171,7 +175,8 @@ class PomodoroViewModel @Inject constructor(
             when (finished.mode) {
                 PomodoroMode.Focus -> totalFocusSeconds += finished.durationSeconds
                 PomodoroMode.ShortBreak,
-                PomodoroMode.LongBreak -> totalBreakSeconds += finished.durationSeconds
+                PomodoroMode.LongBreak,
+                -> totalBreakSeconds += finished.durationSeconds
                 PomodoroMode.OverTime -> Unit
             }
         }
@@ -187,12 +192,11 @@ class PomodoroViewModel @Inject constructor(
         }
     }
 
-    private fun mapEngineStateToUiState(
-        engineStateSnapshot: com.todoapp.mobile.domain.engine.PomodoroEngineState,
-    ) {
+    private fun mapEngineStateToUiState(engineStateSnapshot: com.todoapp.mobile.domain.engine.PomodoroEngineState) {
         val totalSeconds = engineStateSnapshot.remainingSeconds
-        val currentDuration = sessionQueue.getOrNull(currentSessionIndex)?.durationSeconds
-            ?: (25L * SECONDS_PER_MINUTE)
+        val currentDuration =
+            sessionQueue.getOrNull(currentSessionIndex)?.durationSeconds
+                ?: (25L * SECONDS_PER_MINUTE)
 
         _uiState.update {
             it.copy(
@@ -222,11 +226,12 @@ class PomodoroViewModel @Inject constructor(
 
             val isLastFocus = i == pomodoro.sessionCount
             if (!isLastFocus) {
-                val breakMode = if (i % pomodoro.sectionCount == 0) {
-                    PomodoroMode.LongBreak
-                } else {
-                    PomodoroMode.ShortBreak
-                }
+                val breakMode =
+                    if (i % pomodoro.sectionCount == 0) {
+                        PomodoroMode.LongBreak
+                    } else {
+                        PomodoroMode.ShortBreak
+                    }
                 val breakDuration = if (breakMode == PomodoroMode.LongBreak) longSeconds else shortSeconds
                 queue.addLast(Session(durationSeconds = breakDuration, mode = breakMode))
             }

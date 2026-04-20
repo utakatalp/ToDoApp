@@ -4,10 +4,12 @@ import java.util.Properties
 
 // Read debug BASE_URL from local.properties (not in git). Defaults to the deployed Render backend.
 // Emulator dev: add `debugBaseUrl=http://10.0.2.2:8080/` to local.properties.
-val debugBaseUrl: String = Properties().apply {
-    val f = rootProject.file("local.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
-}.getProperty("debugBaseUrl", "https://donebot-backend.onrender.com/")
+val debugBaseUrl: String =
+    Properties()
+        .apply {
+            val f = rootProject.file("local.properties")
+            if (f.exists()) f.inputStream().use { load(it) }
+        }.getProperty("debugBaseUrl", "https://donebot-backend.onrender.com/")
 
 plugins {
     alias(libs.plugins.android.application)
@@ -126,19 +128,16 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-
     // Dependency Injection (Hilt)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
     ksp(libs.androidx.hilt.compiler)
 
-
     // Network (Retrofit & KotlinX Serialization)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)
-
 
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)

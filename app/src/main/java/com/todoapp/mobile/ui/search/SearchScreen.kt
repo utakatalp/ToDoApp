@@ -95,7 +95,8 @@ fun SearchScreen(
     }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .imePadding()
@@ -109,7 +110,8 @@ fun SearchScreen(
             exit = shrinkHorizontally() + fadeOut(),
         ) {
             TDTextField(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
                 value = queryText,
@@ -173,10 +175,18 @@ private fun SearchResults(
             val hasPersonalTasks = uiState.results.any { it is SearchResultItem.PersonalTask }
             val hasGroupItems = uiState.results.any { it is SearchResultItem.GroupHeader }
             val showSections = hasPersonalTasks && hasGroupItems
-            val firstPersonalTaskId = uiState.results
-                .filterIsInstance<SearchResultItem.PersonalTask>().firstOrNull()?.task?.id
-            val firstGroupId = uiState.results
-                .filterIsInstance<SearchResultItem.GroupHeader>().firstOrNull()?.group?.id
+            val firstPersonalTaskId =
+                uiState.results
+                    .filterIsInstance<SearchResultItem.PersonalTask>()
+                    .firstOrNull()
+                    ?.task
+                    ?.id
+            val firstGroupId =
+                uiState.results
+                    .filterIsInstance<SearchResultItem.GroupHeader>()
+                    .firstOrNull()
+                    ?.group
+                    ?.id
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(
                     items = uiState.results,
@@ -221,7 +231,8 @@ private fun SearchFilterRow(
     onAction: (UiAction) -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -258,7 +269,8 @@ private fun SearchFilterChip(
     val bgColor = if (selected) TDTheme.colors.darkPending else TDTheme.colors.lightPending
     val textColor = if (selected) TDTheme.colors.background else TDTheme.colors.pendingGray
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .background(color = bgColor, shape = RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 7.dp),
@@ -288,13 +300,13 @@ private fun SearchTaskItem(
         )
         Spacer(Modifier.height(4.dp))
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .padding(horizontal = 4.dp)
                 .background(
                     color = TDTheme.colors.onBackground.copy(alpha = 0.06f),
                     shape = RoundedCornerShape(6.dp),
-                )
-                .padding(horizontal = 6.dp, vertical = 3.dp),
+                ).padding(horizontal = 6.dp, vertical = 3.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -353,7 +365,7 @@ private fun SearchScreenIdlePreview() {
         SearchScreen(
             uiState = UiState.Idle,
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -365,7 +377,7 @@ private fun SearchScreenLoadingPreview() {
         SearchScreen(
             uiState = UiState.Loading,
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -375,9 +387,11 @@ private fun SearchScreenLoadingPreview() {
 private fun SearchScreenSuccessPreview() {
     TDTheme {
         SearchScreen(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 query = "Buy",
-                results = listOf(
+                results =
+                listOf(
                     SearchResultItem.PersonalTask(
                         Task(
                             id = 1,
@@ -388,13 +402,13 @@ private fun SearchScreenSuccessPreview() {
                             timeStart = LocalTime.of(9, 0),
                             timeEnd = LocalTime.of(10, 0),
                             isSecret = false,
-                        )
-                    )
+                        ),
+                    ),
                 ),
-                activeFilter = SearchFilter.ALL
+                activeFilter = SearchFilter.ALL,
             ),
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -404,9 +418,11 @@ private fun SearchScreenSuccessPreview() {
 private fun SearchScreenSuccessDarkPreview() {
     TDTheme {
         SearchScreen(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 query = "Buy",
-                results = listOf(
+                results =
+                listOf(
                     SearchResultItem.PersonalTask(
                         Task(
                             id = 1,
@@ -417,13 +433,13 @@ private fun SearchScreenSuccessDarkPreview() {
                             timeStart = LocalTime.of(9, 0),
                             timeEnd = LocalTime.of(10, 0),
                             isSecret = false,
-                        )
-                    )
+                        ),
+                    ),
                 ),
-                activeFilter = SearchFilter.ALL
+                activeFilter = SearchFilter.ALL,
             ),
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }

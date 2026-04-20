@@ -11,13 +11,13 @@ import androidx.navigation.NavHostController
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.atomic.AtomicBoolean
 
-val LocalNavController = staticCompositionLocalOf<NavHostController> {
-    error("No NavController provided")
-}
+val LocalNavController =
+    staticCompositionLocalOf<NavHostController> {
+        error("No NavController provided")
+    }
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
-
     private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -56,11 +56,13 @@ fun LoginScreen(
                 handleFacebookLogin(context = context, onAction = onAction)
             }
             UiEffect.GoogleLogin -> {
-                GoogleSignInManager.getGoogleIdToken(context).onSuccess { idToken ->
-                    onAction(UiAction.OnSuccessfulGoogleLogin(idToken))
-                }.onFailure { error ->
-                    onAction(UiAction.OnGoogleSignInFailed(error.message ?: "Sign-in Cancelled"))
-                }
+                GoogleSignInManager
+                    .getGoogleIdToken(context)
+                    .onSuccess { idToken ->
+                        onAction(UiAction.OnSuccessfulGoogleLogin(idToken))
+                    }.onFailure { error ->
+                        onAction(UiAction.OnGoogleSignInFailed(error.message ?: "Sign-in Cancelled"))
+                    }
             }
             is UiEffect.ShowToast -> {}
         }
@@ -92,36 +94,37 @@ private fun LoginPortraitContent(
             .fillMaxSize()
             .background(color = TDTheme.colors.pendingGray)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
         Spacer(Modifier.height(32.dp))
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(70.dp)
                 .background(
                     color = TDTheme.colors.background.copy(alpha = 0.25f),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painterResource(R.drawable.ic_logo),
                 contentDescription = stringResource(R.string.logo),
                 modifier = Modifier.size(40.dp),
-                tint = TDTheme.colors.white
+                tint = TDTheme.colors.white,
             )
         }
         Spacer(Modifier.height(12.dp))
         TDText(
             text = stringResource(R.string.login_header),
             style = TDTheme.typography.heading1,
-            color = TDTheme.colors.white
+            color = TDTheme.colors.white,
         )
         TDText(
             text = stringResource(R.string.elevate_your_productivity),
             style = TDTheme.typography.heading4,
-            color = TDTheme.colors.white.copy(0.8f)
+            color = TDTheme.colors.white.copy(0.8f),
         )
         Spacer(Modifier.weight(1f))
 
@@ -144,12 +147,14 @@ private fun LoginLandscapeContent(
 ) {
     Row(Modifier.fillMaxSize()) {
         LoginBrandingPanel(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f)
-                .fillMaxHeight()
+                .fillMaxHeight(),
         )
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .background(TDTheme.colors.background)
@@ -165,21 +170,21 @@ suspend fun handleFacebookLogin(
     context: Context,
     onAction: (UiAction) -> Unit,
 ) {
-    val activity = context as? FragmentActivity
-        ?: run {
-            onAction(
-                UiAction.OnFacebookLoginFail(
-                    IllegalStateException("Facebook login requires a FragmentActivity context")
+    val activity =
+        context as? FragmentActivity
+            ?: run {
+                onAction(
+                    UiAction.OnFacebookLoginFail(
+                        IllegalStateException("Facebook login requires a FragmentActivity context"),
+                    ),
                 )
-            )
-            return
-        }
+                return
+            }
 
     loginWithFacebook(activity = activity)
         .onSuccess { token ->
             onAction(UiAction.OnSuccessfulFacebookLogin(token))
-        }
-        .onFailure { throwable ->
+        }.onFailure { throwable ->
             onAction(UiAction.OnFacebookLoginFail(throwable))
         }
 }
@@ -189,7 +194,8 @@ suspend fun handleFacebookLogin(
 private fun LoginContentPreview() {
     TDTheme {
         LoginContent(
-            uiState = UiState(
+            uiState =
+            UiState(
                 email = "name@example.com",
                 password = "ExamplePassword123",
                 isPasswordVisible = true,
@@ -204,10 +210,11 @@ private fun LoginContentPreview() {
 private fun LoginContentDarkPreview() {
     TDTheme {
         LoginContent(
-            uiState = UiState(
+            uiState =
+            UiState(
                 email = "name@example.com",
                 password = "ExamplePassword123",
-                isPasswordVisible = false
+                isPasswordVisible = false,
             ),
             onAction = {},
         )

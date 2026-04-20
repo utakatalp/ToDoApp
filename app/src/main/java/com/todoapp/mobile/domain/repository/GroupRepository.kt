@@ -23,29 +23,58 @@ interface GroupRepository {
 
     fun observeAllGroups(): Flow<List<Group>>
 
-    suspend fun reorderGroups(fromIndex: Int, toIndex: Int): Result<Unit>
+    suspend fun reorderGroups(
+        fromIndex: Int,
+        toIndex: Int,
+    ): Result<Unit>
 
     suspend fun getGroupDetail(groupId: Long): Result<GroupData>
 
-    suspend fun updateGroup(groupId: Long, name: String, description: String): Result<Unit>
+    suspend fun updateGroup(
+        groupId: Long,
+        name: String,
+        description: String,
+    ): Result<Unit>
 
     suspend fun getGroupMembers(groupId: Long): Result<List<GroupMember>>
 
-    suspend fun inviteMember(groupId: Long, email: String): Result<Unit>
+    suspend fun inviteMember(
+        groupId: Long,
+        email: String,
+    ): Result<Unit>
 
-    suspend fun removeMember(groupId: Long, userId: Long): Result<Unit>
+    suspend fun removeMember(
+        groupId: Long,
+        userId: Long,
+    ): Result<Unit>
 
-    suspend fun transferOwnership(groupId: Long, userId: Long): Result<Unit>
+    suspend fun transferOwnership(
+        groupId: Long,
+        userId: Long,
+    ): Result<Unit>
 
     suspend fun getGroupActivity(groupId: Long): Result<List<GroupActivity>>
 
     suspend fun getGroupTasks(groupId: Long): Result<List<GroupTask>>
 
-    suspend fun createGroupTask(groupId: Long, task: Task, priority: String? = null, assignedToUserId: Long? = null): Result<Long>
+    suspend fun createGroupTask(
+        groupId: Long,
+        task: Task,
+        priority: String? = null,
+        assignedToUserId: Long? = null,
+    ): Result<Long>
 
-    suspend fun deleteGroupTask(groupId: Long, taskId: Long): Result<Unit>
+    suspend fun deleteGroupTask(
+        groupId: Long,
+        taskId: Long,
+    ): Result<Unit>
 
-    suspend fun updateGroupTaskStatus(groupId: Long, taskId: Long, groupTask: GroupTask, isCompleted: Boolean): Result<Unit>
+    suspend fun updateGroupTaskStatus(
+        groupId: Long,
+        taskId: Long,
+        groupTask: GroupTask,
+        isCompleted: Boolean,
+    ): Result<Unit>
 
     suspend fun updateGroupTask(
         groupId: Long,
@@ -57,9 +86,16 @@ interface GroupRepository {
         assignedToUserId: Long? = null,
     ): Result<Unit>
 
-    suspend fun assignGroupTask(groupId: Long, taskId: Long, userId: Long): Result<Unit>
+    suspend fun assignGroupTask(
+        groupId: Long,
+        taskId: Long,
+        userId: Long,
+    ): Result<Unit>
 
-    suspend fun unassignGroupTask(groupId: Long, taskId: Long): Result<Unit>
+    suspend fun unassignGroupTask(
+        groupId: Long,
+        taskId: Long,
+    ): Result<Unit>
 
     fun observeGroupTasks(localGroupId: Long): Flow<List<GroupTask>>
 
@@ -71,8 +107,20 @@ interface GroupRepository {
 
     suspend fun searchGroupTasksAcrossGroups(query: String): Result<List<Pair<Group, List<GroupTask>>>>
 
-    suspend fun uploadTaskPhoto(taskId: Long, bytes: ByteArray, mimeType: String): Result<String>
-    suspend fun deleteTaskPhoto(taskId: Long, photoId: Long): Result<Unit>
+    suspend fun uploadTaskPhoto(
+        taskId: Long,
+        bytes: ByteArray,
+        mimeType: String,
+    ): Result<String>
 
-    suspend fun uploadGroupAvatar(groupId: Long, bytes: ByteArray, mimeType: String): Result<Unit>
+    suspend fun deleteTaskPhoto(
+        taskId: Long,
+        photoId: Long,
+    ): Result<Unit>
+
+    suspend fun uploadGroupAvatar(
+        groupId: Long,
+        bytes: ByteArray,
+        mimeType: String,
+    ): Result<Unit>
 }

@@ -165,15 +165,19 @@ fun NavGraph(
                         activity.recreate()
                     }
                     is SettingsContract.UiEffect.ApplyLocale -> {
-                        val locales = androidx.core.os.LocaleListCompat.forLanguageTags(effect.tag)
+                        val locales =
+                            androidx.core.os.LocaleListCompat
+                                .forLanguageTags(effect.tag)
                         if (Build.VERSION.SDK_INT >= 33) {
                             // Android 13+: platform LocaleManager applies process-wide without full recreate.
                             val lm = context.getSystemService(android.app.LocaleManager::class.java)
                             lm?.applicationLocales = android.os.LocaleList.forLanguageTags(effect.tag)
-                            androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(locales)
+                            androidx.appcompat.app.AppCompatDelegate
+                                .setApplicationLocales(locales)
                         } else {
                             // Pre-33: AppCompat routes through the delegate and auto-recreates.
-                            androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(locales)
+                            androidx.appcompat.app.AppCompatDelegate
+                                .setApplicationLocales(locales)
                         }
                     }
                 }
@@ -221,7 +225,7 @@ fun NavGraph(
             NavigationEffectController(viewModel.navEffect)
             AddPomodoroTimerScreen(
                 uiState,
-                viewModel::onAction
+                viewModel::onAction,
             )
         }
         composable<Screen.Pomodoro> {
@@ -232,7 +236,7 @@ fun NavGraph(
             PomodoroScreen(
                 uiState,
                 uiEffect,
-                viewModel::onAction
+                viewModel::onAction,
             )
         }
 
@@ -244,7 +248,7 @@ fun NavGraph(
             DetailsScreen(
                 uiState,
                 uiEffect,
-                viewModel::onAction
+                viewModel::onAction,
             )
         }
         composable<Screen.Register> {
@@ -277,7 +281,7 @@ fun NavGraph(
             NavigationEffectController(viewModel.navEffect)
             WebViewScreen(
                 onAction = viewModel::onAction,
-                uiEffect = uiEffect
+                uiEffect = uiEffect,
             )
         }
 
@@ -337,7 +341,8 @@ fun NavGraph(
         composable<Screen.Profile> {
             val viewModel: com.todoapp.mobile.ui.profile.ProfileViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
-            com.todoapp.mobile.ui.profile.ProfileScreen(viewModel = viewModel)
+            com.todoapp.mobile.ui.profile
+                .ProfileScreen(viewModel = viewModel)
         }
 
         composable<Screen.GroupDetail> {
@@ -377,7 +382,8 @@ fun NavGraph(
         composable<Screen.TransferOwnership> {
             val viewModel: com.todoapp.mobile.ui.transferownership.TransferOwnershipViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
-            com.todoapp.mobile.ui.transferownership.TransferOwnershipScreen(viewModel = viewModel)
+            com.todoapp.mobile.ui.transferownership
+                .TransferOwnershipScreen(viewModel = viewModel)
         }
     }
 }
@@ -402,16 +408,16 @@ fun ToDoApp() {
 
     Scaffold(
         modifier =
-            Modifier
-                .fillMaxSize()
-                .background(TDTheme.colors.background),
+        Modifier
+            .fillMaxSize()
+            .background(TDTheme.colors.background),
         bottomBar = { if (isPortrait) TDBottomBar() },
         topBar = {
             Column {
                 BannerOverlay(
                     bannerState,
                     bannerViewModel::onAction,
-                    bannerViewModel.uiEffect
+                    bannerViewModel.uiEffect,
                 )
                 NavigationEffectController(bannerViewModel.navEffect)
                 ShowTopBar(bannerState.isBannerActivated, topBarViewModel::onAction, topBarState)
@@ -428,10 +434,11 @@ fun ToDoApp() {
             if (!isPortrait) TDNavigationRail()
             NavGraph(
                 navController = LocalNavController.current,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .weight(1f),
-                startDestination = startDestination
+                startDestination = startDestination,
             )
         }
     }
@@ -447,14 +454,15 @@ sealed interface NavigationEffect {
         val restoreState: Boolean = false,
     ) : NavigationEffect
 
-    data class NavigateClearingBackstack(val route: Screen) : NavigationEffect
+    data class NavigateClearingBackstack(
+        val route: Screen,
+    ) : NavigationEffect
+
     data object Back : NavigationEffect
 }
 
 @Composable
-fun NavigationEffectController(
-    navEffect: Flow<NavigationEffect>,
-) {
+fun NavigationEffectController(navEffect: Flow<NavigationEffect>) {
     val navController = LocalNavController.current
     navEffect.collectWithLifecycle { effect ->
         when (effect) {

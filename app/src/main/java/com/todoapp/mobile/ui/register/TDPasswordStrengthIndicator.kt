@@ -22,14 +22,13 @@ import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun TDPasswordStrengthIndicator(
-    uiState: UiState,
-) {
+fun TDPasswordStrengthIndicator(uiState: UiState) {
     uiState.passwordStrength?.let { strength ->
         val (progress, color, label) = strength.toProgress()
 
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(vertical = 6.dp),
             horizontalAlignment = Alignment.Start,
@@ -46,12 +45,12 @@ fun TDPasswordStrengthIndicator(
                 TDText(
                     text = label.substringBeforeLast(" ") + " ",
                     style = TDTheme.typography.subheading4,
-                    color = TDTheme.colors.onBackground
+                    color = TDTheme.colors.onBackground,
                 )
                 TDText(
                     text = label.substringAfterLast(" "),
                     style = TDTheme.typography.subheading4,
-                    color = color
+                    color = color,
                 )
             }
         }
@@ -63,32 +62,36 @@ fun TDPasswordStrengthIndicator(
 fun TDPasswordStrengthIndicatorPreview() {
     TDTheme {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxHeight()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             TDPasswordStrengthIndicator(
-                uiState = UiState(
-                    passwordStrength = PasswordStrength.WEAK
-                )
+                uiState =
+                UiState(
+                    passwordStrength = PasswordStrength.WEAK,
+                ),
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             TDPasswordStrengthIndicator(
-                uiState = UiState(
-                    passwordStrength = PasswordStrength.MEDIUM
-                )
+                uiState =
+                UiState(
+                    passwordStrength = PasswordStrength.MEDIUM,
+                ),
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             TDPasswordStrengthIndicator(
-                uiState = UiState(
-                    passwordStrength = PasswordStrength.STRONG
-                )
+                uiState =
+                UiState(
+                    passwordStrength = PasswordStrength.STRONG,
+                ),
             )
         }
     }
@@ -99,32 +102,36 @@ fun TDPasswordStrengthIndicatorPreview() {
 fun TDPasswordStrengthIndicatorDarkPreview() {
     TDTheme {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxHeight()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             TDPasswordStrengthIndicator(
-                uiState = UiState(
-                    passwordStrength = PasswordStrength.WEAK
-                )
+                uiState =
+                UiState(
+                    passwordStrength = PasswordStrength.WEAK,
+                ),
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             TDPasswordStrengthIndicator(
-                uiState = UiState(
-                    passwordStrength = PasswordStrength.MEDIUM
-                )
+                uiState =
+                UiState(
+                    passwordStrength = PasswordStrength.MEDIUM,
+                ),
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             TDPasswordStrengthIndicator(
-                uiState = UiState(
-                    passwordStrength = PasswordStrength.STRONG
-                )
+                uiState =
+                UiState(
+                    passwordStrength = PasswordStrength.STRONG,
+                ),
             )
         }
     }

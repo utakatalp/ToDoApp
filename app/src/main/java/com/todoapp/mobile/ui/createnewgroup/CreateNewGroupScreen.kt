@@ -50,7 +50,8 @@ private fun CreateNewGroupContent(
 ) {
     val verticalScroll = rememberScrollState()
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(color = TDTheme.colors.background)
             .verticalScroll(verticalScroll)
@@ -61,7 +62,7 @@ private fun CreateNewGroupContent(
             painterResource(com.example.uikit.R.drawable.ic_avatar_new_group),
             contentDescription = stringResource(new_group),
             modifier = Modifier.size(140.dp),
-            tint = TDTheme.colors.pendingGray.copy(0.81f)
+            tint = TDTheme.colors.pendingGray.copy(0.81f),
         )
         TDText(text = stringResource(let_s_get_started), style = TDTheme.typography.heading2)
         TDText(text = stringResource(bring_your_group_together_in_one_place), color = TDTheme.colors.lightGray)
@@ -71,7 +72,7 @@ private fun CreateNewGroupContent(
             isError = uiState.error != null,
             placeholder = stringResource(e_g_the_johnsons_summer_vacation),
             value = uiState.groupName,
-            onValueChange = { onAction(UiAction.OnGroupNameChange(it)) }
+            onValueChange = { onAction(UiAction.OnGroupNameChange(it)) },
         )
         uiState.error?.let {
             Spacer(Modifier.height(4.dp))
@@ -83,7 +84,7 @@ private fun CreateNewGroupContent(
             placeholder = stringResource(what_is_this_group_for_collaborating_on_chores_planning_trips_or_daily_tasks),
             value = uiState.groupDescription ?: "",
             onValueChange = { onAction(UiAction.OnGroupDescriptionChange(it)) },
-            minLines = 5
+            minLines = 5,
         )
         Spacer(Modifier.height(24.dp))
         TDButton(
@@ -93,10 +94,11 @@ private fun CreateNewGroupContent(
         )
         Spacer(Modifier.height(24.dp))
         TDInfoCard(
-            text = stringResource(
-                R.string.text_field_description
+            text =
+            stringResource(
+                R.string.text_field_description,
             ),
-            modifier = Modifier.imePadding()
+            modifier = Modifier.imePadding(),
         )
     }
 }
@@ -107,13 +109,14 @@ private fun CreateNewGroupContent(
 private fun CreateNewGroupScreenPreview() {
     TDTheme {
         CreateNewGroupScreen(
-            uiState = UiState(
+            uiState =
+            UiState(
                 groupName = "YTU Family",
                 groupDescription = "Weekend chores and shared tasks",
                 error = null,
-                isUserAuthenticated = true
+                isUserAuthenticated = true,
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -124,13 +127,14 @@ private fun CreateNewGroupScreenPreview() {
 private fun CreateNewGroupScreenPreview2() {
     TDTheme {
         CreateNewGroupScreen(
-            uiState = UiState(
+            uiState =
+            UiState(
                 groupName = "",
                 groupDescription = "",
                 error = "Group name is required.",
-                isUserAuthenticated = true
+                isUserAuthenticated = true,
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }

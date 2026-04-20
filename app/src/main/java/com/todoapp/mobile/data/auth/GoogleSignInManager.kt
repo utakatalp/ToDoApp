@@ -13,43 +13,45 @@ import javax.inject.Singleton
 
 @Singleton
 object GoogleSignInManager {
-
-    suspend fun getGoogleIdToken(activityContext: Context): Result<String> {
-        return try {
-            val credentialManager = CredentialManager.create(activityContext)
-            val googleIdOption = GetGoogleIdOption.Builder()
+    suspend fun getGoogleIdToken(activityContext: Context): Result<String> = try {
+        val credentialManager = CredentialManager.create(activityContext)
+        val googleIdOption =
+            GetGoogleIdOption
+                .Builder()
                 .setFilterByAuthorizedAccounts(false)
                 .setServerClientId(activityContext.getString(R.string.default_web_client_id))
                 .setAutoSelectEnabled(false)
                 .build()
 
-            val request = GetCredentialRequest.Builder()
+        val request =
+            GetCredentialRequest
+                .Builder()
                 .addCredentialOption(googleIdOption)
                 .build()
 
-            val result = credentialManager.getCredential(
+        val result =
+            credentialManager.getCredential(
                 request = request,
-                context = activityContext
+                context = activityContext,
             )
 
-            when (val credential = result.credential) {
-                is CustomCredential -> {
-                    if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                        val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                        Result.success(googleCredential.idToken)
-                    } else {
-                        Result.failure(Exception("Unexpected credential type"))
-                    }
-                }
-
-                else -> {
-                    Result.failure(Exception("Invalid credential"))
+        when (val credential = result.credential) {
+            is CustomCredential -> {
+                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                    Result.success(googleCredential.idToken)
+                } else {
+                    Result.failure(Exception("Unexpected credential type"))
                 }
             }
-        } catch (e: GetCredentialException) {
-            Result.failure(Exception("Google Sign-In Cancelled: ${e.type} - ${e.message}"))
-        } catch (e: IOException) {
-            Result.failure(e)
+
+            else -> {
+                Result.failure(Exception("Invalid credential"))
+            }
         }
+    } catch (e: GetCredentialException) {
+        Result.failure(Exception("Google Sign-In Cancelled: ${e.type} - ${e.message}"))
+    } catch (e: IOException) {
+        Result.failure(e)
     }
 }

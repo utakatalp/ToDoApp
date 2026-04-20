@@ -63,7 +63,8 @@ private fun ForgotPasswordContent(
 @Composable
 private fun ForgotPasswordBrandingPanel(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .background(TDTheme.colors.pendingGray)
             .statusBarsPadding()
             .padding(24.dp),
@@ -71,23 +72,24 @@ private fun ForgotPasswordBrandingPanel(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(70.dp)
                 .background(color = TDTheme.colors.white.copy(alpha = 0.25f), shape = CircleShape),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painterResource(R.drawable.ic_lock_reset),
                 contentDescription = stringResource(R.string.logo),
                 modifier = Modifier.size(40.dp),
-                tint = TDTheme.colors.white
+                tint = TDTheme.colors.white,
             )
         }
         Spacer(Modifier.height(8.dp))
         TDText(
             text = stringResource(R.string.forgot_password),
             style = TDTheme.typography.heading1,
-            color = TDTheme.colors.white
+            color = TDTheme.colors.white,
         )
     }
 }
@@ -102,7 +104,7 @@ private fun ForgotPasswordFormPanel(
     Spacer(Modifier.height(16.dp))
     TDText(
         text = stringResource(R.string.enter_your_email_address_and_we_will_send_you_a_link_to_reset_your_password),
-        color = TDTheme.colors.gray.copy(0.7f)
+        color = TDTheme.colors.gray.copy(0.7f),
     )
     Spacer(Modifier.height(16.dp))
     TDCompactOutlinedTextField(
@@ -116,14 +118,15 @@ private fun ForgotPasswordFormPanel(
             Icon(
                 painterResource(R.drawable.ic_mail_white),
                 contentDescription = stringResource(R.string.email),
-                tint = TDTheme.colors.gray.copy(0.5f)
+                tint = TDTheme.colors.gray.copy(0.5f),
             )
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier = Modifier.clickable(indication = null, interactionSource = MutableInteractionSource()) {
+        modifier =
+        Modifier.clickable(indication = null, interactionSource = MutableInteractionSource()) {
             onAction(UiAction.OnEmailFieldTap)
-        }
+        },
     )
     uiState.error?.let {
         TDText(text = it, color = TDTheme.colors.red)
@@ -132,22 +135,23 @@ private fun ForgotPasswordFormPanel(
     TDButton(
         text = stringResource(R.string.send_reset_link),
         fullWidth = true,
-        modifier = Modifier.clip(RoundedCornerShape(12.dp))
+        modifier = Modifier.clip(RoundedCornerShape(12.dp)),
     ) { onAction(UiAction.OnForgotPasswordTap) }
     Spacer(Modifier.height(24.dp))
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .imePadding(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Center,
     ) {
         TDText(text = stringResource(R.string.remember_your_password), color = TDTheme.colors.gray.copy(0.6f))
         TDText(
             text = stringResource(R.string.back_to_login),
             color = TDTheme.colors.pendingGray,
             style = TDTheme.typography.heading6,
-            modifier = Modifier.clickable { onAction(UiAction.OnBackToLoginTap) }
+            modifier = Modifier.clickable { onAction(UiAction.OnBackToLoginTap) },
         )
     }
     Spacer(Modifier.height(32.dp))
@@ -164,31 +168,32 @@ private fun ForgotPasswordPortraitContent(
             .imePadding()
             .background(color = TDTheme.colors.pendingGray)
             .statusBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(70.dp)
                     .background(color = TDTheme.colors.white.copy(alpha = 0.25f), shape = CircleShape),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     painterResource(R.drawable.ic_lock_reset),
                     contentDescription = stringResource(R.string.logo),
                     modifier = Modifier.size(40.dp),
-                    tint = TDTheme.colors.white
+                    tint = TDTheme.colors.white,
                 )
             }
             Spacer(Modifier.height(8.dp))
             TDText(
                 text = stringResource(R.string.forgot_password),
                 style = TDTheme.typography.heading1,
-                color = TDTheme.colors.white
+                color = TDTheme.colors.white,
             )
         }
 
@@ -198,7 +203,7 @@ private fun ForgotPasswordPortraitContent(
                 .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
                 .background(color = TDTheme.colors.white)
                 .padding(start = 32.dp, end = 32.dp, top = 24.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
         ) {
             ForgotPasswordFormPanel(uiState = uiState, onAction = onAction)
         }
@@ -212,12 +217,14 @@ private fun ForgotPasswordLandscapeContent(
 ) {
     Row(Modifier.fillMaxSize()) {
         ForgotPasswordBrandingPanel(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f)
-                .fillMaxHeight()
+                .fillMaxHeight(),
         )
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .background(TDTheme.colors.background)
@@ -236,9 +243,10 @@ private fun ForgotPasswordLandscapeContent(
 @Composable
 private fun ForgotPasswordContentPreview() {
     ForgotPasswordContent(
-        uiState = UiState(
-            email = ""
+        uiState =
+        UiState(
+            email = "",
         ),
-        onAction = {}
+        onAction = {},
     )
 }

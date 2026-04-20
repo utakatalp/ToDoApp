@@ -9,10 +9,15 @@ interface TaskRemoteDataSource {
         task: Task,
         familyGroupId: Long? = null,
         assignedToUserId: Long? = null,
-        priority: String? = null
+        priority: String? = null,
     ): Result<TaskData>
 
-    suspend fun updateTask(id: Long, task: Task, familyGroupId: Long? = null, assignedToUserId: Long? = null): Result<TaskData>
+    suspend fun updateTask(
+        id: Long,
+        task: Task,
+        familyGroupId: Long? = null,
+        assignedToUserId: Long? = null,
+    ): Result<TaskData>
 
     suspend fun deleteTask(id: Long): Result<Unit>
 

@@ -79,30 +79,31 @@ private fun CalendarErrorContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_error),
             contentDescription = null,
             tint = TDTheme.colors.crossRed,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(64.dp),
         )
         Spacer(Modifier.height(16.dp))
         TDText(
             text = message,
             style = TDTheme.typography.heading3,
-            color = TDTheme.colors.onBackground
+            color = TDTheme.colors.onBackground,
         )
         Spacer(Modifier.height(24.dp))
         TDButton(
             text = stringResource(com.todoapp.mobile.R.string.retry),
             onClick = { onAction(UiAction.OnRetry) },
-            size = TDButtonSize.SMALL
+            size = TDButtonSize.SMALL,
         )
     }
 }
@@ -126,9 +127,10 @@ private fun CalendarSuccessContent(
                         is TaskFormUiAction.DateDeselect -> onAction(UiAction.OnDialogDateDeselect)
                         is TaskFormUiAction.TimeStartChange -> onAction(UiAction.OnTaskTimeStartChange(action.time))
                         is TaskFormUiAction.TimeEndChange -> onAction(UiAction.OnTaskTimeEndChange(action.time))
-                        is TaskFormUiAction.DescriptionChange -> onAction(
-                            UiAction.OnTaskDescriptionChange(action.description)
-                        )
+                        is TaskFormUiAction.DescriptionChange ->
+                            onAction(
+                                UiAction.OnTaskDescriptionChange(action.description),
+                            )
                         is TaskFormUiAction.ToggleAdvancedSettings -> onAction(UiAction.OnToggleAdvancedSettings)
                         is TaskFormUiAction.SecretChange -> onAction(UiAction.OnTaskSecretChange(action.isSecret))
                         else -> Unit
@@ -140,7 +142,8 @@ private fun CalendarSuccessContent(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .background(color = TDTheme.colors.background),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -190,7 +193,7 @@ private fun CalendarErrorPreview() {
     TDTheme {
         CalendarErrorContent(
             message = "Something went wrong",
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -200,39 +203,46 @@ private fun CalendarErrorPreview() {
 private fun CalendarSuccessPreview() {
     TDTheme {
         CalendarSuccessContent(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 selectedDate = LocalDate.of(2025, 1, 12),
-                taskDayItems = listOf(
+                taskDayItems =
+                listOf(
                     TaskDayItem(
                         date = LocalDate.of(2025, 1, 12),
-                        tasks = listOf(
+                        tasks =
+                        listOf(
                             TaskCardItem(
                                 1L,
                                 "Read Book",
                                 "09:30",
                                 "10:15",
                                 isCompleted = true,
-                                description = "Chapter 5 of Clean Code"
+                                description = "Chapter 5 of Clean Code",
                             ),
                             TaskCardItem(2L, "Gym", "18:00", "19:00", isCompleted = false),
                         ),
                     ),
                     TaskDayItem(
                         date = LocalDate.of(2025, 1, 13),
-                        tasks = listOf(
+                        tasks =
+                        listOf(
                             TaskCardItem(
                                 3L,
                                 "Study Kotlin",
                                 "10:00",
                                 "12:00",
                                 isCompleted = false,
-                                description = "Coroutines deep dive"
-                            )
+                                description = "Coroutines deep dive",
+                            ),
                         ),
                     ),
                     TaskDayItem(
                         date = LocalDate.of(2025, 1, 14),
-                        tasks = listOf(TaskCardItem(4L, "Project Review", "16:30", "17:30", isCompleted = true)),
+                        tasks =
+                        listOf(
+                            TaskCardItem(4L, "Project Review", "16:30", "17:30", isCompleted = true),
+                        ),
                     ),
                 ),
             ),

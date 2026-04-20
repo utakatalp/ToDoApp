@@ -53,17 +53,19 @@ fun HomeFabMenu(
     Box(modifier = modifier.fillMaxSize()) {
         if (isFabMenuOpen) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() },
-                    ) { isFabMenuOpen = false }
+                    ) { isFabMenuOpen = false },
             )
         }
 
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -76,7 +78,8 @@ fun HomeFabMenu(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .background(TDTheme.colors.pendingGray, RoundedCornerShape(8.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                     ) {
@@ -88,7 +91,8 @@ fun HomeFabMenu(
                     }
                     Spacer(Modifier.width(8.dp))
                     IconButton(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(48.dp)
                             .background(TDTheme.colors.pendingGray, CircleShape),
                         onClick = {
@@ -113,7 +117,8 @@ fun HomeFabMenu(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .background(TDTheme.colors.pendingGray, RoundedCornerShape(8.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                     ) {
@@ -125,7 +130,8 @@ fun HomeFabMenu(
                     }
                     Spacer(Modifier.width(8.dp))
                     IconButton(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(48.dp)
                             .background(TDTheme.colors.pendingGray, CircleShape),
                         onClick = {
@@ -144,7 +150,8 @@ fun HomeFabMenu(
             }
 
             TDAddTaskButton(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(56.dp)
                     .graphicsLayer { rotationZ = fabRotation },
                 onClick = { isFabMenuOpen = !isFabMenuOpen },

@@ -5,6 +5,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface GroupActivityLocalDataSource {
     fun observeByGroupId(localGroupId: Long): Flow<List<GroupActivityEntity>>
+
     suspend fun getByGroupIdOnce(localGroupId: Long): List<GroupActivityEntity>
-    suspend fun replaceAll(localGroupId: Long, activities: List<GroupActivityEntity>)
+
+    suspend fun replaceAll(
+        localGroupId: Long,
+        activities: List<GroupActivityEntity>,
+    )
 }

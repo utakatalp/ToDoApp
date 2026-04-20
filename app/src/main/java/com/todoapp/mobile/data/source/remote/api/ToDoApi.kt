@@ -12,7 +12,6 @@ import com.todoapp.mobile.data.model.network.data.TaskData
 import com.todoapp.mobile.data.model.network.data.TaskListData
 import com.todoapp.mobile.data.model.network.data.UserData
 import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
-import com.todoapp.mobile.data.model.network.request.UpdateUserRequest
 import com.todoapp.mobile.data.model.network.request.FCMTokenRequest
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
@@ -25,6 +24,7 @@ import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.data.model.network.request.TaskRequest
 import com.todoapp.mobile.data.model.network.request.TransferOwnershipRequest
 import com.todoapp.mobile.data.model.network.request.UpdateGroupRequest
+import com.todoapp.mobile.data.model.network.request.UpdateUserRequest
 import com.todoapp.mobile.data.model.network.response.BaseResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -63,7 +63,7 @@ interface ToDoApi {
 
     @GET("tasks")
     suspend fun getTasks(
-    @Query("familyGroupId") familyGroupId: Long? = null,
+        @Query("familyGroupId") familyGroupId: Long? = null,
     ): Response<BaseResponse<TaskListData?>>
 
     @GET("tasks/{id}")
@@ -90,7 +90,9 @@ interface ToDoApi {
     suspend fun getUserInfo(): Response<BaseResponse<UserData?>>
 
     @PUT("users/me")
-    suspend fun updateUser(@Body request: UpdateUserRequest): Response<BaseResponse<UserData?>>
+    suspend fun updateUser(
+        @Body request: UpdateUserRequest,
+    ): Response<BaseResponse<UserData?>>
 
     @retrofit2.http.Multipart
     @POST("users/me/avatar")

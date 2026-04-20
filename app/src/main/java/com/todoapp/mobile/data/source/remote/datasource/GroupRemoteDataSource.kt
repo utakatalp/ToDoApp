@@ -21,21 +21,40 @@ interface GroupRemoteDataSource {
 
     suspend fun getGroupDetail(id: Long): Result<GroupData>
 
-    suspend fun updateGroup(id: Long, request: UpdateGroupRequest): Result<Unit>
+    suspend fun updateGroup(
+        id: Long,
+        request: UpdateGroupRequest,
+    ): Result<Unit>
 
-    suspend fun createGroupTask(groupId: Long, request: GroupTaskRequest): Result<GroupTaskData>
+    suspend fun createGroupTask(
+        groupId: Long,
+        request: GroupTaskRequest,
+    ): Result<GroupTaskData>
 
     suspend fun inviteMember(request: InviteMemberRequest): Result<Unit>
 
-    suspend fun removeMember(id: Long, userId: Long): Result<Unit>
+    suspend fun removeMember(
+        id: Long,
+        userId: Long,
+    ): Result<Unit>
 
-    suspend fun transferOwnership(id: Long, request: TransferOwnershipRequest): Result<Unit>
+    suspend fun transferOwnership(
+        id: Long,
+        request: TransferOwnershipRequest,
+    ): Result<Unit>
 
     suspend fun getGroupActivity(id: Long): Result<GroupActivityDataList>
 
     suspend fun getGroupTasks(id: Long): Result<GroupTaskListData>
 
-    suspend fun deleteGroupTask(groupId: Long, taskId: Long): Result<Unit>
+    suspend fun deleteGroupTask(
+        groupId: Long,
+        taskId: Long,
+    ): Result<Unit>
 
-    suspend fun updateGroupTask(groupId: Long, taskId: Long, request: GroupTaskUpdateRequest): Result<GroupTaskData>
+    suspend fun updateGroupTask(
+        groupId: Long,
+        taskId: Long,
+        request: GroupTaskUpdateRequest,
+    ): Result<GroupTaskData>
 }

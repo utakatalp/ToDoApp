@@ -60,15 +60,16 @@ fun TDWeeklyBarChart(
     scrollableHeight: Dp? = null,
     onExpandClick: (() -> Unit)? = null,
 ) {
-    val resolvedDays = days ?: listOf(
-        stringResource(R.string.bar_chart_days_mon),
-        stringResource(R.string.bar_chart_days_tue),
-        stringResource(R.string.bar_chart_days_wed),
-        stringResource(R.string.bar_chart_days_thu),
-        stringResource(R.string.bar_chart_days_fri),
-        stringResource(R.string.bar_chart_days_sat),
-        stringResource(R.string.bar_chart_days_sun),
-    )
+    val resolvedDays =
+        days ?: listOf(
+            stringResource(R.string.bar_chart_days_mon),
+            stringResource(R.string.bar_chart_days_tue),
+            stringResource(R.string.bar_chart_days_wed),
+            stringResource(R.string.bar_chart_days_thu),
+            stringResource(R.string.bar_chart_days_fri),
+            stringResource(R.string.bar_chart_days_sat),
+            stringResource(R.string.bar_chart_days_sun),
+        )
 
     if (values.size != resolvedDays.size) return
 
@@ -83,11 +84,12 @@ fun TDWeeklyBarChart(
 
     val density = LocalDensity.current
 
-    val maxY = if (hasPending) {
-        values.zip(pendingValues) { c, p -> c + p }.maxOrNull() ?: 0
-    } else {
-        values.maxOrNull() ?: 0
-    }
+    val maxY =
+        if (hasPending) {
+            values.zip(pendingValues) { c, p -> c + p }.maxOrNull() ?: 0
+        } else {
+            values.maxOrNull() ?: 0
+        }
     val safeMaxY = max(1, maxY)
 
     val requiredPlotHeight = (safeMaxY * minGridStep.value).dp
@@ -95,14 +97,15 @@ fun TDWeeklyBarChart(
 
     val labelTextSizePx = with(density) { 12.sp.toPx() }
     val labelXOffsetPx = with(density) { 10.dp.toPx() }
-    val yLabelPaint = remember(yLabelColor, labelTextSizePx) {
-        Paint().apply {
-            isAntiAlias = true
-            textSize = labelTextSizePx
-            textAlign = Paint.Align.RIGHT
-            color = yLabelColor.toArgb()
+    val yLabelPaint =
+        remember(yLabelColor, labelTextSizePx) {
+            Paint().apply {
+                isAntiAlias = true
+                textSize = labelTextSizePx
+                textAlign = Paint.Align.RIGHT
+                color = yLabelColor.toArgb()
+            }
         }
-    }
 
     val dashedLines = remember { PathEffect.dashPathEffect(floatArrayOf(48f, 4f), 0f) }
 
@@ -155,7 +158,8 @@ private fun TDWeeklyBarChartContent(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -183,15 +187,17 @@ private fun TDWeeklyBarChartContent(
 
         val chartPlot: @Composable () -> Unit = {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(plotHeight + xAxisHeight)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
             ) {
                 Canvas(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
-                        .padding(top = 8.dp)
+                        .padding(top = 8.dp),
                 ) {
                     val plotLeft = with(density) { (yLabelWidth + leftGapToPlot).toPx() }
                     val plotRight = size.width
@@ -207,7 +213,7 @@ private fun TDWeeklyBarChartContent(
                             start = Offset(plotLeft, y),
                             end = Offset(plotRight, y),
                             strokeWidth = with(density) { 1.dp.toPx() },
-                            pathEffect = dashedLines
+                            pathEffect = dashedLines,
                         )
 
                         val label = if (i == 0) "0" else i.toString().padStart(2, '0')
@@ -216,19 +222,20 @@ private fun TDWeeklyBarChartContent(
                                 label,
                                 plotLeft - labelXOffsetPx,
                                 y + yLabelPaint.textSize / 3f,
-                                yLabelPaint
+                                yLabelPaint,
                             )
                         }
                     }
                 }
 
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(start = yLabelWidth + leftGapToPlot)
                         .height(plotHeight + xAxisHeight),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                    verticalAlignment = Alignment.Bottom,
                 ) {
                     values.forEachIndexed { index, v ->
                         val pendingV = pendingValues?.getOrNull(index) ?: 0
@@ -249,29 +256,32 @@ private fun TDWeeklyBarChartContent(
                         Column(
                             modifier = Modifier.height(plotHeight + xAxisHeight),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Bottom
+                            verticalArrangement = Arrangement.Bottom,
                         ) {
                             Box(
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .height(plotHeight)
                                     .width(barWidth),
-                                contentAlignment = Alignment.BottomCenter
+                                contentAlignment = Alignment.BottomCenter,
                             ) {
                                 if (pendingValues != null) {
                                     Box(
-                                        modifier = Modifier
+                                        modifier =
+                                        Modifier
                                             .fillMaxWidth()
                                             .fillMaxHeight(totalAnim)
                                             .clip(RoundedCornerShape(2.dp))
-                                            .background(pendingBarColor)
+                                            .background(pendingBarColor),
                                     )
                                 }
                                 Box(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .fillMaxWidth()
                                         .fillMaxHeight(if (pendingValues != null) completedAnim else totalAnim)
                                         .clip(RoundedCornerShape(2.dp))
-                                        .background(barColor)
+                                        .background(barColor),
                                 )
                             }
 
@@ -280,7 +290,7 @@ private fun TDWeeklyBarChartContent(
                             TDText(
                                 text = days[index],
                                 style = TDTheme.typography.regularTextStyle,
-                                color = TDTheme.colors.onBackground
+                                color = TDTheme.colors.onBackground,
                             )
                         }
                     }
@@ -290,14 +300,16 @@ private fun TDWeeklyBarChartContent(
 
         if (scrollableHeight != null) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .height(scrollableHeight)
+                    .height(scrollableHeight),
             ) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(rememberScrollState()),
                 ) {
                     chartPlot()
                 }
@@ -313,11 +325,12 @@ private fun TDWeeklyBarChartContent(
 fun TDWeeklyBarChartPreview() {
     TDTheme {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(8.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             TDWeeklyBarChart(
                 modifier = Modifier,

@@ -60,13 +60,13 @@ fun TDWeeklyCircularProgressIndicator(
     )
 
     BoxWithConstraints(
-        modifier = modifier
+        modifier = modifier,
     ) {
         val indicatorSize = maxWidth * 0.35f
 
         Row(
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier,
@@ -93,7 +93,7 @@ fun TDWeeklyCircularProgressIndicator(
                         sweepAngle = completedSweep,
                         useCenter = false,
                         size = arcSize,
-                        style = stroke
+                        style = stroke,
                     )
 
                     drawArc(
@@ -102,7 +102,7 @@ fun TDWeeklyCircularProgressIndicator(
                         sweepAngle = -inProgressSweep,
                         useCenter = false,
                         size = arcSize,
-                        style = stroke
+                        style = stroke,
                     )
                 }
             }
@@ -147,12 +147,13 @@ fun LegendColoredBoxItem(
     text: String,
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(12.dp)
-                .background(color)
+                .background(color),
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -169,12 +170,11 @@ fun LegendColoredBoxItem(
 
 @TDPreviewWide
 @Composable
-fun TDWeeklyCircularProgressIndicatorPreview(
-    modifier: Modifier = Modifier,
-) {
+fun TDWeeklyCircularProgressIndicatorPreview(modifier: Modifier = Modifier) {
     TDTheme {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

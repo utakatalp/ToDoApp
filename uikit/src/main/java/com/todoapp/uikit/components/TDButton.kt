@@ -29,24 +29,27 @@ import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreviewNoBg
 import com.todoapp.uikit.theme.TDTheme
 
-private val poppinsFontFamily = FontFamily(
-    Font(R.font.poppins_regular, FontWeight.Normal),
-    Font(R.font.poppins_medium, FontWeight.Medium),
-    Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
-    Font(R.font.poppins_bold, FontWeight.Bold),
-)
+private val poppinsFontFamily =
+    FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
+        Font(R.font.poppins_bold, FontWeight.Bold),
+    )
 
-private val buttonSmallTextStyle = TextStyle(
-    fontSize = 14.sp,
-    fontWeight = FontWeight.Medium,
-    fontFamily = poppinsFontFamily,
-)
+private val buttonSmallTextStyle =
+    TextStyle(
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Medium,
+        fontFamily = poppinsFontFamily,
+    )
 
-private val buttonMediumTextStyle = TextStyle(
-    fontSize = 18.sp,
-    fontWeight = FontWeight.SemiBold,
-    fontFamily = poppinsFontFamily,
-)
+private val buttonMediumTextStyle =
+    TextStyle(
+        fontSize = 18.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontFamily = poppinsFontFamily,
+    )
 
 private val buttonSmallPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
 private val buttonMediumPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp)
@@ -71,10 +74,11 @@ fun TDButton(
     val width = if (size == TDButtonSize.SMALL) 140.dp else 200.dp
     val paddingValues = if (size == TDButtonSize.SMALL) buttonSmallPadding else buttonMediumPadding
 
-    val sizeModifier = Modifier
-        .heightIn(min = height)
-        .then(modifier)
-        .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.widthIn(min = width))
+    val sizeModifier =
+        Modifier
+            .heightIn(min = height)
+            .then(modifier)
+            .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier.widthIn(min = width))
 
     when (type) {
         TDButtonType.PRIMARY -> {
@@ -85,12 +89,12 @@ fun TDButton(
                 contentPadding = paddingValues,
                 shape = RoundedCornerShape(12.dp),
                 colors =
-                    ButtonColors(
-                        containerColor = TDTheme.colors.pendingGray,
-                        contentColor = TDTheme.colors.white,
-                        disabledContainerColor = TDTheme.colors.purple.copy(alpha = 0.4f),
-                        disabledContentColor = TDTheme.colors.white.copy(alpha = 0.5f),
-                    ),
+                ButtonColors(
+                    containerColor = TDTheme.colors.pendingGray,
+                    contentColor = TDTheme.colors.white,
+                    disabledContainerColor = TDTheme.colors.purple.copy(alpha = 0.4f),
+                    disabledContentColor = TDTheme.colors.white.copy(alpha = 0.5f),
+                ),
             ) {
                 icon?.let {
                     Icon(
@@ -116,9 +120,10 @@ fun TDButton(
                 enabled = isEnable,
                 contentPadding = paddingValues,
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(
+                border =
+                BorderStroke(
                     2.dp,
-                    if (isEnable) TDTheme.colors.crossRed else TDTheme.colors.crossRed.copy(alpha = 0.3f)
+                    if (isEnable) TDTheme.colors.crossRed else TDTheme.colors.crossRed.copy(alpha = 0.3f),
                 ),
             ) {
                 icon?.let {
@@ -145,9 +150,17 @@ fun TDButton(
                 enabled = isEnable,
                 contentPadding = paddingValues,
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(
+                border =
+                BorderStroke(
                     width = 1.5.dp,
-                    color = if (isEnable) TDTheme.colors.pendingGray else TDTheme.colors.pendingGray.copy(alpha = 0.3f)
+                    color =
+                    if (isEnable) {
+                        TDTheme.colors.pendingGray
+                    } else {
+                        TDTheme.colors.pendingGray.copy(
+                            alpha = 0.3f,
+                        )
+                    },
                 ),
             ) {
                 icon?.let {
@@ -175,12 +188,12 @@ fun TDButton(
                 contentPadding = paddingValues,
                 shape = RoundedCornerShape(12.dp),
                 colors =
-                    ButtonColors(
-                        containerColor = TDTheme.colors.crossRed,
-                        contentColor = TDTheme.colors.white,
-                        disabledContainerColor = TDTheme.colors.red.copy(alpha = 0.5f),
-                        disabledContentColor = TDTheme.colors.white.copy(alpha = 0.5f),
-                    ),
+                ButtonColors(
+                    containerColor = TDTheme.colors.crossRed,
+                    contentColor = TDTheme.colors.white,
+                    disabledContainerColor = TDTheme.colors.red.copy(alpha = 0.5f),
+                    disabledContentColor = TDTheme.colors.white.copy(alpha = 0.5f),
+                ),
             ) {
                 icon?.let {
                     Icon(
@@ -207,12 +220,12 @@ fun TDButton(
                 contentPadding = paddingValues,
                 shape = RoundedCornerShape(12.dp),
                 colors =
-                    ButtonColors(
-                        containerColor = TDTheme.colors.pendingGray,
-                        contentColor = TDTheme.colors.white,
-                        disabledContainerColor = TDTheme.colors.pendingGray.copy(alpha = 0.4f),
-                        disabledContentColor = TDTheme.colors.white.copy(alpha = 0.5f),
-                    ),
+                ButtonColors(
+                    containerColor = TDTheme.colors.pendingGray,
+                    contentColor = TDTheme.colors.white,
+                    disabledContainerColor = TDTheme.colors.pendingGray.copy(alpha = 0.4f),
+                    disabledContentColor = TDTheme.colors.white.copy(alpha = 0.5f),
+                ),
             ) {
                 icon?.let {
                     Icon(

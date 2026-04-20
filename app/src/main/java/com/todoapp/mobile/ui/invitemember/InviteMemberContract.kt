@@ -1,7 +1,6 @@
 package com.todoapp.mobile.ui.invitemember
 
 object InviteMemberContract {
-
     data class UiState(
         val email: String = "",
         val emailError: String? = null,
@@ -10,12 +9,18 @@ object InviteMemberContract {
     )
 
     sealed interface UiAction {
-        data class OnEmailChange(val email: String) : UiAction
+        data class OnEmailChange(
+            val email: String,
+        ) : UiAction
+
         data object OnSendInviteTap : UiAction
+
         data object OnShareLinkTap : UiAction
     }
 
     sealed interface UiEffect {
-        data class ShowToast(val message: String) : UiEffect
+        data class ShowToast(
+            val message: String,
+        ) : UiEffect
     }
 }

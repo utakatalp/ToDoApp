@@ -32,14 +32,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class RegisterViewModel @Inject constructor(
+class RegisterViewModel
+@Inject
+constructor(
     private val userRepository: UserRepository,
     private val sessionPreferences: SessionPreferences,
     private val authTokenManager: AuthTokenManager,
     private val dataStoreHelper: DataStoreHelper,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val redirectAfterRegister: String? = savedStateHandle.toRoute<Screen.Register>().redirectAfterRegister
 
     private val _uiState = MutableStateFlow(UiState())
@@ -99,12 +100,13 @@ class RegisterViewModel @Inject constructor(
     }
 
     private fun updateValidationMode() {
-        validationMode = ValidationMode.AfterSubmit(
-            getState = { uiState.value },
-            validateEmail = { validateEmail(it) },
-            validatePassword = { validatePassword(it) },
-            validateConfirm = { confirmPassword, password -> validateConfirmPassword(confirmPassword, password) }
-        )
+        validationMode =
+            ValidationMode.AfterSubmit(
+                getState = { uiState.value },
+                validateEmail = { validateEmail(it) },
+                validatePassword = { validatePassword(it) },
+                validateConfirm = { confirmPassword, password -> validateConfirmPassword(confirmPassword, password) },
+            )
     }
 
     private fun onSignUpTap() {
@@ -114,9 +116,9 @@ class RegisterViewModel @Inject constructor(
 
         val hasEmptyField =
             state.email.isBlank() ||
-                    state.password.isBlank() ||
-                    state.confirmPassword.isBlank() ||
-                    state.fullName.isBlank()
+                state.password.isBlank() ||
+                state.confirmPassword.isBlank() ||
+                state.fullName.isBlank()
 
         if (hasEmptyField) {
             _uiState.update {
@@ -139,13 +141,14 @@ class RegisterViewModel @Inject constructor(
 
         val hasAnyError =
             uiState.value.emailError != null ||
-                    uiState.value.passwordError != null ||
-                    uiState.value.confirmPasswordError != null
+                uiState.value.passwordError != null ||
+                uiState.value.confirmPasswordError != null
 
         if (hasAnyError) return
 
         viewModelScope.launch {
-            userRepository.register(RegisterRequest(state.email, state.password, state.fullName))
+            userRepository
+                .register(RegisterRequest(state.email, state.password, state.fullName))
                 .onSuccess { handleSuccessfulRegister(it) }
                 .onFailure { throwable ->
                     if (throwable is DomainException.Server) {
@@ -165,7 +168,8 @@ class RegisterViewModel @Inject constructor(
         viewModelScope.launch {
             setRedirecting(true)
 
-            userRepository.facebookLogin(FacebookLoginRequest(token))
+            userRepository
+                .facebookLogin(FacebookLoginRequest(token))
                 .onSuccess { handleSuccessfulRegister(it) }
                 .onFailure { throwable ->
                     Log.d("facebook_login", throwable.message.orEmpty())
@@ -177,12 +181,13 @@ class RegisterViewModel @Inject constructor(
     private fun handleFacebookLoginFailure(throwable: Throwable) {
         setRedirecting(false)
 
-        val message = when (throwable) {
-            is DomainException.NoInternet -> "No internet connection."
-            is DomainException.Unauthorized -> "Facebook session expired. Please try again."
-            is DomainException.Server -> throwable.message ?: "Try again later."
-            else -> throwable.message ?: "Try again later."
-        }
+        val message =
+            when (throwable) {
+                is DomainException.NoInternet -> "No internet connection."
+                is DomainException.Unauthorized -> "Facebook session expired. Please try again."
+                is DomainException.Server -> throwable.message ?: "Try again later."
+                else -> throwable.message ?: "Try again later."
+            }
 
         _uiState.update { state ->
             state.copy(generalError = RegisterError(message))
@@ -193,7 +198,8 @@ class RegisterViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isRedirecting = true) }
 
-            userRepository.googleLogin(idToken)
+            userRepository
+                .googleLogin(idToken)
                 .onSuccess { loginData ->
                     authTokenManager.saveTokens(
                         AuthModel(
@@ -203,11 +209,10 @@ class RegisterViewModel @Inject constructor(
                             email = loginData.user.email,
                             displayName = loginData.user.displayName,
                             avatarUrl = loginData.user.avatarUrl,
-                        )
+                        ),
                     )
                     handleSuccessfulRegister(loginData)
-                }
-                .onFailure { error ->
+                }.onFailure { error ->
                     Log.e("GOOGLE_LOGIN", "Google login failed", error)
                     _uiState.update { it.copy(isRedirecting = false) }
                     _uiEffect.trySend(UiEffect.ShowToast(error.message ?: "Google login error"))
@@ -226,7 +231,8 @@ class RegisterViewModel @Inject constructor(
             sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
             dataStoreHelper.setUser(registerResponseData.user)
 
-            userRepository.syncPendingFcmToken()
+            userRepository
+                .syncPendingFcmToken()
                 .onFailure { Log.d("FCM_SYNC", "syncPendingFcmToken failed: ${it.message}") }
 
             val destination = resolveRedirectDestination()
@@ -235,8 +241,8 @@ class RegisterViewModel @Inject constructor(
                     NavigationEffect.Navigate(
                         route = destination,
                         popUpTo = Screen.Home,
-                        isInclusive = false
-                    )
+                        isInclusive = false,
+                    ),
                 )
             } else {
                 _navEffect.send(NavigationEffect.Navigate(Screen.Home))
@@ -268,7 +274,7 @@ class RegisterViewModel @Inject constructor(
             state.copy(
                 password = password,
                 passwordError = validationMode.validate(Field.Password(password)),
-                passwordStrength = ValidationManager.computePasswordStrength(password)
+                passwordStrength = ValidationManager.computePasswordStrength(password),
             )
         }
     }
@@ -317,18 +323,19 @@ class RegisterViewModel @Inject constructor(
         fun validate(password: String): RegisterError?
     }
 
-    private val passwordRules: List<PasswordRule> = listOf(
-        MinLengthPasswordRule(minLength = MIN_PASSWORD_LENGTH),
-        ContainsDigitOrSymbolPasswordRule(),
-    )
+    private val passwordRules: List<PasswordRule> =
+        listOf(
+            MinLengthPasswordRule(minLength = MIN_PASSWORD_LENGTH),
+            ContainsDigitOrSymbolPasswordRule(),
+        )
 
-    private class MinLengthPasswordRule(private val minLength: Int) : PasswordRule {
-        override fun validate(password: String): RegisterError? {
-            return if (password.length >= minLength) {
-                null
-            } else {
-                RegisterError("Password must be at least $minLength characters.")
-            }
+    private class MinLengthPasswordRule(
+        private val minLength: Int,
+    ) : PasswordRule {
+        override fun validate(password: String): RegisterError? = if (password.length >= minLength) {
+            null
+        } else {
+            RegisterError("Password must be at least $minLength characters.")
         }
     }
 
@@ -353,7 +360,10 @@ class RegisterViewModel @Inject constructor(
         return null
     }
 
-    private fun validateConfirmPassword(password: String, confirmPassword: String): RegisterError? {
+    private fun validateConfirmPassword(
+        password: String,
+        confirmPassword: String,
+    ): RegisterError? {
         if (confirmPassword.isBlank()) return null
         return if (password == confirmPassword) {
             null
@@ -381,12 +391,10 @@ sealed interface ValidationMode {
         private val validatePassword: (String) -> RegisterError?,
         private val validateConfirm: (String, String) -> RegisterError?,
     ) : ValidationMode {
-        override fun validate(field: Field): RegisterError? {
-            return when (field) {
-                is Field.Email -> validateEmail(field.email)
-                is Field.Password -> validatePassword(field.password)
-                is Field.ConfirmPassword -> validateConfirm(field.confirmPassword, getState().password)
-            }
+        override fun validate(field: Field): RegisterError? = when (field) {
+            is Field.Email -> validateEmail(field.email)
+            is Field.Password -> validatePassword(field.password)
+            is Field.ConfirmPassword -> validateConfirm(field.confirmPassword, getState().password)
         }
     }
 
@@ -396,7 +404,15 @@ sealed interface ValidationMode {
 }
 
 sealed class Field {
-    data class Email(val email: String) : Field()
-    data class Password(val password: String) : Field()
-    data class ConfirmPassword(val confirmPassword: String) : Field()
+    data class Email(
+        val email: String,
+    ) : Field()
+
+    data class Password(
+        val password: String,
+    ) : Field()
+
+    data class ConfirmPassword(
+        val confirmPassword: String,
+    ) : Field()
 }

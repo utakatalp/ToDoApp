@@ -43,7 +43,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-
     @Binds
     @Singleton
     abstract fun bindTaskRemoteDataSource(impl: TaskRemoteDataSourceImpl): TaskRemoteDataSource
@@ -102,9 +101,7 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindGroupDataSource(
-        groupRemoteDataSourceImpl: GroupRemoteDataSourceImpl
-    ): GroupRemoteDataSource
+    abstract fun bindGroupDataSource(groupRemoteDataSourceImpl: GroupRemoteDataSourceImpl): GroupRemoteDataSource
 
     @Binds
     @Singleton

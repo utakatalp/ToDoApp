@@ -23,23 +23,27 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
-class PomodoroSummaryViewModel @Inject constructor(
+class PomodoroSummaryViewModel
+@Inject
+constructor(
     savedStateHandle: SavedStateHandle,
     private val pomodoroRepository: PomodoroRepository,
     private val engine: PomodoroEngine,
 ) : ViewModel() {
-
     private val route: Screen.PomodoroSummary = savedStateHandle.toRoute()
 
-    private val _uiState = MutableStateFlow(
-        PomodoroSummaryContract.UiState(
-            focusSessions = route.focusSessions,
-            totalFocusMinutes = route.totalFocusMinutes,
-            totalBreakMinutes = route.totalBreakMinutes,
-            completedAt = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("EEE, MMM d · HH:mm")),
+    private val _uiState =
+        MutableStateFlow(
+            PomodoroSummaryContract.UiState(
+                focusSessions = route.focusSessions,
+                totalFocusMinutes = route.totalFocusMinutes,
+                totalBreakMinutes = route.totalBreakMinutes,
+                completedAt =
+                LocalDateTime
+                    .now()
+                    .format(DateTimeFormatter.ofPattern("EEE, MMM d · HH:mm")),
+            ),
         )
-    )
     val uiState = _uiState.asStateFlow()
 
     private val _navEffect = Channel<NavigationEffect>(Channel.BUFFERED)
@@ -80,8 +84,8 @@ class PomodoroSummaryViewModel @Inject constructor(
                 queue.addLast(
                     Session(
                         durationSeconds = if (breakMode == PomodoroMode.LongBreak) longSeconds else shortSeconds,
-                        mode = breakMode
-                    )
+                        mode = breakMode,
+                    ),
                 )
             }
         }

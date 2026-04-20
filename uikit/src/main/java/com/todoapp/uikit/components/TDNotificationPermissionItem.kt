@@ -38,55 +38,57 @@ import com.todoapp.uikit.theme.TDTheme
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun TDNotificationPermissionItem(
-    onDismiss: () -> Unit = {},
-) {
+fun TDNotificationPermissionItem(onDismiss: () -> Unit = {}) {
     val context = LocalContext.current
     val permission = Manifest.permission.POST_NOTIFICATIONS
     val shouldOpenSettingsOnNextGrantClick = remember { mutableStateOf(false) }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            val activity = context as? Activity
-            val shouldShowRationale = activity?.let {
-                ActivityCompat.shouldShowRequestPermissionRationale(it, permission)
-            } ?: true
-            if (!shouldShowRationale) {
-                shouldOpenSettingsOnNextGrantClick.value = true
+    val launcher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            if (!isGranted) {
+                val activity = context as? Activity
+                val shouldShowRationale =
+                    activity?.let {
+                        ActivityCompat.shouldShowRequestPermissionRationale(it, permission)
+                    } ?: true
+                if (!shouldShowRationale) {
+                    shouldOpenSettingsOnNextGrantClick.value = true
+                }
+            } else {
+                shouldOpenSettingsOnNextGrantClick.value = false
             }
-        } else {
-            shouldOpenSettingsOnNextGrantClick.value = false
         }
-    }
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
                 color = TDTheme.colors.onBackground.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(12.dp)
-            )
+                shape = RoundedCornerShape(12.dp),
+            ),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             TDText(
                 text = stringResource(R.string.notification_permission),
                 style = TDTheme.typography.heading4,
-                color = TDTheme.colors.onBackground
+                color = TDTheme.colors.onBackground,
             )
             Spacer(Modifier.height(8.dp))
             TDText(
                 text = stringResource(R.string.allows_the_app_to_display_notifications),
                 style = TDTheme.typography.subheading1,
                 color = TDTheme.colors.onBackground.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(16.dp))
             TDButton(
@@ -98,19 +100,19 @@ fun TDNotificationPermissionItem(
                         return@TDButton
                     }
                     launcher.launch(permission)
-                }
+                },
             )
         }
 
         IconButton(
             onClick = onDismiss,
-            modifier = Modifier.align(Alignment.TopEnd)
+            modifier = Modifier.align(Alignment.TopEnd),
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_close),
                 contentDescription = "Close",
                 tint = TDTheme.colors.onBackground,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(20.dp),
             )
         }
     }
@@ -118,10 +120,11 @@ fun TDNotificationPermissionItem(
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun openNotificationSettings(context: Context) {
-    val intent = Intent().apply {
-        action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-    }
+    val intent =
+        Intent().apply {
+            action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
     context.startActivity(intent)
 }
 
@@ -131,9 +134,10 @@ fun openNotificationSettings(context: Context) {
 private fun TDNotificationPermissionItemPreview() {
     TDTheme {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .background(TDTheme.colors.background)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             TDNotificationPermissionItem()
         }

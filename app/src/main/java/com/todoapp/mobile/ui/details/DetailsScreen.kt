@@ -73,9 +73,10 @@ fun DetailsScreen(
     }
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .background(TDTheme.colors.background)
+            .background(TDTheme.colors.background),
     ) {
         when (uiState) {
             is UiState.Loading -> DetailsLoadingContent()
@@ -98,29 +99,30 @@ private fun DetailsErrorContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Icon(
             painter = painterResource(com.example.uikit.R.drawable.ic_error),
             contentDescription = null,
             tint = TDTheme.colors.crossRed,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(64.dp),
         )
         Spacer(Modifier.height(16.dp))
         TDText(
             text = message,
             style = TDTheme.typography.heading3,
-            color = TDTheme.colors.onSurface
+            color = TDTheme.colors.onSurface,
         )
         Spacer(Modifier.height(24.dp))
         TDButton(
             text = stringResource(R.string.retry),
             onClick = { onAction(UiAction.OnRetry) },
-            size = TDButtonSize.SMALL
+            size = TDButtonSize.SMALL,
         )
     }
 }
@@ -137,25 +139,28 @@ private fun DetailsSuccessContent(
     var showEndTimePicker by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .imePadding()
+            .imePadding(),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f)
                 .verticalScroll(verticalScroll)
                 .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Spacer(Modifier.height(8.dp))
 
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
                     .padding(vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 TDCompactOutlinedTextField(
                     label = stringResource(R.string.task_title),
@@ -169,7 +174,7 @@ private fun DetailsSuccessContent(
                     TDText(
                         text = stringResource(R.string.task_date),
                         style = TDTheme.typography.heading6,
-                        color = TDTheme.colors.onSurface
+                        color = TDTheme.colors.onSurface,
                     )
                     TDDatePickerDialog(
                         selectedDate = uiState.dialogSelectedDate,
@@ -182,7 +187,8 @@ private fun DetailsSuccessContent(
                     Column(modifier = Modifier.weight(1f)) {
                         TDPickerField(
                             title = stringResource(R.string.set_time),
-                            value = uiState.taskTimeStart?.format(timeFormatter)
+                            value =
+                            uiState.taskTimeStart?.format(timeFormatter)
                                 ?: stringResource(R.string.starts),
                             onClick = { showStartTimePicker = true },
                             leadingIcon = {
@@ -199,7 +205,8 @@ private fun DetailsSuccessContent(
                     Column(modifier = Modifier.weight(1f)) {
                         TDPickerField(
                             title = "",
-                            value = uiState.taskTimeEnd?.format(timeFormatter)
+                            value =
+                            uiState.taskTimeEnd?.format(timeFormatter)
                                 ?: stringResource(R.string.ends),
                             onClick = { showEndTimePicker = true },
                             leadingIcon = {
@@ -224,23 +231,25 @@ private fun DetailsSuccessContent(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 TDText(
                     modifier = Modifier.weight(1f),
                     text = stringResource(R.string.edit_details_hint),
                     style = TDTheme.typography.subheading3,
-                    color = TDTheme.colors.onBackground.copy(alpha = 0.6f)
+                    color = TDTheme.colors.onBackground.copy(alpha = 0.6f),
                 )
                 Spacer(Modifier.width(12.dp))
                 Image(
-                    painter = painterResource(
-                        if (TDTheme.isDark) R.drawable.ic_edit_robot_dark else R.drawable.ic_edit_robot_light
+                    painter =
+                    painterResource(
+                        if (TDTheme.isDark) R.drawable.ic_edit_robot_dark else R.drawable.ic_edit_robot_light,
                     ),
                     contentDescription = null,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth(0.28f)
-                        .aspectRatio(1f)
+                        .aspectRatio(1f),
                 )
             }
 
@@ -254,11 +263,12 @@ private fun DetailsSuccessContent(
         }
 
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .background(TDTheme.colors.background)
                 .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             TDButton(
                 modifier = Modifier.fillMaxWidth(),
@@ -266,7 +276,7 @@ private fun DetailsSuccessContent(
                 onClick = { onAction(UiAction.OnSaveChanges) },
                 size = TDButtonSize.MEDIUM,
                 isEnable = uiState.isDirty && !uiState.isSaving,
-                fullWidth = true
+                fullWidth = true,
             )
             TDButton(
                 modifier = Modifier.fillMaxWidth(),
@@ -274,7 +284,7 @@ private fun DetailsSuccessContent(
                 onClick = { onAction(UiAction.OnCancelClick) },
                 size = TDButtonSize.MEDIUM,
                 type = TDButtonType.SECONDARY,
-                fullWidth = true
+                fullWidth = true,
             )
         }
     }

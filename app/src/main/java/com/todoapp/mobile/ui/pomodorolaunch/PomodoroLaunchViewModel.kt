@@ -16,10 +16,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PomodoroLaunchViewModel @Inject constructor(
+class PomodoroLaunchViewModel
+@Inject
+constructor(
     private val pomodoroRepository: PomodoroRepository,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(PomodoroLaunchContract.UiState())
     val uiState = _uiState.asStateFlow()
 

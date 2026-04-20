@@ -17,11 +17,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TopBarViewModel @Inject constructor(
+class TopBarViewModel
+@Inject
+constructor(
     private val userRepository: UserRepository,
     private val dataStoreHelper: DataStoreHelper,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(TopBarContract.UiState(isUserAuthenticated = false))
     val uiState = _uiState.asStateFlow()
 
@@ -34,9 +35,10 @@ class TopBarViewModel @Inject constructor(
 
     fun onAction(action: UiAction) {
         when (action) {
-            UiAction.OnBackClick -> sendNavEffect(
-                effect = NavigationEffect.Back
-            )
+            UiAction.OnBackClick ->
+                sendNavEffect(
+                    effect = NavigationEffect.Back,
+                )
 
             UiAction.OnNotificationClick -> handleNotificationClick()
             UiAction.OnProfileClick -> {
@@ -46,9 +48,9 @@ class TopBarViewModel @Inject constructor(
                     sendNavEffect(
                         NavigationEffect.Navigate(
                             Screen.Login(
-                                redirectAfterLogin = Screen.Home::class.qualifiedName
-                            )
-                        )
+                                redirectAfterLogin = Screen.Home::class.qualifiedName,
+                            ),
+                        ),
                     )
                 }
             }
@@ -56,9 +58,10 @@ class TopBarViewModel @Inject constructor(
             UiAction.OnSettingsClick -> sendNavEffect(NavigationEffect.Navigate(Screen.Settings))
             UiAction.OnSearchClick -> sendNavEffect(NavigationEffect.Navigate(Screen.Search))
             UiAction.OnAuthenticationUpdate -> refreshAuthenticationState()
-            is UiAction.OnGroupSettingsClick -> sendNavEffect(
-                NavigationEffect.Navigate(Screen.GroupSettings(action.groupId))
-            )
+            is UiAction.OnGroupSettingsClick ->
+                sendNavEffect(
+                    NavigationEffect.Navigate(Screen.GroupSettings(action.groupId)),
+                )
         }
     }
 
@@ -92,7 +95,7 @@ class TopBarViewModel @Inject constructor(
     private fun refreshAuthenticationState() {
         viewModelScope.launch {
             updateAuthenticationState(
-                isAuthenticated = userRepository.getUserInfo().isSuccess
+                isAuthenticated = userRepository.getUserInfo().isSuccess,
             )
         }
     }

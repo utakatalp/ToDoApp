@@ -25,10 +25,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import com.todoapp.uikit.modifier.neumorphicShadow
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,8 +39,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.modifier.neumorphicShadow
 import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun TDStatisticCard(
@@ -67,22 +67,25 @@ fun TDStatisticCard(
         alpha.animateTo(1f, spring(stiffness = 300f))
     }
 
-    val surfaceModifier = modifier
-        .fillMaxWidth()
-        .graphicsLayer {
-            scaleX = scale.value
-            scaleY = scale.value
-            this.alpha = alpha.value
-        }
-        .then(
-            if (isDark) Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.25f), cornerShape)
-            else Modifier.neumorphicShadow(
-                lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
-                darkShadow = shadowAccent.copy(alpha = 0.18f),
-                cornerRadius = 20.dp,
-                elevation = 6.dp,
+    val surfaceModifier =
+        modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale.value
+                scaleY = scale.value
+                this.alpha = alpha.value
+            }.then(
+                if (isDark) {
+                    Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.25f), cornerShape)
+                } else {
+                    Modifier.neumorphicShadow(
+                        lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
+                        darkShadow = shadowAccent.copy(alpha = 0.18f),
+                        cornerRadius = 20.dp,
+                        elevation = 6.dp,
+                    )
+                },
             )
-        )
 
     val content: @Composable () -> Unit = {
         Row(
@@ -104,10 +107,10 @@ fun TDStatisticCard(
                     transitionSpec = {
                         if (targetState > initialState) {
                             slideInVertically { -it } + fadeIn(tween(250)) togetherWith
-                                    slideOutVertically { it } + fadeOut(tween(250))
+                                slideOutVertically { it } + fadeOut(tween(250))
                         } else {
                             slideInVertically { it } + fadeIn(tween(250)) togetherWith
-                                    slideOutVertically { -it } + fadeOut(tween(250))
+                                slideOutVertically { -it } + fadeOut(tween(250))
                         }
                     },
                     label = "taskAmountAnim",
@@ -172,14 +175,16 @@ private fun StatisticIcon(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(44.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor),
     ) {
         if (isCompleted) {
             Icon(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(20.dp)
                     .scale(iconScale.value),
                 painter = painterResource(R.drawable.ic_rectangle_svg),
@@ -187,7 +192,8 @@ private fun StatisticIcon(
                 tint = TDTheme.colors.white,
             )
             Icon(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(13.dp)
                     .scale(iconScale.value),
                 painter = painterResource(R.drawable.ic_check_svg),
@@ -196,7 +202,8 @@ private fun StatisticIcon(
             )
         } else {
             Icon(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(20.dp)
                     .scale(iconScale.value),
                 painter = painterResource(R.drawable.ic_sand_clock),

@@ -13,12 +13,17 @@ import okhttp3.Response
 import okhttp3.Route
 import javax.inject.Inject
 
-class TokenRefreshAuthenticator @Inject constructor(
+class TokenRefreshAuthenticator
+@Inject
+constructor(
     private val sessionPreferences: SessionPreferences,
     private val mutex: Mutex,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
 ) : Authenticator {
-    override fun authenticate(route: Route?, response: Response): Request? {
+    override fun authenticate(
+        route: Route?,
+        response: Response,
+    ): Request? {
         if (responseCount(response) >= 2) return null
         Log.d("TokenRefreshAuthenticator", "authenticate: $response")
         return runBlocking {
@@ -28,16 +33,18 @@ class TokenRefreshAuthenticator @Inject constructor(
                 val currentAccessToken = sessionPreferences.getAccessToken()
                 val requestAccessToken = response.request.header("Authorization")?.removePrefix("Bearer ")
                 if (!currentAccessToken.isNullOrBlank() && currentAccessToken != requestAccessToken) {
-                    return@runBlocking response.request.newBuilder()
+                    return@runBlocking response.request
+                        .newBuilder()
                         .header("Authorization", "Bearer $currentAccessToken")
                         .build()
                 }
 
-                val refreshed = authRepository.refresh(
-                    RefreshTokenRequest(
-                        sessionPreferences.getRefreshToken().orEmpty()
+                val refreshed =
+                    authRepository.refresh(
+                        RefreshTokenRequest(
+                            sessionPreferences.getRefreshToken().orEmpty(),
+                        ),
                     )
-                )
                 Log.d("TokenRefresh", refreshed.isSuccess.toString())
                 if (refreshed.isSuccess) {
                     val newAccessToken = refreshed.getOrThrow().accessToken
@@ -47,7 +54,8 @@ class TokenRefreshAuthenticator @Inject constructor(
                     sessionPreferences.setAccessToken(newAccessToken)
                     sessionPreferences.setRefreshToken(newRefreshToken)
                     sessionPreferences.setExpiresAt(newExpiresIn)
-                    response.request.newBuilder()
+                    response.request
+                        .newBuilder()
                         .header("Authorization", "Bearer $newAccessToken")
                         .build()
                 } else {

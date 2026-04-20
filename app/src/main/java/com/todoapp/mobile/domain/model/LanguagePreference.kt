@@ -4,7 +4,8 @@ import java.util.Locale
 
 enum class LanguagePreference {
     ENGLISH,
-    TURKISH;
+    TURKISH,
+    ;
 
     fun toLocale(): Locale = when (this) {
         ENGLISH -> Locale.ENGLISH

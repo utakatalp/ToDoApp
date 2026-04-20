@@ -34,13 +34,14 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
-class GroupTaskDetailViewModel @Inject constructor(
+class GroupTaskDetailViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
     savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
-
     private val route = savedStateHandle.toRoute<Screen.GroupTaskDetail>()
     private val groupId = route.groupId
     private val taskId = route.taskId
@@ -79,9 +80,13 @@ class GroupTaskDetailViewModel @Inject constructor(
         }
     }
 
-    private fun uploadPhoto(bytes: ByteArray, mimeType: String) {
+    private fun uploadPhoto(
+        bytes: ByteArray,
+        mimeType: String,
+    ) {
         viewModelScope.launch {
-            groupRepository.uploadTaskPhoto(taskId, bytes, mimeType)
+            groupRepository
+                .uploadTaskPhoto(taskId, bytes, mimeType)
                 .onSuccess { loadTask() }
                 .onFailure { _uiEffect.trySend(UiEffect.ShowToast(it.message ?: "Failed to upload photo")) }
         }
@@ -89,7 +94,8 @@ class GroupTaskDetailViewModel @Inject constructor(
 
     private fun deletePhoto(photoId: Long) {
         viewModelScope.launch {
-            groupRepository.deleteTaskPhoto(taskId, photoId)
+            groupRepository
+                .deleteTaskPhoto(taskId, photoId)
                 .onSuccess { loadTask() }
                 .onFailure { _uiEffect.trySend(UiEffect.ShowToast(it.message ?: "Failed to delete photo")) }
         }
@@ -102,41 +108,50 @@ class GroupTaskDetailViewModel @Inject constructor(
             val detailResult = groupRepository.getGroupDetail(groupId)
             val detail = detailResult.getOrNull()
             if (detail != null) {
-                currentUserRole = detail.members.find { it.userId == currentUserId }?.role?.uppercase() ?: ""
+                currentUserRole = detail.members
+                    .find { it.userId == currentUserId }
+                    ?.role
+                    ?.uppercase() ?: ""
             }
 
             val members = groupRepository.getGroupMembers(groupId).getOrNull() ?: emptyList()
-            val memberUiItems = members.map { member ->
-                val initials = member.displayName.split(" ")
-                    .mapNotNull { it.firstOrNull()?.toString() }
-                    .take(2).joinToString("").uppercase()
-                GroupDetailContract.GroupMemberUiItem(
-                    userId = member.userId,
-                    displayName = member.displayName,
-                    email = member.email,
-                    avatarUrl = member.avatarUrl,
-                    initials = initials,
-                    role = member.role,
-                    joinedAt = "",
-                    pendingTaskCount = 0,
-                    isCurrentUser = member.userId == currentUserId,
-                )
-            }
+            val memberUiItems =
+                members.map { member ->
+                    val initials =
+                        member.displayName
+                            .split(" ")
+                            .mapNotNull { it.firstOrNull()?.toString() }
+                            .take(2)
+                            .joinToString("")
+                            .uppercase()
+                    GroupDetailContract.GroupMemberUiItem(
+                        userId = member.userId,
+                        displayName = member.displayName,
+                        email = member.email,
+                        avatarUrl = member.avatarUrl,
+                        initials = initials,
+                        role = member.role,
+                        joinedAt = "",
+                        pendingTaskCount = 0,
+                        isCurrentUser = member.userId == currentUserId,
+                    )
+                }
 
-            groupRepository.getGroupTasks(groupId)
+            groupRepository
+                .getGroupTasks(groupId)
                 .onSuccess { tasks ->
                     val task = tasks.find { it.id == taskId }
                     if (task == null) {
                         _uiState.value = UiState.Error(context.getString(R.string.error_generic))
                     } else {
-                        _uiState.value = UiState.Success(
-                            task = task.toUiModel(),
-                            groupName = detail?.name ?: "",
-                            members = memberUiItems,
-                        )
+                        _uiState.value =
+                            UiState.Success(
+                                task = task.toUiModel(),
+                                groupName = detail?.name ?: "",
+                                members = memberUiItems,
+                            )
                     }
-                }
-                .onFailure {
+                }.onFailure {
                     _uiState.value = UiState.Error(it.message ?: context.getString(R.string.error_generic))
                 }
         }
@@ -170,45 +185,56 @@ class GroupTaskDetailViewModel @Inject constructor(
             _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.task_title_empty)))
             return
         }
-        val dueDate: Long? = state.editDate?.let { date ->
-            val time = state.editTime ?: LocalTime.MIDNIGHT
-            date.atTime(time).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        }
+        val dueDate: Long? =
+            state.editDate?.let { date ->
+                val time = state.editTime ?: LocalTime.MIDNIGHT
+                date
+                    .atTime(time)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+            }
         updateSuccess { it.copy(isSaving = true) }
         viewModelScope.launch {
-            groupRepository.updateGroupTask(
-                groupId = groupId,
-                taskId = taskId,
-                title = state.editTitle,
-                description = state.editDescription.ifBlank { null },
-                dueDate = dueDate,
-                priority = state.task.priority,
-                assignedToUserId = state.editAssigneeId,
-            ).onSuccess {
-                val newAssigneeName = state.members.find { it.userId == state.editAssigneeId }?.displayName
-                val newAssigneeInitials = newAssigneeName?.split(" ")
-                    ?.mapNotNull { it.firstOrNull()?.toString() }?.take(2)?.joinToString("")
-                updateSuccess { s ->
-                    s.copy(
-                        task = s.task.copy(
-                            title = s.editTitle,
-                            description = s.editDescription.ifBlank { null },
-                            dueTime = dueDate?.let { formatDueDate(it) },
-                            rawDueDate = dueDate,
-                            assigneeName = newAssigneeName,
-                            assigneeInitials = newAssigneeInitials,
-                            assigneeUserId = s.editAssigneeId,
-                            isAssignedToMe = s.editAssigneeId == currentUserId,
-                        ),
-                        isEditSheetOpen = false,
-                        isSaving = false,
-                    )
+            groupRepository
+                .updateGroupTask(
+                    groupId = groupId,
+                    taskId = taskId,
+                    title = state.editTitle,
+                    description = state.editDescription.ifBlank { null },
+                    dueDate = dueDate,
+                    priority = state.task.priority,
+                    assignedToUserId = state.editAssigneeId,
+                ).onSuccess {
+                    val newAssigneeName = state.members.find { it.userId == state.editAssigneeId }?.displayName
+                    val newAssigneeInitials =
+                        newAssigneeName
+                            ?.split(" ")
+                            ?.mapNotNull { it.firstOrNull()?.toString() }
+                            ?.take(2)
+                            ?.joinToString("")
+                    updateSuccess { s ->
+                        s.copy(
+                            task =
+                            s.task.copy(
+                                title = s.editTitle,
+                                description = s.editDescription.ifBlank { null },
+                                dueTime = dueDate?.let { formatDueDate(it) },
+                                rawDueDate = dueDate,
+                                assigneeName = newAssigneeName,
+                                assigneeInitials = newAssigneeInitials,
+                                assigneeUserId = s.editAssigneeId,
+                                isAssignedToMe = s.editAssigneeId == currentUserId,
+                            ),
+                            isEditSheetOpen = false,
+                            isSaving = false,
+                        )
+                    }
+                    _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.task_updated)))
+                }.onFailure {
+                    updateSuccess { s -> s.copy(isSaving = false) }
+                    _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.failed_to_update_task)))
                 }
-                _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.task_updated)))
-            }.onFailure {
-                updateSuccess { s -> s.copy(isSaving = false) }
-                _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.failed_to_update_task)))
-            }
         }
     }
 
@@ -218,11 +244,13 @@ class GroupTaskDetailViewModel @Inject constructor(
 
     private fun GroupTask.toUiModel(): TaskUiModel {
         val isAssignedToMe = assignee?.userId == currentUserId
-        val assigneeInitials = assignee?.displayName
-            ?.split(" ")
-            ?.mapNotNull { it.firstOrNull()?.toString() }
-            ?.take(2)
-            ?.joinToString("")
+        val assigneeInitials =
+            assignee
+                ?.displayName
+                ?.split(" ")
+                ?.mapNotNull { it.firstOrNull()?.toString() }
+                ?.take(2)
+                ?.joinToString("")
         return TaskUiModel(
             id = id,
             title = title,

@@ -41,7 +41,9 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class CalendarViewModel @Inject constructor(
+class CalendarViewModel
+@Inject
+constructor(
     private val taskRepository: TaskRepository,
     private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
@@ -67,41 +69,60 @@ class CalendarViewModel @Inject constructor(
         when (uiAction) {
             is UiAction.OnDateDeselect -> deselectDate()
             is UiAction.OnDateSelect -> updateDate(uiAction)
-            is UiAction.OnMonthForward -> updateSuccessState { it.copy(selectedMonth = it.selectedMonth.plusMonths(1)) }
-            is UiAction.OnMonthBack -> updateSuccessState { it.copy(selectedMonth = it.selectedMonth.minusMonths(1)) }
+            is UiAction.OnMonthForward ->
+                updateSuccessState {
+                    it.copy(
+                        selectedMonth = it.selectedMonth.plusMonths(1),
+                    )
+                }
+            is UiAction.OnMonthBack ->
+                updateSuccessState {
+                    it.copy(
+                        selectedMonth = it.selectedMonth.minusMonths(1),
+                    )
+                }
             is UiAction.OnRetry -> retry()
             is UiAction.OnTaskClick -> navigateToTask(uiAction.taskId)
             is UiAction.OnShowBottomSheet -> showBottomSheet()
             is UiAction.OnDismissBottomSheet -> dismissBottomSheet()
             is UiAction.OnTaskCreate -> createTask()
-            is UiAction.OnTaskTitleChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(taskTitle = uiAction.title))
-            }
-            is UiAction.OnDialogDateSelect -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = uiAction.date))
-            }
-            is UiAction.OnDialogDateDeselect -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = null))
-            }
-            is UiAction.OnTaskTimeStartChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(taskTimeStart = uiAction.time))
-            }
-            is UiAction.OnTaskTimeEndChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(taskTimeEnd = uiAction.time))
-            }
-            is UiAction.OnTaskDescriptionChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(taskDescription = uiAction.description))
-            }
-            is UiAction.OnToggleAdvancedSettings -> updateSuccessState {
-                it.copy(
-                    taskFormState = it.taskFormState.copy(
-                        isAdvancedSettingsExpanded = !it.taskFormState.isAdvancedSettingsExpanded
+            is UiAction.OnTaskTitleChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(taskTitle = uiAction.title))
+                }
+            is UiAction.OnDialogDateSelect ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = uiAction.date))
+                }
+            is UiAction.OnDialogDateDeselect ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = null))
+                }
+            is UiAction.OnTaskTimeStartChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(taskTimeStart = uiAction.time))
+                }
+            is UiAction.OnTaskTimeEndChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(taskTimeEnd = uiAction.time))
+                }
+            is UiAction.OnTaskDescriptionChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(taskDescription = uiAction.description))
+                }
+            is UiAction.OnToggleAdvancedSettings ->
+                updateSuccessState {
+                    it.copy(
+                        taskFormState =
+                        it.taskFormState.copy(
+                            isAdvancedSettingsExpanded = !it.taskFormState.isAdvancedSettingsExpanded,
+                        ),
                     )
-                )
-            }
-            is UiAction.OnTaskSecretChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(isTaskSecret = uiAction.isSecret))
-            }
+                }
+            is UiAction.OnTaskSecretChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(isTaskSecret = uiAction.isSecret))
+                }
             is UiAction.OnPomodoroTap -> navigateToPomodoro()
             is UiAction.OnSuccessfulBiometricAuthenticationHandle -> handleSuccessfulBiometricAuthentication()
         }
@@ -117,9 +138,10 @@ class CalendarViewModel @Inject constructor(
                 return@launch
             }
 
-            val isActive = secretModePreferences
-                .getCondition()
-                .isActive(System.currentTimeMillis())
+            val isActive =
+                secretModePreferences
+                    .getCondition()
+                    .isActive(System.currentTimeMillis())
 
             if (isActive) navigateToTaskDetail() else _effect.trySend(UiEffect.ShowBiometricAuthenticator)
         }
@@ -133,12 +155,14 @@ class CalendarViewModel @Inject constructor(
 
     private fun handleSuccessfulBiometricAuthentication() {
         viewModelScope.launch {
-            val selectedOption = SecretModeReopenOptions.byId(
-                secretModePreferences.getLastSelectedOptionId()
-            )
-            val condition = SecretModeConditionFactory(
-                clock = Clock.systemDefaultZone()
-            ).create(selectedOption)
+            val selectedOption =
+                SecretModeReopenOptions.byId(
+                    secretModePreferences.getLastSelectedOptionId(),
+                )
+            val condition =
+                SecretModeConditionFactory(
+                    clock = Clock.systemDefaultZone(),
+                ).create(selectedOption)
             secretModePreferences.saveCondition(condition)
             navigateToTaskDetail()
         }
@@ -167,15 +191,16 @@ class CalendarViewModel @Inject constructor(
 
         viewModelScope.launch {
             val form = currentState.taskFormState
-            val task = Task(
-                title = form.taskTitle,
-                description = form.taskDescription,
-                date = form.dialogSelectedDate!!,
-                timeStart = form.taskTimeStart!!,
-                timeEnd = form.taskTimeEnd!!,
-                isCompleted = false,
-                isSecret = form.isTaskSecret
-            )
+            val task =
+                Task(
+                    title = form.taskTitle,
+                    description = form.taskDescription,
+                    date = form.dialogSelectedDate!!,
+                    timeStart = form.taskTimeStart!!,
+                    timeEnd = form.taskTimeEnd!!,
+                    isCompleted = false,
+                    isSecret = form.isTaskSecret,
+                )
             taskRepository.insert(task)
             scheduleTaskReminders(task)
             updateSuccessState { it.copy(taskFormState = TaskFormState(), isSheetOpen = false) }
@@ -212,7 +237,7 @@ class CalendarViewModel @Inject constructor(
         remindBeforeMinutes.forEach { minutes ->
             alarmScheduler.schedule(
                 task.toAlarmItem(remindBeforeMinutes = minutes),
-                type = AlarmType.TASK
+                type = AlarmType.TASK,
             )
         }
     }
@@ -271,25 +296,24 @@ class CalendarViewModel @Inject constructor(
         updateSuccessState { it.copy(selectedDate = uiAction.date) }
     }
 
-    private fun mapTasksToTaskDayItems(tasks: List<Task>): List<TaskDayItem> {
-        return tasks
-            .groupBy { it.date }
-            .map { (date, tasks) ->
-                TaskDayItem(
-                    date = date,
-                    tasks = tasks.map { task ->
-                        TaskCardItem(
-                            taskId = task.id,
-                            taskTitle = if (task.isSecret) task.title.maskTitle() else task.title,
-                            taskTimeStart = task.timeStart.toString(),
-                            taskTimeEnd = task.timeEnd.toString(),
-                            isCompleted = task.isCompleted,
-                            description = task.description,
-                        )
-                    }
-                )
-            }
-    }
+    private fun mapTasksToTaskDayItems(tasks: List<Task>): List<TaskDayItem> = tasks
+        .groupBy { it.date }
+        .map { (date, tasks) ->
+            TaskDayItem(
+                date = date,
+                tasks =
+                tasks.map { task ->
+                    TaskCardItem(
+                        taskId = task.id,
+                        taskTitle = if (task.isSecret) task.title.maskTitle() else task.title,
+                        taskTimeStart = task.timeStart.toString(),
+                        taskTimeEnd = task.timeEnd.toString(),
+                        isCompleted = task.isCompleted,
+                        description = task.description,
+                    )
+                },
+            )
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun syncTaskDatesForMonth() {
@@ -302,10 +326,10 @@ class CalendarViewModel @Inject constructor(
                     val firstDay = month.atDay(1)
                     val startDate = firstDay.minusDays((firstDay.dayOfWeek.value - 1).toLong())
                     val endDate = startDate.plusDays(34L)
-                    taskRepository.observeRange(startDate, endDate)
+                    taskRepository
+                        .observeRange(startDate, endDate)
                         .map { tasks -> tasks.map { it.date }.toSet() }
-                }
-                .collect { taskDates ->
+                }.collect { taskDates ->
                     updateSuccessState { it.copy(taskDatesInMonth = taskDates) }
                 }
         }

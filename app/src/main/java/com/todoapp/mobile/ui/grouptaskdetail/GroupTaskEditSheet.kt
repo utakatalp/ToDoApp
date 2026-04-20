@@ -54,7 +54,8 @@ fun GroupTaskEditSheet(
     var showTimePicker by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
@@ -96,7 +97,8 @@ fun GroupTaskEditSheet(
         Spacer(Modifier.height(12.dp))
         TDPickerField(
             title = stringResource(com.todoapp.mobile.R.string.set_time),
-            value = state.editTime?.format(timeFormatter)
+            value =
+            state.editTime?.format(timeFormatter)
                 ?: stringResource(com.todoapp.mobile.R.string.starts),
             onClick = { showTimePicker = true },
             leadingIcon = {
@@ -163,13 +165,15 @@ private fun EditTaskAssigneeSelector(
                 val isSelected = member.userId == selectedAssigneeId
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .clickable { onAssigneeSelected(if (isSelected) null else member.userId) }
                         .padding(4.dp),
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(40.dp)
                             .clip(CircleShape)
                             .background(if (isSelected) TDTheme.colors.pendingGray else TDTheme.colors.lightPending)
@@ -178,7 +182,7 @@ private fun EditTaskAssigneeSelector(
                                     Modifier.border(2.dp, TDTheme.colors.pendingGray, CircleShape)
                                 } else {
                                     Modifier
-                                }
+                                },
                             ),
                     ) {
                         TDText(

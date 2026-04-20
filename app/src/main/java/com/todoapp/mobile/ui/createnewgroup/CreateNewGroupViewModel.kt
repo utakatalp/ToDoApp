@@ -19,11 +19,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateNewGroupViewModel @Inject constructor(
+class CreateNewGroupViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(UiState(isUserAuthenticated = false))
     val uiState = _uiState.asStateFlow()
 
@@ -39,11 +40,12 @@ class CreateNewGroupViewModel @Inject constructor(
     fun onAction(action: UiAction) {
         when (action) {
             is UiAction.OnCreateTap -> createGroup()
-            is UiAction.OnGroupDescriptionChange -> _uiState.update {
-                it.copy(
-                    groupDescription = action.groupDescription
-                )
-            }
+            is UiAction.OnGroupDescriptionChange ->
+                _uiState.update {
+                    it.copy(
+                        groupDescription = action.groupDescription,
+                    )
+                }
 
             is UiAction.OnGroupNameChange -> updateGroupName(action.groupName)
         }
@@ -75,22 +77,23 @@ class CreateNewGroupViewModel @Inject constructor(
             if (!isUserAuthenticated) {
                 _navEffect.send(
                     NavigationEffect.Navigate(
-                        Screen.Login(redirectAfterLogin = "CreateNewGroup")
-                    )
+                        Screen.Login(redirectAfterLogin = "CreateNewGroup"),
+                    ),
                 )
                 return@launch
             }
 
-            groupRepository.createGroup(
-                CreateGroupRequest(
-                    uiState.value.groupName,
-                    uiState.value.groupDescription ?: ""
-                )
-            ).onSuccess {
-                _navEffect.send(NavigationEffect.Back)
-            }.onFailure {
-                _uiState.update { it.copy(error = "Something went wrong. Try again later.") }
-            }
+            groupRepository
+                .createGroup(
+                    CreateGroupRequest(
+                        uiState.value.groupName,
+                        uiState.value.groupDescription ?: "",
+                    ),
+                ).onSuccess {
+                    _navEffect.send(NavigationEffect.Back)
+                }.onFailure {
+                    _uiState.update { it.copy(error = "Something went wrong. Try again later.") }
+                }
         }
     }
 

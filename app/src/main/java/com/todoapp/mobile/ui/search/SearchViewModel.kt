@@ -37,13 +37,14 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class, kotlinx.coroutines.FlowPreview::class)
 @HiltViewModel
-class SearchViewModel @Inject constructor(
+class SearchViewModel
+@Inject
+constructor(
     private val taskRepository: TaskRepository,
     private val groupRepository: GroupRepository,
     private val secretPreferences: SecretPreferences,
 ) : ViewModel() {
-
-    private val _query = MutableStateFlow("")
+    private val queryFlow = MutableStateFlow("")
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState = _uiState.asStateFlow()
@@ -67,7 +68,7 @@ class SearchViewModel @Inject constructor(
 
     fun onAction(action: UiAction) {
         when (action) {
-            is UiAction.OnQueryChange -> _query.update { action.query }
+            is UiAction.OnQueryChange -> queryFlow.update { action.query }
             is UiAction.OnFilterChange -> applyFilter(action.filter)
             is UiAction.OnTaskClick -> openTaskDetail(action.task)
             is UiAction.OnTaskCheck -> toggleCompletion(action.task)
@@ -94,7 +95,7 @@ class SearchViewModel @Inject constructor(
 
     private fun observeSearchQuery() {
         viewModelScope.launch {
-            _query
+            queryFlow
                 .debounce(300L)
                 .distinctUntilChanged()
                 .flatMapLatest { raw ->
@@ -107,12 +108,12 @@ class SearchViewModel @Inject constructor(
                         flowOf(emptyList<Task>() to "")
                     } else {
                         _uiState.update { UiState.Loading }
-                        taskRepository.searchTasks(raw)
+                        taskRepository
+                            .searchTasks(raw)
                             .map { tasks -> tasks to raw }
                             .catch { e -> _uiState.update { UiState.Error(e.message ?: "Search failed") } }
                     }
-                }
-                .collect { (personalTasks, raw) ->
+                }.collect { (personalTasks, raw) ->
                     if (raw.isNotBlank()) {
                         lastPersonalTasks = personalTasks
                         lastGroupPairs = emptyList()
@@ -123,15 +124,19 @@ class SearchViewModel @Inject constructor(
                                 activeFilter = SearchFilter.ALL,
                             )
                         }
-                        groupSearchJob = viewModelScope.launch {
-                            fetchAndMergeGroupResults(raw, personalTasks)
-                        }
+                        groupSearchJob =
+                            viewModelScope.launch {
+                                fetchAndMergeGroupResults(raw, personalTasks)
+                            }
                     }
                 }
         }
     }
 
-    private suspend fun fetchAndMergeGroupResults(query: String, personalTasks: List<Task>) {
+    private suspend fun fetchAndMergeGroupResults(
+        query: String,
+        personalTasks: List<Task>,
+    ) {
         groupRepository.searchGroupTasksAcrossGroups(query).onSuccess { groupPairs ->
             lastGroupPairs = groupPairs
             _uiState.update { current ->
@@ -169,14 +174,17 @@ class SearchViewModel @Inject constructor(
 
     private fun navigateToGroup(group: Group) {
         _navEffect.trySend(
-            NavigationEffect.Navigate(Screen.GroupDetail(group.remoteId ?: group.id, group.name))
+            NavigationEffect.Navigate(Screen.GroupDetail(group.remoteId ?: group.id, group.name)),
         )
     }
 
-    private fun navigateToGroupTask(group: Group, groupTask: GroupTask) {
+    private fun navigateToGroupTask(
+        group: Group,
+        groupTask: GroupTask,
+    ) {
         val groupRemoteId = group.remoteId ?: return
         _navEffect.trySend(
-            NavigationEffect.Navigate(Screen.GroupTaskDetail(groupRemoteId, groupTask.id))
+            NavigationEffect.Navigate(Screen.GroupTaskDetail(groupRemoteId, groupTask.id)),
         )
     }
 
@@ -187,9 +195,10 @@ class SearchViewModel @Inject constructor(
         }
         pendingSecretTask = task
         viewModelScope.launch {
-            val isActive = secretPreferences
-                .getCondition()
-                .isActive(System.currentTimeMillis())
+            val isActive =
+                secretPreferences
+                    .getCondition()
+                    .isActive(System.currentTimeMillis())
             if (isActive) {
                 _navEffect.trySend(NavigationEffect.Navigate(Screen.Task(task.id)))
             } else {
@@ -200,12 +209,14 @@ class SearchViewModel @Inject constructor(
 
     private fun handleSuccessfulBiometricAuthentication() {
         viewModelScope.launch {
-            val selectedOption = SecretModeReopenOptions.byId(
-                secretPreferences.getLastSelectedOptionId()
-            )
-            val condition = SecretModeConditionFactory(
-                clock = Clock.systemDefaultZone()
-            ).create(selectedOption)
+            val selectedOption =
+                SecretModeReopenOptions.byId(
+                    secretPreferences.getLastSelectedOptionId(),
+                )
+            val condition =
+                SecretModeConditionFactory(
+                    clock = Clock.systemDefaultZone(),
+                ).create(selectedOption)
             secretPreferences.saveCondition(condition)
             pendingSecretTask?.let {
                 _navEffect.send(NavigationEffect.Navigate(Screen.Task(it.id)))

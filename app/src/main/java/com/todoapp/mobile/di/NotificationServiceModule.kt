@@ -12,7 +12,5 @@ import javax.inject.Singleton
 object NotificationServiceModule {
     @Provides
     @Singleton
-    fun provideNotificationService(): NotificationService {
-        return NotificationService()
-    }
+    fun provideNotificationService(): NotificationService = NotificationService()
 }

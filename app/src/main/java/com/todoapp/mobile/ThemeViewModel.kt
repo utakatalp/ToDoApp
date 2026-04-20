@@ -6,7 +6,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class ThemeViewModel @Inject constructor(
+class ThemeViewModel
+@Inject
+constructor(
     themeRepository: ThemeRepository,
 ) : ViewModel() {
     val themeFlow = themeRepository.themeFlow

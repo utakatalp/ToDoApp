@@ -16,8 +16,6 @@ object AlarmManagerModule {
     @Provides
     @Singleton
     fun provideAlarmScheduler(
-        @ApplicationContext context: Context
-    ): AlarmScheduler {
-        return AlarmSchedulerImpl(context)
-    }
+        @ApplicationContext context: Context,
+    ): AlarmScheduler = AlarmSchedulerImpl(context)
 }

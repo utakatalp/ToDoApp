@@ -53,7 +53,8 @@ fun TDUndoSnackbar(
     }
 
     Surface(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .widthIn(max = 520.dp),
@@ -64,17 +65,19 @@ fun TDUndoSnackbar(
     ) {
         Column {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(3.dp)
                     .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
-                    .background(TDTheme.colors.background.copy(alpha = 0.2f))
+                    .background(TDTheme.colors.background.copy(alpha = 0.2f)),
             ) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth(fraction = progress)
                         .height(3.dp)
-                        .background(TDTheme.colors.crossRed)
+                        .background(TDTheme.colors.crossRed),
                 )
             }
             Row(

@@ -5,15 +5,16 @@ import com.todoapp.mobile.data.source.local.GroupTaskDao
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GroupTaskLocalDataSourceImpl @Inject constructor(
+class GroupTaskLocalDataSourceImpl
+@Inject
+constructor(
     private val groupTaskDao: GroupTaskDao,
 ) : GroupTaskLocalDataSource {
+    override fun observeByGroupId(localGroupId: Long): Flow<List<GroupTaskEntity>> = groupTaskDao.getTasksByGroupId(
+        localGroupId,
+    )
 
-    override fun observeByGroupId(localGroupId: Long): Flow<List<GroupTaskEntity>> =
-        groupTaskDao.getTasksByGroupId(localGroupId)
-
-    override fun searchAll(query: String): Flow<List<GroupTaskEntity>> =
-        groupTaskDao.searchTasks(query)
+    override fun searchAll(query: String): Flow<List<GroupTaskEntity>> = groupTaskDao.searchTasks(query)
 
     override suspend fun insert(task: GroupTaskEntity) = groupTaskDao.insert(task)
 
@@ -23,20 +24,18 @@ class GroupTaskLocalDataSourceImpl @Inject constructor(
 
     override suspend fun delete(task: GroupTaskEntity) = groupTaskDao.delete(task)
 
-    override suspend fun deleteByGroupId(localGroupId: Long) =
-        groupTaskDao.deleteByGroupId(localGroupId)
+    override suspend fun deleteByGroupId(localGroupId: Long) = groupTaskDao.deleteByGroupId(localGroupId)
 
-    override suspend fun deleteByRemoteId(remoteId: Long) =
-        groupTaskDao.deleteByRemoteId(remoteId)
+    override suspend fun deleteByRemoteId(remoteId: Long) = groupTaskDao.deleteByRemoteId(remoteId)
 
-    override suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity? =
-        groupTaskDao.getByRemoteId(remoteId)
+    override suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity? = groupTaskDao.getByRemoteId(remoteId)
 
-    override suspend fun getAllRemoteIds(): List<Long> =
-        groupTaskDao.getAllRemoteIds()
+    override suspend fun getAllRemoteIds(): List<Long> = groupTaskDao.getAllRemoteIds()
 
-    override suspend fun updateCompletion(remoteId: Long, isCompleted: Boolean) =
-        groupTaskDao.updateCompletion(remoteId, isCompleted)
+    override suspend fun updateCompletion(
+        remoteId: Long,
+        isCompleted: Boolean,
+    ) = groupTaskDao.updateCompletion(remoteId, isCompleted)
 
     override suspend fun updateTask(
         remoteId: Long,

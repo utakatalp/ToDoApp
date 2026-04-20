@@ -53,7 +53,8 @@ fun PlanYourDayScreen(
         }
     }
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(horizontal = 16.dp),
@@ -82,12 +83,13 @@ fun PlanYourDayScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
-                painter = painterResource(
+                painter =
+                painterResource(
                     if (TDTheme.isDark) {
                         R.drawable.ic_plan_day_robot_dark
                     } else {
                         R.drawable.ic_plan_day_robot_light
-                    }
+                    },
                 ),
                 contentDescription = null,
                 modifier = Modifier.size(200.dp),
@@ -131,7 +133,8 @@ fun PlanYourDayScreen(
 private fun PlanYourDayScreenPreview() {
     TDTheme {
         PlanYourDayScreen(
-            uiState = UiState(
+            uiState =
+            UiState(
                 selectedTime = LocalTime.of(9, 30),
                 savedTime = LocalTime.of(9, 0),
             ),
@@ -147,7 +150,8 @@ private fun PlanYourDayScreenPreview() {
 private fun PlanYourDayScreenNoChangePreview() {
     TDTheme {
         PlanYourDayScreen(
-            uiState = UiState(
+            uiState =
+            UiState(
                 selectedTime = LocalTime.of(9, 0),
                 savedTime = LocalTime.of(9, 0),
             ),

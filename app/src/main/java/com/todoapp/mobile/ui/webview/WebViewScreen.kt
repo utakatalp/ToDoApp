@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.emptyFlow
 @Composable
 fun WebViewScreen(
     uiEffect: Flow<UiEffect>,
-    onAction: (UiAction) -> Unit
+    onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
     val webView = remember { WebView(context) }
@@ -75,12 +75,14 @@ fun WebViewScreen(
     }
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .background(TDTheme.colors.white)
+            .background(TDTheme.colors.white),
     ) {
         AndroidView(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding(),
@@ -88,7 +90,8 @@ fun WebViewScreen(
         )
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(12.dp),
@@ -98,7 +101,8 @@ fun WebViewScreen(
                 painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
                 contentDescription = "Close",
                 tint = TDTheme.colors.black,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(TDTheme.colors.white.copy(alpha = 0.9f))
@@ -106,7 +110,7 @@ fun WebViewScreen(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() },
                     ) { onAction(UiAction.OnCloseWebView) }
-                    .padding(8.dp)
+                    .padding(8.dp),
             )
         }
     }
@@ -118,7 +122,7 @@ private fun WebViewScreenPreview() {
     TDTheme {
         WebViewScreen(
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }

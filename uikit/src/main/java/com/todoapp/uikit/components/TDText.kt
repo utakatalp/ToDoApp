@@ -30,9 +30,9 @@ fun TDText(
             modifier = modifier,
             textAlign = textAlign,
             style =
-                style.merge(
-                    color = color,
-                ),
+            style.merge(
+                color = color,
+            ),
             overflow = overflow,
             maxLines = maxLines,
         )
@@ -51,26 +51,26 @@ fun TDSpannableText(
 ) {
     Text(
         text =
-            buildAnnotatedString {
-                withStyle(style = style.toSpanStyle()) {
-                    append(fullText)
-                    val mStartIndex = fullText.indexOf(spanText)
-                    if (mStartIndex != -1) {
-                        val mEndIndex = mStartIndex.plus(spanText.length)
-                        addStyle(
-                            style = spanStyle,
-                            start = mStartIndex,
-                            end = mEndIndex,
-                        )
-                    }
+        buildAnnotatedString {
+            withStyle(style = style.toSpanStyle()) {
+                append(fullText)
+                val mStartIndex = fullText.indexOf(spanText)
+                if (mStartIndex != -1) {
+                    val mEndIndex = mStartIndex.plus(spanText.length)
+                    addStyle(
+                        style = spanStyle,
+                        start = mStartIndex,
+                        end = mEndIndex,
+                    )
                 }
-            },
+            }
+        },
         modifier = modifier,
         textAlign = textAlign,
         style =
-            style.merge(
-                color = color,
-            ),
+        style.merge(
+            color = color,
+        ),
     )
 }
 
@@ -92,10 +92,10 @@ private fun TDAnnotatedTextExample() {
             fullText = "This should be a text.",
             spanText = "should",
             spanStyle =
-                SpanStyle(
-                    color = TDTheme.colors.pendingGray,
-                    fontWeight = FontWeight.Bold,
-                ),
+            SpanStyle(
+                color = TDTheme.colors.pendingGray,
+                fontWeight = FontWeight.Bold,
+            ),
         )
     }
 }

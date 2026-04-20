@@ -33,16 +33,17 @@ fun TDSplashScreen() {
     LaunchedEffect(Unit) {
         scale.animateTo(
             targetValue = 1f,
-            animationSpec = tween(600, easing = EaseOutBack)
+            animationSpec = tween(600, easing = EaseOutBack),
         )
         alpha.animateTo(
             targetValue = 1f,
-            animationSpec = tween(400)
+            animationSpec = tween(400),
         )
     }
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background),
         contentAlignment = Alignment.Center,
@@ -51,16 +52,17 @@ fun TDSplashScreen() {
             Image(
                 painter = painterResource(R.drawable.ic_logo),
                 contentDescription = null,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(120.dp)
-                    .scale(scale.value)
+                    .scale(scale.value),
             )
             Spacer(Modifier.height(16.dp))
             TDText(
                 text = "ToDo App",
                 style = TDTheme.typography.heading6,
                 color = TDTheme.colors.pendingGray,
-                modifier = Modifier.alpha(alpha.value)
+                modifier = Modifier.alpha(alpha.value),
             )
         }
     }

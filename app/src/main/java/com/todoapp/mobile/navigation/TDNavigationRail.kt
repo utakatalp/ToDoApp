@@ -29,13 +29,15 @@ fun TDNavigationRail() {
     ) {
         AppDestination.bottomBarItems.forEach { screen ->
             val screenRoute = screen.route
-            val selected = currentDestination?.hierarchy?.any { dest ->
-                dest.route?.substringBefore("?")?.substringBefore("/") == screenRoute
-            } == true
+            val selected =
+                currentDestination?.hierarchy?.any { dest ->
+                    dest.route?.substringBefore("?")?.substringBefore("/") == screenRoute
+                } == true
 
             NavigationRailItem(
                 selected = selected,
-                colors = NavigationRailItemDefaults.colors(
+                colors =
+                NavigationRailItemDefaults.colors(
                     selectedIconColor = TDTheme.colors.pendingGray,
                     selectedTextColor = TDTheme.colors.pendingGray,
                     indicatorColor = TDTheme.colors.pendingGray.copy(alpha = 0.2f),

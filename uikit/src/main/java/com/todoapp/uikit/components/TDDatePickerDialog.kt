@@ -46,11 +46,11 @@ fun TDDatePickerDialog(
         TDPickerField(
             title = stringResource(R.string.pick_a_date),
             value =
-                selectedDate?.format(
-                    DateTimeFormatter.ofPattern(
-                        "dd MMMM yyyy",
-                    ),
-                ) ?: stringResource(R.string.pick_a_date),
+            selectedDate?.format(
+                DateTimeFormatter.ofPattern(
+                    "dd MMMM yyyy",
+                ),
+            ) ?: stringResource(R.string.pick_a_date),
             onClick = { isPickerOpen = true },
             trailingIcon = {
                 Icon(
@@ -60,7 +60,7 @@ fun TDDatePickerDialog(
                 )
             },
             modifier = Modifier.fillMaxWidth(),
-            isError = isError
+            isError = isError,
         )
         if (isPickerOpen) {
             Dialog(
@@ -68,9 +68,9 @@ fun TDDatePickerDialog(
             ) {
                 Surface(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     shape = RoundedCornerShape(16.dp),
                     tonalElevation = 8.dp,
                 ) {
@@ -84,7 +84,8 @@ fun TDDatePickerDialog(
                             onDayDeselect = onDateDeselect,
                         )
                         Row(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxWidth()
                                 .background(TDTheme.colors.background)
                                 .padding(horizontal = 16.dp, vertical = 4.dp),

@@ -35,19 +35,21 @@ fun TDWeekNavigator(
 
     // Safely obtain the locale from configuration to avoid exceptions in Preview environments
     val configuration = LocalConfiguration.current
-    val locale = if (configuration.locales.isEmpty) {
-        Locale.getDefault()
-    } else {
-        configuration.locales[0]
-    }
+    val locale =
+        if (configuration.locales.isEmpty) {
+            Locale.getDefault()
+        } else {
+            configuration.locales[0]
+        }
 
-    val label = if (weekStart.year == weekEnd.year) {
-        val formatter = DateTimeFormatter.ofPattern("MMM d", locale)
-        "${formatter.format(weekStart)} – ${formatter.format(weekEnd)}"
-    } else {
-        val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", locale)
-        "${formatter.format(weekStart)} – ${formatter.format(weekEnd)}"
-    }
+    val label =
+        if (weekStart.year == weekEnd.year) {
+            val formatter = DateTimeFormatter.ofPattern("MMM d", locale)
+            "${formatter.format(weekStart)} – ${formatter.format(weekEnd)}"
+        } else {
+            val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", locale)
+            "${formatter.format(weekStart)} – ${formatter.format(weekEnd)}"
+        }
 
     Row(
         modifier = modifier,

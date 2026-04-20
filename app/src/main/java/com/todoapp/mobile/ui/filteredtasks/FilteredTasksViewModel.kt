@@ -32,12 +32,13 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class FilteredTasksViewModel @Inject constructor(
+class FilteredTasksViewModel
+@Inject
+constructor(
     private val taskRepository: TaskRepository,
     private val secretModePreferences: SecretPreferences,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
 
@@ -76,38 +77,44 @@ class FilteredTasksViewModel @Inject constructor(
             is UiAction.OnSuccessfulBiometricAuthenticationHandle -> handleSuccessfulBiometricAuthentication()
             is UiAction.OnUndoDelete -> undoDelete()
             is UiAction.OnBack -> _navEffect.trySend(NavigationEffect.Back)
-            is UiAction.OnToggleSortOrder -> updateSuccessState { current ->
-                val newOrder = if (current.sortOrder == SortOrder.ASC) SortOrder.DESC else SortOrder.ASC
-                current.copy(sortOrder = newOrder, tasks = current.tasks.applySortOrder(newOrder))
-            }
-        }
-    }
-
-    private fun fetchTasks(date: LocalDate, tab: TaskTab) {
-        fetchJob?.cancel()
-        fetchJob = viewModelScope.launch {
-            taskRepository.observeTasksByWeekAndStatus(
-                date = date,
-                isCompleted = tab == TaskTab.DONE,
-            ).collect { tasks ->
-                val order = (_uiState.value as? UiState.Success)?.sortOrder ?: SortOrder.ASC
-                val sorted = kotlinx.coroutines.withContext(Dispatchers.Default) { tasks.applySortOrder(order) }
-                _uiState.update { current ->
-                    when (current) {
-                        is UiState.Success -> current.copy(tasks = sorted)
-                        else -> UiState.Success(
-                            tasks = sorted,
-                            selectedTab = tab,
-                            selectedWeekDate = date,
-                        )
-                    }
+            is UiAction.OnToggleSortOrder ->
+                updateSuccessState { current ->
+                    val newOrder = if (current.sortOrder == SortOrder.ASC) SortOrder.DESC else SortOrder.ASC
+                    current.copy(sortOrder = newOrder, tasks = current.tasks.applySortOrder(newOrder))
                 }
-            }
         }
     }
 
-    private fun List<Task>.applySortOrder(order: SortOrder) =
-        if (order == SortOrder.ASC) sortedBy { it.date } else sortedByDescending { it.date }
+    private fun fetchTasks(
+        date: LocalDate,
+        tab: TaskTab,
+    ) {
+        fetchJob?.cancel()
+        fetchJob =
+            viewModelScope.launch {
+                taskRepository
+                    .observeTasksByWeekAndStatus(
+                        date = date,
+                        isCompleted = tab == TaskTab.DONE,
+                    ).collect { tasks ->
+                        val order = (_uiState.value as? UiState.Success)?.sortOrder ?: SortOrder.ASC
+                        val sorted = kotlinx.coroutines.withContext(Dispatchers.Default) { tasks.applySortOrder(order) }
+                        _uiState.update { current ->
+                            when (current) {
+                                is UiState.Success -> current.copy(tasks = sorted)
+                                else ->
+                                    UiState.Success(
+                                        tasks = sorted,
+                                        selectedTab = tab,
+                                        selectedWeekDate = date,
+                                    )
+                            }
+                        }
+                    }
+            }
+    }
+
+    private fun List<Task>.applySortOrder(order: SortOrder) = if (order == SortOrder.ASC) sortedBy { it.date } else sortedByDescending { it.date }
 
     private fun changeTab(tab: TaskTab) {
         val currentState = _uiState.value as? UiState.Success ?: return
@@ -135,11 +142,12 @@ class FilteredTasksViewModel @Inject constructor(
     private fun deleteTask(task: Task) {
         updateSuccessState { it.copy(pendingDeleteTask = task) }
         pendingDeleteJob?.cancel()
-        pendingDeleteJob = viewModelScope.launch {
-            delay(UNDO_DELAY_MS)
-            taskRepository.delete(task)
-            updateSuccessState { it.copy(pendingDeleteTask = null) }
-        }
+        pendingDeleteJob =
+            viewModelScope.launch {
+                delay(UNDO_DELAY_MS)
+                taskRepository.delete(task)
+                updateSuccessState { it.copy(pendingDeleteTask = null) }
+            }
     }
 
     private fun undoDelete() {
@@ -161,9 +169,10 @@ class FilteredTasksViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            val isActive = secretModePreferences
-                .getCondition()
-                .isActive(System.currentTimeMillis())
+            val isActive =
+                secretModePreferences
+                    .getCondition()
+                    .isActive(System.currentTimeMillis())
             if (isActive) navigateToTaskDetail() else authenticate()
         }
     }
@@ -180,12 +189,14 @@ class FilteredTasksViewModel @Inject constructor(
 
     private fun handleSuccessfulBiometricAuthentication() {
         viewModelScope.launch {
-            val selectedOption = SecretModeReopenOptions.byId(
-                secretModePreferences.getLastSelectedOptionId()
-            )
-            val condition = SecretModeConditionFactory(
-                clock = Clock.systemDefaultZone()
-            ).create(selectedOption)
+            val selectedOption =
+                SecretModeReopenOptions.byId(
+                    secretModePreferences.getLastSelectedOptionId(),
+                )
+            val condition =
+                SecretModeConditionFactory(
+                    clock = Clock.systemDefaultZone(),
+                ).create(selectedOption)
             secretModePreferences.saveCondition(condition)
             navigateToTaskDetail()
         }

@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface LanguageRepository {
     val languageFlow: Flow<LanguagePreference>
+
     suspend fun saveLanguage(language: LanguagePreference)
+
     suspend fun getCurrentLanguage(): LanguagePreference
 }

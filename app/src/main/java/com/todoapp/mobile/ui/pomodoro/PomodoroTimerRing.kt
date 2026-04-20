@@ -81,7 +81,7 @@ private fun PomodoroTimerRingPreview() {
             PomodoroTimerRing(
                 progress = 0.75f,
                 progressColor = palette.content,
-                trackColor = palette.track
+                trackColor = palette.track,
             )
         }
     }

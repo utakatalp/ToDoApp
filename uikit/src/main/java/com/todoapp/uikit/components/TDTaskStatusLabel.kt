@@ -30,7 +30,8 @@ fun TDTaskStatusLabel(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier
+        modifier =
+        modifier
             .size(36.dp)
             .border(
                 width = 1.5.dp,
@@ -40,14 +41,16 @@ fun TDTaskStatusLabel(
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(24.dp)
                 .clip(CircleShape)
                 .background(circleColor),
         ) {
             Icon(
                 modifier = Modifier.size(12.dp),
-                painter = painterResource(
+                painter =
+                painterResource(
                     if (isCompleted) R.drawable.ic_check_svg else R.drawable.ic_sand_clock,
                 ),
                 contentDescription = null,
@@ -80,7 +83,7 @@ private fun TDTaskStatusLabelCompletedDarkPreview() {
         Box(
             Modifier
                 .background(TDTheme.colors.background)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             TDTaskStatusLabel(isCompleted = true)
         }
@@ -94,7 +97,7 @@ private fun TDTaskStatusLabelPendingDarkPreview() {
         Box(
             Modifier
                 .background(TDTheme.colors.background)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             TDTaskStatusLabel(isCompleted = false)
         }
@@ -120,7 +123,7 @@ private fun TDTaskStatusLabelGroupDarkPreview() {
         Column(
             Modifier
                 .background(TDTheme.colors.background)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             TDTaskStatusLabel(isCompleted = true)
             Spacer(Modifier.height(12.dp))

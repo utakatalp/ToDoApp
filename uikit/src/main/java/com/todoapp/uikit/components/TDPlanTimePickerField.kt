@@ -58,10 +58,11 @@ fun TDPlanTimePickerField(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Top,
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .background(TDTheme.colors.background)
                 .clickable { isDialogOpen = true }
@@ -92,7 +93,8 @@ fun TDPlanTimePickerField(
             Spacer(modifier = Modifier.width(12.dp))
 
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .clip(RoundedCornerShape(999.dp))
                     .background(TDTheme.colors.pendingGray)
                     .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -116,11 +118,12 @@ fun TDPlanTimePickerField(
         if (isDialogOpen) {
             Dialog(onDismissRequest = { isDialogOpen = false }) {
                 key(initialHour, initialMinute) {
-                    val timePickerState = rememberTimePickerState(
-                        initialHour = initialHour,
-                        initialMinute = initialMinute,
-                        is24Hour = true,
-                    )
+                    val timePickerState =
+                        rememberTimePickerState(
+                            initialHour = initialHour,
+                            initialMinute = initialMinute,
+                            is24Hour = true,
+                        )
 
                     Surface(
                         modifier = Modifier.padding(16.dp),
@@ -130,7 +133,8 @@ fun TDPlanTimePickerField(
                         color = TDTheme.colors.background,
                     ) {
                         Column(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .widthIn(max = 320.dp)
                                 .padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -143,7 +147,7 @@ fun TDPlanTimePickerField(
 
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 TDButton(
                                     text = stringResource(R.string.cancel),

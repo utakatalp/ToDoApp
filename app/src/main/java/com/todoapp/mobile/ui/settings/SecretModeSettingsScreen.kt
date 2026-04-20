@@ -77,7 +77,8 @@ fun SecretModeSettingsScreen(
     }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .verticalScroll(rememberScrollState())
@@ -134,9 +135,13 @@ private fun SecretModeStatusCard(
         transitionSpec = { tween(durationMillis = 400) },
         label = "backgroundColor",
     ) { active ->
-        if (active) TDTheme.colors.pendingGray.copy(
-            alpha = 0.12f
-        ) else TDTheme.colors.onBackground.copy(alpha = 0.06f)
+        if (active) {
+            TDTheme.colors.pendingGray.copy(
+                alpha = 0.12f,
+            )
+        } else {
+            TDTheme.colors.onBackground.copy(alpha = 0.06f)
+        }
     }
     val iconTint by transition.animateColor(
         transitionSpec = { tween(durationMillis = 400) },
@@ -151,12 +156,14 @@ private fun SecretModeStatusCard(
         label = "iconScale",
     ) { active -> if (active) 1f else 0.85f }
 
-    val showSubtitle = isActive &&
+    val showSubtitle =
+        isActive &&
             statusMessage.isNotBlank() &&
             statusMessage != "Secret mode is closed."
 
     Surface(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .border(width = 1.5.dp, color = borderColor, shape = RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
@@ -172,11 +179,12 @@ private fun SecretModeStatusCard(
                 painter = painterResource(R.drawable.ic_secret_mode),
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(32.dp)
                     .graphicsLayer {
                         scaleX = iconScale
-                    scaleY = iconScale
+                        scaleY = iconScale
                     },
             )
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -189,7 +197,8 @@ private fun SecretModeStatusCard(
                     label = "titleText",
                 ) { active ->
                     TDText(
-                        text = if (active) {
+                        text =
+                        if (active) {
                             stringResource(R.string.secret_mode_active)
                         } else {
                             stringResource(R.string.secret_mode_inactive)
@@ -241,7 +250,8 @@ private fun SecretModeOptionRow(
     val labelColor = if (isSelected) TDTheme.colors.pendingGray else TDTheme.colors.onBackground
 
     Surface(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() },
@@ -268,29 +278,32 @@ private fun SecretModeOptionRow(
 private fun RadioIndicator(isSelected: Boolean) {
     if (isSelected) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(20.dp)
                 .clip(CircleShape)
                 .then(
-                    Modifier.border(2.dp, TDTheme.colors.pendingGray, CircleShape)
+                    Modifier.border(2.dp, TDTheme.colors.pendingGray, CircleShape),
                 ),
             contentAlignment = Alignment.Center,
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(10.dp)
                     .clip(CircleShape)
                     .then(
-                        Modifier.border(5.dp, TDTheme.colors.pendingGray, CircleShape)
-                    )
+                        Modifier.border(5.dp, TDTheme.colors.pendingGray, CircleShape),
+                    ),
             )
         }
     } else {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(20.dp)
                 .clip(CircleShape)
-                .border(2.dp, TDTheme.colors.onBackground.copy(alpha = 0.3f), CircleShape)
+                .border(2.dp, TDTheme.colors.onBackground.copy(alpha = 0.3f), CircleShape),
         )
     }
 }
@@ -300,12 +313,13 @@ private fun RadioIndicator(isSelected: Boolean) {
 private fun SecretModeSettingsScreenPreview_Inactive() {
     TDTheme {
         SecretModeSettingsScreen(
-            uiState = SettingsContract.UiState(
+            uiState =
+            SettingsContract.UiState(
                 selectedSecretMode = SecretModeReopenOptions.Minutes5,
                 isSecretModeActive = false,
                 remainedSecretModeTime = "Secret mode is closed.",
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -315,12 +329,13 @@ private fun SecretModeSettingsScreenPreview_Inactive() {
 private fun SecretModeSettingsScreenPreview_Active() {
     TDTheme {
         SecretModeSettingsScreen(
-            uiState = SettingsContract.UiState(
+            uiState =
+            SettingsContract.UiState(
                 selectedSecretMode = SecretModeReopenOptions.Minutes5,
                 isSecretModeActive = true,
                 remainedSecretModeTime = "Secret mode will be open for 03:50.",
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }

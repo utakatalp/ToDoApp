@@ -9,7 +9,6 @@ sealed class AppDestination(
     val icon: Int?,
     val selectedIcon: Int?,
 ) {
-
     data object Home : AppDestination(
         title = R.string.navbar_home_screen_page_name,
         route = Screen.Home::class.qualifiedName!!,
@@ -35,28 +34,28 @@ sealed class AppDestination(
         title = R.string.settings,
         route = Screen.Settings::class.qualifiedName!!,
         icon = null,
-        selectedIcon = null
+        selectedIcon = null,
     )
 
     data object PomodoroAddTimer : AppDestination(
         title = R.string.add_timer,
         route = Screen.AddPomodoroTimer::class.qualifiedName!!,
         icon = null,
-        selectedIcon = null
+        selectedIcon = null,
     )
 
     data object Task : AppDestination(
         title = R.string.task_details,
         route = Screen.Task::class.qualifiedName!!,
         icon = null,
-        selectedIcon = null
+        selectedIcon = null,
     )
 
     data object SecretMode : AppDestination(
         title = R.string.secret_mode_settings,
         route = Screen.SecretMode::class.qualifiedName!!,
         icon = null,
-        selectedIcon = null
+        selectedIcon = null,
     )
 
     data object PlanYourDay : AppDestination(
@@ -166,14 +165,34 @@ sealed class AppDestination(
 
     companion object {
         val bottomBarItems = listOf(Home, Groups, Calendar, Activity)
-        val topBarItems = listOf(
-            Home, Calendar, Activity, PomodoroAddTimer, Settings, Task, SecretMode, PlanYourDay, Groups,
-            CreateNewGroup, FilteredTasks, Search, PomodoroLaunch, PomodoroSummary,
-            GroupDetail, GroupSettings, InviteMember, ManageMembers, GroupTaskDetail,
-            MemberProfile, TransferOwnership, Profile,
-        )
+        val topBarItems =
+            listOf(
+                Home,
+                Calendar,
+                Activity,
+                PomodoroAddTimer,
+                Settings,
+                Task,
+                SecretMode,
+                PlanYourDay,
+                Groups,
+                CreateNewGroup,
+                FilteredTasks,
+                Search,
+                PomodoroLaunch,
+                PomodoroSummary,
+                GroupDetail,
+                GroupSettings,
+                InviteMember,
+                ManageMembers,
+                GroupTaskDetail,
+                MemberProfile,
+                TransferOwnership,
+                Profile,
+            )
     }
 }
 
 fun bottomBarAppDestinationFromRoute(route: String?) = AppDestination.bottomBarItems.firstOrNull { it.route == route }
+
 fun appDestinationFromRoute(route: String?) = AppDestination.topBarItems.firstOrNull { it.route == route }

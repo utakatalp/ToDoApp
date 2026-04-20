@@ -88,9 +88,10 @@ private fun WheelColumn(
     val baseIndex = (totalItems / 2) - ((totalItems / 2) % count)
     val initialIndex = baseIndex + selected
 
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = initialIndex - VISIBLE_ITEMS / 2,
-    )
+    val listState =
+        rememberLazyListState(
+            initialFirstVisibleItemIndex = initialIndex - VISIBLE_ITEMS / 2,
+        )
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
     var lastReportedValue by remember { mutableIntStateOf(selected) }
@@ -122,7 +123,8 @@ private fun WheelColumn(
 
     Box(contentAlignment = Alignment.Center) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .width(80.dp)
                 .height(itemHeight)
                 .clip(RoundedCornerShape(12.dp))
@@ -132,7 +134,8 @@ private fun WheelColumn(
         LazyColumn(
             state = listState,
             flingBehavior = flingBehavior,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .width(80.dp)
                 .height(visibleHeight),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -143,18 +146,21 @@ private fun WheelColumn(
 
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .width(80.dp)
                         .height(itemHeight),
                 ) {
                     TDText(
                         text = format(value),
-                        style = if (isCentered) {
+                        style =
+                        if (isCentered) {
                             TDTheme.typography.heading2.copy(fontWeight = FontWeight.Bold)
                         } else {
                             TDTheme.typography.heading4
                         },
-                        color = if (isCentered) {
+                        color =
+                        if (isCentered) {
                             TDTheme.colors.purple
                         } else {
                             TDTheme.colors.onBackground.copy(alpha = 0.3f)
@@ -168,16 +174,16 @@ private fun WheelColumn(
 
 private fun LazyListState.settledCenterIndex(): Int {
     val info = layoutInfo
-    val center = info.viewportStartOffset +
+    val center =
+        info.viewportStartOffset +
             (info.viewportEndOffset - info.viewportStartOffset) / 2
-    return info.visibleItemsInfo.minByOrNull {
-        kotlin.math.abs((it.offset + it.size / 2) - center)
-    }?.index ?: 0
+    return info.visibleItemsInfo
+        .minByOrNull {
+            kotlin.math.abs((it.offset + it.size / 2) - center)
+        }?.index ?: 0
 }
 
-private fun LazyListState.settledCenterValue(count: Int): Int {
-    return settledCenterIndex() % count
-}
+private fun LazyListState.settledCenterValue(count: Int): Int = settledCenterIndex() % count
 
 private const val CYCLE_MULTIPLIER = 1000
 private const val VISIBLE_ITEMS = 5
@@ -189,7 +195,7 @@ private fun TDWheelTimePickerPreview() {
         Box(
             Modifier
                 .background(TDTheme.colors.background)
-                .padding(24.dp)
+                .padding(24.dp),
         ) {
             TDWheelTimePicker(
                 hour = 9,

@@ -79,30 +79,31 @@ private fun ActivityErrorContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_error),
             contentDescription = null,
             tint = TDTheme.colors.crossRed,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(64.dp),
         )
         Spacer(Modifier.height(16.dp))
         TDText(
             text = message,
             style = TDTheme.typography.heading3,
-            color = TDTheme.colors.onBackground
+            color = TDTheme.colors.onBackground,
         )
         Spacer(Modifier.height(24.dp))
         TDButton(
             text = stringResource(com.todoapp.mobile.R.string.retry),
             onClick = { onAction(UiAction.OnRetry) },
-            size = TDButtonSize.SMALL
+            size = TDButtonSize.SMALL,
         )
     }
 }
@@ -125,21 +126,24 @@ private fun ActivitySuccessContent(
                 exit = scaleOut(animationSpec = tween(200)) + fadeOut(tween(200)),
             ) {
                 Surface(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth(0.92f),
                     shape = RoundedCornerShape(20.dp),
                     color = TDTheme.colors.background,
                     shadowElevation = 8.dp,
                 ) {
                     Column(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .padding(16.dp)
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(rememberScrollState()),
                     ) {
                         TDWeeklyBarChart(
                             modifier = Modifier.fillMaxWidth(),
-                            title = stringResource(
-                                id = com.todoapp.mobile.R.string.activity_screen_bar_chart_component_title_text
+                            title =
+                            stringResource(
+                                id = com.todoapp.mobile.R.string.activity_screen_bar_chart_component_title_text,
                             ),
                             values = uiState.weeklyBarValues,
                             pendingValues = uiState.weeklyPendingBarValues,
@@ -165,9 +169,10 @@ private fun ActivitySuccessContent(
                         is TaskFormUiAction.DateDeselect -> onAction(UiAction.OnDialogDateDeselect)
                         is TaskFormUiAction.TimeStartChange -> onAction(UiAction.OnTaskTimeStartChange(action.time))
                         is TaskFormUiAction.TimeEndChange -> onAction(UiAction.OnTaskTimeEndChange(action.time))
-                        is TaskFormUiAction.DescriptionChange -> onAction(
-                            UiAction.OnTaskDescriptionChange(action.description)
-                        )
+                        is TaskFormUiAction.DescriptionChange ->
+                            onAction(
+                                UiAction.OnTaskDescriptionChange(action.description),
+                            )
                         is TaskFormUiAction.ToggleAdvancedSettings -> onAction(UiAction.OnToggleAdvancedSettings)
                         is TaskFormUiAction.SecretChange -> onAction(UiAction.OnTaskSecretChange(action.isSecret))
                         else -> Unit
@@ -178,17 +183,20 @@ private fun ActivitySuccessContent(
         onDismissSheet = { onAction(UiAction.OnDismissBottomSheet) },
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .background(TDTheme.colors.background),
         ) {
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
             ) {
                 TDWeekNavigator(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     selectedDate = uiState.selectedDate,
@@ -197,7 +205,8 @@ private fun ActivitySuccessContent(
                 )
 
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalAlignment = Alignment.Start,
@@ -206,7 +215,7 @@ private fun ActivitySuccessContent(
                     TDText(
                         text = stringResource(id = com.todoapp.mobile.R.string.activity_screen_statistic_text),
                         style = TDTheme.typography.heading2,
-                        color = TDTheme.colors.onBackground
+                        color = TDTheme.colors.onBackground,
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     TDWeeklyCircularProgressIndicator(
@@ -221,7 +230,8 @@ private fun ActivitySuccessContent(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -245,7 +255,8 @@ private fun ActivitySuccessContent(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.Start,
@@ -254,12 +265,13 @@ private fun ActivitySuccessContent(
                     TDText(
                         text = stringResource(id = com.todoapp.mobile.R.string.activity_screen_activity_text),
                         style = TDTheme.typography.heading2,
-                        color = TDTheme.colors.onBackground
+                        color = TDTheme.colors.onBackground,
                     )
                     TDWeeklyBarChart(
                         modifier = Modifier.fillMaxWidth(),
-                        title = stringResource(
-                            id = com.todoapp.mobile.R.string.activity_screen_bar_chart_component_title_text
+                        title =
+                        stringResource(
+                            id = com.todoapp.mobile.R.string.activity_screen_bar_chart_component_title_text,
                         ),
                         values = uiState.weeklyBarValues,
                         pendingValues = uiState.weeklyPendingBarValues,
@@ -272,7 +284,8 @@ private fun ActivitySuccessContent(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(bottom = 80.dp, end = 16.dp, start = 16.dp),
                     horizontalAlignment = Alignment.Start,
@@ -281,7 +294,7 @@ private fun ActivitySuccessContent(
                     TDText(
                         text = stringResource(com.todoapp.mobile.R.string.activity_screen_progress_text),
                         style = TDTheme.typography.heading2,
-                        color = TDTheme.colors.onBackground
+                        color = TDTheme.colors.onBackground,
                     )
                     TDGeneralProgressBar(
                         progress = uiState.yearlyProgress,
@@ -312,7 +325,7 @@ private fun ActivityErrorPreview() {
     TDTheme {
         ActivityErrorContent(
             message = "Something went wrong",
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -323,7 +336,8 @@ private fun ActivityScreenPreview_Light() {
     TDTheme {
         ActivitySuccessContent(
             onAction = {},
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 weeklyCompleted = 24,
                 weeklyPending = 10,
                 weeklyProgress = 0.65f,
@@ -335,7 +349,7 @@ private fun ActivityScreenPreview_Light() {
                 yearlyCompleted = 42,
                 yearlyTotal = 100,
                 weeklyPendingBarValues = listOf(1, 1, 3, 1, 5, 2, 4),
-            )
+            ),
         )
     }
 }
@@ -346,7 +360,8 @@ private fun ActivityScreenPreview_Dark() {
     TDTheme {
         ActivitySuccessContent(
             onAction = {},
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 weeklyCompleted = 24,
                 weeklyPending = 10,
                 weeklyProgress = 0.65f,
@@ -358,8 +373,7 @@ private fun ActivityScreenPreview_Dark() {
                 yearlyCompleted = 42,
                 yearlyTotal = 100,
                 weeklyPendingBarValues = listOf(1, 1, 3, 1, 5, 2, 4),
-
-                )
+            ),
         )
     }
 }

@@ -30,7 +30,9 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class ActivityViewModel @Inject constructor(
+class ActivityViewModel
+@Inject
+constructor(
     private val taskRepository: TaskRepository,
     private val alarmScheduler: AlarmScheduler,
     private val pomodoroEngine: PomodoroEngine,
@@ -41,11 +43,11 @@ class ActivityViewModel @Inject constructor(
     private val _navEffect = Channel<NavigationEffect>()
     val navEffect = _navEffect.receiveAsFlow()
 
-    private val _selectedDate = MutableStateFlow(LocalDate.now())
+    private val selectedDateFlow = MutableStateFlow(LocalDate.now())
 
     init {
         viewModelScope.launch {
-            _selectedDate
+            selectedDateFlow
                 .flatMapLatest { date ->
                     val today = LocalDate.now()
                     combine(
@@ -58,8 +60,16 @@ class ActivityViewModel @Inject constructor(
                         taskRepository.observePendingTasksYearToDate(today),
                         taskRepository.countCompletedTasksYearToDate(today),
                     ) { (weeklyPending, weeklyCompleted), weeklyBarValues, weeklyPendingBarValues, yearlyPending, yearlyCompleted ->
-                        val (weeklyProgress, weeklyPendingProcess) = calculateProgress(weeklyCompleted, weeklyPending)
-                        val (yearlyProgress, yearlyPendingProcess) = calculateProgress(yearlyCompleted, yearlyPending)
+                        val (weeklyProgress, weeklyPendingProcess) =
+                            calculateProgress(
+                                weeklyCompleted,
+                                weeklyPending,
+                            )
+                        val (yearlyProgress, yearlyPendingProcess) =
+                            calculateProgress(
+                                yearlyCompleted,
+                                yearlyPending,
+                            )
                         val current = _uiState.value
                         UiState.Success(
                             selectedDate = date,
@@ -77,8 +87,7 @@ class ActivityViewModel @Inject constructor(
                             taskFormState = if (current is UiState.Success) current.taskFormState else TaskFormState(),
                         )
                     }
-                }
-                .catch { e -> _uiState.value = UiState.Error(e.message ?: "Unknown Error", e) }
+                }.catch { e -> _uiState.value = UiState.Error(e.message ?: "Unknown Error", e) }
                 .collect { _uiState.value = it }
         }
     }
@@ -86,38 +95,47 @@ class ActivityViewModel @Inject constructor(
     fun onAction(action: UiAction) {
         when (action) {
             UiAction.OnRetry -> retry()
-            is UiAction.OnWeekSelected -> _selectedDate.value = action.date
+            is UiAction.OnWeekSelected -> selectedDateFlow.value = action.date
             UiAction.OnShowBottomSheet -> updateSuccessState { it.copy(isSheetOpen = true) }
             UiAction.OnDismissBottomSheet -> updateSuccessState { it.copy(isSheetOpen = false) }
             UiAction.OnTaskCreate -> createTask()
-            is UiAction.OnTaskTitleChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(taskTitle = action.title))
-            }
-            is UiAction.OnDialogDateSelect -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = action.date))
-            }
-            UiAction.OnDialogDateDeselect -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = null))
-            }
-            is UiAction.OnTaskTimeStartChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(taskTimeStart = action.time))
-            }
-            is UiAction.OnTaskTimeEndChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(taskTimeEnd = action.time))
-            }
-            is UiAction.OnTaskDescriptionChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(taskDescription = action.description))
-            }
-            UiAction.OnToggleAdvancedSettings -> updateSuccessState {
-                it.copy(
-                    taskFormState = it.taskFormState.copy(
-                        isAdvancedSettingsExpanded = !it.taskFormState.isAdvancedSettingsExpanded
+            is UiAction.OnTaskTitleChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(taskTitle = action.title))
+                }
+            is UiAction.OnDialogDateSelect ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = action.date))
+                }
+            UiAction.OnDialogDateDeselect ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = null))
+                }
+            is UiAction.OnTaskTimeStartChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(taskTimeStart = action.time))
+                }
+            is UiAction.OnTaskTimeEndChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(taskTimeEnd = action.time))
+                }
+            is UiAction.OnTaskDescriptionChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(taskDescription = action.description))
+                }
+            UiAction.OnToggleAdvancedSettings ->
+                updateSuccessState {
+                    it.copy(
+                        taskFormState =
+                        it.taskFormState.copy(
+                            isAdvancedSettingsExpanded = !it.taskFormState.isAdvancedSettingsExpanded,
+                        ),
                     )
-                )
-            }
-            is UiAction.OnTaskSecretChange -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(isTaskSecret = action.isSecret))
-            }
+                }
+            is UiAction.OnTaskSecretChange ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(isTaskSecret = action.isSecret))
+                }
             UiAction.OnPomodoroTap -> navigateToPomodoro()
             UiAction.OnCompletedStatCardTap -> navigateToFilteredTasks(isCompleted = true)
             UiAction.OnPendingStatCardTap -> navigateToFilteredTasks(isCompleted = false)
@@ -125,7 +143,7 @@ class ActivityViewModel @Inject constructor(
     }
 
     private fun navigateToFilteredTasks(isCompleted: Boolean) {
-        val date = _selectedDate.value
+        val date = selectedDateFlow.value
         _navEffect.trySend(NavigationEffect.Navigate(Screen.FilteredTasks(isCompleted, date.toEpochDay())))
     }
 
@@ -144,15 +162,16 @@ class ActivityViewModel @Inject constructor(
 
         viewModelScope.launch {
             val form = currentState.taskFormState
-            val task = Task(
-                title = form.taskTitle,
-                description = form.taskDescription,
-                date = form.dialogSelectedDate!!,
-                timeStart = form.taskTimeStart!!,
-                timeEnd = form.taskTimeEnd!!,
-                isCompleted = false,
-                isSecret = form.isTaskSecret
-            )
+            val task =
+                Task(
+                    title = form.taskTitle,
+                    description = form.taskDescription,
+                    date = form.dialogSelectedDate!!,
+                    timeStart = form.taskTimeStart!!,
+                    timeEnd = form.taskTimeEnd!!,
+                    isCompleted = false,
+                    isSecret = form.isTaskSecret,
+                )
             taskRepository.insert(task)
             scheduleTaskReminders(task)
             updateSuccessState { it.copy(taskFormState = TaskFormState(), isSheetOpen = false) }
@@ -189,7 +208,7 @@ class ActivityViewModel @Inject constructor(
         remindBeforeMinutes.forEach { minutes ->
             alarmScheduler.schedule(
                 task.toAlarmItem(remindBeforeMinutes = minutes),
-                type = AlarmType.TASK
+                type = AlarmType.TASK,
             )
         }
     }
@@ -216,10 +235,13 @@ class ActivityViewModel @Inject constructor(
 
     private fun retry() {
         _uiState.value = UiState.Loading
-        _selectedDate.value = _selectedDate.value
+        selectedDateFlow.value = selectedDateFlow.value
     }
 
-    private fun calculateProgress(completed: Int, pending: Int): Pair<Float, Float> {
+    private fun calculateProgress(
+        completed: Int,
+        pending: Int,
+    ): Pair<Float, Float> {
         val total = completed + pending
         return if (total > 0) {
             completed.toFloat() / total to pending.toFloat() / total

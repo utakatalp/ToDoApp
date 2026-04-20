@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -15,7 +16,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -82,9 +82,10 @@ private fun TDScreenWithSheetPreview() {
             isSheetOpen = true,
             sheetContent = {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .background(TDTheme.colors.background)
-                        .padding(24.dp)
+                        .padding(24.dp),
                 ) {
                     TDText(text = "Sheet Content")
                 }
@@ -92,10 +93,11 @@ private fun TDScreenWithSheetPreview() {
             onDismissSheet = {},
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .background(TDTheme.colors.background)
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 TDText(text = "Main Content")
             }

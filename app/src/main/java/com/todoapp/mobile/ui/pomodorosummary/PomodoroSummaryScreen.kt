@@ -45,12 +45,14 @@ fun PomodoroSummaryScreen(
     onAction: (UiAction) -> Unit,
 ) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.green.copy(alpha = 0.08f)),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .background(TDTheme.colors.background)
                 .padding(horizontal = 24.dp),
@@ -59,7 +61,8 @@ fun PomodoroSummaryScreen(
             Spacer(Modifier.weight(1f))
 
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(80.dp)
                     .clip(CircleShape)
                     .background(TDTheme.colors.pendingGray),
@@ -163,20 +166,20 @@ private fun PomodoroStatCard(
     val isDark = TDTheme.isDark
     val statShape = RoundedCornerShape(16.dp)
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .then(
                 if (isDark) {
                     Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.2f), statShape)
                 } else {
                     Modifier.neumorphicShadow(
-                    lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
-                    darkShadow = TDTheme.colors.darkPending.copy(alpha = 0.18f),
-                    cornerRadius = 16.dp,
-                    elevation = 5.dp,
-                )
-                }
-            )
-            .clip(statShape)
+                        lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
+                        darkShadow = TDTheme.colors.darkPending.copy(alpha = 0.18f),
+                        cornerRadius = 16.dp,
+                        elevation = 5.dp,
+                    )
+                },
+            ).clip(statShape)
             .background(TDTheme.colors.pendingGray)
             .padding(vertical = 16.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -201,7 +204,8 @@ private fun PomodoroStatCard(
 private fun PomodoroSummaryPreview() {
     TDTheme {
         PomodoroSummaryScreen(
-            uiState = UiState(
+            uiState =
+            UiState(
                 focusSessions = 4,
                 totalFocusMinutes = 100,
                 totalBreakMinutes = 30,

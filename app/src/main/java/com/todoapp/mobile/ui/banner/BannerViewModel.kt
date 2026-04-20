@@ -17,10 +17,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class BannerViewModel @Inject constructor(
-    private val pomodoroEngine: PomodoroEngine
+class BannerViewModel
+@Inject
+constructor(
+    private val pomodoroEngine: PomodoroEngine,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(BannerContract.UiState())
     val uiState = _uiState.asStateFlow()
 

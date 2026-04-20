@@ -6,8 +6,12 @@ import kotlinx.coroutines.flow.Flow
 
 interface SecretPreferences {
     suspend fun saveCondition(condition: SecretModeEndCondition)
+
     suspend fun getCondition(): SecretModeEndCondition
+
     fun observeCondition(): Flow<SecretModeEndCondition>
+
     suspend fun setLastSelectedOptionId(id: SecretModeReopenOptionId)
+
     suspend fun getLastSelectedOptionId(): SecretModeReopenOptionId
 }

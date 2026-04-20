@@ -47,7 +47,8 @@ internal fun SearchGroupHeaderItem(
     onAction: (UiAction) -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .clickable { onAction(UiAction.OnGroupClick(group)) }
             .padding(vertical = 8.dp, horizontal = 4.dp),
@@ -75,7 +76,8 @@ internal fun SearchGroupTaskItem(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .padding(start = 16.dp)
             .clickable { onAction(UiAction.OnGroupTaskClick(group, groupTask)) },
     ) {
@@ -105,19 +107,20 @@ internal fun SearchGroupTaskItem(
                 PriorityBadge(priority = priority)
             }
             groupTask.assignee?.let { assignee ->
-                val initials = assignee.displayName
-                    .split(" ")
-                    .filter { it.isNotBlank() }
-                    .take(2)
-                    .joinToString("") { it.first().uppercase() }
+                val initials =
+                    assignee.displayName
+                        .split(" ")
+                        .filter { it.isNotBlank() }
+                        .take(2)
+                        .joinToString("") { it.first().uppercase() }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .background(
                             color = TDTheme.colors.onBackground.copy(alpha = 0.06f),
                             shape = RoundedCornerShape(6.dp),
-                        )
-                        .padding(horizontal = 6.dp, vertical = 3.dp),
+                        ).padding(horizontal = 6.dp, vertical = 3.dp),
                 ) {
                     GroupInitialsAvatar(name = assignee.displayName, size = 16)
                     Spacer(Modifier.width(4.dp))
@@ -135,12 +138,12 @@ internal fun SearchGroupTaskItem(
 @Composable
 private fun BadgePill(content: @Composable () -> Unit) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .background(
                 color = TDTheme.colors.onBackground.copy(alpha = 0.06f),
                 shape = RoundedCornerShape(6.dp),
-            )
-            .padding(horizontal = 6.dp, vertical = 3.dp),
+            ).padding(horizontal = 6.dp, vertical = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         content()
@@ -149,13 +152,15 @@ private fun BadgePill(content: @Composable () -> Unit) {
 
 @Composable
 private fun PriorityBadge(priority: String) {
-    val (bgColor, textColor) = when (priority.uppercase()) {
-        "HIGH" -> TDTheme.colors.lightOrange to TDTheme.colors.orange
-        "LOW" -> TDTheme.colors.lightGreen to TDTheme.colors.darkGreen
-        else -> TDTheme.colors.onBackground.copy(alpha = 0.06f) to TDTheme.colors.gray
-    }
+    val (bgColor, textColor) =
+        when (priority.uppercase()) {
+            "HIGH" -> TDTheme.colors.lightOrange to TDTheme.colors.orange
+            "LOW" -> TDTheme.colors.lightGreen to TDTheme.colors.darkGreen
+            else -> TDTheme.colors.onBackground.copy(alpha = 0.06f) to TDTheme.colors.gray
+        }
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .background(color = bgColor, shape = RoundedCornerShape(6.dp))
             .padding(horizontal = 6.dp, vertical = 3.dp),
     ) {
@@ -169,18 +174,21 @@ private fun PriorityBadge(priority: String) {
 
 @Composable
 private fun GroupRolePill(role: String) {
-    val bgColor = if (role.uppercase() == "ADMIN") {
-        TDTheme.colors.lightOrange
-    } else {
-        TDTheme.colors.onBackground.copy(alpha = 0.06f)
-    }
-    val textColor = if (role.uppercase() == "ADMIN") {
-        TDTheme.colors.orange
-    } else {
-        TDTheme.colors.gray
-    }
+    val bgColor =
+        if (role.uppercase() == "ADMIN") {
+            TDTheme.colors.lightOrange
+        } else {
+            TDTheme.colors.onBackground.copy(alpha = 0.06f)
+        }
+    val textColor =
+        if (role.uppercase() == "ADMIN") {
+            TDTheme.colors.orange
+        } else {
+            TDTheme.colors.gray
+        }
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .background(color = bgColor, shape = RoundedCornerShape(4.dp))
             .padding(horizontal = 6.dp, vertical = 2.dp),
     ) {
@@ -193,14 +201,19 @@ private fun GroupRolePill(role: String) {
 }
 
 @Composable
-private fun GroupInitialsAvatar(name: String, size: Int) {
-    val initials = name
-        .split(" ")
-        .filter { it.isNotBlank() }
-        .take(2)
-        .joinToString("") { it.first().uppercase() }
+private fun GroupInitialsAvatar(
+    name: String,
+    size: Int,
+) {
+    val initials =
+        name
+            .split(" ")
+            .filter { it.isNotBlank() }
+            .take(2)
+            .joinToString("") { it.first().uppercase() }
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(size.dp)
             .background(color = TDTheme.colors.pendingGray, shape = CircleShape),
         contentAlignment = Alignment.Center,

@@ -53,19 +53,22 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         }
     }
 
-    val picker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        val cr = context.contentResolver
-        val mime = cr.getType(uri) ?: "image/jpeg"
-        val bytes = runCatching { cr.openInputStream(uri)?.use { it.readBytes() } }
-            .getOrNull() ?: return@rememberLauncherForActivityResult
-        viewModel.onAction(UiAction.OnAvatarPicked(bytes, mime))
-    }
+    val picker =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia(),
+        ) { uri ->
+            uri ?: return@rememberLauncherForActivityResult
+            val cr = context.contentResolver
+            val mime = cr.getType(uri) ?: "image/jpeg"
+            val bytes =
+                runCatching { cr.openInputStream(uri)?.use { it.readBytes() } }
+                    .getOrNull() ?: return@rememberLauncherForActivityResult
+            viewModel.onAction(UiAction.OnAvatarPicked(bytes, mime))
+        }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .verticalScroll(rememberScrollState())
@@ -95,7 +98,8 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             text = stringResource(R.string.change_photo),
             style = TDTheme.typography.subheading2,
             color = TDTheme.colors.pendingGray,
-            modifier = Modifier.clickable {
+            modifier =
+            Modifier.clickable {
                 picker.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                 )
@@ -116,7 +120,8 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             onValueChange = { viewModel.onAction(UiAction.OnDisplayNameChange(it)) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
+            colors =
+            OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = TDTheme.colors.pendingGray,
                 unfocusedBorderColor = TDTheme.colors.lightGray,
                 focusedTextColor = TDTheme.colors.onBackground,
@@ -139,7 +144,8 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             text = uiState.email,
             style = TDTheme.typography.regularTextStyle,
             color = TDTheme.colors.gray,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.Start)
                 .padding(vertical = 12.dp),
         )
@@ -148,7 +154,8 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
 
         TDButton(
             text = stringResource(R.string.save_changes),
-            isEnable = !uiState.isSaving &&
+            isEnable =
+            !uiState.isSaving &&
                 uiState.editedDisplayName.isNotBlank() &&
                 uiState.editedDisplayName.trim() != uiState.displayName,
             modifier = Modifier.fillMaxWidth(),
@@ -165,7 +172,8 @@ private fun AvatarDisplay(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(120.dp)
             .clip(CircleShape)
             .background(TDTheme.colors.lightPending)
@@ -188,7 +196,8 @@ private fun AvatarDisplay(
         }
         if (isUploading) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .background(TDTheme.colors.background.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center,
@@ -199,7 +208,10 @@ private fun AvatarDisplay(
     }
 }
 
-private fun absoluteAvatarUrl(path: String, version: Long): String {
+private fun absoluteAvatarUrl(
+    path: String,
+    version: Long,
+): String {
     val base = BuildConfig.BASE_URL.trimEnd('/')
     val relative = path.trimStart('/')
     return "$base/$relative?v=$version"

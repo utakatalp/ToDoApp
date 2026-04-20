@@ -17,12 +17,13 @@ import com.todoapp.uikit.theme.TDTheme
 @Composable
 fun TDLoadingBar() {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .clickable(
                 indication = null,
-                interactionSource = remember { MutableInteractionSource() }
+                interactionSource = remember { MutableInteractionSource() },
             ) {},
         contentAlignment = Alignment.Center,
     ) {

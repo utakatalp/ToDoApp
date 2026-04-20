@@ -18,8 +18,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddPomodoroTimerViewModel @Inject constructor(
-    private val pomodoroRepository: PomodoroRepository
+class AddPomodoroTimerViewModel
+@Inject
+constructor(
+    private val pomodoroRepository: PomodoroRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -41,9 +43,7 @@ class AddPomodoroTimerViewModel @Inject constructor(
         }
     }
 
-    private inline fun updateUiState(
-        crossinline reducer: UiState.() -> UiState,
-    ) {
+    private inline fun updateUiState(crossinline reducer: UiState.() -> UiState) {
         _uiState.update { current -> current.reducer() }
     }
 
@@ -80,8 +80,8 @@ class AddPomodoroTimerViewModel @Inject constructor(
                     focusTime = uiState.value.focusTime.toInt(),
                     shortBreak = uiState.value.shortBreak.toInt(),
                     longBreak = uiState.value.longBreak.toInt(),
-                    sectionCount = uiState.value.sectionCount.toInt()
-                )
+                    sectionCount = uiState.value.sectionCount.toInt(),
+                ),
             )
             _navEffect.trySend(NavigationEffect.Navigate(Screen.Pomodoro, Screen.Home))
         }
@@ -95,20 +95,20 @@ class AddPomodoroTimerViewModel @Inject constructor(
                 focusTime = uiState.value.focusTime.toInt(),
                 shortBreak = uiState.value.shortBreak.toInt(),
                 longBreak = uiState.value.longBreak.toInt(),
-                sectionCount = uiState.value.sectionCount.toInt()
-            )
+                sectionCount = uiState.value.sectionCount.toInt(),
+            ),
         )
     }
 
-private fun loadPomodoroSettings(pomodoro: Pomodoro) {
-    updateUiState {
-        copy(
-            sessionCount = pomodoro.sessionCount.toFloat(),
-            focusTime = pomodoro.focusTime.toFloat(),
-            shortBreak = pomodoro.shortBreak.toFloat(),
-            longBreak = pomodoro.longBreak.toFloat(),
-            sectionCount = pomodoro.sectionCount.toFloat(),
-        )
+    private fun loadPomodoroSettings(pomodoro: Pomodoro) {
+        updateUiState {
+            copy(
+                sessionCount = pomodoro.sessionCount.toFloat(),
+                focusTime = pomodoro.focusTime.toFloat(),
+                shortBreak = pomodoro.shortBreak.toFloat(),
+                longBreak = pomodoro.longBreak.toFloat(),
+                sectionCount = pomodoro.sectionCount.toFloat(),
+            )
+        }
     }
-}
 }

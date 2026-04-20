@@ -89,15 +89,22 @@ fun TDTextField(
                     IconButton(onClick = onTogglePasswordVisible) {
                         Icon(
                             imageVector =
-                                ImageVector.vectorResource(
-                                    if (passwordVisible) {
-                                        R.drawable.ic_visibility
-                                    } else {
-                                        R.drawable.ic_visibility_off
-                                    },
-                                ),
+                            ImageVector.vectorResource(
+                                if (passwordVisible) {
+                                    R.drawable.ic_visibility
+                                } else {
+                                    R.drawable.ic_visibility_off
+                                },
+                            ),
                             contentDescription = null,
-                            tint = if (isError) TDTheme.colors.red else if (isFocused) TDTheme.colors.pendingGray else TDTheme.colors.gray
+                            tint =
+                            if (isError) {
+                                TDTheme.colors.red
+                            } else if (isFocused) {
+                                TDTheme.colors.pendingGray
+                            } else {
+                                TDTheme.colors.gray
+                            },
                         )
                     }
                 }
@@ -114,13 +121,13 @@ fun TDTextField(
 
     OutlinedTextField(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .bringIntoViewRequester(bringIntoViewRequester)
-                .onFocusChanged { focusState ->
-                    isFocused = focusState.isFocused
-                    onFocusChange?.invoke(focusState.isFocused)
-                },
+        modifier
+            .fillMaxWidth()
+            .bringIntoViewRequester(bringIntoViewRequester)
+            .onFocusChanged { focusState ->
+                isFocused = focusState.isFocused
+                onFocusChange?.invoke(focusState.isFocused)
+            },
         value = value,
         onValueChange = onValueChange,
         label = {
@@ -189,7 +196,7 @@ fun TDLabeledTextField(
                     TDText(
                         text = placeholder,
                         color = TDTheme.colors.gray.copy(alpha = 0.6f),
-                        style = TDTheme.typography.regularTextStyle
+                        style = TDTheme.typography.regularTextStyle,
                     )
                 }
             },
@@ -226,10 +233,11 @@ fun TDCompactOutlinedTextField(
 
     LaunchedEffect(value) {
         if (value != textFieldValueState.text) {
-            textFieldValueState = textFieldValueState.copy(
-                text = value,
-                selection = TextRange(value.length)
-            )
+            textFieldValueState =
+                textFieldValueState.copy(
+                    text = value,
+                    selection = TextRange(value.length),
+                )
         }
     }
 
@@ -257,14 +265,14 @@ fun TDCompactOutlinedTextField(
         Column {
             Box(
                 modifier =
-                    Modifier
-                        .height(height = height)
-                        .heightIn(min = 40.dp)
-                        .border(1.5.dp, borderColor, roundedCornerShape)
-                        .background(
-                            color = if (enabled) Color.Transparent else TDTheme.colors.background.copy(alpha = 0.5f),
-                            shape = roundedCornerShape
-                        ),
+                Modifier
+                    .height(height = height)
+                    .heightIn(min = 40.dp)
+                    .border(1.5.dp, borderColor, roundedCornerShape)
+                    .background(
+                        color = if (enabled) Color.Transparent else TDTheme.colors.background.copy(alpha = 0.5f),
+                        shape = roundedCornerShape,
+                    ),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 BasicTextField(
@@ -280,55 +288,56 @@ fun TDCompactOutlinedTextField(
                     visualTransformation = visualTransformation,
                     cursorBrush = SolidColor(if (isError) TDTheme.colors.red else TDTheme.colors.pendingGray),
                     textStyle =
-                        TDTheme.typography.regularTextStyle.copy(
-                            color =
-                                if (enabled) {
-                                    TDTheme.colors.onSurface
-                                } else {
-                                    TDTheme.colors.onSurface.copy(alpha = 0.38f)
-                                },
-                        ),
+                    TDTheme.typography.regularTextStyle.copy(
+                        color =
+                        if (enabled) {
+                            TDTheme.colors.onSurface
+                        } else {
+                            TDTheme.colors.onSurface.copy(alpha = 0.38f)
+                        },
+                    ),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged { isFocused = it.isFocused }
-                            .focusRequester(focusRequester),
+                    Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { isFocused = it.isFocused }
+                        .focusRequester(focusRequester),
                     decorationBox = { innerTextField ->
                         Row(
                             modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp)
-                                    .then(
-                                        if (enabled) {
-                                            Modifier
-                                                .clickable(
-                                                    indication = null,
-                                                    interactionSource = MutableInteractionSource()
-                                                ) {
-                                                    focusRequester.requestFocus()
-                                                    // Ensure cursor is at the end when focusing via the container
-                                                    textFieldValueState = textFieldValueState.copy(
-                                                        selection = TextRange(value.length)
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                                .then(
+                                    if (enabled) {
+                                        Modifier
+                                            .clickable(
+                                                indication = null,
+                                                interactionSource = MutableInteractionSource(),
+                                            ) {
+                                                focusRequester.requestFocus()
+                                                // Ensure cursor is at the end when focusing via the container
+                                                textFieldValueState =
+                                                    textFieldValueState.copy(
+                                                        selection = TextRange(value.length),
                                                     )
-                                                    coroutineScope.launch {
-                                                        delay(50)
-                                                        keyboardController?.show()
-                                                    }
+                                                coroutineScope.launch {
+                                                    delay(50)
+                                                    keyboardController?.show()
                                                 }
-                                        } else {
-                                            Modifier
-                                        },
-                                    ),
+                                            }
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             leadingIcon?.invoke()
 
                             Box(
                                 modifier =
-                                    Modifier
-                                        .padding(vertical = 8.dp)
-                                        .weight(1f),
+                                Modifier
+                                    .padding(vertical = 8.dp)
+                                    .weight(1f),
                                 contentAlignment = Alignment.CenterStart,
                             ) {
                                 if (value.isEmpty() && !placeholder.isNullOrEmpty()) {
@@ -336,11 +345,11 @@ fun TDCompactOutlinedTextField(
                                         text = placeholder,
                                         style = TDTheme.typography.regularTextStyle,
                                         color =
-                                            if (enabled) {
-                                                TDTheme.colors.gray.copy(alpha = 0.6f)
-                                            } else {
-                                                TDTheme.colors.gray.copy(alpha = 0.3f)
-                                            },
+                                        if (enabled) {
+                                            TDTheme.colors.gray.copy(alpha = 0.6f)
+                                        } else {
+                                            TDTheme.colors.gray.copy(alpha = 0.3f)
+                                        },
                                     )
                                 }
                                 innerTextField()
@@ -372,9 +381,9 @@ private fun TextFieldPreview() {
     TDTheme {
         Column(
             modifier =
-                Modifier
-                    .background(TDTheme.colors.background)
-                    .padding(16.dp),
+            Modifier
+                .background(TDTheme.colors.background)
+                .padding(16.dp),
         ) {
             TDTextField(
                 value = "John Doe",
@@ -384,7 +393,7 @@ private fun TextFieldPreview() {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_name),
                         contentDescription = null,
-                        tint = TDTheme.colors.gray
+                        tint = TDTheme.colors.gray,
                     )
                 },
             )
@@ -399,7 +408,7 @@ private fun TextFieldPreview() {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_mail),
                         contentDescription = null,
-                        tint = TDTheme.colors.gray
+                        tint = TDTheme.colors.gray,
                     )
                 },
             )
@@ -416,7 +425,7 @@ private fun TextFieldPreview() {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_password),
                         contentDescription = null,
-                        tint = TDTheme.colors.red
+                        tint = TDTheme.colors.red,
                     )
                 },
                 passwordVisible = passwordVisible,
@@ -431,7 +440,7 @@ private fun TextFieldPreview() {
                 onValueChange = {},
                 placeholder = "Enter description here...",
                 singleLine = false,
-                minLines = 3
+                minLines = 3,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -441,7 +450,7 @@ private fun TextFieldPreview() {
                 onValueChange = { },
                 placeholder = "Task Title",
                 label = "Quick Add",
-                supportingText = "Required field"
+                supportingText = "Required field",
             )
         }
     }

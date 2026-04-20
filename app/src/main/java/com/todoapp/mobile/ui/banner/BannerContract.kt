@@ -3,7 +3,6 @@ package com.todoapp.mobile.ui.banner
 import com.todoapp.mobile.domain.engine.PomodoroMode
 
 object BannerContract {
-
     data class UiState(
         val minutes: Int? = null,
         val seconds: Int? = null,
@@ -12,9 +11,11 @@ object BannerContract {
         val isVisible: Boolean = true,
         val mode: PomodoroMode = PomodoroMode.Focus,
     )
+
     sealed interface UiEffect {
         data object SessionFinished : UiEffect
     }
+
     sealed interface UiAction {
         data object OnBannerTap : UiAction
     }

@@ -28,5 +28,5 @@ data class TaskData(
 @Serializable
 data class TaskListData(
     val tasks: List<TaskData>,
-    val count: Int
+    val count: Int,
 )

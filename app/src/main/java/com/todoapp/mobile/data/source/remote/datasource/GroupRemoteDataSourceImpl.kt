@@ -18,70 +18,80 @@ import com.todoapp.mobile.data.source.remote.api.ToDoApi
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-class GroupRemoteDataSourceImpl @Inject constructor(
-    private val todoApi: ToDoApi
+class GroupRemoteDataSourceImpl
+@Inject
+constructor(
+    private val todoApi: ToDoApi,
 ) : GroupRemoteDataSource {
-    override suspend fun createGroup(request: CreateGroupRequest): Result<GroupData> {
-        return handleRequest { todoApi.createGroup(request) }
+    override suspend fun createGroup(request: CreateGroupRequest): Result<GroupData> = handleRequest {
+        todoApi.createGroup(
+            request,
+        )
     }
 
-    override suspend fun getGroups(): Result<GroupSummaryDataList> {
-        return handleRequest { todoApi.getGroups() }
-    }
+    override suspend fun getGroups(): Result<GroupSummaryDataList> = handleRequest { todoApi.getGroups() }
 
-    override suspend fun deleteGroup(id: Long): Result<Unit> {
-        return handleRequest { todoApi.deleteGroup(id) }
-    }
+    override suspend fun deleteGroup(id: Long): Result<Unit> = handleRequest { todoApi.deleteGroup(id) }
 
-    override suspend fun getGroupDetail(id: Long): Result<GroupData> {
-        return handleRequest { todoApi.getGroupDetail(id) }
-    }
+    override suspend fun getGroupDetail(id: Long): Result<GroupData> = handleRequest { todoApi.getGroupDetail(id) }
 
-    override suspend fun updateGroup(id: Long, request: UpdateGroupRequest): Result<Unit> {
-        return runCatching {
-            val response = todoApi.updateGroup(request)
-            if (!response.isSuccessful) {
-                val msg = response.errorBody()?.string()
+    override suspend fun updateGroup(
+        id: Long,
+        request: UpdateGroupRequest,
+    ): Result<Unit> = runCatching {
+        val response = todoApi.updateGroup(request)
+        if (!response.isSuccessful) {
+            val msg =
+                response
+                    .errorBody()
+                    ?.string()
                     ?.let { runCatching { Json.decodeFromString<ErrorResponse>(it).message }.getOrNull() }
                     ?: response.message() ?: "Failed to update group"
-                throw DomainException.Server(msg)
-            }
+            throw DomainException.Server(msg)
         }
     }
 
-    override suspend fun createGroupTask(groupId: Long, request: GroupTaskRequest): Result<GroupTaskData> {
-        return handleRequest { todoApi.createGroupTask(groupId, request) }
+    override suspend fun createGroupTask(
+        groupId: Long,
+        request: GroupTaskRequest,
+    ): Result<GroupTaskData> = handleRequest {
+        todoApi.createGroupTask(groupId, request)
     }
 
-    override suspend fun inviteMember(request: InviteMemberRequest): Result<Unit> {
-        return handleRequest { todoApi.inviteMember(request) }
+    override suspend fun inviteMember(request: InviteMemberRequest): Result<Unit> = handleRequest {
+        todoApi.inviteMember(request)
     }
 
-    override suspend fun removeMember(id: Long, userId: Long): Result<Unit> {
-        return handleRequest { todoApi.removeMember(id, userId) }
+    override suspend fun removeMember(
+        id: Long,
+        userId: Long,
+    ): Result<Unit> = handleRequest { todoApi.removeMember(id, userId) }
+
+    override suspend fun transferOwnership(
+        id: Long,
+        request: TransferOwnershipRequest,
+    ): Result<Unit> = handleRequest {
+        todoApi.transferOwnership(id, request)
     }
 
-    override suspend fun transferOwnership(id: Long, request: TransferOwnershipRequest): Result<Unit> {
-        return handleRequest { todoApi.transferOwnership(id, request) }
+    override suspend fun getGroupActivity(id: Long): Result<GroupActivityDataList> = handleRequest {
+        todoApi.getGroupActivity(id)
     }
 
-    override suspend fun getGroupActivity(id: Long): Result<GroupActivityDataList> {
-        return handleRequest { todoApi.getGroupActivity(id) }
+    override suspend fun getGroupTasks(id: Long): Result<GroupTaskListData> = handleRequest {
+        todoApi.getGroupTasks(
+            id,
+        )
     }
 
-    override suspend fun getGroupTasks(id: Long): Result<GroupTaskListData> {
-        return handleRequest { todoApi.getGroupTasks(id) }
-    }
-
-    override suspend fun deleteGroupTask(groupId: Long, taskId: Long): Result<Unit> {
-        return handleRequest { todoApi.deleteGroupTask(groupId, taskId) }
-    }
+    override suspend fun deleteGroupTask(
+        groupId: Long,
+        taskId: Long,
+    ): Result<Unit> = handleRequest { todoApi.deleteGroupTask(groupId, taskId) }
 
     override suspend fun updateGroupTask(
         groupId: Long,
         taskId: Long,
         request: GroupTaskUpdateRequest,
-    ): Result<GroupTaskData> {
-        return handleRequest { todoApi.updateGroupTask(groupId, taskId, request) }
-    }
+    ): Result<GroupTaskData> = handleRequest { todoApi.updateGroupTask(groupId, taskId, request) }
 }

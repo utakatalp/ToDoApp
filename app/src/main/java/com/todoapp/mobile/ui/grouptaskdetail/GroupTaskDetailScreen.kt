@@ -47,9 +47,7 @@ import com.todoapp.uikit.theme.TDTheme
 import com.example.uikit.R as UiKitR
 
 @Composable
-fun GroupTaskDetailScreen(
-    viewModel: GroupTaskDetailViewModel = hiltViewModel(),
-) {
+fun GroupTaskDetailScreen(viewModel: GroupTaskDetailViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -83,22 +81,24 @@ private fun GroupTaskDetailContent(
     onAction: (UiAction) -> Unit,
 ) {
     when (uiState) {
-        is UiState.Loading -> Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator(color = TDTheme.colors.pendingGray)
-        }
-        is UiState.Error -> Box(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            TDText(
-                text = uiState.message,
-                style = TDTheme.typography.subheading3,
-                color = TDTheme.colors.gray,
-            )
-        }
+        is UiState.Loading ->
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = TDTheme.colors.pendingGray)
+            }
+        is UiState.Error ->
+            Box(
+                modifier = Modifier.fillMaxSize().padding(24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                TDText(
+                    text = uiState.message,
+                    style = TDTheme.typography.subheading3,
+                    color = TDTheme.colors.gray,
+                )
+            }
         is UiState.Success -> TaskDetailBody(task = uiState.task, onAction = onAction)
     }
 }
@@ -109,7 +109,8 @@ private fun TaskDetailBody(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .verticalScroll(rememberScrollState())
@@ -121,7 +122,8 @@ private fun TaskDetailBody(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(12.dp))
                     .clickable { onAction(UiAction.OnToggleComplete) }
@@ -158,7 +160,8 @@ private fun TaskDetailBody(
         Spacer(modifier = Modifier.height(24.dp))
 
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
                 .background(TDTheme.colors.lightPending)
@@ -196,9 +199,14 @@ private fun TaskDetailBody(
 
             MetadataRow(label = stringResource(R.string.status)) {
                 TDText(
-                    text = if (task.isCompleted) stringResource(
-                            UiKitR.string.status_completed
-                        ) else stringResource(UiKitR.string.status_pending),
+                    text =
+                    if (task.isCompleted) {
+                        stringResource(
+                            UiKitR.string.status_completed,
+                        )
+                    } else {
+                        stringResource(UiKitR.string.status_pending)
+                    },
                     style = TDTheme.typography.subheading2,
                     color = if (task.isCompleted) TDTheme.colors.darkGreen else TDTheme.colors.gray,
                 )

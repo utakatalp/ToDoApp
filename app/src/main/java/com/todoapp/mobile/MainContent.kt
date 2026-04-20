@@ -12,7 +12,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import com.todoapp.mobile.R
 import com.todoapp.mobile.MainContract.UiAction.OnDialogOkTap
 import com.todoapp.mobile.navigation.NavigationEffectController
 import com.todoapp.mobile.navigation.ThemedApp

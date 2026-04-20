@@ -36,7 +36,8 @@ fun PomodoroLaunchScreen(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(horizontal = 24.dp),
@@ -45,7 +46,8 @@ fun PomodoroLaunchScreen(
         Spacer(Modifier.weight(1f))
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(80.dp)
                 .clip(CircleShape)
                 .background(TDTheme.colors.pendingGray),
@@ -142,7 +144,8 @@ private fun LaunchStatCard(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .clip(RoundedCornerShape(16.dp))
             .background(TDTheme.colors.pendingGray)
             .padding(vertical = 16.dp, horizontal = 12.dp),
@@ -168,7 +171,8 @@ private fun LaunchStatCard(
 private fun PomodoroLaunchScreenPreview() {
     TDTheme {
         PomodoroLaunchScreen(
-            uiState = UiState(
+            uiState =
+            UiState(
                 sessionCount = 8,
                 focusTime = 25,
                 shortBreak = 5,

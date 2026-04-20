@@ -46,7 +46,8 @@ import com.todoapp.uikit.theme.TDTheme
 @Composable
 internal fun RegisterBrandingPanel(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .background(TDTheme.colors.pendingGray)
             .statusBarsPadding()
             .padding(24.dp),
@@ -54,29 +55,30 @@ internal fun RegisterBrandingPanel(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(70.dp)
                 .background(color = TDTheme.colors.background.copy(alpha = 0.25f), shape = CircleShape),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painterResource(R.drawable.ic_logo),
                 contentDescription = stringResource(R.string.logo),
                 modifier = Modifier.size(40.dp),
-                tint = TDTheme.colors.white
+                tint = TDTheme.colors.white,
             )
         }
         TDText(
             text = stringResource(R.string.create_account),
             style = TDTheme.typography.heading1,
-            color = TDTheme.colors.white
+            color = TDTheme.colors.white,
         )
         TDText(
             modifier = Modifier.size(width = 300.dp, height = 70.dp),
             text = stringResource(R.string.join_us_and_start_organizing_your_tasks_efficiently),
             style = TDTheme.typography.heading4,
             textAlign = TextAlign.Center,
-            color = TDTheme.colors.white.copy(0.8f)
+            color = TDTheme.colors.white.copy(0.8f),
         )
     }
 }
@@ -98,15 +100,16 @@ internal fun RegisterFormPanel(
             Icon(
                 painterResource(R.drawable.ic_person),
                 contentDescription = stringResource(R.string.full_name),
-                tint = TDTheme.colors.onBackground.copy(0.5f)
+                tint = TDTheme.colors.onBackground.copy(0.5f),
             )
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier = Modifier.clickable(
+        modifier =
+        Modifier.clickable(
             indication = null,
-            interactionSource = remember { MutableInteractionSource() }
-        ) { onAction(UiAction.OnFullNameFieldTap) }
+            interactionSource = remember { MutableInteractionSource() },
+        ) { onAction(UiAction.OnFullNameFieldTap) },
     )
     TDCompactOutlinedTextField(
         value = uiState.email,
@@ -119,18 +122,20 @@ internal fun RegisterFormPanel(
             Icon(
                 painterResource(R.drawable.ic_mail_white),
                 contentDescription = stringResource(R.string.email),
-                tint = when {
+                tint =
+                when {
                     uiState.emailError != null -> TDTheme.colors.crossRed
                     else -> TDTheme.colors.onBackground.copy(alpha = 0.5f)
-                }
+                },
             )
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier = Modifier.clickable(
+        modifier =
+        Modifier.clickable(
             indication = null,
-            interactionSource = remember { MutableInteractionSource() }
-        ) { onAction(UiAction.OnEmailFieldTap) }
+            interactionSource = remember { MutableInteractionSource() },
+        ) { onAction(UiAction.OnEmailFieldTap) },
     )
     uiState.emailError?.let {
         TDText(text = it.message, color = TDTheme.colors.red)
@@ -147,29 +152,32 @@ internal fun RegisterFormPanel(
             Icon(
                 painterResource(R.drawable.ic_lock),
                 contentDescription = stringResource(R.string.password),
-                tint = when {
+                tint =
+                when {
                     uiState.passwordError != null -> TDTheme.colors.crossRed
                     else -> TDTheme.colors.onBackground.copy(alpha = 0.5f)
-                }
+                },
             )
         },
         trailingIcon = {
             IconButton(onClick = { onAction(UiAction.OnPasswordVisibilityTap) }) {
                 Icon(
-                    painter = painterResource(
-                        if (uiState.isPasswordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_close
+                    painter =
+                    painterResource(
+                        if (uiState.isPasswordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_close,
                     ),
                     contentDescription = stringResource(R.string.toggle_password_visibility),
-                    tint = TDTheme.colors.onBackground.copy(alpha = 0.5f)
+                    tint = TDTheme.colors.onBackground.copy(alpha = 0.5f),
                 )
             }
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier = Modifier.clickable(
+        modifier =
+        Modifier.clickable(
             indication = null,
-            interactionSource = remember { MutableInteractionSource() }
-        ) { onAction(UiAction.OnPasswordFieldTap) }
+            interactionSource = remember { MutableInteractionSource() },
+        ) { onAction(UiAction.OnPasswordFieldTap) },
     )
     uiState.passwordError?.let {
         TDText(text = it.message, color = TDTheme.colors.red)
@@ -191,18 +199,20 @@ internal fun RegisterFormPanel(
             Icon(
                 painterResource(R.drawable.ic_lock),
                 contentDescription = stringResource(R.string.confirm_password),
-                tint = when {
+                tint =
+                when {
                     uiState.confirmPasswordError != null -> TDTheme.colors.crossRed
                     else -> TDTheme.colors.onBackground.copy(alpha = 0.5f)
-                }
+                },
             )
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier = Modifier.clickable(
+        modifier =
+        Modifier.clickable(
             indication = null,
-            interactionSource = remember { MutableInteractionSource() }
-        ) { onAction(UiAction.OnConfirmPasswordFieldTap) }
+            interactionSource = remember { MutableInteractionSource() },
+        ) { onAction(UiAction.OnConfirmPasswordFieldTap) },
     )
     uiState.confirmPasswordError?.let {
         TDText(text = it.message, color = TDTheme.colors.red)
@@ -214,21 +224,21 @@ internal fun RegisterFormPanel(
     TDButton(
         text = stringResource(R.string.sign_up),
         fullWidth = true,
-        modifier = Modifier.clip(RoundedCornerShape(12.dp))
+        modifier = Modifier.clip(RoundedCornerShape(12.dp)),
     ) { onAction(UiAction.OnSignUpTap) }
     Spacer(Modifier.height(24.dp))
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Center,
     ) {
         HorizontalDivider(modifier = Modifier.weight(1f), color = TDTheme.colors.gray.copy(0.3f))
         TDText(
             text = stringResource(R.string.or_continue_with),
             style = TDTheme.typography.subheading4,
             color = TDTheme.colors.gray,
-            modifier = Modifier.padding(horizontal = 12.dp)
+            modifier = Modifier.padding(horizontal = 12.dp),
         )
         HorizontalDivider(modifier = Modifier.weight(1f), color = TDTheme.colors.gray.copy(0.3f))
     }
@@ -241,7 +251,7 @@ internal fun RegisterFormPanel(
             fullWidth = false,
             type = TDButtonType.OUTLINE,
             icon = painterResource(R.drawable.ic_google_logo),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) { onAction(UiAction.OnGoogleSignInTap) }
         Spacer(Modifier.width(12.dp))
         TDButton(
@@ -249,7 +259,7 @@ internal fun RegisterFormPanel(
             fullWidth = false,
             type = TDButtonType.OUTLINE,
             icon = painterResource(R.drawable.ic_facebook_logo),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) { onAction(UiAction.OnFacebookSignInTap) }
     }
 
@@ -258,47 +268,48 @@ internal fun RegisterFormPanel(
         TDText(
             text = stringResource(R.string.already_have_an_account),
             style = TDTheme.typography.heading6,
-            color = TDTheme.colors.onBackground.copy(0.7f)
+            color = TDTheme.colors.onBackground.copy(0.7f),
         )
         TDText(
             text = stringResource(R.string.login),
             color = TDTheme.colors.pendingGray,
             style = TDTheme.typography.heading6.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.clickable { onAction(UiAction.OnLoginTap) }
+            modifier = Modifier.clickable { onAction(UiAction.OnLoginTap) },
         )
     }
     Spacer(Modifier.height(16.dp))
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .imePadding()
             .navigationBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row {
             TDText(
                 text = stringResource(R.string.by_signing_up_you_agree_to_our),
                 style = TDTheme.typography.subheading4,
-                color = TDTheme.colors.gray
+                color = TDTheme.colors.gray,
             )
             TDText(
                 text = stringResource(R.string.terms_of_service),
                 style = TDTheme.typography.subheading4.copy(textDecoration = TextDecoration.Underline),
                 color = TDTheme.colors.gray,
-                modifier = Modifier.clickable { onAction(UiAction.OnTermsOfServiceTap) }
+                modifier = Modifier.clickable { onAction(UiAction.OnTermsOfServiceTap) },
             )
         }
         Row {
             TDText(
                 text = stringResource(R.string.and),
                 style = TDTheme.typography.subheading4,
-                color = TDTheme.colors.gray
+                color = TDTheme.colors.gray,
             )
             TDText(
                 text = stringResource(R.string.privacy_policy),
                 style = TDTheme.typography.subheading4.copy(textDecoration = TextDecoration.Underline),
                 color = TDTheme.colors.gray,
-                modifier = Modifier.clickable { onAction(UiAction.OnPrivacyPolicyTap) }
+                modifier = Modifier.clickable { onAction(UiAction.OnPrivacyPolicyTap) },
             )
         }
     }

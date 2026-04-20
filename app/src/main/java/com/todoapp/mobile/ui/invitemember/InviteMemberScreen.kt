@@ -37,9 +37,7 @@ import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun InviteMemberScreen(
-    viewModel: InviteMemberViewModel = hiltViewModel(),
-) {
+fun InviteMemberScreen(viewModel: InviteMemberViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -63,7 +61,8 @@ private fun InviteMemberContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(24.dp),
@@ -120,7 +119,8 @@ private fun InviteMemberContent(
                 )
             },
             shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
+            colors =
+            OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = if (uiState.emailError != null) TDTheme.colors.crossRed else TDTheme.colors.pendingGray,
                 unfocusedBorderColor = if (uiState.emailError != null) TDTheme.colors.crossRed else TDTheme.colors.lightGray,
                 focusedTextColor = TDTheme.colors.onBackground,
@@ -129,7 +129,8 @@ private fun InviteMemberContent(
             ),
             singleLine = true,
             isError = uiState.emailError != null,
-            supportingText = uiState.emailError?.let { error ->
+            supportingText =
+            uiState.emailError?.let { error ->
                 {
                     TDText(
                         text = error,
@@ -161,7 +162,8 @@ private fun InviteMemberContent(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .clickable { onAction(UiAction.OnShareLinkTap) }
                 .padding(8.dp),
         ) {
@@ -186,10 +188,11 @@ private fun InviteMemberContent(
 private fun InviteMemberPreview() {
     TDTheme {
         InviteMemberContent(
-            uiState = InviteMemberContract.UiState(
+            uiState =
+            InviteMemberContract.UiState(
                 email = "user@example.com",
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -199,11 +202,12 @@ private fun InviteMemberPreview() {
 private fun InviteMemberDarkPreview() {
     TDTheme {
         InviteMemberContent(
-            uiState = InviteMemberContract.UiState(
+            uiState =
+            InviteMemberContract.UiState(
                 email = "user@example.com",
-                emailError = "Invalid email address"
+                emailError = "Invalid email address",
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }

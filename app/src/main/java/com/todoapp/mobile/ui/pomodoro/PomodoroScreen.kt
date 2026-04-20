@@ -98,9 +98,10 @@ private fun PomodoroPortraitContent(
 ) {
     // Resolve per-mode palette (handles both light & dark theme)
     val isDark = isSystemInDarkTheme()
-    val targetPalette = remember(uiState.mode.colorKey, isDark) {
-        PomodoroModeTheme.resolve(uiState.mode.colorKey, isDark)
-    }
+    val targetPalette =
+        remember(uiState.mode.colorKey, isDark) {
+            PomodoroModeTheme.resolve(uiState.mode.colorKey, isDark)
+        }
 
     // Animate every color when mode changes (400ms crossfade)
     val bgColor by animateColorAsState(targetPalette.background, tween(COLOR_ANIM_MS), "pomoBg")
@@ -126,12 +127,14 @@ private fun PomodoroPortraitContent(
     )
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(bgColor),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(horizontal = 24.dp),
@@ -181,7 +184,8 @@ private fun PomodoroPortraitContent(
             Spacer(Modifier.height(12.dp))
 
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .clip(RoundedCornerShape(16.dp))
                     .clickable { onAction(UiAction.OnEndSessionTap) }
                     .background(contentColor.copy(alpha = 0.08f))
@@ -264,9 +268,10 @@ private fun PomodoroLandscapeContent(
     onAction: (UiAction) -> Unit,
 ) {
     val isDark = isSystemInDarkTheme()
-    val targetPalette = remember(uiState.mode.colorKey, isDark) {
-        PomodoroModeTheme.resolve(uiState.mode.colorKey, isDark)
-    }
+    val targetPalette =
+        remember(uiState.mode.colorKey, isDark) {
+            PomodoroModeTheme.resolve(uiState.mode.colorKey, isDark)
+        }
 
     val bgColor by animateColorAsState(targetPalette.background, tween(COLOR_ANIM_MS), "pomoBgL")
     val surfaceColor by animateColorAsState(targetPalette.surface, tween(COLOR_ANIM_MS), "pomoSurfaceL")
@@ -289,18 +294,21 @@ private fun PomodoroLandscapeContent(
     )
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(bgColor),
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(horizontal = 16.dp),
         ) {
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .fillMaxHeight(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -325,7 +333,8 @@ private fun PomodoroLandscapeContent(
             }
 
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .fillMaxHeight(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -351,7 +360,8 @@ private fun PomodoroLandscapeContent(
                 Spacer(Modifier.height(10.dp))
 
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .clip(RoundedCornerShape(16.dp))
                         .clickable { onAction(UiAction.OnEndSessionTap) }
                         .background(contentColor.copy(alpha = 0.08f))
@@ -469,14 +479,14 @@ private fun ModeCard(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
+        modifier =
+        modifier
             .neumorphicShadow(
                 lightShadow = lightShadow,
                 darkShadow = darkShadow,
                 cornerRadius = 20.dp,
                 elevation = 8.dp,
-            )
-            .clip(RoundedCornerShape(20.dp))
+            ).clip(RoundedCornerShape(20.dp))
             .background(surfaceColor)
             .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -529,7 +539,8 @@ private const val PROGRESS_ANIM_MS = 900
 private fun Preview_Focus() {
     TDTheme {
         PomodoroContent(
-            uiState = UiState(
+            uiState =
+            UiState(
                 min = 24,
                 second = 57,
                 mode = PomodoroMode.Focus.toUiMode(),
@@ -548,7 +559,8 @@ private fun Preview_Focus() {
 private fun Preview_ShortBreak() {
     TDTheme {
         PomodoroContent(
-            uiState = UiState(
+            uiState =
+            UiState(
                 min = 4,
                 second = 30,
                 mode = PomodoroMode.ShortBreak.toUiMode(),
@@ -566,7 +578,8 @@ private fun Preview_ShortBreak() {
 private fun Preview_LongBreak() {
     TDTheme {
         PomodoroContent(
-            uiState = UiState(
+            uiState =
+            UiState(
                 min = 18,
                 second = 0,
                 mode = PomodoroMode.LongBreak.toUiMode(),

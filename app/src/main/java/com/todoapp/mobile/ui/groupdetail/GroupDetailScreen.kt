@@ -35,9 +35,7 @@ import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun GroupDetailScreen(
-    viewModel: GroupDetailViewModel = hiltViewModel(),
-) {
+fun GroupDetailScreen(viewModel: GroupDetailViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -130,8 +128,9 @@ private fun GroupDetailContent(
                     groupName = successState.groupName,
                     formState = successState.taskFormState,
                     members = successState.members,
-                    submitLabel = stringResource(
-                        if (successState.editingTaskId != null) R.string.update_task else R.string.create_task
+                    submitLabel =
+                    stringResource(
+                        if (successState.editingTaskId != null) R.string.update_task else R.string.create_task,
                     ),
                     onAction = { action ->
                         when (action) {
@@ -146,9 +145,10 @@ private fun GroupDetailContent(
         onDismissSheet = { onAction(UiAction.OnDismissGroupTaskSheet) },
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
-                .background(TDTheme.colors.background)
+                .background(TDTheme.colors.background),
         ) {
             when (uiState) {
                 is GroupDetailContract.UiState.Loading -> GroupDetailLoadingContent()
@@ -164,11 +164,12 @@ private fun GroupDetailSuccessContent(
     uiState: GroupDetailContract.UiState.Success,
     onAction: (UiAction) -> Unit,
 ) {
-    val tabs = listOf(
-        stringResource(R.string.overview),
-        stringResource(R.string.members),
-        stringResource(R.string.activity),
-    )
+    val tabs =
+        listOf(
+            stringResource(R.string.overview),
+            stringResource(R.string.members),
+            stringResource(R.string.activity),
+        )
 
     Column(modifier = Modifier.fillMaxSize()) {
         TabRow(

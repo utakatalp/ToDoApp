@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 object GroupTaskDetailContract {
-
     data class TaskUiModel(
         val id: Long,
         val title: String,
@@ -25,6 +24,7 @@ object GroupTaskDetailContract {
 
     sealed interface UiState {
         data object Loading : UiState
+
         data class Success(
             val task: TaskUiModel,
             val groupName: String,
@@ -37,26 +37,58 @@ object GroupTaskDetailContract {
             val editAssigneeId: Long? = null,
             val isSaving: Boolean = false,
         ) : UiState
-        data class Error(val message: String) : UiState
+
+        data class Error(
+            val message: String,
+        ) : UiState
     }
 
     sealed interface UiAction {
         data object OnBackTap : UiAction
+
         data object OnToggleComplete : UiAction
+
         data object OnEditTap : UiAction
+
         data object OnEditDismiss : UiAction
+
         data object OnEditSave : UiAction
-        data class OnEditTitleChange(val title: String) : UiAction
-        data class OnEditDescriptionChange(val description: String) : UiAction
-        data class OnEditDateSelect(val date: LocalDate) : UiAction
+
+        data class OnEditTitleChange(
+            val title: String,
+        ) : UiAction
+
+        data class OnEditDescriptionChange(
+            val description: String,
+        ) : UiAction
+
+        data class OnEditDateSelect(
+            val date: LocalDate,
+        ) : UiAction
+
         data object OnEditDateDeselect : UiAction
-        data class OnEditTimeChange(val time: LocalTime) : UiAction
-        data class OnEditAssigneeChange(val userId: Long?) : UiAction
-        data class OnPhotoPicked(val bytes: ByteArray, val mimeType: String) : UiAction
-        data class OnPhotoDelete(val photoId: Long) : UiAction
+
+        data class OnEditTimeChange(
+            val time: LocalTime,
+        ) : UiAction
+
+        data class OnEditAssigneeChange(
+            val userId: Long?,
+        ) : UiAction
+
+        data class OnPhotoPicked(
+            val bytes: ByteArray,
+            val mimeType: String,
+        ) : UiAction
+
+        data class OnPhotoDelete(
+            val photoId: Long,
+        ) : UiAction
     }
 
     sealed interface UiEffect {
-        data class ShowToast(val message: String) : UiEffect
+        data class ShowToast(
+            val message: String,
+        ) : UiEffect
     }
 }

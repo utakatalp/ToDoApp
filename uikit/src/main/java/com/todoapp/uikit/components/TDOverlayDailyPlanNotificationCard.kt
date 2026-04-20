@@ -71,17 +71,17 @@ fun TDOverlayDailyPlanNotificationCard(
     val overlaySurfaceColor = TDTheme.colors.background
 
     Surface(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .pointerInput(Unit) {
                 detectDragGestures(
-                    onDragEnd = { onDragEnd() }
+                    onDragEnd = { onDragEnd() },
                 ) { change, dragAmount ->
                     change.consume()
                     onDrag(dragAmount.x, dragAmount.y)
                 }
-            }
-            .padding(horizontal = 16.dp, vertical = 16.dp)
+            }.padding(horizontal = 16.dp, vertical = 16.dp)
             .widthIn(max = 520.dp)
             .clickable { onOpenApp() },
         shape = RoundedCornerShape(22.dp),
@@ -91,17 +91,19 @@ fun TDOverlayDailyPlanNotificationCard(
     ) {
         Column {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(3.dp)
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 22.dp))
-                    .background(TDTheme.colors.pendingGray.copy(alpha = 0.2f))
+                    .background(TDTheme.colors.pendingGray.copy(alpha = 0.2f)),
             ) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth(fraction = progress)
                         .height(3.dp)
-                        .background(TDTheme.colors.crossRed)
+                        .background(TDTheme.colors.crossRed),
                 )
             }
             Row(
@@ -110,22 +112,24 @@ fun TDOverlayDailyPlanNotificationCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .size(64.dp)
                         .clip(CircleShape)
                         .background(TDTheme.colors.background.copy(alpha = 0.14f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Image(
-                        painter = painterResource(
+                        painter =
+                        painterResource(
                             if (TDTheme.isDark) {
                                 R.drawable.ic_daily_overlay_robot_dark
                             } else {
                                 R.drawable.ic_daily_overlay_robot_light
-                            }
+                            },
                         ),
                         contentDescription = "Logo",
-                        modifier = Modifier.size(64.dp)
+                        modifier = Modifier.size(64.dp),
                     )
                 }
 
@@ -150,7 +154,8 @@ fun TDOverlayDailyPlanNotificationCard(
                 }
 
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .size(28.dp)
                         .clip(CircleShape)
                         .clickable { onDismiss() },

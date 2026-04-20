@@ -41,9 +41,7 @@ import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun GroupSettingsScreen(
-    viewModel: GroupSettingsViewModel = hiltViewModel(),
-) {
+fun GroupSettingsScreen(viewModel: GroupSettingsViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -67,7 +65,8 @@ private fun GroupSettingsContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .verticalScroll(rememberScrollState())
@@ -106,7 +105,8 @@ private fun GroupSettingsContent(
                 onValueChange = { onAction(UiAction.OnNameChange(it)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                colors =
+                OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = TDTheme.colors.pendingGray,
                     unfocusedBorderColor = TDTheme.colors.lightGray,
                     focusedTextColor = TDTheme.colors.onBackground,
@@ -120,7 +120,8 @@ private fun GroupSettingsContent(
                 text = uiState.name,
                 style = TDTheme.typography.regularTextStyle,
                 color = TDTheme.colors.gray,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
             )
@@ -138,11 +139,13 @@ private fun GroupSettingsContent(
             OutlinedTextField(
                 value = uiState.description,
                 onValueChange = { onAction(UiAction.OnDescriptionChange(it)) },
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(120.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                colors =
+                OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = TDTheme.colors.pendingGray,
                     unfocusedBorderColor = TDTheme.colors.lightGray,
                     focusedTextColor = TDTheme.colors.onBackground,
@@ -156,7 +159,8 @@ private fun GroupSettingsContent(
                 text = uiState.description.ifBlank { "—" },
                 style = TDTheme.typography.regularTextStyle,
                 color = TDTheme.colors.gray,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
             )
@@ -223,7 +227,8 @@ private fun GroupSettingsLoadingPreview() {
 private fun GroupSettingsAdminPreview() {
     TDTheme {
         GroupSettingsContent(
-            uiState = GroupSettingsContract.UiState(
+            uiState =
+            GroupSettingsContract.UiState(
                 groupId = 1L,
                 name = "The Smith Family",
                 description = "Daily chores, grocery lists, and vacation planning for 2024.",
@@ -241,7 +246,8 @@ private fun GroupSettingsAdminPreview() {
 private fun GroupSettingsMemberPreview() {
     TDTheme {
         GroupSettingsContent(
-            uiState = GroupSettingsContract.UiState(
+            uiState =
+            GroupSettingsContract.UiState(
                 groupId = 1L,
                 name = "The Smith Family",
                 description = "Daily chores, grocery lists, and vacation planning for 2024.",
@@ -259,7 +265,8 @@ private fun GroupSettingsMemberPreview() {
 private fun GroupSettingsSavingPreview() {
     TDTheme {
         GroupSettingsContent(
-            uiState = GroupSettingsContract.UiState(
+            uiState =
+            GroupSettingsContract.UiState(
                 groupId = 1L,
                 name = "The Smith Family",
                 description = "Daily chores, grocery lists, and vacation planning for 2024.",
@@ -280,7 +287,8 @@ private fun ManagementRow(
     onClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(TDTheme.colors.lightPending)

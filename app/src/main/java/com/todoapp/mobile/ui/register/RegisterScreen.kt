@@ -63,7 +63,8 @@ fun RegisterScreen(
                 handleFacebookLogin(context = context, onAction = onAction)
             }
             UiEffect.LaunchGoogleSignIn -> {
-                GoogleSignInManager.getGoogleIdToken(context)
+                GoogleSignInManager
+                    .getGoogleIdToken(context)
                     .onSuccess { token -> onAction(UiAction.OnGoogleSignInResult(token)) }
                     .onFailure { error ->
                         onAction(UiAction.OnGoogleSignInFailed(error.message ?: "Sign-in cancelled"))
@@ -78,14 +79,15 @@ fun RegisterScreen(
 
         if (uiState.isRedirecting) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.35f))
                     .clickable(
                         indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
+                        interactionSource = remember { MutableInteractionSource() },
                     ) { },
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }
@@ -116,34 +118,35 @@ private fun RegisterPortraitContent(
             .fillMaxSize()
             .background(color = TDTheme.colors.pendingGray)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
         Spacer(Modifier.height(32.dp))
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(70.dp)
                 .background(color = TDTheme.colors.background.copy(alpha = 0.25f), shape = CircleShape),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painterResource(R.drawable.ic_logo),
                 contentDescription = stringResource(R.string.logo),
                 modifier = Modifier.size(40.dp),
-                tint = TDTheme.colors.white
+                tint = TDTheme.colors.white,
             )
         }
         TDText(
             text = stringResource(R.string.create_account),
             style = TDTheme.typography.heading1,
-            color = TDTheme.colors.white
+            color = TDTheme.colors.white,
         )
         TDText(
             modifier = Modifier.size(width = 300.dp, height = 70.dp),
             text = stringResource(R.string.join_us_and_start_organizing_your_tasks_efficiently),
             style = TDTheme.typography.heading4,
             textAlign = TextAlign.Center,
-            color = TDTheme.colors.white.copy(0.8f)
+            color = TDTheme.colors.white.copy(0.8f),
         )
         Spacer(Modifier.weight(1f))
         Column(
@@ -151,7 +154,7 @@ private fun RegisterPortraitContent(
                 .fillMaxSize()
                 .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                 .background(color = TDTheme.colors.background)
-                .padding(start = 32.dp, end = 32.dp, top = 24.dp, bottom = 16.dp)
+                .padding(start = 32.dp, end = 32.dp, top = 24.dp, bottom = 16.dp),
         ) {
             RegisterFormPanel(uiState = uiState, onAction = onAction)
         }
@@ -165,12 +168,14 @@ private fun RegisterLandscapeContent(
 ) {
     Row(Modifier.fillMaxSize()) {
         RegisterBrandingPanel(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f)
-                .fillMaxHeight()
+                .fillMaxHeight(),
         )
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .background(TDTheme.colors.background)
@@ -186,22 +191,22 @@ suspend fun handleFacebookLogin(
     context: Context,
     onAction: (UiAction) -> Unit,
 ) {
-    val activity = context as? FragmentActivity
-        ?: run {
-            onAction(
-                UiAction.OnFacebookLoginFail(
-                    IllegalStateException("Facebook login requires a FragmentActivity context")
+    val activity =
+        context as? FragmentActivity
+            ?: run {
+                onAction(
+                    UiAction.OnFacebookLoginFail(
+                        IllegalStateException("Facebook login requires a FragmentActivity context"),
+                    ),
                 )
-            )
-            return
-        }
+                return
+            }
 
     loginWithFacebook(activity = activity)
         .onSuccess { token ->
             Log.d("token", token)
             onAction(UiAction.OnSuccessfulFacebookLogin(token))
-        }
-        .onFailure { throwable ->
+        }.onFailure { throwable ->
             onAction(UiAction.OnFacebookLoginFail(throwable))
             Log.d("token", "fail")
         }
@@ -212,7 +217,8 @@ suspend fun handleFacebookLogin(
 private fun RegisterContentPreview() {
     TDTheme {
         RegisterContent(
-            uiState = UiState(
+            uiState =
+            UiState(
                 fullName = "",
                 email = "natalia@example.com",
                 password = "password",
@@ -229,7 +235,8 @@ private fun RegisterContentPreview() {
 private fun RegisterContentDarkPreview() {
     TDTheme {
         RegisterContent(
-            uiState = UiState(
+            uiState =
+            UiState(
                 fullName = "Natalia Smith",
                 email = "natalia@example.com",
                 password = "password123",

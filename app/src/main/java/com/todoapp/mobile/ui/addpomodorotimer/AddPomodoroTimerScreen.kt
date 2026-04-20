@@ -57,27 +57,29 @@ private fun AddPomodoroTimerContent(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
 ) {
-    val totalMinutes = remember(
-        uiState.sessionCount,
-        uiState.focusTime,
-        uiState.shortBreak,
-        uiState.longBreak,
-        uiState.sectionCount,
-    ) {
-        val s = uiState.sessionCount.toInt()
-        val f = uiState.focusTime.toInt()
-        val sh = uiState.shortBreak.toInt()
-        val lo = uiState.longBreak.toInt()
-        val sec = uiState.sectionCount.toInt()
-        var t = s * f
-        for (i in 1 until s) {
-            t += if (i % sec == 0) lo else sh
+    val totalMinutes =
+        remember(
+            uiState.sessionCount,
+            uiState.focusTime,
+            uiState.shortBreak,
+            uiState.longBreak,
+            uiState.sectionCount,
+        ) {
+            val s = uiState.sessionCount.toInt()
+            val f = uiState.focusTime.toInt()
+            val sh = uiState.shortBreak.toInt()
+            val lo = uiState.longBreak.toInt()
+            val sec = uiState.sectionCount.toInt()
+            var t = s * f
+            for (i in 1 until s) {
+                t += if (i % sec == 0) lo else sh
+            }
+            t
         }
-        t
-    }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .background(TDTheme.colors.background)
             .statusBarsPadding()
             .fillMaxSize()
@@ -178,7 +180,7 @@ private fun AddPomodoroTimerContent(
             TDButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(R.string.cancel),
-                type = TDButtonType.CANCEL
+                type = TDButtonType.CANCEL,
             ) {
                 onAction(UiAction.OnCancelTap)
             }
@@ -186,7 +188,7 @@ private fun AddPomodoroTimerContent(
             TDButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(R.string.start),
-                type = TDButtonType.PRIMARY
+                type = TDButtonType.PRIMARY,
             ) {
                 onAction(UiAction.OnStartTap)
             }
@@ -206,21 +208,21 @@ private fun PomodoroPreviewCard(
 ) {
     val isDark = isSystemInDarkTheme()
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .then(
                 if (isDark) {
                     Modifier.border(1.dp, TDTheme.colors.pendingGray.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
                 } else {
                     Modifier.neumorphicShadow(
-                    lightShadow = TDTheme.colors.white.copy(alpha = 0.9f),
-                    darkShadow = TDTheme.colors.darkPending.copy(alpha = 0.15f),
-                    cornerRadius = 16.dp,
-                    elevation = 8.dp,
-                )
-                }
-            )
-            .clip(RoundedCornerShape(16.dp))
+                        lightShadow = TDTheme.colors.white.copy(alpha = 0.9f),
+                        darkShadow = TDTheme.colors.darkPending.copy(alpha = 0.15f),
+                        cornerRadius = 16.dp,
+                        elevation = 8.dp,
+                    )
+                },
+            ).clip(RoundedCornerShape(16.dp))
             .background(TDTheme.colors.background)
             .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
@@ -287,21 +289,21 @@ private fun PomodoroStepperCard(
     val isDark = isSystemInDarkTheme()
 
     Row(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .then(
                 if (isDark) {
                     Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
                 } else {
                     Modifier.neumorphicShadow(
-                    lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
-                    darkShadow = iconTintColor.copy(alpha = 0.18f),
-                    cornerRadius = 16.dp,
-                    elevation = 6.dp,
-                )
-                }
-            )
-            .clip(RoundedCornerShape(16.dp))
+                        lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
+                        darkShadow = iconTintColor.copy(alpha = 0.18f),
+                        cornerRadius = 16.dp,
+                        elevation = 6.dp,
+                    )
+                },
+            ).clip(RoundedCornerShape(16.dp))
             .background(cardBgColor)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -328,7 +330,8 @@ private fun PomodoroStepperCard(
             modifier = Modifier.size(36.dp),
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(28.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .border(
@@ -363,7 +366,8 @@ private fun PomodoroStepperCard(
             modifier = Modifier.size(36.dp),
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(28.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .border(

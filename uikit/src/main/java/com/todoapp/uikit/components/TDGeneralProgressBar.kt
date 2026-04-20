@@ -14,12 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
+import kotlin.math.roundToInt
 
 @Composable
 fun TDGeneralProgressBar(
@@ -38,18 +38,20 @@ fun TDGeneralProgressBar(
 
     Column {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .background(barColor)
                 .height(height),
             contentAlignment = Alignment.Center,
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.CenterStart)
                     .fillMaxHeight()
                     .fillMaxWidth(animatedP)
-                    .background(progressColor)
+                    .background(progressColor),
             )
             TDText(
                 text = "${(p * 100).roundToInt()}%",
@@ -60,7 +62,8 @@ fun TDGeneralProgressBar(
 
         if (completedCount != null && totalCount != null) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(top = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,8 +88,9 @@ fun TDGeneralProgressBar(
 fun TDGeneralProgressBarPreviewLight() {
     TDTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier =
+            Modifier
+                .fillMaxWidth(),
         ) {
             TDGeneralProgressBar(
                 progress = 0.7f,

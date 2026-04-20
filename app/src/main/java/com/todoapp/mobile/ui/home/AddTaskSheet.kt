@@ -51,7 +51,8 @@ internal fun AddTaskSheet(
     var showEndTimePicker by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
@@ -94,7 +95,8 @@ internal fun AddTaskSheet(
             Column(modifier = Modifier.weight(1f)) {
                 TDPickerField(
                     title = stringResource(com.todoapp.mobile.R.string.set_time),
-                    value = formState.taskTimeStart?.format(timeFormatter)
+                    value =
+                    formState.taskTimeStart?.format(timeFormatter)
                         ?: stringResource(com.todoapp.mobile.R.string.starts),
                     onClick = { showStartTimePicker = true },
                     isError = formState.isTimeError,
@@ -112,7 +114,8 @@ internal fun AddTaskSheet(
             Column(modifier = Modifier.weight(1f)) {
                 TDPickerField(
                     title = "",
-                    value = formState.taskTimeEnd?.format(timeFormatter)
+                    value =
+                    formState.taskTimeEnd?.format(timeFormatter)
                         ?: stringResource(com.todoapp.mobile.R.string.ends),
                     onClick = { showEndTimePicker = true },
                     isError = formState.isTimeError,
@@ -142,8 +145,8 @@ internal fun AddTaskSheet(
                 onGroupSelected = { groupId ->
                     onAction(
                         TaskFormUiAction.GroupSelectionChanged(
-                        if (formState.selectedGroupId == groupId) null else groupId
-                    )
+                            if (formState.selectedGroupId == groupId) null else groupId,
+                        ),
                     )
                 },
             )
@@ -208,7 +211,8 @@ private fun GroupAssignmentSection(
         )
         availableGroups.forEach { group ->
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .clickable { onGroupSelected(group.groupId) }
                     .padding(vertical = 4.dp),
@@ -230,7 +234,8 @@ private fun GroupAssignmentSection(
                 Checkbox(
                     checked = selectedGroupId == group.groupId,
                     onCheckedChange = { onGroupSelected(group.groupId) },
-                    colors = CheckboxDefaults.colors(
+                    colors =
+                    CheckboxDefaults.colors(
                         checkedColor = TDTheme.colors.pendingGray,
                         uncheckedColor = TDTheme.colors.onBackground.copy(alpha = 0.5f),
                     ),
@@ -249,7 +254,8 @@ private fun AdvancedSettings(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .clickable { onToggleExpanded() }
                 .padding(vertical = 8.dp),
@@ -262,12 +268,13 @@ private fun AdvancedSettings(
                 color = TDTheme.colors.onBackground.copy(alpha = 0.7f),
             )
             Icon(
-                painter = painterResource(
+                painter =
+                painterResource(
                     if (isExpanded) {
                         R.drawable.ic_outline_expand_circle_down_24
                     } else {
                         R.drawable.ic_outline_expand_circle_right_24
-                    }
+                    },
                 ),
                 contentDescription = null,
                 tint = TDTheme.colors.onBackground.copy(alpha = 0.7f),
@@ -276,7 +283,8 @@ private fun AdvancedSettings(
 
         AnimatedVisibility(visible = isExpanded) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -284,7 +292,8 @@ private fun AdvancedSettings(
                 Checkbox(
                     checked = isSecret,
                     onCheckedChange = { onSecretChange(it) },
-                    colors = CheckboxDefaults.colors(
+                    colors =
+                    CheckboxDefaults.colors(
                         checkedColor = TDTheme.colors.pendingGray,
                         uncheckedColor = TDTheme.colors.onBackground.copy(alpha = 0.6f),
                     ),

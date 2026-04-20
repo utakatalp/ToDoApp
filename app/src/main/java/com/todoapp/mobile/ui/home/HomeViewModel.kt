@@ -39,7 +39,9 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class HomeViewModel
+@Inject
+constructor(
     private val taskRepository: TaskRepository,
     private val taskSyncRepository: TaskSyncRepository,
     private val secretModePreferences: SecretPreferences,
@@ -47,7 +49,6 @@ class HomeViewModel @Inject constructor(
     private val pomodoroEngine: PomodoroEngine,
     private val groupRepository: GroupRepository,
 ) : ViewModel() {
-
     private data class DailyData(
         val tasks: List<Task>,
         val pendingTaskCountThisWeek: Int,
@@ -103,23 +104,28 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnUndoDelete -> undoDelete()
             is UiAction.OnPreviousMonth -> navigateToPreviousMonth()
             is UiAction.OnNextMonth -> navigateToNextMonth()
-            is UiAction.OnGroupSelectionChanged -> updateSuccessState {
-                it.copy(taskFormState = it.taskFormState.copy(selectedGroupId = uiAction.groupId))
-            }
-            is UiAction.OnPendingPhotoAdd -> updateSuccessState { s ->
-                s.copy(
-                    taskFormState = s.taskFormState.copy(
-                        pendingPhotos = s.taskFormState.pendingPhotos + PendingPhoto(uiAction.bytes, uiAction.mimeType),
-                    ),
-                )
-            }
-            is UiAction.OnPendingPhotoRemove -> updateSuccessState { s ->
-                s.copy(
-                    taskFormState = s.taskFormState.copy(
-                        pendingPhotos = s.taskFormState.pendingPhotos.filterIndexed { i, _ -> i != uiAction.index },
-                    ),
-                )
-            }
+            is UiAction.OnGroupSelectionChanged ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(selectedGroupId = uiAction.groupId))
+                }
+            is UiAction.OnPendingPhotoAdd ->
+                updateSuccessState { s ->
+                    s.copy(
+                        taskFormState =
+                        s.taskFormState.copy(
+                            pendingPhotos = s.taskFormState.pendingPhotos + PendingPhoto(uiAction.bytes, uiAction.mimeType),
+                        ),
+                    )
+                }
+            is UiAction.OnPendingPhotoRemove ->
+                updateSuccessState { s ->
+                    s.copy(
+                        taskFormState =
+                        s.taskFormState.copy(
+                            pendingPhotos = s.taskFormState.pendingPhotos.filterIndexed { i, _ -> i != uiAction.index },
+                        ),
+                    )
+                }
         }
     }
 
@@ -138,10 +144,11 @@ class HomeViewModel @Inject constructor(
                 val today = LocalDate.now()
                 fetchDailyTask(today)
             } catch (e: IOException) {
-                _uiState.value = UiState.Error(
-                    message = e.message ?: "Unknown error",
-                    throwable = e,
-                )
+                _uiState.value =
+                    UiState.Error(
+                        message = e.message ?: "Unknown error",
+                        throwable = e,
+                    )
             }
         }
     }
@@ -166,36 +173,42 @@ class HomeViewModel @Inject constructor(
 
     private fun fetchDailyTask(date: LocalDate) {
         fetchJob?.cancel()
-        fetchJob = viewModelScope.launch {
-            delay(LOADING_DELAY)
-            combine(
-                taskRepository.observeTasksByDate(date),
-                taskRepository.observePendingTasksInAWeek(date),
-                taskRepository.countCompletedTasksInAWeek(date),
-                taskRepository.observeTaskPhotoUrls(),
-            ) { tasks, pendingTaskCount, completedTaskCount, photoUrls ->
-                val withPhotos = tasks.map { t ->
-                    val urls = t.remoteId?.let { photoUrls[it] } ?: emptyList()
-                    if (urls.isNotEmpty()) t.copy(photoUrls = urls) else t
-                }
-                DailyData(withPhotos, pendingTaskCount, completedTaskCount)
-            }.collect { data ->
-                _uiState.update { current ->
-                    when (current) {
-                        is UiState.Success -> current.copy(
-                            tasks = data.tasks,
-                            pendingTaskCountThisWeek = data.pendingTaskCountThisWeek,
-                            completedTaskCountThisWeek = data.completedTaskCountThisWeek,
-                        )
+        fetchJob =
+            viewModelScope.launch {
+                delay(LOADING_DELAY)
+                combine(
+                    taskRepository.observeTasksByDate(date),
+                    taskRepository.observePendingTasksInAWeek(date),
+                    taskRepository.countCompletedTasksInAWeek(date),
+                    taskRepository.observeTaskPhotoUrls(),
+                ) { tasks, pendingTaskCount, completedTaskCount, photoUrls ->
+                    val withPhotos =
+                        tasks.map { t ->
+                            val urls = t.remoteId?.let { photoUrls[it] } ?: emptyList()
+                            if (urls.isNotEmpty()) t.copy(photoUrls = urls) else t
+                        }
+                    DailyData(withPhotos, pendingTaskCount, completedTaskCount)
+                }.collect { data ->
+                    _uiState.update { current ->
+                        when (current) {
+                            is UiState.Success ->
+                                current.copy(
+                                    tasks = data.tasks,
+                                    pendingTaskCountThisWeek = data.pendingTaskCountThisWeek,
+                                    completedTaskCountThisWeek = data.completedTaskCountThisWeek,
+                                )
 
-                        else -> createInitialState(date, data)
+                            else -> createInitialState(date, data)
+                        }
                     }
                 }
             }
-        }
     }
 
-    private fun createInitialState(date: LocalDate, data: DailyData) = UiState.Success(
+    private fun createInitialState(
+        date: LocalDate,
+        data: DailyData,
+    ) = UiState.Success(
         selectedDate = date,
         displayedMonth = YearMonth.from(date),
         tasks = data.tasks,
@@ -242,15 +255,16 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             val form = currentState.taskFormState
-            val task = Task(
-                title = form.taskTitle,
-                description = form.taskDescription.ifBlank { null },
-                date = form.dialogSelectedDate!!,
-                timeStart = form.taskTimeStart!!,
-                timeEnd = form.taskTimeEnd!!,
-                isCompleted = false,
-                isSecret = form.isTaskSecret
-            )
+            val task =
+                Task(
+                    title = form.taskTitle,
+                    description = form.taskDescription.ifBlank { null },
+                    date = form.dialogSelectedDate!!,
+                    timeStart = form.taskTimeStart!!,
+                    timeEnd = form.taskTimeEnd!!,
+                    isCompleted = false,
+                    isSecret = form.isTaskSecret,
+                )
             if (form.selectedGroupId != null) {
                 groupRepository.createGroupTask(form.selectedGroupId, task)
             } else if (form.pendingPhotos.isNotEmpty()) {
@@ -272,7 +286,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             taskRepository.updateTaskCompletion(
                 uiAction.task.id,
-                isCompleted = !uiAction.task.isCompleted
+                isCompleted = !uiAction.task.isCompleted,
             )
         }
     }
@@ -280,11 +294,12 @@ class HomeViewModel @Inject constructor(
     private fun deleteTask(task: Task) {
         updateSuccessState { it.copy(pendingDeleteTask = task) }
         pendingDeleteJob?.cancel()
-        pendingDeleteJob = viewModelScope.launch {
-            delay(UNDO_DELAY_MS)
-            taskRepository.delete(task)
-            updateSuccessState { it.copy(pendingDeleteTask = null) }
-        }
+        pendingDeleteJob =
+            viewModelScope.launch {
+                delay(UNDO_DELAY_MS)
+                taskRepository.delete(task)
+                updateSuccessState { it.copy(pendingDeleteTask = null) }
+            }
     }
 
     private fun undoDelete() {
@@ -309,8 +324,7 @@ class HomeViewModel @Inject constructor(
                     date = currentState.selectedDate,
                     fromIndex = uiAction.from,
                     toIndex = uiAction.to,
-                )
-                .onFailure { t ->
+                ).onFailure { t ->
                     Log.e("HomeViewModel", "Failed to persist task reorder", t)
                 }
         }
@@ -326,7 +340,11 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun changeTaskDescription(uiAction: UiAction.OnTaskDescriptionChange) {
-        updateSuccessState { it.copy(taskFormState = it.taskFormState.copy(taskDescription = uiAction.description)) }
+        updateSuccessState {
+            it.copy(
+                taskFormState = it.taskFormState.copy(taskDescription = uiAction.description),
+            )
+        }
     }
 
     private fun changeTaskDate(uiAction: UiAction.OnTaskDateChange) {
@@ -407,7 +425,7 @@ class HomeViewModel @Inject constructor(
             remindBeforeMinutes.forEach { minutes ->
                 alarmScheduler.schedule(
                     task.toAlarmItem(remindBeforeMinutes = minutes),
-                    type = AlarmType.TASK
+                    type = AlarmType.TASK,
                 )
             }
         }
@@ -427,11 +445,18 @@ class HomeViewModel @Inject constructor(
     private fun showBottomSheet() {
         updateSuccessState { it.copy(isSheetOpen = true) }
         viewModelScope.launch {
-            groupRepository.observeAllGroups()
+            groupRepository
+                .observeAllGroups()
                 .collect { groups ->
-                    val items = groups.mapNotNull { group ->
-                        group.remoteId?.let { remoteId -> HomeContract.GroupSelectionItem(remoteId, group.name) }
-                    }
+                    val items =
+                        groups.mapNotNull { group ->
+                            group.remoteId?.let { remoteId ->
+                                HomeContract.GroupSelectionItem(
+                                    remoteId,
+                                    group.name,
+                                )
+                            }
+                        }
                     updateSuccessState { it.copy(availableGroups = items) }
                 }
         }
@@ -444,9 +469,10 @@ class HomeViewModel @Inject constructor(
     private fun toggleAdvancedSettings() {
         updateSuccessState {
             it.copy(
-                taskFormState = it.taskFormState.copy(
-                    isAdvancedSettingsExpanded = !it.taskFormState.isAdvancedSettingsExpanded
-                )
+                taskFormState =
+                it.taskFormState.copy(
+                    isAdvancedSettingsExpanded = !it.taskFormState.isAdvancedSettingsExpanded,
+                ),
             )
         }
     }
@@ -468,9 +494,10 @@ class HomeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val isActive = secretModePreferences
-                .getCondition()
-                .isActive(System.currentTimeMillis())
+            val isActive =
+                secretModePreferences
+                    .getCondition()
+                    .isActive(System.currentTimeMillis())
 
             if (isActive) navigateToTaskDetail() else authenticate()
         }
@@ -488,12 +515,14 @@ class HomeViewModel @Inject constructor(
 
     private fun handleSuccessfulBiometricAuthentication() {
         viewModelScope.launch {
-            val selectedOption = SecretModeReopenOptions.byId(
-                secretModePreferences.getLastSelectedOptionId()
-            )
-            val condition = SecretModeConditionFactory(
-                clock = Clock.systemDefaultZone()
-            ).create(selectedOption)
+            val selectedOption =
+                SecretModeReopenOptions.byId(
+                    secretModePreferences.getLastSelectedOptionId(),
+                )
+            val condition =
+                SecretModeConditionFactory(
+                    clock = Clock.systemDefaultZone(),
+                ).create(selectedOption)
             secretModePreferences.saveCondition(condition)
             navigateToTaskDetail()
         }

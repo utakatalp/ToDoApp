@@ -33,7 +33,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(
+class LoginViewModel
+@Inject
+constructor(
     private val userRepository: UserRepository,
     private val authTokenManager: AuthTokenManager,
     private val sessionPreferences: SessionPreferences,
@@ -41,7 +43,6 @@ class LoginViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
-
     private val redirectAfterLogin: String? = savedStateHandle.toRoute<Screen.Login>().redirectAfterLogin
 
     private val _uiState = MutableStateFlow(UiState())
@@ -82,7 +83,8 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            userRepository.facebookLogin(FacebookLoginRequest(token))
+            userRepository
+                .facebookLogin(FacebookLoginRequest(token))
                 .onSuccess { handleSuccessfulLogin(it) }
                 .onFailure { throwable ->
                     Log.d("facebook_login", throwable.message.orEmpty())
@@ -94,16 +96,17 @@ class LoginViewModel @Inject constructor(
     private fun handleFacebookLoginFailure(throwable: Throwable) {
         _uiState.update { it.copy(isLoading = false) }
 
-        val message = when (throwable) {
-            is DomainException.NoInternet -> "No internet connection."
-            is DomainException.Unauthorized -> "Facebook session expired. Please try again."
-            is DomainException.Server -> throwable.message ?: "Try again later."
-            else -> throwable.message ?: "Try again later."
-        }
+        val message =
+            when (throwable) {
+                is DomainException.NoInternet -> "No internet connection."
+                is DomainException.Unauthorized -> "Facebook session expired. Please try again."
+                is DomainException.Server -> throwable.message ?: "Try again later."
+                else -> throwable.message ?: "Try again later."
+            }
 
         _uiState.update { state ->
             state.copy(
-                generalError = LoginContract.LoginError(message)
+                generalError = LoginContract.LoginError(message),
             )
         }
     }
@@ -112,7 +115,8 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            userRepository.googleLogin(idToken)
+            userRepository
+                .googleLogin(idToken)
                 .onSuccess { loginData ->
                     authTokenManager.saveTokens(
                         AuthModel(
@@ -122,7 +126,7 @@ class LoginViewModel @Inject constructor(
                             email = loginData.user.email,
                             displayName = loginData.user.displayName,
                             avatarUrl = loginData.user.avatarUrl,
-                        )
+                        ),
                     )
                     handleSuccessfulLogin(loginData)
                 }.onFailure { error ->
@@ -136,46 +140,53 @@ class LoginViewModel @Inject constructor(
     private fun login() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
 
-        userRepository.login(
-            request = LoginRequest(
-                email = uiState.value.email,
-                password = uiState.value.password,
+        userRepository
+            .login(
+                request =
+                LoginRequest(
+                    email = uiState.value.email,
+                    password = uiState.value.password,
+                ),
+            ).fold(
+                onSuccess = { loginData ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    handleSuccessfulLogin(loginData)
+                    userRepository
+                        .syncPendingFcmToken()
+                        .onFailure { Log.d("FCM_SYNC", "syncPendingFcmToken failed: ${it.message}") }
+                },
+                onFailure = { throwable ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    if (throwable is DomainException.Server) {
+                        _uiState.update {
+                            it.copy(
+                                emailError = LoginContract.LoginError(throwable.message ?: "Try again later"),
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                generalError = LoginContract.LoginError(throwable.message ?: "Try again later"),
+                            )
+                        }
+                    }
+                },
             )
-        ).fold(
-            onSuccess = { loginData ->
-                _uiState.update { it.copy(isLoading = false) }
-                handleSuccessfulLogin(loginData)
-                userRepository.syncPendingFcmToken()
-                    .onFailure { Log.d("FCM_SYNC", "syncPendingFcmToken failed: ${it.message}") }
-            },
-            onFailure = { throwable ->
-                _uiState.update { it.copy(isLoading = false) }
-                if (throwable is DomainException.Server) {
-                    _uiState.update {
-                        it.copy(emailError = LoginContract.LoginError(throwable.message ?: "Try again later"))
-                    }
-                } else {
-                    _uiState.update {
-                        it.copy(generalError = LoginContract.LoginError(throwable.message ?: "Try again later"))
-                    }
-                }
-            }
-        )
     }
 
     private fun navigateToRegister() {
         _navEffect.trySend(
             NavigationEffect.Navigate(
-                route = Screen.Register(redirectAfterRegister = redirectAfterLogin)
-            )
+                route = Screen.Register(redirectAfterRegister = redirectAfterLogin),
+            ),
         )
     }
 
     private fun navigateToForgotPassword() {
         _navEffect.trySend(
             NavigationEffect.Navigate(
-                route = Screen.ForgotPassword
-            )
+                route = Screen.ForgotPassword,
+            ),
         )
     }
 
@@ -192,7 +203,7 @@ class LoginViewModel @Inject constructor(
                     emailError = emailError?.let { LoginContract.LoginError(it) },
                     passwordError = passwordError?.let { LoginContract.LoginError(it) },
                     isLoading = false,
-                    hasSubmittedOnce = true
+                    hasSubmittedOnce = true,
                 )
             }
         }
@@ -214,16 +225,16 @@ class LoginViewModel @Inject constructor(
                     NavigationEffect.Navigate(
                         route = destination,
                         popUpTo = Screen.Home,
-                        isInclusive = false
-                    )
+                        isInclusive = false,
+                    ),
                 )
             } else {
                 _navEffect.send(
                     NavigationEffect.Navigate(
                         route = destination,
                         popUpTo = Screen.Onboarding,
-                        isInclusive = true
-                    )
+                        isInclusive = true,
+                    ),
                 )
             }
         }
@@ -242,12 +253,15 @@ class LoginViewModel @Inject constructor(
         _uiState.update { current ->
             current.copy(
                 email = email,
-                emailError = if (current.hasSubmittedOnce) {
-                    ValidationManager.validateEmail(email).toLocalizedError()
+                emailError =
+                if (current.hasSubmittedOnce) {
+                    ValidationManager
+                        .validateEmail(email)
+                        .toLocalizedError()
                         ?.let { LoginContract.LoginError(it) }
                 } else {
                     null
-                }
+                },
             )
         }
     }
@@ -256,12 +270,15 @@ class LoginViewModel @Inject constructor(
         _uiState.update { current ->
             current.copy(
                 password = password,
-                passwordError = if (current.hasSubmittedOnce) {
-                    ValidationManager.validatePassword(password).toLocalizedError()
+                passwordError =
+                if (current.hasSubmittedOnce) {
+                    ValidationManager
+                        .validatePassword(password)
+                        .toLocalizedError()
                         ?.let { LoginContract.LoginError(it) }
                 } else {
                     null
-                }
+                },
             )
         }
     }
@@ -282,7 +299,7 @@ class LoginViewModel @Inject constructor(
             ValidationManager.ValidationErrors.PASSWORD_MIN_LENGTH ->
                 context.getString(
                     R.string.error_password_min_length,
-                    ValidationManager.PasswordRules.MIN_LENGTH
+                    ValidationManager.PasswordRules.MIN_LENGTH,
                 )
 
             else -> this

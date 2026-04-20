@@ -48,14 +48,15 @@ fun TDWeeklyDatePicker(
     val listState = rememberLazyListState()
 
     LaunchedEffect(displayedMonth, selectedDate) {
-        val scrollIndex = max(
-            0,
-            selectedDate
-                ?.takeIf { YearMonth.from(it) == displayedMonth }
-                ?.dayOfMonth
-                ?.minus(4)
-                ?: 0,
-        )
+        val scrollIndex =
+            max(
+                0,
+                selectedDate
+                    ?.takeIf { YearMonth.from(it) == displayedMonth }
+                    ?.dayOfMonth
+                    ?.minus(4)
+                    ?: 0,
+            )
         listState.animateScrollToItem(scrollIndex)
     }
 
@@ -66,7 +67,8 @@ fun TDWeeklyDatePicker(
             onNextMonth = onNextMonth,
         )
         LazyRow(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -95,7 +97,8 @@ private fun MonthNavigationHeader(
     val yearLabel = displayedMonth.year.toString()
 
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -136,24 +139,22 @@ private fun DatePickerCard(
     val textColor = if (isSelected) TDTheme.colors.white else TDTheme.colors.lightGray
     Column(
         modifier =
-            modifier
-                .background(
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (isSelected) TDTheme.colors.pendingGray.copy(alpha = 0.8f) else Color.Transparent
-                )
-                .size(width = 48.dp, height = 80.dp)
-                .clickable(
-                    onClick = { onDateSelect(currentDate) },
-                )
-                .padding(vertical = 4.dp, horizontal = 8.dp),
+        modifier
+            .background(
+                shape = RoundedCornerShape(12.dp),
+                color = if (isSelected) TDTheme.colors.pendingGray.copy(alpha = 0.8f) else Color.Transparent,
+            ).size(width = 48.dp, height = 80.dp)
+            .clickable(
+                onClick = { onDateSelect(currentDate) },
+            ).padding(vertical = 4.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier.weight(0.8f))
         TDText(
             text =
-                currentDate.dayOfWeek.toString().take(3).let {
-                    it[0] + it[1].lowercase() + it[2].lowercase()
-                },
+            currentDate.dayOfWeek.toString().take(3).let {
+                it[0] + it[1].lowercase() + it[2].lowercase()
+            },
             style = TDTheme.typography.regularTextStyle,
             color = textColor,
         )

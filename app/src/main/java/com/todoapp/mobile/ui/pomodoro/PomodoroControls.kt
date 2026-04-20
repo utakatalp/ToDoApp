@@ -45,13 +45,15 @@ fun PomodoroControls(
     ) {
         // Center play/pause — large neumorphic circle
         val playIconRes = if (isRunning && !isOvertime) UiKitR.drawable.ic_pause else UiKitR.drawable.ic_resume
-        val playDescRes = when {
-            isOvertime -> R.string.next
-            isRunning -> R.string.pause
-            else -> R.string.start
-        }
+        val playDescRes =
+            when {
+                isOvertime -> R.string.next
+                isRunning -> R.string.pause
+                else -> R.string.start
+            }
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .padding(horizontal = 32.dp)
                 .size(88.dp)
                 .neumorphicShadow(
@@ -59,8 +61,7 @@ fun PomodoroControls(
                     darkShadow = darkShadow,
                     cornerRadius = 44.dp,
                     elevation = 10.dp,
-                )
-                .clip(CircleShape)
+                ).clip(CircleShape)
                 .background(surfaceColor)
                 .clickable {
                     if (isRunning && !isOvertime) {
@@ -81,7 +82,8 @@ fun PomodoroControls(
 
         // → Skip / SkipNext
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(48.dp)
                 .clip(CircleShape)
                 .clickable { onAction(UiAction.SkipSession) },
@@ -110,7 +112,7 @@ private fun PomodoroControlsPreview() {
             lightShadow = palette.lightShadow,
             darkShadow = palette.darkShadow,
             onAction = {},
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         )
     }
 }

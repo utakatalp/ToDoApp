@@ -4,12 +4,12 @@ import com.todoapp.mobile.data.model.entity.GroupEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GroupLocalDataSourceImpl @Inject constructor(
+class GroupLocalDataSourceImpl
+@Inject
+constructor(
     private val groupDao: GroupDao,
 ) : GroupLocalDataSource {
-    override fun observeAll(): Flow<List<GroupEntity>> {
-        return groupDao.getAllGroups()
-    }
+    override fun observeAll(): Flow<List<GroupEntity>> = groupDao.getAllGroups()
 
     override suspend fun insert(group: GroupEntity) {
         groupDao.insert(group)
@@ -31,7 +31,10 @@ class GroupLocalDataSourceImpl @Inject constructor(
 
     override suspend fun getGroupByName(name: String): GroupEntity = groupDao.getGroupByName(name)
 
-    override suspend fun updateOrderIndex(id: Long, orderIndex: Int) {
+    override suspend fun updateOrderIndex(
+        id: Long,
+        orderIndex: Int,
+    ) {
         groupDao.updateOrderIndex(id = id, orderIndex = orderIndex)
     }
 
@@ -41,7 +44,5 @@ class GroupLocalDataSourceImpl @Inject constructor(
         }
     }
 
-    override fun getAllGroupsOrdered(): Flow<List<GroupEntity>> {
-        return groupDao.getAllGroupsOrdered()
-    }
+    override fun getAllGroupsOrdered(): Flow<List<GroupEntity>> = groupDao.getAllGroupsOrdered()
 }

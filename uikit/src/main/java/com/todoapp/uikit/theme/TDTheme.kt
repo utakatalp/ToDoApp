@@ -43,22 +43,24 @@ fun TDTheme(
         LaunchedEffect(darkTheme) {
             val activity = view.context as? Activity ?: return@LaunchedEffect
             (activity as? ComponentActivity)?.enableEdgeToEdge(
-                statusBarStyle = if (darkTheme) {
+                statusBarStyle =
+                if (darkTheme) {
                     SystemBarStyle.dark(scrim = 0x00000000)
                 } else {
                     SystemBarStyle.light(
                         scrim = 0x00000000,
-                        darkScrim = 0x00000000
+                        darkScrim = 0x00000000,
                     )
                 },
-                navigationBarStyle = if (darkTheme) {
+                navigationBarStyle =
+                if (darkTheme) {
                     SystemBarStyle.dark(scrim = 0x00000000)
                 } else {
                     SystemBarStyle.light(
                         scrim = 0x00000000,
-                        darkScrim = 0x00000000
+                        darkScrim = 0x00000000,
                     )
-                }
+                },
             )
         }
     }

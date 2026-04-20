@@ -21,11 +21,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InviteMemberViewModel @Inject constructor(
+class InviteMemberViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val groupId = savedStateHandle.toRoute<Screen.InviteMember>().groupId
 
     private val _uiState = MutableStateFlow(UiState())
@@ -53,13 +54,13 @@ class InviteMemberViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, emailError = null) }
-            groupRepository.inviteMember(groupId, email)
+            groupRepository
+                .inviteMember(groupId, email)
                 .onSuccess {
                     _uiState.update { it.copy(isLoading = false, isSent = true, email = "") }
                     _uiEffect.trySend(UiEffect.ShowToast("Invite sent successfully"))
                     _navEffect.trySend(NavigationEffect.Back)
-                }
-                .onFailure {
+                }.onFailure {
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.trySend(UiEffect.ShowToast(it.message ?: "Failed to send invite"))
                 }

@@ -107,7 +107,8 @@ private fun FilteredTasksErrorContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(24.dp),
@@ -135,9 +136,10 @@ private fun FilteredTasksSuccessContent(
     uiState: UiState.Success,
     onAction: (UiAction) -> Unit,
 ) {
-    val visibleTasks = remember(uiState.tasks, uiState.pendingDeleteTask) {
-        uiState.tasks.filter { it.id != uiState.pendingDeleteTask?.id }
-    }
+    val visibleTasks =
+        remember(uiState.tasks, uiState.pendingDeleteTask) {
+            uiState.tasks.filter { it.id != uiState.pendingDeleteTask?.id }
+        }
 
     if (uiState.isDeleteDialogOpen) {
         AlertDialog(
@@ -161,13 +163,15 @@ private fun FilteredTasksSuccessContent(
     }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background),
     ) {
         // Week navigator
         TDWeekNavigator(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             selectedDate = uiState.selectedWeekDate,
@@ -179,14 +183,16 @@ private fun FilteredTasksSuccessContent(
         FilteredTasksTabRow(
             selectedTab = uiState.selectedTab,
             onTabSelect = { onAction(UiAction.OnTabSelect(it)) },
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         )
 
         // Sort order button — right-aligned below the tab row
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.End,
@@ -208,7 +214,8 @@ private fun FilteredTasksSuccessContent(
                         tint = TDTheme.colors.onBackground,
                     )
                     TDText(
-                        text = if (uiState.sortOrder == SortOrder.ASC) {
+                        text =
+                        if (uiState.sortOrder == SortOrder.ASC) {
                             stringResource(com.todoapp.mobile.R.string.sort_order_oldest)
                         } else {
                             stringResource(com.todoapp.mobile.R.string.sort_order_newest)
@@ -218,7 +225,8 @@ private fun FilteredTasksSuccessContent(
                     )
                     Icon(
                         modifier = Modifier.size(12.dp),
-                        painter = painterResource(
+                        painter =
+                        painterResource(
                             if (uiState.sortOrder == SortOrder.ASC) {
                                 R.drawable.ic_arrow_up
                             } else {
@@ -238,7 +246,8 @@ private fun FilteredTasksSuccessContent(
         Box(modifier = Modifier.weight(1f)) {
             if (visibleTasks.isEmpty()) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
                         .padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -260,7 +269,8 @@ private fun FilteredTasksSuccessContent(
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -296,13 +306,13 @@ private fun FilteredTasksSuccessContent(
                         ) {
                             Column {
                                 Row(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .padding(start = 4.dp, bottom = 4.dp)
                                         .background(
                                             color = TDTheme.colors.onBackground.copy(alpha = 0.06f),
                                             shape = RoundedCornerShape(6.dp),
-                                        )
-                                        .padding(horizontal = 6.dp, vertical = 3.dp),
+                                        ).padding(horizontal = 6.dp, vertical = 3.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Icon(
@@ -357,7 +367,8 @@ private fun FilteredTasksTabRow(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
+        modifier =
+        modifier
             .background(TDTheme.colors.onBackground.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -405,35 +416,40 @@ private fun FilteredTasksTab(
 @Composable
 private fun FilteredSwipeDismissBackground(direction: SwipeToDismissBoxValue) {
     val color by animateColorAsState(
-        targetValue = when (direction) {
+        targetValue =
+        when (direction) {
             SwipeToDismissBoxValue.EndToStart -> TDTheme.colors.crossRed
             SwipeToDismissBoxValue.StartToEnd -> TDTheme.colors.pendingGray
             else -> Color.Transparent
         },
         label = "swipe_bg",
     )
-    val alignment = when (direction) {
-        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-        else -> Alignment.CenterStart
-    }
+    val alignment =
+        when (direction) {
+            SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+            else -> Alignment.CenterStart
+        }
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(color, RoundedCornerShape(12.dp))
             .padding(horizontal = 20.dp),
         contentAlignment = alignment,
     ) {
         when (direction) {
-            SwipeToDismissBoxValue.EndToStart -> Icon(
-                painter = painterResource(R.drawable.ic_delete),
-                contentDescription = null,
-                tint = Color.White,
-            )
-            SwipeToDismissBoxValue.StartToEnd -> Icon(
-                painter = painterResource(com.todoapp.mobile.R.drawable.ic_secret_mode),
-                contentDescription = null,
-                tint = Color.White,
-            )
+            SwipeToDismissBoxValue.EndToStart ->
+                Icon(
+                    painter = painterResource(R.drawable.ic_delete),
+                    contentDescription = null,
+                    tint = Color.White,
+                )
+            SwipeToDismissBoxValue.StartToEnd ->
+                Icon(
+                    painter = painterResource(com.todoapp.mobile.R.drawable.ic_secret_mode),
+                    contentDescription = null,
+                    tint = Color.White,
+                )
             else -> {}
         }
     }
@@ -455,7 +471,7 @@ private fun FilteredTasksScreenLoadingPreview() {
         FilteredTasksScreen(
             uiState = UiState.Loading,
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -467,7 +483,7 @@ private fun FilteredTasksScreenErrorPreview() {
         FilteredTasksScreen(
             uiState = UiState.Error("An unexpected error occurred"),
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -477,13 +493,14 @@ private fun FilteredTasksScreenErrorPreview() {
 private fun FilteredTasksScreenEmptyPreview() {
     TDTheme {
         FilteredTasksScreen(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 tasks = emptyList(),
                 selectedTab = TaskTab.PENDING,
-                selectedWeekDate = LocalDate.now()
+                selectedWeekDate = LocalDate.now(),
             ),
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -493,13 +510,14 @@ private fun FilteredTasksScreenEmptyPreview() {
 private fun FilteredTasksScreenSuccessPreview() {
     TDTheme {
         FilteredTasksScreen(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 tasks = dummyTasks,
                 selectedTab = TaskTab.PENDING,
-                selectedWeekDate = LocalDate.now()
+                selectedWeekDate = LocalDate.now(),
             ),
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -509,14 +527,15 @@ private fun FilteredTasksScreenSuccessPreview() {
 private fun FilteredTasksScreenDeleteDialogPreview() {
     TDTheme {
         FilteredTasksScreen(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 tasks = dummyTasks,
                 selectedTab = TaskTab.PENDING,
                 selectedWeekDate = LocalDate.now(),
-                isDeleteDialogOpen = true
+                isDeleteDialogOpen = true,
             ),
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -526,47 +545,49 @@ private fun FilteredTasksScreenDeleteDialogPreview() {
 private fun FilteredTasksScreenUndoPreview() {
     TDTheme {
         FilteredTasksScreen(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 tasks = dummyTasks,
                 selectedTab = TaskTab.PENDING,
                 selectedWeekDate = LocalDate.now(),
-                pendingDeleteTask = dummyTasks[0]
+                pendingDeleteTask = dummyTasks[0],
             ),
             uiEffect = emptyFlow(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
 
-private val dummyTasks = listOf(
-    Task(
-        id = 1,
-        title = "Buy groceries",
-        description = "Milk, eggs, bread",
-        date = LocalDate.now(),
-        timeStart = LocalTime.of(10, 0),
-        timeEnd = LocalTime.of(11, 0),
-        isCompleted = false,
-        isSecret = false
-    ),
-    Task(
-        id = 2,
-        title = "Gym session",
-        description = "Leg day",
-        date = LocalDate.now(),
-        timeStart = LocalTime.of(18, 0),
-        timeEnd = LocalTime.of(19, 30),
-        isCompleted = true,
-        isSecret = false
-    ),
-    Task(
-        id = 3,
-        title = "Secret meeting",
-        description = "Classified",
-        date = LocalDate.now().plusDays(1),
-        timeStart = LocalTime.of(14, 0),
-        timeEnd = LocalTime.of(15, 0),
-        isCompleted = false,
-        isSecret = true
+private val dummyTasks =
+    listOf(
+        Task(
+            id = 1,
+            title = "Buy groceries",
+            description = "Milk, eggs, bread",
+            date = LocalDate.now(),
+            timeStart = LocalTime.of(10, 0),
+            timeEnd = LocalTime.of(11, 0),
+            isCompleted = false,
+            isSecret = false,
+        ),
+        Task(
+            id = 2,
+            title = "Gym session",
+            description = "Leg day",
+            date = LocalDate.now(),
+            timeStart = LocalTime.of(18, 0),
+            timeEnd = LocalTime.of(19, 30),
+            isCompleted = true,
+            isSecret = false,
+        ),
+        Task(
+            id = 3,
+            title = "Secret meeting",
+            description = "Classified",
+            date = LocalDate.now().plusDays(1),
+            timeStart = LocalTime.of(14, 0),
+            timeEnd = LocalTime.of(15, 0),
+            isCompleted = false,
+            isSecret = true,
+        ),
     )
-)

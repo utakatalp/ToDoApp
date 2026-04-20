@@ -41,19 +41,20 @@ fun LanguageSelector(
             text = stringResource(R.string.app_language),
             style = TDTheme.typography.heading6,
             color = TDTheme.colors.onBackground,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
 
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .padding(start = 16.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(TDTheme.colors.background)
                 .border(
                     width = 1.dp,
                     color = TDTheme.colors.gray,
-                    shape = RoundedCornerShape(12.dp)
-                )
+                    shape = RoundedCornerShape(12.dp),
+                ),
         ) {
             LanguageItem(
                 selected = currentLanguage == LanguagePreference.ENGLISH,
@@ -80,20 +81,20 @@ private fun LanguageItem(
     contentDescription: String,
 ) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .clip(RoundedCornerShape(8.dp))
             .background(
-                if (selected) TDTheme.colors.pendingGray else Color.Transparent
-            )
-            .clickable { onClick() }
+                if (selected) TDTheme.colors.pendingGray else Color.Transparent,
+            ).clickable { onClick() }
             .padding(12.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             painter = flag,
             contentDescription = contentDescription,
             tint = Color.Unspecified,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         )
     }
 }
@@ -104,7 +105,7 @@ private fun LanguageSelectorPreview_Light() {
     TDTheme {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             LanguageSelector(currentLanguage = LanguagePreference.ENGLISH, onLanguageChange = {})
             LanguageSelector(currentLanguage = LanguagePreference.TURKISH, onLanguageChange = {})
@@ -118,7 +119,7 @@ private fun LanguageSelectorPreview_Dark() {
     TDTheme {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             LanguageSelector(currentLanguage = LanguagePreference.ENGLISH, onLanguageChange = {})
             LanguageSelector(currentLanguage = LanguagePreference.TURKISH, onLanguageChange = {})

@@ -66,22 +66,26 @@ fun TDOverlayNotificationCard(
 
     AnimatedVisibility(
         visible = show,
-        enter = slideInVertically(
-            initialOffsetY = { fullHeight -> -fullHeight }
+        enter =
+        slideInVertically(
+            initialOffsetY = { fullHeight -> -fullHeight },
         ) + fadeIn(),
-        exit = slideOutVertically(
-            targetOffsetY = { fullHeight -> -fullHeight }
+        exit =
+        slideOutVertically(
+            targetOffsetY = { fullHeight -> -fullHeight },
         ) + fadeOut(),
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
-            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+            .padding(top = 16.dp, start = 16.dp, end = 16.dp),
     ) {
         NotificationCardContent(
             message = message,
             onDismissClick = onDismissClick,
             onOpenClick = onOpenClick,
             minutesBefore = minutesBefore,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
@@ -99,13 +103,13 @@ fun TDOverlayNotificationCard(
                         },
                         onDragCancel = {
                             scope.launch { offsetX.animateTo(0f, animationSpec = tween(300)) }
-                        }
+                        },
                     ) { change, dragAmount ->
                         change.consume()
                         dragJobRef[0]?.cancel()
                         dragJobRef[0] = scope.launch { offsetX.snapTo(offsetX.value + dragAmount) }
                     }
-                }
+                },
         )
     }
 }
@@ -124,31 +128,32 @@ private fun NotificationCardContent(
         shape = RoundedCornerShape(28.dp),
         color = TDTheme.colors.surface,
         shadowElevation = 12.dp,
-        border = BorderStroke(1.dp, TDTheme.colors.onSurface.copy(alpha = 0.05f))
+        border = BorderStroke(1.dp, TDTheme.colors.onSurface.copy(alpha = 0.05f)),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(20.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.Top,
                 ) {
                     Surface(
                         modifier = Modifier.size(56.dp),
                         shape = RoundedCornerShape(18.dp),
-                        color = TDTheme.colors.pendingGray.copy(alpha = 0.1f)
+                        color = TDTheme.colors.pendingGray.copy(alpha = 0.1f),
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_pomodoro),
                                 contentDescription = null,
                                 tint = TDTheme.colors.pendingGray,
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(32.dp),
                             )
                         }
                     }
@@ -159,27 +164,29 @@ private fun NotificationCardContent(
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             TDText(
                                 text = stringResource(id = R.string.overlay_notification_reminder),
-                                style = TDTheme.typography.subheading1.copy(
+                                style =
+                                TDTheme.typography.subheading1.copy(
                                     fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.4.sp
+                                    letterSpacing = 0.4.sp,
                                 ),
-                                color = TDTheme.colors.pendingGray
+                                color = TDTheme.colors.pendingGray,
                             )
                             TDText(
-                                text = if (minutesBefore == 0L) {
+                                text =
+                                if (minutesBefore == 0L) {
                                     stringResource(id = R.string.overlay_notification_now)
                                 } else {
                                     stringResource(
                                         id = R.string.overlay_notification_minutes_ago,
-                                        minutesBefore.toInt()
+                                        minutesBefore.toInt(),
                                     )
                                 },
                                 style = TDTheme.typography.subheading2,
-                                color = TDTheme.colors.gray.copy(alpha = 0.8f)
+                                color = TDTheme.colors.gray.copy(alpha = 0.8f),
                             )
                         }
                         Spacer(Modifier.height(2.dp))
@@ -188,36 +195,38 @@ private fun NotificationCardContent(
                             style = TDTheme.typography.heading3,
                             color = TDTheme.colors.onSurface,
                             maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Spacer(Modifier.height(4.dp))
                         TDText(
                             text = stringResource(id = R.string.overlay_notification_tap_to_open),
                             style = TDTheme.typography.heading7,
-                            color = TDTheme.colors.gray.copy(alpha = 0.8f)
+                            color = TDTheme.colors.gray.copy(alpha = 0.8f),
                         )
                     }
                 }
             }
 
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(TDTheme.colors.onSurface.copy(alpha = 0.06f))
+                    .background(TDTheme.colors.onSurface.copy(alpha = 0.06f)),
             )
 
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(52.dp)
                     .clickable { onDismissClick() },
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 TDText(
                     text = stringResource(id = R.string.overlay_notification_dismiss),
                     style = TDTheme.typography.heading7,
-                    color = TDTheme.colors.crossRed
+                    color = TDTheme.colors.crossRed,
                 )
             }
         }
@@ -229,13 +238,14 @@ private fun NotificationCardContent(
 fun OverlayNotificationCardDarkPreview() {
     TDTheme(darkTheme = true) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
-                .background(TDTheme.colors.background)
+                .background(TDTheme.colors.background),
         ) {
             TDOverlayNotificationCard(
                 message = "Go to the gym and do cardio",
-                show = true
+                show = true,
             )
         }
     }
@@ -246,13 +256,14 @@ fun OverlayNotificationCardDarkPreview() {
 fun OverlayNotificationCardLightPreview() {
     TDTheme(darkTheme = false) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
-                .background(TDTheme.colors.background)
+                .background(TDTheme.colors.background),
         ) {
             TDOverlayNotificationCard(
                 message = "Go to the gym and do cardio",
-                show = true
+                show = true,
             )
         }
     }
@@ -263,11 +274,12 @@ fun OverlayNotificationCardLightPreview() {
 fun NotificationCardContentPreview() {
     TDTheme {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .background(TDTheme.colors.background)
                 .padding(16.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             NotificationCardContent(message = "Meeting with the team at 2 PM")
         }

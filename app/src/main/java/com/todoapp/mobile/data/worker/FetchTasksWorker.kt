@@ -11,26 +11,28 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
 @HiltWorker
-class FetchTasksWorker @AssistedInject constructor(
+class FetchTasksWorker
+@AssistedInject
+constructor(
     @Assisted ctx: Context,
     @Assisted params: WorkerParameters,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
 ) : CoroutineWorker(ctx, params) {
-    override suspend fun doWork(): Result {
-        return taskRepository.syncRemoteTasksWithLocal()
-            .fold(
-                onSuccess = {
-                    Log.d("FetchTasksWorker", "Success")
-                    Result.success()
-                },
-                onFailure = { throwable ->
-                    Log.e("FetchTasksWorker", "Failed: ${throwable::class.simpleName}: ${throwable.message}")
-                    when (throwable) {
-                        is DomainException.NoInternet,
-                        is DomainException.Server -> Result.retry()
-                        else -> Result.failure()
-                    }
+    override suspend fun doWork(): Result = taskRepository
+        .syncRemoteTasksWithLocal()
+        .fold(
+            onSuccess = {
+                Log.d("FetchTasksWorker", "Success")
+                Result.success()
+            },
+            onFailure = { throwable ->
+                Log.e("FetchTasksWorker", "Failed: ${throwable::class.simpleName}: ${throwable.message}")
+                when (throwable) {
+                    is DomainException.NoInternet,
+                    is DomainException.Server,
+                    -> Result.retry()
+                    else -> Result.failure()
                 }
-            )
-    }
+            },
+        )
 }

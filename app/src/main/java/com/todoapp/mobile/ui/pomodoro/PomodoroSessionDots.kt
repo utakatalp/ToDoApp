@@ -43,7 +43,8 @@ fun PomodoroSessionDots(
             val dotColor = if (isPast || isCurrent) contentColor else dimColor
 
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(dotSize)
                     .clip(CircleShape)
                     .background(dotColor),

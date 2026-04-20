@@ -21,12 +21,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GroupSettingsViewModel @Inject constructor(
+class GroupSettingsViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val groupId = savedStateHandle.toRoute<Screen.GroupSettings>().groupId
 
     private val _uiState = MutableStateFlow(UiState(groupId = groupId))
@@ -47,20 +48,29 @@ class GroupSettingsViewModel @Inject constructor(
             is UiAction.OnNameChange -> _uiState.update { it.copy(name = action.name) }
             is UiAction.OnDescriptionChange -> _uiState.update { it.copy(description = action.description) }
             UiAction.OnSaveTap -> saveChanges()
-            UiAction.OnManageMembersTap -> _navEffect.trySend(NavigationEffect.Navigate(Screen.ManageMembers(groupId)))
-            UiAction.OnTransferOwnershipTap -> _navEffect.trySend(NavigationEffect.Navigate(Screen.TransferOwnership(groupId)))
+            UiAction.OnManageMembersTap ->
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(Screen.ManageMembers(groupId)),
+                )
+            UiAction.OnTransferOwnershipTap ->
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(Screen.TransferOwnership(groupId)),
+                )
             is UiAction.OnAvatarPicked -> uploadAvatar(action.bytes, action.mimeType)
         }
     }
 
-    private fun uploadAvatar(bytes: ByteArray, mimeType: String) {
+    private fun uploadAvatar(
+        bytes: ByteArray,
+        mimeType: String,
+    ) {
         viewModelScope.launch {
-            groupRepository.uploadGroupAvatar(groupId, bytes, mimeType)
+            groupRepository
+                .uploadGroupAvatar(groupId, bytes, mimeType)
                 .onSuccess {
                     _uiState.update { it.copy(avatarVersion = System.currentTimeMillis()) }
                     loadGroupDetail()
-                }
-                .onFailure {
+                }.onFailure {
                     _uiEffect.trySend(UiEffect.ShowToast(it.message ?: "Failed to upload avatar"))
                 }
         }
@@ -71,7 +81,8 @@ class GroupSettingsViewModel @Inject constructor(
             val userResult = userRepository.getUserInfo()
             val currentUserId = userResult.getOrNull()?.id ?: -1L
 
-            groupRepository.getGroupDetail(groupId)
+            groupRepository
+                .getGroupDetail(groupId)
                 .onSuccess { detail ->
                     val role = detail.members.find { it.userId == currentUserId }?.role ?: ""
                     _uiState.update { state ->
@@ -84,8 +95,7 @@ class GroupSettingsViewModel @Inject constructor(
                             isLoading = false,
                         )
                     }
-                }
-                .onFailure {
+                }.onFailure {
                     _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to load group") }
                 }
         }
@@ -99,12 +109,12 @@ class GroupSettingsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            groupRepository.updateGroup(groupId, state.name, state.description)
+            groupRepository
+                .updateGroup(groupId, state.name, state.description)
                 .onSuccess {
                     _uiState.update { it.copy(isSaving = false) }
                     _navEffect.trySend(NavigationEffect.Back)
-                }
-                .onFailure {
+                }.onFailure {
                     _uiState.update { it.copy(isSaving = false) }
                     _uiEffect.trySend(UiEffect.ShowToast("Failed to save changes"))
                 }

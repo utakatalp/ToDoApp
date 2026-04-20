@@ -15,11 +15,12 @@ fun ThemedApp() {
     val themePreference by themeViewModel.themeFlow
         .collectAsState(initial = ThemePreference.SYSTEM_DEFAULT)
 
-    val darkTheme = when (themePreference) {
-        ThemePreference.DARK_MODE -> true
-        ThemePreference.LIGHT_MODE -> false
-        ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
-    }
+    val darkTheme =
+        when (themePreference) {
+            ThemePreference.DARK_MODE -> true
+            ThemePreference.LIGHT_MODE -> false
+            ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+        }
 
     TDTheme(darkTheme = darkTheme) {
         ToDoApp()

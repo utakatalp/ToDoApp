@@ -21,8 +21,7 @@ fun Modifier.neumorphicShadow(
         blurRadius = elevation,
         offsetX = elevation * 0.6f,
         offsetY = elevation * 0.6f,
-    )
-    .coloredShadow(
+    ).coloredShadow(
         color = lightShadow,
         cornerRadius = cornerRadius,
         blurRadius = elevation,
@@ -42,10 +41,11 @@ private fun Modifier.coloredShadow(
         val frameworkPaint = paint.asFrameworkPaint()
         frameworkPaint.isAntiAlias = true
         if (blurRadius.value != 0f) {
-            frameworkPaint.maskFilter = BlurMaskFilter(
-                blurRadius.toPx(),
-                BlurMaskFilter.Blur.NORMAL,
-            )
+            frameworkPaint.maskFilter =
+                BlurMaskFilter(
+                    blurRadius.toPx(),
+                    BlurMaskFilter.Blur.NORMAL,
+                )
         }
         paint.color = color
         canvas.save()

@@ -41,19 +41,20 @@ fun ThemeSelector(
             text = stringResource(R.string.app_theme),
             style = TDTheme.typography.heading6,
             color = TDTheme.colors.onBackground,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
 
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .padding(start = 16.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(TDTheme.colors.background)
                 .border(
                     width = 1.dp,
                     color = TDTheme.colors.gray,
-                    shape = RoundedCornerShape(12.dp)
-                )
+                    shape = RoundedCornerShape(12.dp),
+                ),
         ) {
             ThemeItem(
                 selected = currentTheme == ThemePreference.LIGHT_MODE,
@@ -64,13 +65,13 @@ fun ThemeSelector(
             ThemeItem(
                 selected = currentTheme == ThemePreference.DARK_MODE,
                 onClick = { onThemeChange(ThemePreference.DARK_MODE) },
-                icon = painterResource(com.example.uikit.R.drawable.ic_dark_mode)
+                icon = painterResource(com.example.uikit.R.drawable.ic_dark_mode),
             )
 
             ThemeItem(
                 selected = currentTheme == ThemePreference.SYSTEM_DEFAULT,
                 onClick = { onThemeChange(ThemePreference.SYSTEM_DEFAULT) },
-                icon = painterResource(com.example.uikit.R.drawable.ic_system_default)
+                icon = painterResource(com.example.uikit.R.drawable.ic_system_default),
             )
         }
     }
@@ -83,28 +84,29 @@ private fun ThemeItem(
     icon: Painter,
 ) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .clip(RoundedCornerShape(8.dp))
             .background(
                 if (selected) {
                     TDTheme.colors.pendingGray
                 } else {
                     Color.Transparent
-                }
-            )
-            .clickable { onClick() }
+                },
+            ).clickable { onClick() }
             .padding(12.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             painter = icon,
             contentDescription = stringResource(R.string.app_theme),
-            tint = if (selected) {
+            tint =
+            if (selected) {
                 TDTheme.colors.onPrimary
             } else {
                 TDTheme.colors.gray
             },
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         )
     }
 }
@@ -115,19 +117,19 @@ private fun ThemeSelectorAllStatesPreview_light() {
     TDTheme {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             ThemeSelector(
                 currentTheme = ThemePreference.LIGHT_MODE,
-                onThemeChange = {}
+                onThemeChange = {},
             )
             ThemeSelector(
                 currentTheme = ThemePreference.DARK_MODE,
-                onThemeChange = {}
+                onThemeChange = {},
             )
             ThemeSelector(
                 currentTheme = ThemePreference.SYSTEM_DEFAULT,
-                onThemeChange = {}
+                onThemeChange = {},
             )
         }
     }
@@ -139,19 +141,19 @@ private fun ThemeSelectorAllStatesPreview_dark() {
     TDTheme {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             ThemeSelector(
                 currentTheme = ThemePreference.LIGHT_MODE,
-                onThemeChange = {}
+                onThemeChange = {},
             )
             ThemeSelector(
                 currentTheme = ThemePreference.DARK_MODE,
-                onThemeChange = {}
+                onThemeChange = {},
             )
             ThemeSelector(
                 currentTheme = ThemePreference.SYSTEM_DEFAULT,
-                onThemeChange = {}
+                onThemeChange = {},
             )
         }
     }

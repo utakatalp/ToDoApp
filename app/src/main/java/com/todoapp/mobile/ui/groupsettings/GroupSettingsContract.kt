@@ -1,7 +1,6 @@
 package com.todoapp.mobile.ui.groupsettings
 
 object GroupSettingsContract {
-
     data class UiState(
         val groupId: Long = 0L,
         val name: String = "",
@@ -15,15 +14,29 @@ object GroupSettingsContract {
     )
 
     sealed interface UiAction {
-        data class OnNameChange(val name: String) : UiAction
-        data class OnDescriptionChange(val description: String) : UiAction
+        data class OnNameChange(
+            val name: String,
+        ) : UiAction
+
+        data class OnDescriptionChange(
+            val description: String,
+        ) : UiAction
+
         data object OnSaveTap : UiAction
+
         data object OnManageMembersTap : UiAction
+
         data object OnTransferOwnershipTap : UiAction
-        data class OnAvatarPicked(val bytes: ByteArray, val mimeType: String) : UiAction
+
+        data class OnAvatarPicked(
+            val bytes: ByteArray,
+            val mimeType: String,
+        ) : UiAction
     }
 
     sealed interface UiEffect {
-        data class ShowToast(val message: String) : UiEffect
+        data class ShowToast(
+            val message: String,
+        ) : UiEffect
     }
 }

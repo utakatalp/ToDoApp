@@ -40,16 +40,24 @@ interface Screen {
     data object Profile : Screen
 
     @Serializable
-    data class Task(val taskId: Long) : Screen
+    data class Task(
+        val taskId: Long,
+    ) : Screen
 
     @Serializable
-    data class Register(val redirectAfterRegister: String? = null) : Screen
+    data class Register(
+        val redirectAfterRegister: String? = null,
+    ) : Screen
 
     @Serializable
-    data class Login(val redirectAfterLogin: String? = null) : Screen
+    data class Login(
+        val redirectAfterLogin: String? = null,
+    ) : Screen
 
     @Serializable
-    data class WebView(val url: String) : Screen
+    data class WebView(
+        val url: String,
+    ) : Screen
 
     @Serializable
     data object ForgotPassword : Screen
@@ -65,7 +73,9 @@ interface Screen {
     data object PomodoroLaunch : Screen
 
     @Serializable
-    data class Groups(val pendingDeleteGroupId: Long = -1L) : Screen
+    data class Groups(
+        val pendingDeleteGroupId: Long = -1L,
+    ) : Screen
 
     @Serializable
     data object CreateNewGroup : Screen
@@ -77,23 +87,40 @@ interface Screen {
     ) : Screen
 
     @Serializable
-    data class GroupDetail(val groupId: Long, val groupName: String) : Screen
+    data class GroupDetail(
+        val groupId: Long,
+        val groupName: String,
+    ) : Screen
 
     @Serializable
-    data class GroupSettings(val groupId: Long) : Screen
+    data class GroupSettings(
+        val groupId: Long,
+    ) : Screen
 
     @Serializable
-    data class InviteMember(val groupId: Long) : Screen
+    data class InviteMember(
+        val groupId: Long,
+    ) : Screen
 
     @Serializable
-    data class ManageMembers(val groupId: Long) : Screen
+    data class ManageMembers(
+        val groupId: Long,
+    ) : Screen
 
     @Serializable
-    data class GroupTaskDetail(val groupId: Long, val taskId: Long) : Screen
+    data class GroupTaskDetail(
+        val groupId: Long,
+        val taskId: Long,
+    ) : Screen
 
     @Serializable
-    data class MemberProfile(val groupId: Long, val userId: Long) : Screen
+    data class MemberProfile(
+        val groupId: Long,
+        val userId: Long,
+    ) : Screen
 
     @Serializable
-    data class TransferOwnership(val groupId: Long) : Screen
+    data class TransferOwnership(
+        val groupId: Long,
+    ) : Screen
 }

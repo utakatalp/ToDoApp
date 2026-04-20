@@ -4,10 +4,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-open class BaseResponse<T> (
+open class BaseResponse<T>(
     @SerialName("code") open val code: Int,
     @SerialName("message") open val message: String,
-    @SerialName("data") val data: T?
+    @SerialName("data") val data: T?,
 )
 
 typealias ErrorResponse = BaseResponse<Nothing>

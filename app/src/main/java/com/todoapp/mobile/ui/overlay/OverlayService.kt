@@ -46,7 +46,10 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
+class OverlayService :
+    Service(),
+    LifecycleOwner,
+    SavedStateRegistryOwner {
     @Inject
     lateinit var dailyPlanPreferences: DailyPlanPreferences
 
@@ -56,16 +59,18 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     @Inject
     lateinit var themeRepository: ThemeRepository
     private lateinit var windowManager: WindowManager
+
+    @Suppress("ktlint:standard:backing-property-naming")
     private val _lifecycleRegistry = LifecycleRegistry(this)
+
+    @Suppress("ktlint:standard:backing-property-naming")
     private val _savedStateRegistryController: SavedStateRegistryController = SavedStateRegistryController.create(this)
     override val savedStateRegistry: SavedStateRegistry = _savedStateRegistryController.savedStateRegistry
     override val lifecycle: Lifecycle = _lifecycleRegistry
     private var taskOverlayView: View? = null
     private var dailyPlanOverlayView: View? = null
 
-    override fun onBind(intent: Intent?): IBinder {
-        throw UnsupportedOperationException(BOUND_MODE_NOT_SUPPORTED)
-    }
+    override fun onBind(intent: Intent?): IBinder = throw UnsupportedOperationException(BOUND_MODE_NOT_SUPPORTED)
 
     override fun onCreate() {
         super.onCreate()
@@ -75,14 +80,20 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent,
+        flags: Int,
+        startId: Int,
+    ): Int {
         android.util.Log.d("OverlayService", "onStartCommand called, extras: ${intent.extras}")
         if (intent.hasExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)) {
             val message = intent.getStringExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)
             val minutesBefore = intent.getLongExtra(INTENT_EXTRA_LONG, 0)
             val overlayType = intent.getStringExtra(INTENT_EXTRA_OVERLAY_TYPE) ?: OVERLAY_TYPE_TASK
             showOverlay(message.orEmpty(), minutesBefore, overlayType)
-        } else if (intent.hasExtra(INTENT_EXTRA_COMMAND_HIDE_OVERLAY)) hideOverlay()
+        } else if (intent.hasExtra(INTENT_EXTRA_COMMAND_HIDE_OVERLAY)) {
+            hideOverlay()
+        }
         return START_NOT_STICKY
     }
 
@@ -116,70 +127,71 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             }
         }
 
-        val newView = ComposeView(this).apply {
-            setViewTreeLifecycleOwner(this@OverlayService)
-            setViewTreeSavedStateRegistryOwner(this@OverlayService)
-            setContent {
-                val themePreference by themeRepository.themeFlow
-                    .collectAsState(initial = ThemePreference.SYSTEM_DEFAULT)
-                val isSystemDark = isSystemInDarkTheme()
-                val darkTheme = when (themePreference) {
-                    ThemePreference.DARK_MODE -> true
-                    ThemePreference.LIGHT_MODE -> false
-                    ThemePreference.SYSTEM_DEFAULT -> isSystemDark
-                }
-                TDTheme(darkTheme = darkTheme) {
-                var show by remember { mutableStateOf(true) }
-                LaunchedEffect(show) {
-                    if (!show) {
-                        delay(HIDE_OVERLAY_ANIMATION_DELAY)
-                        hideOverlay()
-                    }
-                }
-                when (overlayType) {
-                    OVERLAY_TYPE_DAILY_PLAN -> {
-                        TDOverlayDailyPlanNotificationCard(
-                            isVisible = show,
-                            onDismiss = { show = false },
-                            onOpenApp = {
-                                show = false
-                                openApp()
-                            },
-                            onDrag = { dx, dy ->
-                                layoutParams.x += dx.toInt()
-                                layoutParams.y += dy.toInt()
-                                windowManager.updateViewLayout(this@apply, layoutParams)
-                            },
-                            onDragEnd = {
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    dailyPlanPreferences.saveCardPosition(
-                                        DailyCardPosition(
-                                            layoutParams.x.toFloat(),
-                                            layoutParams.y.toFloat()
-                                        )
-                                    )
-                                }
+        val newView =
+            ComposeView(this).apply {
+                setViewTreeLifecycleOwner(this@OverlayService)
+                setViewTreeSavedStateRegistryOwner(this@OverlayService)
+                setContent {
+                    val themePreference by themeRepository.themeFlow
+                        .collectAsState(initial = ThemePreference.SYSTEM_DEFAULT)
+                    val isSystemDark = isSystemInDarkTheme()
+                    val darkTheme =
+                        when (themePreference) {
+                            ThemePreference.DARK_MODE -> true
+                            ThemePreference.LIGHT_MODE -> false
+                            ThemePreference.SYSTEM_DEFAULT -> isSystemDark
+                        }
+                    TDTheme(darkTheme = darkTheme) {
+                        var show by remember { mutableStateOf(true) }
+                        LaunchedEffect(show) {
+                            if (!show) {
+                                delay(HIDE_OVERLAY_ANIMATION_DELAY)
+                                hideOverlay()
+                            }
+                        }
+                        when (overlayType) {
+                            OVERLAY_TYPE_DAILY_PLAN -> {
+                                TDOverlayDailyPlanNotificationCard(
+                                    isVisible = show,
+                                    onDismiss = { show = false },
+                                    onOpenApp = {
+                                        show = false
+                                        openApp()
+                                    },
+                                    onDrag = { dx, dy ->
+                                        layoutParams.x += dx.toInt()
+                                        layoutParams.y += dy.toInt()
+                                        windowManager.updateViewLayout(this@apply, layoutParams)
+                                    },
+                                    onDragEnd = {
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            dailyPlanPreferences.saveCardPosition(
+                                                DailyCardPosition(
+                                                    layoutParams.x.toFloat(),
+                                                    layoutParams.y.toFloat(),
+                                                ),
+                                            )
+                                        }
+                                    },
+                                )
                             }
 
-                        )
-                    }
-
-                    OVERLAY_TYPE_TASK -> {
-                        TDOverlayNotificationCard(
-                            message = message,
-                            minutesBefore = minutesBefore,
-                            show = show,
-                            onDismissClick = { show = false },
-                            onOpenClick = {
-                                show = false
-                                openApp()
+                            OVERLAY_TYPE_TASK -> {
+                                TDOverlayNotificationCard(
+                                    message = message,
+                                    minutesBefore = minutesBefore,
+                                    show = show,
+                                    onDismissClick = { show = false },
+                                    onOpenClick = {
+                                        show = false
+                                        openApp()
+                                    },
+                                )
                             }
-                        )
-                    }
+                        }
+                    } // TDTheme
                 }
-                } // TDTheme
             }
-        }
         when (overlayType) {
             OVERLAY_TYPE_DAILY_PLAN -> {
                 dailyPlanOverlayView = newView
@@ -193,15 +205,17 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     private fun rescheduleNextDailyPlan() {
         CoroutineScope(Dispatchers.IO).launch {
-            val time = dailyPlanPreferences.observePlanTime().first()
-                ?: DailyPlanDefaults.DEFAULT_PLAN_TIME
+            val time =
+                dailyPlanPreferences.observePlanTime().first()
+                    ?: DailyPlanDefaults.DEFAULT_PLAN_TIME
 
             val now = LocalDateTime.now()
-            val item = buildDailyPlanAlarmItem(
-                selectedTime = time,
-                now = now,
-                message = "",
-            )
+            val item =
+                buildDailyPlanAlarmItem(
+                    selectedTime = time,
+                    now = now,
+                    message = "",
+                )
             alarmScheduler.schedule(item, AlarmType.DAILY_PLAN)
         }
     }
@@ -218,30 +232,31 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
     }
 
-    private fun getLayoutParams(overlayType: String): WindowManager.LayoutParams {
-        return WindowManager.LayoutParams(
+    private fun getLayoutParams(overlayType: String): WindowManager.LayoutParams = WindowManager
+        .LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            PixelFormat.TRANSLUCENT
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            PixelFormat.TRANSLUCENT,
         ).apply {
             gravity = Gravity.TOP or Gravity.START
             x = 0
-            y = if (overlayType == OVERLAY_TYPE_DAILY_PLAN) {
-                val bottomMarginPx = (DAILY_PLAN_BOTTOM_MARGIN_DP * resources.displayMetrics.density).toInt()
-                resources.displayMetrics.heightPixels - bottomMarginPx
-            } else {
-                0
-            }
+            y =
+                if (overlayType == OVERLAY_TYPE_DAILY_PLAN) {
+                    val bottomMarginPx = (DAILY_PLAN_BOTTOM_MARGIN_DP * resources.displayMetrics.density).toInt()
+                    resources.displayMetrics.heightPixels - bottomMarginPx
+                } else {
+                    0
+                }
         }
-    }
 
     private fun openApp() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        val intent =
+            Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         startActivity(intent)
     }
 

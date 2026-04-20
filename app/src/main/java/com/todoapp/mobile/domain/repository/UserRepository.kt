@@ -13,19 +13,30 @@ import kotlinx.coroutines.flow.SharedFlow
 
 interface UserRepository {
     suspend fun fcmToken(request: FCMTokenRequest): Result<FCMTokenResponseData>
+
     suspend fun syncPendingFcmToken(): Result<Unit>
+
     suspend fun register(request: RegisterRequest): Result<AuthResponseData>
+
     suspend fun login(request: LoginRequest): Result<AuthResponseData>
+
     suspend fun googleLogin(token: String): Result<AuthResponseData>
+
     suspend fun facebookLogin(request: FacebookLoginRequest): Result<AuthResponseData>
+
     suspend fun getUserInfo(): Result<UserData>
+
     suspend fun updateDisplayName(displayName: String): Result<UserData>
-    suspend fun uploadAvatar(bytes: ByteArray, mimeType: String): Result<UserData>
+
+    suspend fun uploadAvatar(
+        bytes: ByteArray,
+        mimeType: String,
+    ): Result<UserData>
 }
 
 interface AuthRepository {
-
     val events: SharedFlow<AuthEvent>
+
     suspend fun refresh(request: RefreshTokenRequest): Result<RefreshTokenData>
 
     suspend fun logout(): Result<Unit>
@@ -34,7 +45,6 @@ interface AuthRepository {
 }
 
 sealed interface AuthEvent {
-
     data object Logout : AuthEvent
 
     data object ForceLogout : AuthEvent

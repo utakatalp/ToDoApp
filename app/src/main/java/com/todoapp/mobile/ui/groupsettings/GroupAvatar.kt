@@ -30,32 +30,40 @@ fun GroupAvatar(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val picker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        val cr = context.contentResolver
-        val mime = cr.getType(uri) ?: "image/jpeg"
-        val bytes = runCatching { cr.openInputStream(uri)?.use { it.readBytes() } }
-            .getOrNull() ?: return@rememberLauncherForActivityResult
-        onAvatarPicked(bytes, mime)
-    }
-    val absoluteUrl = avatarUrl?.let {
-        val base = BuildConfig.BASE_URL.trimEnd('/')
-        val path = it.trimStart('/')
-        "$base/$path?v=$avatarVersion"
-    }
+    val picker =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia(),
+        ) { uri ->
+            uri ?: return@rememberLauncherForActivityResult
+            val cr = context.contentResolver
+            val mime = cr.getType(uri) ?: "image/jpeg"
+            val bytes =
+                runCatching { cr.openInputStream(uri)?.use { it.readBytes() } }
+                    .getOrNull() ?: return@rememberLauncherForActivityResult
+            onAvatarPicked(bytes, mime)
+        }
+    val absoluteUrl =
+        avatarUrl?.let {
+            val base = BuildConfig.BASE_URL.trimEnd('/')
+            val path = it.trimStart('/')
+            "$base/$path?v=$avatarVersion"
+        }
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .size(96.dp)
             .clip(CircleShape)
             .background(TDTheme.colors.lightPending)
             .then(
-                if (isAdmin) Modifier.clickable {
-                    picker.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                    )
-                } else Modifier,
+                if (isAdmin) {
+                    Modifier.clickable {
+                        picker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    }
+                } else {
+                    Modifier
+                },
             ),
         contentAlignment = Alignment.Center,
     ) {
@@ -68,7 +76,13 @@ fun GroupAvatar(
             )
         } else {
             TDText(
-                text = name.split(" ").mapNotNull { it.firstOrNull()?.toString() }.take(2).joinToString("").uppercase(),
+                text =
+                name
+                    .split(" ")
+                    .mapNotNull { it.firstOrNull()?.toString() }
+                    .take(2)
+                    .joinToString("")
+                    .uppercase(),
                 style = TDTheme.typography.heading4,
                 color = TDTheme.colors.pendingGray,
             )

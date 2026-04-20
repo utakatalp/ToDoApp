@@ -7,7 +7,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AuthTokenManager @Inject constructor(
+class AuthTokenManager
+@Inject
+constructor(
     private val dataStoreHelper: DataStoreHelper,
 ) {
     companion object {
@@ -46,37 +48,25 @@ class AuthTokenManager @Inject constructor(
         )
     }
 
-    fun getAccessToken(): Flow<String> {
-        return dataStoreHelper.getString(KEY_ACCESS_TOKEN)
-    }
+    fun getAccessToken(): Flow<String> = dataStoreHelper.getString(KEY_ACCESS_TOKEN)
 
-    private suspend fun getAccessTokenSync(): String? {
-        return dataStoreHelper.getString(KEY_ACCESS_TOKEN).first().ifBlank { null }
-    }
+    private suspend fun getAccessTokenSync(): String? = dataStoreHelper
+        .getString(
+            KEY_ACCESS_TOKEN,
+        ).first()
+        .ifBlank { null }
 
-    fun getRefreshToken(): Flow<String> {
-        return dataStoreHelper.getString(KEY_REFRESH_TOKEN)
-    }
+    fun getRefreshToken(): Flow<String> = dataStoreHelper.getString(KEY_REFRESH_TOKEN)
 
-    fun getUserId(): Flow<String> {
-        return dataStoreHelper.getString(KEY_USER_ID)
-    }
+    fun getUserId(): Flow<String> = dataStoreHelper.getString(KEY_USER_ID)
 
-    fun getEmail(): Flow<String> {
-        return dataStoreHelper.getString(KEY_EMAIL)
-    }
+    fun getEmail(): Flow<String> = dataStoreHelper.getString(KEY_EMAIL)
 
-    fun getDisplayName(): Flow<String> {
-        return dataStoreHelper.getString(KEY_DISPLAY_NAME)
-    }
+    fun getDisplayName(): Flow<String> = dataStoreHelper.getString(KEY_DISPLAY_NAME)
 
-    fun getAvatarUrl(): Flow<String> {
-        return dataStoreHelper.getString(KEY_AVATAR_URL)
-    }
+    fun getAvatarUrl(): Flow<String> = dataStoreHelper.getString(KEY_AVATAR_URL)
 
-    suspend fun isLoggedIn(): Boolean {
-        return getAccessTokenSync()?.isNotBlank() == true
-    }
+    suspend fun isLoggedIn(): Boolean = getAccessTokenSync()?.isNotBlank() == true
 
     suspend fun clearTokens() {
         dataStoreHelper.saveString(KEY_ACCESS_TOKEN, "")

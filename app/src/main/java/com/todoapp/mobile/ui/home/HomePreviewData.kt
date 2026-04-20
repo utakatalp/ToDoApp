@@ -9,7 +9,6 @@ import java.time.LocalTime
 import java.time.YearMonth
 
 object HomePreviewData {
-
     fun successState(
         selectedDate: LocalDate = LocalDate.now(),
         displayedMonth: YearMonth = YearMonth.now(),
@@ -38,7 +37,8 @@ object HomePreviewData {
         isSheetOpen = isSheetOpen,
         isDeleteDialogOpen = isDeleteDialogOpen,
         isSecretModeEnabled = isSecretModeEnabled,
-        taskFormState = TaskFormState(
+        taskFormState =
+        TaskFormState(
             taskTitle = taskTitle,
             dialogSelectedDate = dialogSelectedDate,
             taskTimeStart = taskTimeStart,
@@ -52,36 +52,37 @@ object HomePreviewData {
         ),
     )
 
-    val sampleTasks = listOf(
-        Task(
-            id = 1L,
-            title = "Design the main screen",
-            description = "Draft layout & components",
-            date = LocalDate.now(),
-            timeStart = LocalTime.of(9, 30),
-            timeEnd = LocalTime.of(10, 15),
-            isCompleted = false,
-            isSecret = false,
-        ),
-        Task(
-            id = 2L,
-            title = "Develop the API client",
-            description = "Retrofit + serialization setup",
-            date = LocalDate.now().minusDays(1),
-            timeStart = LocalTime.of(11, 0),
-            timeEnd = LocalTime.of(12, 0),
-            isCompleted = true,
-            isSecret = false
-        ),
-        Task(
-            id = 3L,
-            title = "Fix the login bug",
-            description = null,
-            date = LocalDate.now(),
-            timeStart = LocalTime.of(14, 0),
-            timeEnd = LocalTime.of(14, 30),
-            isCompleted = false,
-            isSecret = false
-        ),
-    )
+    val sampleTasks =
+        listOf(
+            Task(
+                id = 1L,
+                title = "Design the main screen",
+                description = "Draft layout & components",
+                date = LocalDate.now(),
+                timeStart = LocalTime.of(9, 30),
+                timeEnd = LocalTime.of(10, 15),
+                isCompleted = false,
+                isSecret = false,
+            ),
+            Task(
+                id = 2L,
+                title = "Develop the API client",
+                description = "Retrofit + serialization setup",
+                date = LocalDate.now().minusDays(1),
+                timeStart = LocalTime.of(11, 0),
+                timeEnd = LocalTime.of(12, 0),
+                isCompleted = true,
+                isSecret = false,
+            ),
+            Task(
+                id = 3L,
+                title = "Fix the login bug",
+                description = null,
+                date = LocalDate.now(),
+                timeStart = LocalTime.of(14, 0),
+                timeEnd = LocalTime.of(14, 30),
+                isCompleted = false,
+                isSecret = false,
+            ),
+        )
 }

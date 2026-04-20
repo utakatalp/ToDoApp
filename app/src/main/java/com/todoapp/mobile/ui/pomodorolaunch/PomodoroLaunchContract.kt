@@ -1,7 +1,6 @@
 package com.todoapp.mobile.ui.pomodorolaunch
 
 object PomodoroLaunchContract {
-
     data class UiState(
         val sessionCount: Int = 0,
         val focusTime: Int = 0,
@@ -12,6 +11,7 @@ object PomodoroLaunchContract {
 
     sealed interface UiAction {
         data object OnStartTap : UiAction
+
         data object OnSettingsTap : UiAction
     }
 }

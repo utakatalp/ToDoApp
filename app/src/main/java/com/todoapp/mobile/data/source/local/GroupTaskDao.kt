@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GroupTaskDao {
-
     @Query("SELECT * FROM group_tasks WHERE local_group_id = :localGroupId")
     fun getTasksByGroupId(localGroupId: Long): Flow<List<GroupTaskEntity>>
 
@@ -46,7 +45,10 @@ interface GroupTaskDao {
     suspend fun deleteByRemoteId(remoteId: Long)
 
     @Query("UPDATE group_tasks SET is_completed = :isCompleted WHERE remote_id = :remoteId")
-    suspend fun updateCompletion(remoteId: Long, isCompleted: Boolean)
+    suspend fun updateCompletion(
+        remoteId: Long,
+        isCompleted: Boolean,
+    )
 
     @Query(
         "UPDATE group_tasks SET title = :title, description = :description, " +

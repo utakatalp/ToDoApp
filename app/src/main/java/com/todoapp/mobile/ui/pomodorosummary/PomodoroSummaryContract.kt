@@ -1,7 +1,6 @@
 package com.todoapp.mobile.ui.pomodorosummary
 
 object PomodoroSummaryContract {
-
     data class UiState(
         val focusSessions: Int = 0,
         val totalFocusMinutes: Int = 0,
@@ -11,7 +10,9 @@ object PomodoroSummaryContract {
 
     sealed interface UiAction {
         data object OnStartAgainTap : UiAction
+
         data object OnEditSettingsTap : UiAction
+
         data object OnCloseTap : UiAction
     }
 }

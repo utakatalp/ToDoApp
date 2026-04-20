@@ -14,7 +14,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class SecretPreferencesImpl @Inject constructor(
+class SecretPreferencesImpl
+@Inject
+constructor(
     private val sharedPreferences: SharedPreferences,
 ) : SecretPreferences {
     override suspend fun saveCondition(condition: SecretModeEndCondition) {
@@ -41,29 +43,29 @@ class SecretPreferencesImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCondition(): SecretModeEndCondition {
-        return withContext(Dispatchers.IO) {
-            val conditionType = sharedPreferences.getString(KEY_CONDITION_TYPE, ConditionType.DISABLED.name)
+    override suspend fun getCondition(): SecretModeEndCondition = withContext(Dispatchers.IO) {
+        val conditionType =
+            sharedPreferences
+                .getString(KEY_CONDITION_TYPE, ConditionType.DISABLED.name)
                 ?.let { ConditionType.valueOf(it) } ?: ConditionType.DISABLED
 
-            when (conditionType) {
-                ConditionType.DISABLED -> SecretModeEndCondition.Disabled
-                ConditionType.UNTIL_TIME -> {
-                    val until = sharedPreferences.getLong(KEY_UNTIL_EPOCH_MILLIS, 0L)
-                    if (until > 0L) {
-                        SecretModeEndCondition.UntilTime(until)
-                    } else {
-                        SecretModeEndCondition.Disabled
-                    }
+        when (conditionType) {
+            ConditionType.DISABLED -> SecretModeEndCondition.Disabled
+            ConditionType.UNTIL_TIME -> {
+                val until = sharedPreferences.getLong(KEY_UNTIL_EPOCH_MILLIS, 0L)
+                if (until > 0L) {
+                    SecretModeEndCondition.UntilTime(until)
+                } else {
+                    SecretModeEndCondition.Disabled
                 }
-                ConditionType.UNTIL_EVENT -> {
-                    val raw = sharedPreferences.getString(KEY_UNTIL_EVENT, null)
-                    val event = raw?.let { SecretModeEndEvent.valueOf(it) }
-                    if (event != null) {
-                        SecretModeEndCondition.UntilEvent(event)
-                    } else {
-                        SecretModeEndCondition.Disabled
-                    }
+            }
+            ConditionType.UNTIL_EVENT -> {
+                val raw = sharedPreferences.getString(KEY_UNTIL_EVENT, null)
+                val event = raw?.let { SecretModeEndEvent.valueOf(it) }
+                if (event != null) {
+                    SecretModeEndCondition.UntilEvent(event)
+                } else {
+                    SecretModeEndCondition.Disabled
                 }
             }
         }
@@ -71,24 +73,27 @@ class SecretPreferencesImpl @Inject constructor(
 
     override fun observeCondition(): Flow<SecretModeEndCondition> = callbackFlow {
         launch {
-            val current = runCatching { getCondition() }
-                .getOrElse { SecretModeEndCondition.Disabled }
+            val current =
+                runCatching { getCondition() }
+                    .getOrElse { SecretModeEndCondition.Disabled }
             trySend(current)
         }
 
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (
-                key == KEY_CONDITION_TYPE ||
-                key == KEY_UNTIL_EPOCH_MILLIS ||
-                key == KEY_UNTIL_EVENT
-            ) {
-                launch {
-                    val current = runCatching { getCondition() }
-                        .getOrElse { SecretModeEndCondition.Disabled }
-                    trySend(current)
+        val listener =
+            SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                if (
+                    key == KEY_CONDITION_TYPE ||
+                    key == KEY_UNTIL_EPOCH_MILLIS ||
+                    key == KEY_UNTIL_EVENT
+                ) {
+                    launch {
+                        val current =
+                            runCatching { getCondition() }
+                                .getOrElse { SecretModeEndCondition.Disabled }
+                        trySend(current)
+                    }
                 }
             }
-        }
 
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
 
@@ -103,13 +108,11 @@ class SecretPreferencesImpl @Inject constructor(
         }
     }
 
-    override suspend fun getLastSelectedOptionId(): SecretModeReopenOptionId {
-        return withContext(Dispatchers.IO) {
-            val raw = sharedPreferences.getString(KEY_LAST_SELECTED_OPTION_ID, null)
-            raw
-                ?.let { SecretModeReopenOptionId.valueOf(it) }
-                ?: SecretModeReopenOptionId.IMMEDIATE
-        }
+    override suspend fun getLastSelectedOptionId(): SecretModeReopenOptionId = withContext(Dispatchers.IO) {
+        val raw = sharedPreferences.getString(KEY_LAST_SELECTED_OPTION_ID, null)
+        raw
+            ?.let { SecretModeReopenOptionId.valueOf(it) }
+            ?: SecretModeReopenOptionId.IMMEDIATE
     }
 
     private companion object {

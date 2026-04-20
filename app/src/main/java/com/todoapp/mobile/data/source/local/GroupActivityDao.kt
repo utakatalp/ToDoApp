@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GroupActivityDao {
-
     @Query("SELECT * FROM group_activities WHERE local_group_id = :localGroupId ORDER BY timestamp DESC")
     fun getActivitiesByGroupId(localGroupId: Long): Flow<List<GroupActivityEntity>>
 

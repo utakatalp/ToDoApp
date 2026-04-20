@@ -53,25 +53,28 @@ fun TDDatePicker(
 ) {
     // Use ComposeLocale to safely obtain the platform locale, which is more robust in Preview environments
     val locale = LocalConfiguration.current.locales[0]
-    
-    val daysOfWeek = remember(locale) {
-        DayOfWeek.entries.map {
-            it.getDisplayName(TextStyle.SHORT, locale).take(2)
+
+    val daysOfWeek =
+        remember(locale) {
+            DayOfWeek.entries.map {
+                it.getDisplayName(TextStyle.SHORT, locale).take(2)
+            }
         }
-    }
     val firstDayOfMonth = selectedMonth.atDay(1)
     val calendarStartDate =
         firstDayOfMonth.minusDays((firstDayOfMonth.dayOfWeek.value - 1).toLong())
     val today = LocalDate.now()
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.SpaceAround,
@@ -112,7 +115,8 @@ fun TDDatePicker(
         Spacer(Modifier.height(8.dp))
 
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
         ) {
@@ -133,7 +137,8 @@ fun TDDatePicker(
 
         for (week in 0 until 5) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
             ) {
@@ -175,14 +180,16 @@ private fun TDCalendarCell(
         label = "td_calendar_cell_bg",
     )
 
-    val textColor = when {
-        isSelected -> Color.White
-        !isFromCurrentMonth -> TDTheme.colors.lightGray
-        else -> TDTheme.colors.onBackground
-    }
+    val textColor =
+        when {
+            isSelected -> Color.White
+            !isFromCurrentMonth -> TDTheme.colors.lightGray
+            else -> TDTheme.colors.onBackground
+        }
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .height(52.dp)
             .clickable { onClick() },
         contentAlignment = Alignment.Center,
@@ -202,7 +209,8 @@ private fun TDCalendarCell(
                     )
                 }
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .size(36.dp)
                         .background(animatedColor, CircleShape),
                 )
@@ -219,12 +227,13 @@ private fun TDCalendarCell(
             ) {
                 when {
                     isSelected -> Unit
-                    hasTask -> Box(
-                        Modifier
-                            .padding(top = 3.dp)
-                            .size(4.dp)
-                            .background(TDTheme.colors.pendingGray, CircleShape),
-                    )
+                    hasTask ->
+                        Box(
+                            Modifier
+                                .padding(top = 3.dp)
+                                .size(4.dp)
+                                .background(TDTheme.colors.pendingGray, CircleShape),
+                        )
                     else -> Unit
                 }
             }
@@ -245,25 +254,28 @@ fun TDDatePickerSingleInput(
 ) {
     val locale = LocalConfiguration.current.locales[0]
 
-    val daysOfWeek = remember(locale) {
-        DayOfWeek.entries.map {
-            it.getDisplayName(TextStyle.SHORT, locale).take(2)
+    val daysOfWeek =
+        remember(locale) {
+            DayOfWeek.entries.map {
+                it.getDisplayName(TextStyle.SHORT, locale).take(2)
+            }
         }
-    }
 
     val firstDayOfMonth = selectedMonth.atDay(1)
     val calendarStartDate =
         firstDayOfMonth.minusDays((firstDayOfMonth.dayOfWeek.value - 1).toLong())
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .background(TDTheme.colors.background)
             .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.SpaceAround,
@@ -299,7 +311,8 @@ fun TDDatePickerSingleInput(
         Spacer(Modifier.height(16.dp))
 
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
         ) {
@@ -318,7 +331,8 @@ fun TDDatePickerSingleInput(
 
         for (week in 0 until 5) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
             ) {
@@ -335,7 +349,8 @@ fun TDDatePickerSingleInput(
                     ) {
                         Text(
                             text = currentDate.dayOfMonth.toString(),
-                            color = when {
+                            color =
+                            when {
                                 !isFromCurrentMonth -> TDTheme.colors.gray.copy(alpha = 0.35f)
                                 isSelected -> Color.White
                                 else -> TDTheme.colors.gray
@@ -364,7 +379,8 @@ private fun TDAnimatedCell(
     )
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .size(36.dp)
             .background(color = animatedColor, shape = CircleShape)
             .clickable { onClick() },
