@@ -1,7 +1,13 @@
 package com.todoapp.mobile.ui.topbar
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -9,14 +15,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import coil.compose.AsyncImage
 import com.example.uikit.R
+import com.todoapp.mobile.BuildConfig
 import com.todoapp.mobile.LocalNavController
 import com.todoapp.mobile.navigation.AppDestination
 import com.todoapp.mobile.navigation.Screen
@@ -51,6 +65,13 @@ fun TDTopBar(
                 IconButton(onClick = it.onClick) {
                     Icon(painterResource(it.icon), tint = TDTheme.colors.onBackground, contentDescription = null)
                 }
+            }
+            state.profileChip?.let { chip ->
+                AvatarChip(
+                    url = chip.avatarUrl,
+                    initials = chip.initials,
+                    onClick = chip.onClick,
+                )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = TDTheme.colors.background),
@@ -97,6 +118,11 @@ fun ShowTopBar(
                         )
                         )
                     },
+                profileChip = if (uiState.isUserAuthenticated) TDProfileChip(
+                    avatarUrl = absoluteAvatarUrl(uiState.avatarUrl, uiState.avatarVersion),
+                    initials = initialsFrom(uiState.displayName),
+                    onClick = { onEvent(UiAction.OnProfileClick) },
+                ) else null,
             )
 
         AppDestination.GroupDetail -> {
@@ -133,12 +159,61 @@ data class TDTopBarState(
     @DrawableRes val navigationIcon: Int,
     val onNavigationClick: (() -> Unit)? = null,
     val actions: List<TDTopBarAction> = emptyList(),
+    val profileChip: TDProfileChip? = null,
 )
 
 data class TDTopBarAction(
     @DrawableRes val icon: Int,
     val onClick: () -> Unit,
 )
+
+data class TDProfileChip(
+    val avatarUrl: String?,
+    val initials: String,
+    val onClick: () -> Unit,
+)
+
+@Composable
+private fun AvatarChip(url: String?, initials: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .padding(end = 8.dp)
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(TDTheme.colors.lightPending)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (url != null) {
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(36.dp),
+            )
+        } else {
+            Text(
+                text = initials,
+                style = TDTheme.typography.subheading2,
+                color = TDTheme.colors.pendingGray,
+            )
+        }
+    }
+}
+
+private fun absoluteAvatarUrl(path: String?, version: Long): String? {
+    if (path.isNullOrBlank()) return null
+    val base = BuildConfig.BASE_URL.trimEnd('/')
+    val relative = path.trimStart('/')
+    return "$base/$relative?v=$version"
+}
+
+private fun initialsFrom(name: String): String = name
+    .split(" ")
+    .mapNotNull { it.firstOrNull()?.toString() }
+    .take(2)
+    .joinToString("")
+    .uppercase()
 
 private fun normalizeRoute(route: String?): String? {
     return route?.substringBefore("/")?.substringBefore("?")

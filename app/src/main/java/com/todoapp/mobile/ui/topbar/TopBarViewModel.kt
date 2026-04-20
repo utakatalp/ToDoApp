@@ -39,13 +39,19 @@ class TopBarViewModel @Inject constructor(
             )
 
             UiAction.OnNotificationClick -> handleNotificationClick()
-            UiAction.OnProfileClick -> sendNavEffect(
-                NavigationEffect.Navigate(
-                    Screen.Login(
-                        redirectAfterLogin = Screen.Home::class.qualifiedName
+            UiAction.OnProfileClick -> {
+                if (_uiState.value.isUserAuthenticated) {
+                    sendNavEffect(NavigationEffect.Navigate(Screen.Profile))
+                } else {
+                    sendNavEffect(
+                        NavigationEffect.Navigate(
+                            Screen.Login(
+                                redirectAfterLogin = Screen.Home::class.qualifiedName
+                            )
+                        )
                     )
-                )
-            )
+                }
+            }
 
             UiAction.OnSettingsClick -> sendNavEffect(NavigationEffect.Navigate(Screen.Settings))
             UiAction.OnSearchClick -> sendNavEffect(NavigationEffect.Navigate(Screen.Search))
@@ -60,6 +66,21 @@ class TopBarViewModel @Inject constructor(
         viewModelScope.launch {
             dataStoreHelper.observeUser().collect { user ->
                 updateAuthenticationState(isAuthenticated = user != null)
+                if (user != null) refreshUserProfile()
+            }
+        }
+    }
+
+    private fun refreshUserProfile() {
+        viewModelScope.launch {
+            userRepository.getUserInfo().onSuccess { u ->
+                _uiState.update {
+                    it.copy(
+                        avatarUrl = u.avatarUrl,
+                        displayName = u.displayName,
+                        avatarVersion = System.currentTimeMillis(),
+                    )
+                }
             }
         }
     }
