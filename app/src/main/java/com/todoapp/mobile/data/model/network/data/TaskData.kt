@@ -22,6 +22,7 @@ data class TaskData(
     val createdBy: TaskUserData? = null,
     val familyGroupId: Long? = null,
     val priority: String? = null,
+    val photoUrls: List<String> = emptyList(),
 )
 
 @Serializable

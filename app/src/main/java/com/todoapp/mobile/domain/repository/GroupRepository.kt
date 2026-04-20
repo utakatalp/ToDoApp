@@ -70,4 +70,7 @@ interface GroupRepository {
     suspend fun syncGroupTasks(remoteGroupId: Long): Result<Unit>
 
     suspend fun searchGroupTasksAcrossGroups(query: String): Result<List<Pair<Group, List<GroupTask>>>>
+
+    suspend fun uploadTaskPhoto(taskId: Long, bytes: ByteArray, mimeType: String): Result<String>
+    suspend fun deleteTaskPhoto(taskId: Long, photoId: Long): Result<Unit>
 }

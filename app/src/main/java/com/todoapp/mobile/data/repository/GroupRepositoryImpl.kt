@@ -28,6 +28,8 @@ import com.todoapp.mobile.domain.model.GroupTask
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.GroupRepository
 import kotlinx.coroutines.Dispatchers
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -44,6 +46,7 @@ class GroupRepositoryImpl @Inject constructor(
     private val groupActivityLocalDataSource: GroupActivityLocalDataSource,
     private val taskRemoteDataSource: TaskRemoteDataSource,
     private val taskLocalDataSource: TaskLocalDataSource,
+    private val todoApi: com.todoapp.mobile.data.source.remote.api.ToDoApi,
 ) : GroupRepository {
 
     override suspend fun createGroup(request: CreateGroupRequest): Result<GroupData> {
@@ -303,6 +306,17 @@ class GroupRepositoryImpl @Inject constructor(
             }
             syncGroupTasks(groupId)
         }
+    }
+
+    override suspend fun uploadTaskPhoto(taskId: Long, bytes: ByteArray, mimeType: String): Result<String> {
+        val body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+        val part = okhttp3.MultipartBody.Part.createFormData("file", "photo.jpg", body)
+        return com.todoapp.mobile.common.handleRequest { todoApi.uploadTaskPhoto(taskId, part) }
+            .map { it.url }
+    }
+
+    override suspend fun deleteTaskPhoto(taskId: Long, photoId: Long): Result<Unit> {
+        return com.todoapp.mobile.common.handleRequest { todoApi.deleteTaskPhoto(taskId, photoId) }
     }
 
     override suspend fun searchGroupTasksAcrossGroups(query: String): Result<List<Pair<Group, List<GroupTask>>>> =

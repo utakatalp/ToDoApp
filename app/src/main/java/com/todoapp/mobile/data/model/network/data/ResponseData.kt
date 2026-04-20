@@ -139,6 +139,7 @@ data class GroupTaskData(
     @SerialName("priority") val priority: String? = null,
     @SerialName("dueDate") val dueDate: Long? = null,
     @SerialName("assignee") val assignee: GroupMemberData? = null,
+    @SerialName("photoUrls") val photoUrls: List<String> = emptyList(),
 )
 
 @Serializable

@@ -93,6 +93,19 @@ interface ToDoApi {
         @retrofit2.http.Part file: okhttp3.MultipartBody.Part,
     ): Response<BaseResponse<UserData?>>
 
+    @retrofit2.http.Multipart
+    @POST("tasks/{taskId}/photos")
+    suspend fun uploadTaskPhoto(
+        @Path("taskId") taskId: Long,
+        @retrofit2.http.Part file: okhttp3.MultipartBody.Part,
+    ): Response<BaseResponse<com.todoapp.mobile.data.model.network.data.TaskPhotoData?>>
+
+    @DELETE("tasks/{taskId}/photos/{photoId}")
+    suspend fun deleteTaskPhoto(
+        @Path("taskId") taskId: Long,
+        @Path("photoId") photoId: Long,
+    ): Response<BaseResponse<Unit?>>
+
     @POST("family-groups")
     suspend fun createGroup(
         @Body request: CreateGroupRequest,
