@@ -17,14 +17,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -74,14 +71,15 @@ fun HomeContent(
     var dragOriginalIndex by remember { mutableIntStateOf(-1) }
     var dragFinalIndex by remember { mutableIntStateOf(-1) }
 
-    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        if (dragOriginalIndex == -1) dragOriginalIndex = from.index
-        dragFinalIndex = to.index
-        val list = localTasks.toMutableList()
-        list.move(from.index, to.index)
-        localTasks = list
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-    }
+    val reorderableLazyListState =
+        rememberReorderableLazyListState(lazyListState) { from, to ->
+            if (dragOriginalIndex == -1) dragOriginalIndex = from.index
+            dragFinalIndex = to.index
+            val list = localTasks.toMutableList()
+            list.move(from.index, to.index)
+            localTasks = list
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
 
     LaunchedEffect(uiState.tasks) {
         if (!reorderableLazyListState.isAnyItemDragging) {
@@ -90,23 +88,24 @@ fun HomeContent(
     }
     var showHint by remember { mutableStateOf(false) }
     var currentHintRes by remember { mutableIntStateOf(com.todoapp.mobile.R.string.hint_swipe_left_delete) }
-    val hints = listOf(
-        com.todoapp.mobile.R.string.hint_swipe_left_delete,
-        com.todoapp.mobile.R.string.hint_swipe_right_secret,
-        com.todoapp.mobile.R.string.hint_long_press_reorder,
-        com.todoapp.mobile.R.string.hint_add_task,
-        com.todoapp.mobile.R.string.hint_secret_on_create,
-        com.todoapp.mobile.R.string.hint_calendar_range,
-        com.todoapp.mobile.R.string.hint_activity_stats,
-        com.todoapp.mobile.R.string.hint_task_detail,
-        com.todoapp.mobile.R.string.hint_daily_plan,
-        com.todoapp.mobile.R.string.hint_groups,
-        com.todoapp.mobile.R.string.hint_theme,
-        com.todoapp.mobile.R.string.hint_pomodoro,
-        com.todoapp.mobile.R.string.hint_weekly_picker,
-        com.todoapp.mobile.R.string.hint_weekly_stats,
-        com.todoapp.mobile.R.string.hint_group_reorder,
-    )
+    val hints =
+        listOf(
+            com.todoapp.mobile.R.string.hint_swipe_left_delete,
+            com.todoapp.mobile.R.string.hint_swipe_right_secret,
+            com.todoapp.mobile.R.string.hint_long_press_reorder,
+            com.todoapp.mobile.R.string.hint_add_task,
+            com.todoapp.mobile.R.string.hint_secret_on_create,
+            com.todoapp.mobile.R.string.hint_calendar_range,
+            com.todoapp.mobile.R.string.hint_activity_stats,
+            com.todoapp.mobile.R.string.hint_task_detail,
+            com.todoapp.mobile.R.string.hint_daily_plan,
+            com.todoapp.mobile.R.string.hint_groups,
+            com.todoapp.mobile.R.string.hint_theme,
+            com.todoapp.mobile.R.string.hint_pomodoro,
+            com.todoapp.mobile.R.string.hint_weekly_picker,
+            com.todoapp.mobile.R.string.hint_weekly_stats,
+            com.todoapp.mobile.R.string.hint_group_reorder,
+        )
     val pullState = rememberPullToRefreshState()
     LaunchedEffect(showHint) {
         if (showHint) {
@@ -124,7 +123,8 @@ fun HomeContent(
         state = pullState,
         indicator = {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
                     .padding(top = 12.dp),
@@ -132,14 +132,15 @@ fun HomeContent(
             ) {
                 if (pullState.distanceFraction > 0f) {
                     Row(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .background(
-                                color = TDTheme.colors.pendingGray.copy(
-                                    alpha = (pullState.distanceFraction * 1.5f).coerceIn(0.4f, 1f)
+                                color =
+                                TDTheme.colors.pendingGray.copy(
+                                    alpha = (pullState.distanceFraction * 1.5f).coerceIn(0.4f, 1f),
                                 ),
                                 shape = RoundedCornerShape(50.dp),
-                            )
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            ).padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
                     ) {
@@ -151,12 +152,13 @@ fun HomeContent(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         TDText(
-                            text = stringResource(
+                            text =
+                            stringResource(
                                 if (pullState.distanceFraction >= 1f) {
                                     com.todoapp.mobile.R.string.hint_release_indicator
                                 } else {
                                     com.todoapp.mobile.R.string.hint_pull_indicator
-                                }
+                                },
                             ),
                             style = TDTheme.typography.subheading4,
                             color = Color.White,
@@ -166,91 +168,89 @@ fun HomeContent(
             }
         },
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-        ) {
-            HomeHintCard(showHint = showHint, hintRes = currentHintRes)
-            TDWeeklyDatePicker(
-                modifier = Modifier,
-                displayedMonth = uiState.displayedMonth,
-                selectedDate = uiState.selectedDate,
-                onDateSelect = { onAction(UiAction.OnDateSelect(it)) },
-                onPreviousMonth = { onAction(UiAction.OnPreviousMonth) },
-                onNextMonth = { onAction(UiAction.OnNextMonth) },
-            )
-            Spacer(Modifier.height(32.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                TDStatisticCard(
-                    text = stringResource(com.todoapp.mobile.R.string.task_complete),
-                    taskAmount = uiState.completedTaskCountThisWeek,
-                    modifier = Modifier.weight(1f),
-                    isCompleted = true,
-                    onClick = { onAction(UiAction.OnCompletedStatCardTap) },
-                )
-                Spacer(modifier = Modifier.size(20.dp))
-                TDStatisticCard(
-                    text = stringResource(com.todoapp.mobile.R.string.task_pending),
-                    taskAmount = uiState.pendingTaskCountThisWeek,
-                    modifier = Modifier.weight(1f),
-                    isCompleted = false,
-                    onClick = { onAction(UiAction.OnPendingStatCardTap) },
-                )
-            }
-            Spacer(Modifier.height(32.dp))
-            TDText(
-                text = stringResource(com.todoapp.mobile.R.string.tasks_today),
-                color = TDTheme.colors.onBackground,
-                style = TDTheme.typography.heading3,
-            )
-            Spacer(Modifier.height(16.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .heightIn(min = 300.dp),
-            ) {
-                HomeTaskList(
-                    tasks = localTasks.filter { it.id != uiState.pendingDeleteTask?.id },
-                    lazyListState = lazyListState,
-                    reorderableLazyListState = reorderableLazyListState,
-                    hapticFeedback = hapticFeedback,
-                    onTaskCheck = { onAction(UiAction.OnTaskCheck(it)) },
-                    onTaskClick = { onAction(UiAction.OnTaskClick(it)) },
-                    onTaskLongPress = { onAction(UiAction.OnTaskLongPress(it)) },
-                    onToggleTaskSecret = { onAction(UiAction.OnToggleTaskSecret(it)) },
-                    onMoveTask = { from, to -> onAction(UiAction.OnMoveTask(from, to)) },
-                    onReorderFinished = {
-                        val orig = dragOriginalIndex
-                        val final = dragFinalIndex
-                        dragOriginalIndex = -1
-                        dragFinalIndex = -1
-                        if (orig != -1 && final != -1 && orig != final) {
-                            onAction(UiAction.OnMoveTask(orig, final))
-                        }
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                )
-                HomeFabMenu(
-                    onAddTask = { onAction(UiAction.OnShowBottomSheet) },
-                    onPomodoro = { onAction(UiAction.OnPomodoroTap) },
-                )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth(),
-                ) {
-                    this@Column.AnimatedVisibility(
-                        visible = uiState.pendingDeleteTask != null,
-                        enter = slideInVertically { it } + fadeIn(),
-                        exit = slideOutVertically { it } + fadeOut(),
-                    ) {
-                        TDUndoSnackbar(
-                            message = stringResource(com.todoapp.mobile.R.string.task_deleted),
-                            onUndo = { onAction(UiAction.OnUndoDelete) },
+        Box(modifier = modifier.fillMaxSize()) {
+            HomeTaskList(
+                tasks = localTasks.filter { it.id != uiState.pendingDeleteTask?.id },
+                lazyListState = lazyListState,
+                reorderableLazyListState = reorderableLazyListState,
+                hapticFeedback = hapticFeedback,
+                onTaskCheck = { onAction(UiAction.OnTaskCheck(it)) },
+                onTaskClick = { onAction(UiAction.OnTaskClick(it)) },
+                onTaskLongPress = { onAction(UiAction.OnTaskLongPress(it)) },
+                onToggleTaskSecret = { onAction(UiAction.OnToggleTaskSecret(it)) },
+                onMoveTask = { from, to -> onAction(UiAction.OnMoveTask(from, to)) },
+                onReorderFinished = {
+                    val orig = dragOriginalIndex
+                    val final = dragFinalIndex
+                    dragOriginalIndex = -1
+                    dragFinalIndex = -1
+                    if (orig != -1 && final != -1 && orig != final) {
+                        onAction(UiAction.OnMoveTask(orig, final))
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+                headerContent = {
+                    item { HomeHintCard(showHint = showHint, hintRes = currentHintRes) }
+                    item {
+                        TDWeeklyDatePicker(
+                            modifier = Modifier,
+                            displayedMonth = uiState.displayedMonth,
+                            selectedDate = uiState.selectedDate,
+                            onDateSelect = { onAction(UiAction.OnDateSelect(it)) },
+                            onPreviousMonth = { onAction(UiAction.OnPreviousMonth) },
+                            onNextMonth = { onAction(UiAction.OnNextMonth) },
                         )
                     }
+                    item { Spacer(Modifier.height(24.dp)) }
+                    item {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            TDStatisticCard(
+                                text = stringResource(com.todoapp.mobile.R.string.task_complete),
+                                taskAmount = uiState.completedTaskCountThisWeek,
+                                modifier = Modifier.weight(1f),
+                                isCompleted = true,
+                                onClick = { onAction(UiAction.OnCompletedStatCardTap) },
+                            )
+                            Spacer(modifier = Modifier.size(20.dp))
+                            TDStatisticCard(
+                                text = stringResource(com.todoapp.mobile.R.string.task_pending),
+                                taskAmount = uiState.pendingTaskCountThisWeek,
+                                modifier = Modifier.weight(1f),
+                                isCompleted = false,
+                                onClick = { onAction(UiAction.OnPendingStatCardTap) },
+                            )
+                        }
+                    }
+                    item { Spacer(Modifier.height(24.dp)) }
+                    item {
+                        TDText(
+                            text = stringResource(com.todoapp.mobile.R.string.tasks_today),
+                            color = TDTheme.colors.onBackground,
+                            style = TDTheme.typography.heading3,
+                        )
+                    }
+                    item { Spacer(Modifier.height(8.dp)) }
+                },
+            )
+            HomeFabMenu(
+                onAddTask = { onAction(UiAction.OnShowBottomSheet) },
+                onPomodoro = { onAction(UiAction.OnPomodoroTap) },
+            )
+            Box(
+                modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(),
+            ) {
+                AnimatedVisibility(
+                    visible = uiState.pendingDeleteTask != null,
+                    enter = slideInVertically { it } + fadeIn(),
+                    exit = slideOutVertically { it } + fadeOut(),
+                ) {
+                    TDUndoSnackbar(
+                        message = stringResource(com.todoapp.mobile.R.string.task_deleted),
+                        onUndo = { onAction(UiAction.OnUndoDelete) },
+                    )
                 }
             }
         }
@@ -284,14 +284,18 @@ fun HomeContent(
 }
 
 @Composable
-private fun HomeHintCard(showHint: Boolean, hintRes: Int) {
+private fun HomeHintCard(
+    showHint: Boolean,
+    hintRes: Int,
+) {
     AnimatedVisibility(
         visible = showHint,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut(),
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
                 .background(TDTheme.colors.infoCardBgColor, RoundedCornerShape(12.dp))
@@ -302,7 +306,8 @@ private fun HomeHintCard(showHint: Boolean, hintRes: Int) {
                 painter = painterResource(R.drawable.ic_info),
                 contentDescription = null,
                 tint = TDTheme.colors.pendingGray,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(20.dp)
                     .padding(top = 2.dp),
             )
@@ -329,7 +334,8 @@ private fun HomeHintCard(showHint: Boolean, hintRes: Int) {
 private fun HomeContentPreview() {
     TDTheme {
         HomeContent(
-            uiState = HomePreviewData.successState(
+            uiState =
+            HomePreviewData.successState(
                 tasks = HomePreviewData.sampleTasks,
                 completedTaskCountThisWeek = 5,
                 pendingTaskCountThisWeek = 8,
@@ -345,7 +351,8 @@ private fun HomeContentPreview() {
 private fun HomeContentPreview_no_task() {
     TDTheme {
         HomeContent(
-            uiState = HomePreviewData.successState(
+            uiState =
+            HomePreviewData.successState(
                 tasks = emptyList(),
                 completedTaskCountThisWeek = 0,
                 pendingTaskCountThisWeek = 0,
@@ -361,7 +368,8 @@ private fun HomeContentPreview_no_task() {
 private fun HomeContentPreview_no_task_dark() {
     TDTheme {
         HomeContent(
-            uiState = HomePreviewData.successState(
+            uiState =
+            HomePreviewData.successState(
                 tasks = emptyList(),
                 completedTaskCountThisWeek = 0,
                 pendingTaskCountThisWeek = 0,
@@ -377,7 +385,8 @@ private fun HomeContentPreview_no_task_dark() {
 private fun HomeContentPreview_Dark() {
     TDTheme(darkTheme = true) {
         HomeContent(
-            uiState = HomePreviewData.successState(
+            uiState =
+            HomePreviewData.successState(
                 tasks = HomePreviewData.sampleTasks,
                 completedTaskCountThisWeek = 5,
                 pendingTaskCountThisWeek = 8,
