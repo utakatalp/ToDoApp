@@ -63,6 +63,37 @@
     <string name="photo_requires_sync">Görev sunucuya eşitlenene kadar fotoğraf eklenemez</string>
     <string name="failed_to_upload_photo">Fotoğraf yüklenemedi</string>
     <string name="secret_task_hint">Bu görev gizli — görüntülemek için dokunun</string>
+    <!-- Localization batch -->
+    <string name="group_name_empty">Grup adı boş olamaz</string>
+    <string name="failed_to_save_changes">Değişiklikler kaydedilemedi</string>
+    <string name="member_removed">Üye kaldırıldı</string>
+    <string name="failed_to_remove_member_short">Üye kaldırılamadı</string>
+    <string name="please_fill_required_fields">Lütfen tüm zorunlu alanları doldurun</string>
+    <string name="task_added_to_group">Görev gruba eklendi</string>
+    <string name="failed_to_create_task">Görev oluşturulamadı</string>
+    <string name="invite_sent_successfully">Davet başarıyla gönderildi</string>
+    <string name="share_link_coming_soon">Bağlantı paylaşma özelliği yakında</string>
+    <string name="ownership_transferred">Yöneticilik devredildi</string>
+    <string name="failed_to_transfer_ownership">Yöneticilik devredilemedi</string>
+    <string name="profile_updated">Profil güncellendi</string>
+    <string name="failed_to_update_profile">Profil güncellenemedi</string>
+    <string name="photo_updated">Fotoğraf güncellendi</string>
+    <string name="failed_to_upload_avatar">Avatar yüklenemedi</string>
+    <string name="failed_to_delete_photo">Fotoğraf silinemedi</string>
+    <string name="google_login_error">Google giriş hatası</string>
+    <string name="assign_to_a_group">Bir gruba ata</string>
+    <string name="app_brand">ToDo App</string>
+    <string name="failed_to_load_task">Görev yüklenemedi</string>
+    <string name="something_went_wrong_short">Bir şeyler ters gitti</string>
+    <string name="move_up">Yukarı taşı</string>
+    <string name="move_down">Aşağı taşı</string>
+    <string name="reopen_now">Şimdi</string>
+    <string name="reopen_until_app_closed">Uygulama kapanana kadar</string>
+    <!-- Backfilled translations for keys that lived only in EN -->
+    <string name="edit_group_details">Grup Detaylarını Düzenle</string>
+    <string name="assign_to">Şu kişiye ata:</string>
+    <string name="task_title_empty">Görev başlığı boş olamaz</string>
+    <string name="edit_task">Görevi Düzenle</string>
     <string name="home">Ana Sayfa</string>
     <string name="settings">Ayarlar</string>
     <string name="search">Ara</string>
@@ -302,8 +333,6 @@
     <string name="invite_member_email_hint">uye@ornek.com</string>
     <string name="group_settings_saved">Grup ayarları kaydedildi</string>
     <string name="invite_sent">Davet başarıyla gönderildi</string>
-    <string name="member_removed">Üye kaldırıldı</string>
-    <string name="ownership_transferred">Sahiplik devredildi</string>
     <string name="group_deleted_success">Grup silindi</string>
     <string name="error_generic">Bir şeyler ters gitti. Lütfen tekrar deneyin.</string>
     <string name="due_today">Bugün bitiyor</string>

@@ -121,7 +121,8 @@ private fun SettingsContent(
     }
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(horizontal = 16.dp)
@@ -219,30 +220,6 @@ private fun SettingsContent(
             )
         }
 
-        if (uiState.isUserAuthenticated) {
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .clickable { onAction(UiAction.OnNavigateToProfile) },
-            ) {
-                TDText(
-                    text = stringResource(R.string.profile),
-                    style = TDTheme.typography.heading6,
-                    color = TDTheme.colors.onBackground,
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
-                    contentDescription = null,
-                    tint = TDTheme.colors.onBackground,
-                )
-            }
-        }
-
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
         Spacer(modifier = Modifier.height(16.dp))
@@ -308,14 +285,16 @@ private fun PermissionPager(
             modifier = Modifier.fillMaxWidth(),
         ) { index ->
             when (permissions[index]) {
-                PermissionType.NOTIFICATION -> TDNotificationPermissionItem(
-                    onDismiss = { onDismiss(PermissionType.NOTIFICATION) },
-                )
+                PermissionType.NOTIFICATION ->
+                    TDNotificationPermissionItem(
+                        onDismiss = { onDismiss(PermissionType.NOTIFICATION) },
+                    )
 
-                PermissionType.OVERLAY -> TDOverlayPermissionItem(
-                    context = context,
-                    onDismiss = { onDismiss(PermissionType.OVERLAY) },
-                )
+                PermissionType.OVERLAY ->
+                    TDOverlayPermissionItem(
+                        context = context,
+                        onDismiss = { onDismiss(PermissionType.OVERLAY) },
+                    )
             }
         }
 
@@ -328,11 +307,13 @@ private fun PermissionPager(
             ) {
                 repeat(permissions.size) { index ->
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .padding(horizontal = 4.dp)
                             .size(8.dp)
                             .background(
-                                color = if (pagerState.currentPage == index) {
+                                color =
+                                if (pagerState.currentPage == index) {
                                     TDTheme.colors.pendingGray
                                 } else {
                                     TDTheme.colors.onBackground.copy(alpha = 0.3f)
@@ -352,7 +333,8 @@ private fun PermissionPager(
 private fun SettingsScreenPreview() {
     TDTheme {
         SettingsScreen(
-            uiState = UiState(
+            uiState =
+            UiState(
                 currentTheme = ThemePreference.SYSTEM_DEFAULT,
                 selectedSecretMode = SecretModeReopenOptions.Immediate,
                 remainedSecretModeTime = "",
@@ -373,7 +355,8 @@ private fun SettingsScreenPreview() {
 private fun SettingsScreenPreview_Dark() {
     TDTheme {
         SettingsScreen(
-            uiState = UiState(
+            uiState =
+            UiState(
                 currentTheme = ThemePreference.SYSTEM_DEFAULT,
                 selectedSecretMode = SecretModeReopenOptions.Immediate,
                 remainedSecretModeTime = "",

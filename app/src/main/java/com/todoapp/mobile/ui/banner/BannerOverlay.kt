@@ -3,9 +3,11 @@ package com.todoapp.mobile.ui.banner
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.todoapp.mobile.R
 import com.todoapp.mobile.common.RingtoneHolder
@@ -26,6 +28,10 @@ fun BannerOverlay(
 ) {
     val ringToneHolder = remember { RingtoneHolder() }
     val context = LocalContext.current
+
+    DisposableEffect(ringToneHolder) {
+        onDispose { ringToneHolder.stop() }
+    }
 
     LaunchedEffect(uiEffect) {
         uiEffect.collect { effect ->
@@ -55,7 +61,7 @@ fun BannerContent(
         seconds = uiState.seconds ?: 0,
         isBannerActivated = uiState.isBannerActivated,
         isOverTime = uiState.isOverTime ?: false,
-        modeLabel = uiState.mode.toLabel(),
+        modeLabel = stringResource(uiState.mode.toLabelRes()),
         modeIconRes = uiState.mode.toIconRes(),
         backgroundColor = palette.surface,
         contentColor = palette.content,
@@ -70,11 +76,11 @@ private fun PomodoroMode.toModeColorKey(): ModeColorKey = when (this) {
     PomodoroMode.OverTime -> ModeColorKey.OverTime
 }
 
-private fun PomodoroMode.toLabel(): String = when (this) {
-    PomodoroMode.Focus -> "Focus"
-    PomodoroMode.ShortBreak -> "Short Break"
-    PomodoroMode.LongBreak -> "Long Break"
-    PomodoroMode.OverTime -> "Overtime"
+private fun PomodoroMode.toLabelRes(): Int = when (this) {
+    PomodoroMode.Focus -> R.string.pomodoro_mode_focus
+    PomodoroMode.ShortBreak -> R.string.pomodoro_mode_short_break
+    PomodoroMode.LongBreak -> R.string.pomodoro_mode_long_break
+    PomodoroMode.OverTime -> R.string.pomodoro_mode_overtime
 }
 
 @DrawableRes
@@ -90,15 +96,16 @@ private fun PomodoroMode.toIconRes(): Int = when (this) {
 private fun BannerContentPreview() {
     TDTheme {
         BannerContent(
-            uiState = UiState(
+            uiState =
+            UiState(
                 isVisible = true,
                 isBannerActivated = true,
                 minutes = 25,
                 seconds = 0,
                 mode = PomodoroMode.Focus,
-                isOverTime = false
+                isOverTime = false,
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }
