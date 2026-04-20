@@ -35,7 +35,7 @@ interface GroupRemoteDataSource {
 
     suspend fun getGroupTasks(id: Long): Result<GroupTaskListData>
 
-    suspend fun deleteGroupTask(taskId: Long): Result<Unit>
+    suspend fun deleteGroupTask(groupId: Long, taskId: Long): Result<Unit>
 
     suspend fun updateGroupTask(groupId: Long, taskId: Long, request: GroupTaskUpdateRequest): Result<GroupTaskData>
 }

@@ -139,9 +139,10 @@ interface ToDoApi {
         @Body request: GroupTaskRequest,
     ): Response<BaseResponse<GroupTaskData?>>
 
-    @DELETE("tasks/{id}")
+    @DELETE("family-groups/{groupId}/tasks/{taskId}")
     suspend fun deleteGroupTask(
-        @Path("id") taskId: Long,
+        @Path("groupId") groupId: Long,
+        @Path("taskId") taskId: Long,
     ): Response<BaseResponse<Unit?>>
 
     @PUT("family-groups/{groupId}/tasks/{taskId}")

@@ -371,7 +371,7 @@ class GroupDetailViewModel @Inject constructor(
         pendingDeleteJob = viewModelScope.launch {
             delay(UNDO_DELAY_MS)
             updateSuccessState { it.copy(undoDeleteTaskId = null) }
-            groupRepository.deleteGroupTask(taskId)
+            groupRepository.deleteGroupTask(groupId, taskId)
                 .onFailure {
                     _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.failed_to_delete_task)))
                     loadGroupData()

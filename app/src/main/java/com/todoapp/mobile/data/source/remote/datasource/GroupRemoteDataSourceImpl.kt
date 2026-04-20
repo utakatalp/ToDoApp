@@ -73,8 +73,8 @@ class GroupRemoteDataSourceImpl @Inject constructor(
         return handleRequest { todoApi.getGroupTasks(id) }
     }
 
-    override suspend fun deleteGroupTask(taskId: Long): Result<Unit> {
-        return handleRequest { todoApi.deleteGroupTask(taskId) }
+    override suspend fun deleteGroupTask(groupId: Long, taskId: Long): Result<Unit> {
+        return handleRequest { todoApi.deleteGroupTask(groupId, taskId) }
     }
 
     override suspend fun updateGroupTask(

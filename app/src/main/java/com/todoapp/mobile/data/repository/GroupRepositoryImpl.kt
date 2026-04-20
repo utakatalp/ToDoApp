@@ -219,27 +219,19 @@ class GroupRepositoryImpl @Inject constructor(
             .onSuccess { syncGroupTasks(groupId) }
     }
 
-    override suspend fun deleteGroupTask(taskId: Long): Result<Unit> {
-        return groupRemoteDataSource.deleteGroupTask(taskId)
+    override suspend fun deleteGroupTask(groupId: Long, taskId: Long): Result<Unit> {
+        return groupRemoteDataSource.deleteGroupTask(groupId, taskId)
             .onSuccess { groupTaskLocalDataSource.deleteByRemoteId(taskId) }
     }
 
     override suspend fun updateGroupTaskStatus(groupId: Long, taskId: Long, groupTask: GroupTask, isCompleted: Boolean): Result<Unit> {
-        val dueMillis = groupTask.dueDate ?: System.currentTimeMillis()
-        val zdt = Instant.ofEpochMilli(dueMillis).atZone(ZoneId.systemDefault())
-        val updatedTask = Task(
-            id = taskId,
-            title = groupTask.title,
-            description = groupTask.description,
-            date = zdt.toLocalDate(),
-            timeStart = zdt.toLocalTime(),
-            timeEnd = zdt.toLocalTime(),
-            isCompleted = isCompleted,
-            isSecret = false,
-        )
-        return taskRemoteDataSource.updateTask(taskId, updatedTask, familyGroupId = groupId)
-            .map { }
-            .onSuccess { groupTaskLocalDataSource.updateCompletion(remoteId = taskId, isCompleted = isCompleted) }
+        return groupRemoteDataSource.updateGroupTask(
+            groupId = groupId,
+            taskId = taskId,
+            request = GroupTaskUpdateRequest(isCompleted = isCompleted),
+        ).map { }.onSuccess {
+            groupTaskLocalDataSource.updateCompletion(remoteId = taskId, isCompleted = isCompleted)
+        }
     }
 
     override suspend fun updateGroupTask(
@@ -251,44 +243,35 @@ class GroupRepositoryImpl @Inject constructor(
         priority: String?,
         assignedToUserId: Long?,
     ): Result<Unit> {
-        val existing = groupTaskLocalDataSource.getByRemoteId(taskId)
-        val millis = dueDate ?: existing?.dueDate ?: System.currentTimeMillis()
-        val zdt = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault())
-        val updatedTask = Task(
-            id = taskId,
-            title = title,
-            description = description,
-            date = zdt.toLocalDate(),
-            timeStart = zdt.toLocalTime(),
-            timeEnd = zdt.toLocalTime(),
-            isCompleted = existing?.isCompleted ?: false,
-            isSecret = false,
-        )
         val localGroup = groupLocalDataSource.getAllGroupsOrdered().first().find { it.remoteId == groupId }
         val assigneeMember = if (localGroup != null && assignedToUserId != null) {
             groupMemberLocalDataSource.getByGroupIdOnce(localGroup.id).find { it.userId == assignedToUserId }
         } else {
             null
         }
-        return taskRemoteDataSource.updateTask(
-            taskId,
-            updatedTask,
-            familyGroupId = groupId,
-            assignedToUserId = assignedToUserId
-        )
-            .map { }
-            .onSuccess {
-                groupTaskLocalDataSource.updateTask(
-                    remoteId = taskId,
-                    title = title,
-                    description = description,
-                    dueDate = dueDate,
-                    priority = priority,
-                    assigneeUserId = assignedToUserId,
-                    assigneeDisplayName = assigneeMember?.displayName,
-                    assigneeAvatarUrl = assigneeMember?.avatarUrl,
-                )
-            }
+        return groupRemoteDataSource.updateGroupTask(
+            groupId = groupId,
+            taskId = taskId,
+            request = GroupTaskUpdateRequest(
+                title = title,
+                description = description,
+                dueDate = dueDate,
+                priority = priority,
+                assigneeId = assignedToUserId,
+                clearAssignee = assignedToUserId == null,
+            ),
+        ).map { }.onSuccess {
+            groupTaskLocalDataSource.updateTask(
+                remoteId = taskId,
+                title = title,
+                description = description,
+                dueDate = dueDate,
+                priority = priority,
+                assigneeUserId = assignedToUserId,
+                assigneeDisplayName = assigneeMember?.displayName,
+                assigneeAvatarUrl = assigneeMember?.avatarUrl,
+            )
+        }
     }
 
     override suspend fun assignGroupTask(groupId: Long, taskId: Long, userId: Long): Result<Unit> {

@@ -43,7 +43,7 @@ interface GroupRepository {
 
     suspend fun createGroupTask(groupId: Long, task: Task, priority: String? = null, assignedToUserId: Long? = null): Result<Unit>
 
-    suspend fun deleteGroupTask(taskId: Long): Result<Unit>
+    suspend fun deleteGroupTask(groupId: Long, taskId: Long): Result<Unit>
 
     suspend fun updateGroupTaskStatus(groupId: Long, taskId: Long, groupTask: GroupTask, isCompleted: Boolean): Result<Unit>
 
