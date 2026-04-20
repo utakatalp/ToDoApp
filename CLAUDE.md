@@ -244,6 +244,24 @@ object XyzContract {
 - **Don't** pass ViewModel as @Composable param (inject with hiltViewModel())
 - **Don't** use mutable objects as default params in Composables
 - **Don't** forget `.asStateFlow()` after `MutableStateFlow`
+- **Don't** take a raw `Context` in a ViewModel constructor. Always use `@ApplicationContext private val context: Context` or take `Context` as a method parameter at the call site (for transient use like permission checks). A stored Activity context in a `@HiltViewModel` will leak the Activity on config change.
+- **Don't** fire visual feedback (confetti, haptics, sounds) optimistically from a click handler. Drive them off a state transition via `LaunchedEffect(state)` so that a ViewModel that blocks the action (permissions, validation) correctly suppresses the effect.
+- **Don't** overwrite a screen's whole `UiState.Success` on a data refresh if that state also holds UI-owned fields (sheet open/closed, form state, pending dialog ids). When rebuilding the state, copy those fields over from the previous `Success`. Otherwise any code path that triggers `loadData()` while the sheet is open — notably the RESUMED→STARTED→RESUMED cycle from launching the photo picker — will wipe the sheet.
+- **Don't** decode `Bitmap`s into a `remember { }` without cleanup. Back the lifecycle with `DisposableEffect(bitmap) { onDispose { bitmap?.asAndroidBitmap()?.recycle() } }`, or (preferred) use Coil's `AsyncImage(model = byteArray, ...)` so Coil manages the native memory.
+- **Don't** register a singleton `CoroutineScope` without a shutdown path. `@Singleton class Foo { val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default) }` leaks unless a `fun shutdown() { scope.cancel() }` is invoked from `Application.onDestroy` via `ProcessLifecycleOwner`.
+
+## Networking / images / backend
+
+- The backend base URL comes from `local.properties` via `BuildConfig.BASE_URL` (set in `app/build.gradle.kts`). Do not hardcode hosts in Retrofit or anywhere else.
+- Coil is wired app-wide in `Application.newImageLoader()` using the injected auth `OkHttpClient`, so `AsyncImage(model = "$BASE_URL/users/$id/avatar")` sends the Bearer token automatically. No per-call-site setup needed — just build absolute URLs from `BuildConfig.BASE_URL + relativePath`.
+- When adding Coil to a **uikit** component, add `implementation(libs.coil.compose)` to `uikit/build.gradle.kts` (the app module already has it).
+
+## Reusable avatar components
+
+- Users: `MemberAvatar(initials, size, avatarUrl)` in `ui/groupdetail/GroupDetailMembersTab.kt`. Renders `AsyncImage` when `avatarUrl` is non-blank (prepends `BASE_URL`), otherwise shows initials.
+- Groups: `TDFamilyGroupCard(..., avatarUrl = ...)` in `uikit/components/TDGroupsSummary.kt`. Same pattern.
+- Current user chip: `AvatarChip` inside `TDTopBar.kt` handles `?v=` cache-busting via a `version` field on the VM — bump it when the avatar changes.
+- After `uploadAvatar` / `updateDisplayName` on `UserRepositoryImpl`, call `dataStoreHelper.setUser(it)` so the top bar's `observeUser()` chain picks up the change.
 
 ## Testing Conventions
 
