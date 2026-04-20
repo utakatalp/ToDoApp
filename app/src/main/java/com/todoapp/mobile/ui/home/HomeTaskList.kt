@@ -168,29 +168,19 @@ fun HomeTaskList(
                                 interactionSource = interactionSource,
                             ) {
                                 val firstPhoto = task.photoUrls.firstOrNull()
-                                if (task.isSecret) {
-                                    SecretTaskRow(
-                                        isChecked = task.isCompleted,
-                                        onCheckBoxClick = { onTaskCheck(task) },
-                                        onTap = { onTaskClick(task) },
-                                    )
-                                } else if (firstPhoto != null) {
+                                if (firstPhoto != null) {
                                     androidx.compose.foundation.layout.Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
                                             .background(com.todoapp.uikit.theme.TDTheme.colors.lightPending),
                                     ) {
-                                        coil.compose.AsyncImage(
-                                            model = run {
+                                        SecretOrNormalPhotoBanner(
+                                            url = run {
                                                 val base = com.todoapp.mobile.BuildConfig.BASE_URL.trimEnd('/')
                                                 "$base/${firstPhoto.trimStart('/')}"
                                             },
-                                            contentDescription = null,
-                                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(140.dp),
+                                            isSecret = task.isSecret,
                                         )
                                         TDTaskCardWithCheckbox(
                                             taskText = if (task.isSecret) task.title.maskTitle() else task.title,
