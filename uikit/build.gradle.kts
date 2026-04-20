@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.lottie.compose)
+    implementation(libs.coil.compose)
     debugImplementation(libs.androidx.ui.tooling)
     detektPlugins(libs.detekt.formatting)
 }

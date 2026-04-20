@@ -53,64 +53,75 @@ fun TDFamilyGroupCard(
     @DrawableRes membersIcon: Int,
     @DrawableRes tasksIcon: Int,
     modifier: Modifier = Modifier,
+    avatarUrl: String? = null,
     isDragging: Boolean = false,
     isAnyDragging: Boolean = false,
     onViewDetailsClick: () -> Unit = {},
     onDeleteClick: () -> Unit = {},
 ) {
-    val initials = name
-        .split(" ")
-        .filter { it.isNotBlank() }
-        .take(2)
-        .joinToString("") { it.first().uppercase() }
+    val initials =
+        name
+            .split(" ")
+            .filter { it.isNotBlank() }
+            .take(2)
+            .joinToString("") { it.first().uppercase() }
 
-    val roleColor = when (role.uppercase()) {
-        "ADMIN" -> TDTheme.colors.orange
-        else -> TDTheme.colors.pendingGray
-    }
+    val roleColor =
+        when (role.uppercase()) {
+            "ADMIN" -> TDTheme.colors.orange
+            else -> TDTheme.colors.pendingGray
+        }
 
     val dragScale by animateFloatAsState(
         targetValue = if (isDragging) 1.03f else 1f,
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
-        label = "dragScale"
+        label = "dragScale",
     )
     val cardAlpha by animateFloatAsState(
         targetValue = if (isAnyDragging && !isDragging) 0.72f else 1f,
         animationSpec = tween(200),
-        label = "cardAlpha"
+        label = "cardAlpha",
     )
     val activeBorderColor by animateColorAsState(
         targetValue = if (isDragging) TDTheme.colors.pendingGray else Color.Transparent,
         animationSpec = tween(150),
-        label = "activeBorderColor"
+        label = "activeBorderColor",
     )
     val activeBorderWidth by animateDpAsState(
         targetValue = if (isDragging) 2.dp else 0.dp,
         animationSpec = tween(150),
-        label = "activeBorderWidth"
+        label = "activeBorderWidth",
     )
 
     val isDark = TDTheme.isDark
     val cardShape = RoundedCornerShape(16.dp)
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
-            .graphicsLayer { scaleX = dragScale; scaleY = dragScale; alpha = cardAlpha }
-            .border(activeBorderWidth, activeBorderColor, cardShape)
+            .graphicsLayer {
+                scaleX = dragScale
+                scaleY = dragScale
+                alpha = cardAlpha
+            }.border(activeBorderWidth, activeBorderColor, cardShape)
             .padding(activeBorderWidth),
     ) {
         Card(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .then(
-                    if (isDark) Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.18f), cardShape)
-                    else Modifier.neumorphicShadow(
-                        lightShadow = TDTheme.colors.white.copy(alpha = 0.88f),
-                        darkShadow = TDTheme.colors.lightGray.copy(alpha = 0.35f),
-                        cornerRadius = 16.dp,
-                        elevation = 7.dp,
-                    )
+                    if (isDark) {
+                        Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.18f), cardShape)
+                    } else {
+                        Modifier.neumorphicShadow(
+                            lightShadow = TDTheme.colors.white.copy(alpha = 0.88f),
+                            darkShadow = TDTheme.colors.lightGray.copy(alpha = 0.35f),
+                            cornerRadius = 16.dp,
+                            elevation = 7.dp,
+                        )
+                    },
                 ),
             shape = cardShape,
             colors = CardDefaults.cardColors(containerColor = TDTheme.colors.background),
@@ -119,109 +130,120 @@ fun TDFamilyGroupCard(
             Box {
                 val isAdmin = role.equals("Admin", ignoreCase = true)
                 Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 20.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape)
-                            .background(TDTheme.colors.pendingGray),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        TDText(
-                            text = initials,
-                            color = TDTheme.colors.white,
-                            style = TDTheme.typography.heading1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(14.dp))
-
-                    Column {
-                        TDText(
-                            text = name,
-                            style = TDTheme.typography.heading3,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                            color = TDTheme.colors.onBackground
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
-                            modifier = Modifier
-                                .border(1.dp, roleColor, RoundedCornerShape(4.dp))
-                                .padding(horizontal = 10.dp, vertical = 2.dp)
+                            modifier =
+                            Modifier
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(TDTheme.colors.pendingGray),
+                            contentAlignment = Alignment.Center,
                         ) {
+                            if (!avatarUrl.isNullOrBlank()) {
+                                coil.compose.AsyncImage(
+                                    model = avatarUrl,
+                                    contentDescription = null,
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                    modifier = Modifier.size(56.dp).clip(CircleShape),
+                                )
+                            } else {
+                                TDText(
+                                    text = initials,
+                                    color = TDTheme.colors.white,
+                                    style = TDTheme.typography.heading1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(14.dp))
+
+                        Column {
                             TDText(
-                                text = role.uppercase(),
-                                style = TDTheme.typography.subheading4,
+                                text = name,
+                                style = TDTheme.typography.heading3,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
-                                color = roleColor
+                                color = TDTheme.colors.onBackground,
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Box(
+                                modifier =
+                                Modifier
+                                    .border(1.dp, roleColor, RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 10.dp, vertical = 2.dp),
+                            ) {
+                                TDText(
+                                    text = role.uppercase(),
+                                    style = TDTheme.typography.subheading4,
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1,
+                                    color = roleColor,
+                                )
+                            }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                TDText(
-                    text = "\"$description\"",
-                    style = TDTheme.typography.subheading3,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 2,
-                    color = TDTheme.colors.statusCardGray,
-                )
-
-                Spacer(modifier = Modifier.height(18.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    StatBox(
-                        iconRes = membersIcon,
-                        iconTint = TDTheme.colors.pendingGray,
-                        value = "$memberCount",
-                        label = stringResource(R.string.group_card_members_label),
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatBox(
-                        iconRes = tasksIcon,
-                        iconTint = TDTheme.colors.pendingGray,
-                        value = "$pendingTaskCount",
-                        label = stringResource(R.string.group_card_pending_label),
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
                     TDText(
-                        text = stringResource(R.string.group_card_created_label, createdDate),
-                        style = TDTheme.typography.subheading4,
-                        color = TDTheme.colors.statusCardGray
+                        text = "\"$description\"",
+                        style = TDTheme.typography.subheading3,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 2,
+                        color = TDTheme.colors.statusCardGray,
                     )
 
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.height(18.dp))
 
-                    TDButton(
-                        onClick = onViewDetailsClick,
-                        text = stringResource(R.string.group_card_view_details),
-                        modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                        type = TDButtonType.OUTLINE,
-                        size = TDButtonSize.SMALL,
-                    )
-                }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        StatBox(
+                            iconRes = membersIcon,
+                            iconTint = TDTheme.colors.pendingGray,
+                            value = "$memberCount",
+                            label = stringResource(R.string.group_card_members_label),
+                            modifier = Modifier.weight(1f),
+                        )
+                        StatBox(
+                            iconRes = tasksIcon,
+                            iconTint = TDTheme.colors.pendingGray,
+                            value = "$pendingTaskCount",
+                            label = stringResource(R.string.group_card_pending_label),
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        TDText(
+                            text = stringResource(R.string.group_card_created_label, createdDate),
+                            style = TDTheme.typography.subheading4,
+                            color = TDTheme.colors.statusCardGray,
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        TDButton(
+                            onClick = onViewDetailsClick,
+                            text = stringResource(R.string.group_card_view_details),
+                            modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                            type = TDButtonType.OUTLINE,
+                            size = TDButtonSize.SMALL,
+                        )
+                    }
                 }
                 if (isAdmin) {
                     IconButton(
                         onClick = onDeleteClick,
-                        modifier = Modifier.align(Alignment.TopEnd)
+                        modifier = Modifier.align(Alignment.TopEnd),
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_delete),
@@ -247,14 +269,18 @@ private fun StatBox(
     val isDark = TDTheme.isDark
     val statBoxShape = RoundedCornerShape(12.dp)
     Surface(
-        modifier = modifier.then(
-            if (isDark) Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.2f), statBoxShape)
-            else Modifier.neumorphicShadow(
-                lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
-                darkShadow = TDTheme.colors.darkPending.copy(alpha = 0.15f),
-                cornerRadius = 12.dp,
-                elevation = 4.dp,
-            )
+        modifier =
+        modifier.then(
+            if (isDark) {
+                Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.2f), statBoxShape)
+            } else {
+                Modifier.neumorphicShadow(
+                    lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
+                    darkShadow = TDTheme.colors.darkPending.copy(alpha = 0.15f),
+                    cornerRadius = 12.dp,
+                    elevation = 4.dp,
+                )
+            },
         ),
         shape = statBoxShape,
         color = TDTheme.colors.lightPending,
@@ -263,24 +289,24 @@ private fun StatBox(
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Icon(
                 painter = painterResource(id = iconRes),
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(22.dp),
             )
             Column {
                 TDText(
                     text = value,
                     style = TDTheme.typography.heading3,
-                    color = TDTheme.colors.onBackground
+                    color = TDTheme.colors.onBackground,
                 )
                 TDText(
                     text = label,
                     style = TDTheme.typography.subheading4,
-                    color = TDTheme.colors.statusCardGray
+                    color = TDTheme.colors.statusCardGray,
                 )
             }
         }

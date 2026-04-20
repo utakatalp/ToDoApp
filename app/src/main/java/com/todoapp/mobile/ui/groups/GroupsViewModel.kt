@@ -29,12 +29,13 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class GroupsViewModel @Inject constructor(
+class GroupsViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val pendingDeleteGroupId = savedStateHandle.toRoute<Screen.Groups>().pendingDeleteGroupId
     private var pendingDeleteHandled = false
 
@@ -63,7 +64,9 @@ class GroupsViewModel @Inject constructor(
             is UiAction.OnGroupTap -> {
                 action.remoteId.let { remoteId ->
                     _navEffect.trySend(
-                        NavigationEffect.Navigate(Screen.GroupDetail(groupId = remoteId, groupName = action.groupName))
+                        NavigationEffect.Navigate(
+                            Screen.GroupDetail(groupId = remoteId, groupName = action.groupName),
+                        ),
                     )
                 }
             }
@@ -81,8 +84,8 @@ class GroupsViewModel @Inject constructor(
             } else {
                 _navEffect.trySend(
                     NavigationEffect.Navigate(
-                        Screen.Login(redirectAfterLogin = Screen.Groups::class.qualifiedName)
-                    )
+                        Screen.Login(redirectAfterLogin = Screen.Groups::class.qualifiedName),
+                    ),
                 )
             }
         }
@@ -91,15 +94,15 @@ class GroupsViewModel @Inject constructor(
     private fun fetchRemoteGroups() {
         viewModelScope.launch {
             repeat(MAX_RETRY_COUNT) { attempt ->
-                groupRepository.getGroups()
+                groupRepository
+                    .getGroups()
                     .onSuccess { result ->
                         remoteSummaryCache = result.groups.associateBy { it.id }
                         result.groups.forEach { group ->
                             launch { groupRepository.syncGroupTasks(group.id) }
                         }
                         return@launch
-                    }
-                    .onFailure { t ->
+                    }.onFailure { t ->
                         if (attempt < MAX_RETRY_COUNT - 1) {
                             delay(RETRY_DELAY_MS)
                         }
@@ -113,15 +116,15 @@ class GroupsViewModel @Inject constructor(
             groupRepository.observeAllGroups().collect { groups ->
                 _uiState.update {
                     (
-                            if (groups.isEmpty()) {
-                                UiState.Empty(isUserAuthenticated = userRepository.getUserInfo().isSuccess)
-                            } else {
-                                UiState.Success(
-                                    groups = groups.map { it.toUiItem() },
-                                    isUserAuthenticated = userRepository.getUserInfo().isSuccess
-                                )
-                            }
+                        if (groups.isEmpty()) {
+                            UiState.Empty(isUserAuthenticated = userRepository.getUserInfo().isSuccess)
+                        } else {
+                            UiState.Success(
+                                groups = groups.map { it.toUiItem() },
+                                isUserAuthenticated = userRepository.getUserInfo().isSuccess,
                             )
+                        }
+                        )
                 }
                 if (!pendingDeleteHandled && pendingDeleteGroupId > 0 && groups.isNotEmpty()) {
                     pendingDeleteHandled = true
@@ -152,12 +155,14 @@ class GroupsViewModel @Inject constructor(
     private fun startPendingDelete(group: GroupsContract.GroupUiItem) {
         updateSuccessState { it.copy(pendingDeleteGroup = group) }
         pendingDeleteJob?.cancel()
-        pendingDeleteJob = viewModelScope.launch {
-            delay(UNDO_DELAY_MS)
-            groupRepository.deleteGroup(group.id)
-                .onFailure { t -> Log.e("GroupsViewModel", "Failed to delete group", t) }
-            updateSuccessState { it.copy(pendingDeleteGroup = null) }
-        }
+        pendingDeleteJob =
+            viewModelScope.launch {
+                delay(UNDO_DELAY_MS)
+                groupRepository
+                    .deleteGroup(group.id)
+                    .onFailure { t -> Log.e("GroupsViewModel", "Failed to delete group", t) }
+                updateSuccessState { it.copy(pendingDeleteGroup = null) }
+            }
     }
 
     private fun undoDeleteGroup() {
@@ -179,12 +184,13 @@ class GroupsViewModel @Inject constructor(
         _uiState.value = current.copy(groups = mutable)
 
         viewModelScope.launch(Dispatchers.IO) {
-            groupRepository.reorderGroups(
-                fromIndex = action.from,
-                toIndex = action.to,
-            ).onFailure { t ->
-                Log.e("GroupsViewModel", "Failed to persist group reorder", t)
-            }
+            groupRepository
+                .reorderGroups(
+                    fromIndex = action.from,
+                    toIndex = action.to,
+                ).onFailure { t ->
+                    Log.e("GroupsViewModel", "Failed to persist group reorder", t)
+                }
         }
     }
 
@@ -199,6 +205,13 @@ class GroupsViewModel @Inject constructor(
             memberCount = remote?.memberCount ?: memberCount,
             pendingTaskCount = remote?.pendingTaskCount ?: pendingTaskCount,
             createdAt = formatTimestamp(createdAt),
+            avatarUrl =
+            remote?.avatarUrl?.takeIf { it.isNotBlank() }?.let {
+                val base =
+                    com.todoapp.mobile.BuildConfig.BASE_URL
+                        .trimEnd('/')
+                "$base/${it.trimStart('/')}"
+            },
         )
     }
 

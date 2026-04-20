@@ -46,9 +46,7 @@ import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun ManageMembersScreen(
-    viewModel: ManageMembersViewModel = hiltViewModel(),
-) {
+fun ManageMembersScreen(viewModel: ManageMembersViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -79,7 +77,8 @@ private fun ManageMembersContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background),
     ) {
@@ -109,7 +108,8 @@ private fun ManageMembersSuccessContent(
     onAction: (UiAction) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
     ) {
@@ -150,7 +150,8 @@ private fun ManageMemberRow(
     onClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(TDTheme.colors.background)
@@ -160,6 +161,7 @@ private fun ManageMemberRow(
     ) {
         MemberAvatar(
             initials = member.initials,
+            avatarUrl = member.avatarUrl,
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -194,15 +196,17 @@ private fun ManageMemberRow(
 private fun ManageMembersContentPreview() {
     TDTheme {
         ManageMembersContent(
-            uiState = ManageMembersContract.UiState.Success(
-                members = listOf(
+            uiState =
+            ManageMembersContract.UiState.Success(
+                members =
+                listOf(
                     ManageMemberUiItem(
                         1,
                         "John Doe",
                         "JD",
                         "john@example.com",
                         "ADMIN",
-                        role = "ADMIN"
+                        role = "ADMIN",
                     ),
                     ManageMemberUiItem(
                         2,
@@ -210,11 +214,11 @@ private fun ManageMembersContentPreview() {
                         "JS",
                         "jane@example.com",
                         "MEMBER",
-                        role = "MEMBER"
-                    )
-                )
+                        role = "MEMBER",
+                    ),
+                ),
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -224,15 +228,17 @@ private fun ManageMembersContentPreview() {
 private fun ManageMembersContentDarkPreview() {
     TDTheme {
         ManageMembersContent(
-            uiState = ManageMembersContract.UiState.Success(
-                members = listOf(
+            uiState =
+            ManageMembersContract.UiState.Success(
+                members =
+                listOf(
                     ManageMemberUiItem(
                         1,
                         "John Doe",
                         "JD",
                         "john@example.com",
                         "ADMIN",
-                        role = "ADMIN"
+                        role = "ADMIN",
                     ),
                     ManageMemberUiItem(
                         2,
@@ -240,11 +246,11 @@ private fun ManageMembersContentDarkPreview() {
                         "JS",
                         "jane@example.com",
                         "MEMBER",
-                        role = "MEMBER"
-                    )
-                )
+                        role = "MEMBER",
+                    ),
+                ),
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }

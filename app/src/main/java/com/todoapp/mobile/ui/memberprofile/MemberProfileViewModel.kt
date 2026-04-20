@@ -31,12 +31,13 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class MemberProfileViewModel @Inject constructor(
+class MemberProfileViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
-
     private val route = savedStateHandle.toRoute<Screen.MemberProfile>()
     private val groupId = route.groupId
     private val userId = route.userId
@@ -79,7 +80,8 @@ class MemberProfileViewModel @Inject constructor(
         if (pendingUserId != null && pendingRemoveJob?.isActive == true) {
             pendingRemoveJob?.cancel()
             CoroutineScope(SupervisorJob()).launch {
-                groupRepository.removeMember(groupId, userId)
+                groupRepository
+                    .removeMember(groupId, userId)
                     .onSuccess { unassignMemberTasks() }
             }
         }
@@ -87,7 +89,8 @@ class MemberProfileViewModel @Inject constructor(
 
     private fun loadMember() {
         viewModelScope.launch {
-            groupRepository.getGroupMembers(groupId)
+            groupRepository
+                .getGroupMembers(groupId)
                 .onSuccess { members ->
                     val member = members.find { it.userId == userId }
                     if (member != null) {
@@ -95,8 +98,7 @@ class MemberProfileViewModel @Inject constructor(
                     } else {
                         _uiState.value = UiState.Error(context.getString(R.string.member_not_found))
                     }
-                }
-                .onFailure {
+                }.onFailure {
                     _uiState.value = UiState.Error(context.getString(R.string.failed_to_load_member))
                 }
         }
@@ -106,20 +108,21 @@ class MemberProfileViewModel @Inject constructor(
         pendingUserId = userId
         updateSuccessState { it.copy(pendingRemoval = true) }
         pendingRemoveJob?.cancel()
-        pendingRemoveJob = viewModelScope.launch {
-            delay(UNDO_DELAY_MS)
-            executeRemoval()
-        }
+        pendingRemoveJob =
+            viewModelScope.launch {
+                delay(UNDO_DELAY_MS)
+                executeRemoval()
+            }
     }
 
     private suspend fun executeRemoval() {
-        groupRepository.removeMember(groupId, userId)
+        groupRepository
+            .removeMember(groupId, userId)
             .onSuccess {
                 unassignMemberTasks()
                 pendingUserId = null
                 _navEffect.trySend(NavigationEffect.Back)
-            }
-            .onFailure {
+            }.onFailure {
                 pendingUserId = null
                 updateSuccessState { it.copy(pendingRemoval = false) }
                 _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.failed_to_remove_member)))
@@ -127,7 +130,8 @@ class MemberProfileViewModel @Inject constructor(
     }
 
     private suspend fun unassignMemberTasks() {
-        groupRepository.getGroupTasks(groupId)
+        groupRepository
+            .getGroupTasks(groupId)
             .onSuccess { tasks ->
                 tasks
                     .filter { it.assignee?.userId == userId }
@@ -144,7 +148,12 @@ class MemberProfileViewModel @Inject constructor(
         val parts = displayName.trim().split(" ")
         val firstName = parts.firstOrNull() ?: displayName
         val lastName = if (parts.size > 1) parts.drop(1).joinToString(" ") else ""
-        val initials = parts.mapNotNull { it.firstOrNull()?.toString() }.take(2).joinToString("").uppercase()
+        val initials =
+            parts
+                .mapNotNull { it.firstOrNull()?.toString() }
+                .take(2)
+                .joinToString("")
+                .uppercase()
         val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         val formattedJoinedAt = dateFormat.format(Date(joinedAt))
         return MemberUiItem(
@@ -153,6 +162,7 @@ class MemberProfileViewModel @Inject constructor(
             firstName = firstName,
             lastName = lastName,
             email = email,
+            avatarUrl = avatarUrl,
             initials = initials,
             role = role,
             joinedAt = formattedJoinedAt,

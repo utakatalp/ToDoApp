@@ -26,11 +26,10 @@ import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun GroupDetailActivityTab(
-    uiState: UiState.Success,
-) {
+fun GroupDetailActivityTab(uiState: UiState.Success) {
     LazyColumn(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
     ) {
@@ -51,7 +50,8 @@ fun GroupDetailActivityTab(
 private fun GroupDetailActivityTabPreview() {
     TDTheme {
         GroupDetailActivityTab(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 groupId = 1L,
                 groupName = "The Smith Family",
                 description = "",
@@ -74,7 +74,8 @@ private fun GroupDetailActivityTabPreview() {
 private fun GroupDetailActivityTabEmptyPreview() {
     TDTheme {
         GroupDetailActivityTab(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 groupId = 1L,
                 groupName = "The Smith Family",
                 description = "",
@@ -100,6 +101,7 @@ private fun ActivityItem(activity: GroupActivityUiItem) {
         MemberAvatar(
             initials = activity.actorInitials,
             size = 40,
+            avatarUrl = activity.actorAvatarUrl,
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -129,7 +131,8 @@ private fun ActivityItem(activity: GroupActivityUiItem) {
             activity.taskTitle?.let { taskTitle ->
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
                         .background(TDTheme.colors.lightPending)

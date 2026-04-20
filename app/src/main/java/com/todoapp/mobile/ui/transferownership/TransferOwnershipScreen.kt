@@ -42,9 +42,7 @@ import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun TransferOwnershipScreen(
-    viewModel: TransferOwnershipViewModel = hiltViewModel(),
-) {
+fun TransferOwnershipScreen(viewModel: TransferOwnershipViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -68,7 +66,8 @@ private fun TransferOwnershipContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background),
     ) {
@@ -96,7 +95,8 @@ private fun TransferOwnershipSuccessContent(
     onAction: (UiAction) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
     ) {
@@ -119,7 +119,8 @@ private fun TransferOwnershipSuccessContent(
                     )
                 },
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                colors =
+                OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = TDTheme.colors.pendingGray,
                     unfocusedBorderColor = TDTheme.colors.lightGray,
                     focusedTextColor = TDTheme.colors.onBackground,
@@ -174,7 +175,8 @@ private fun TransferMemberRow(
     onClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(TDTheme.colors.surface)
@@ -184,6 +186,7 @@ private fun TransferMemberRow(
     ) {
         MemberAvatar(
             initials = member.initials,
+            avatarUrl = member.avatarUrl,
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +45,8 @@ fun GroupDetailMembersTab(
     onAction: (UiAction) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
     ) {
@@ -92,13 +94,13 @@ private fun MemberCard(
     onRemove: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .border(
                 width = 2.dp,
                 shape = RoundedCornerShape(12.dp),
                 color = TDTheme.colors.pendingGray,
-            )
-            .fillMaxWidth()
+            ).fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(TDTheme.colors.background)
             .padding(16.dp),
@@ -109,14 +111,20 @@ private fun MemberCard(
         ) {
             MemberAvatar(
                 initials = member.initials,
+                avatarUrl = member.avatarUrl,
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TDText(
-                        text = if (member.isCurrentUser) "${member.displayName} (${stringResource(
-                                R.string.you
-                            )})" else member.displayName,
+                        text =
+                        if (member.isCurrentUser) {
+                            "${member.displayName} (${stringResource(
+                                R.string.you,
+                            )})"
+                        } else {
+                            member.displayName
+                        },
                         style = TDTheme.typography.subheading1,
                         color = TDTheme.colors.onBackground,
                     )
@@ -193,7 +201,8 @@ private fun MemberCard(
 private fun GroupDetailMembersTabAdminPreview() {
     TDTheme {
         GroupDetailMembersTab(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 groupId = 1L,
                 groupName = "The Smith Family",
                 description = "Daily chores, grocery lists, and vacation planning for 2024.",
@@ -217,7 +226,8 @@ private fun GroupDetailMembersTabAdminPreview() {
 private fun GroupDetailMembersTabMemberPreview() {
     TDTheme {
         GroupDetailMembersTab(
-            uiState = UiState.Success(
+            uiState =
+            UiState.Success(
                 groupId = 1L,
                 groupName = "The Smith Family",
                 description = "",
@@ -240,19 +250,42 @@ fun MemberAvatar(
     initials: String,
     modifier: Modifier = Modifier,
     size: Int = 44,
+    avatarUrl: String? = null,
 ) {
+    val absoluteUrl =
+        remember(avatarUrl) {
+            if (avatarUrl.isNullOrBlank()) {
+                null
+            } else {
+                val base =
+                    com.todoapp.mobile.BuildConfig.BASE_URL
+                        .trimEnd('/')
+                val rel = avatarUrl.trimStart('/')
+                "$base/$rel"
+            }
+        }
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .size(size.dp)
             .clip(CircleShape)
             .background(TDTheme.colors.pendingGray),
         contentAlignment = Alignment.Center,
     ) {
-        TDText(
-            text = initials.take(2),
-            style = TDTheme.typography.heading3,
-            color = TDTheme.colors.white,
-        )
+        if (absoluteUrl != null) {
+            coil.compose.AsyncImage(
+                model = absoluteUrl,
+                contentDescription = null,
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                modifier = Modifier.size(size.dp).clip(CircleShape),
+            )
+        } else {
+            TDText(
+                text = initials.take(2),
+                style = TDTheme.typography.heading3,
+                color = TDTheme.colors.white,
+            )
+        }
     }
 }
 
@@ -260,7 +293,8 @@ fun MemberAvatar(
 fun RoleBadge(role: String) {
     val isAdmin = role.uppercase() == "ADMIN"
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .clip(RoundedCornerShape(4.dp))
             .background(if (isAdmin) TDTheme.colors.orange else TDTheme.colors.pendingGray.copy(alpha = 0.5f))
             .padding(horizontal = 8.dp, vertical = 2.dp),

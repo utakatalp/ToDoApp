@@ -75,10 +75,11 @@ fun GroupScreen(
     }
 
     when (uiState) {
-        is UiState.Empty -> GroupEmptyContent(
-            onCreateNewGroup = { onAction(UiAction.OnCreateNewGroupTap) },
-            uiState = uiState
-        )
+        is UiState.Empty ->
+            GroupEmptyContent(
+                onCreateNewGroup = { onAction(UiAction.OnCreateNewGroupTap) },
+                uiState = uiState,
+            )
 
         is UiState.Error -> {}
         UiState.Loading -> {}
@@ -98,14 +99,15 @@ private fun GroupsContent(
     var dragOriginalIndex by remember { mutableIntStateOf(-1) }
     var dragFinalIndex by remember { mutableIntStateOf(-1) }
 
-    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        if (dragOriginalIndex == -1) dragOriginalIndex = from.index
-        dragFinalIndex = to.index
-        val list = localGroups.toMutableList()
-        list.move(from.index, to.index)
-        localGroups = list
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-    }
+    val reorderableLazyListState =
+        rememberReorderableLazyListState(lazyListState) { from, to ->
+            if (dragOriginalIndex == -1) dragOriginalIndex = from.index
+            dragFinalIndex = to.index
+            val list = localGroups.toMutableList()
+            list.move(from.index, to.index)
+            localGroups = list
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
 
     LaunchedEffect(uiState.groups) {
         if (!reorderableLazyListState.isAnyItemDragging) {
@@ -114,15 +116,16 @@ private fun GroupsContent(
     }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .background(TDTheme.colors.background)
+            .background(TDTheme.colors.background),
     ) groupsColumn@{
         TDText(
             text = stringResource(com.todoapp.mobile.R.string.my_groups),
             style = TDTheme.typography.heading1,
             color = TDTheme.colors.onBackground,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp)
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
         )
 
         val isAnyDragging = reorderableLazyListState.isAnyItemDragging
@@ -132,15 +135,15 @@ private fun GroupsContent(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 itemsIndexed(
                     items = localGroups.filter { it.id != uiState.pendingDeleteGroup?.id },
-                    key = { _, group -> group.id }
+                    key = { _, group -> group.id },
                 ) { index, group ->
                     ReorderableItem(
                         state = reorderableLazyListState,
-                        key = group.id
+                        key = group.id,
                     ) { isDragging ->
                         TDFamilyGroupCard(
                             name = group.name,
@@ -151,47 +154,49 @@ private fun GroupsContent(
                             createdDate = group.createdAt,
                             membersIcon = R.drawable.ic_members,
                             tasksIcon = R.drawable.ic_sand_clock,
+                            avatarUrl = group.avatarUrl,
                             onViewDetailsClick = {
                                 group.remoteId?.let {
                                     onAction(
-                                UiAction.OnGroupTap(it, group.name)
-                            )
+                                        UiAction.OnGroupTap(it, group.name),
+                                    )
                                 }
                             },
                             onDeleteClick = { onAction(UiAction.OnDeleteGroupTap(group.id)) },
                             isDragging = isDragging,
                             isAnyDragging = isAnyDragging,
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .semantics {
-                                    customActions = listOf(
-                                        CustomAccessibilityAction(
-                                            label = "Move Up",
-                                            action = {
-                                                if (index > 0) {
-                                                    onAction(UiAction.OnMoveGroup(index, index - 1))
-                                                    true
-                                                } else {
-                                                    false
-                                                }
-                                            }
-                                        ),
-                                        CustomAccessibilityAction(
-                                            label = "Move Down",
-                                            action = {
-                                                if (index < localGroups.lastIndex) {
-                                                    onAction(UiAction.OnMoveGroup(index, index + 1))
-                                                    true
-                                                } else {
-                                                    false
-                                                }
-                                            }
-                                        ),
-                                    )
-                                }
-                                .longPressDraggableHandle(
+                                    customActions =
+                                        listOf(
+                                            CustomAccessibilityAction(
+                                                label = "Move Up",
+                                                action = {
+                                                    if (index > 0) {
+                                                        onAction(UiAction.OnMoveGroup(index, index - 1))
+                                                        true
+                                                    } else {
+                                                        false
+                                                    }
+                                                },
+                                            ),
+                                            CustomAccessibilityAction(
+                                                label = "Move Down",
+                                                action = {
+                                                    if (index < localGroups.lastIndex) {
+                                                        onAction(UiAction.OnMoveGroup(index, index + 1))
+                                                        true
+                                                    } else {
+                                                        false
+                                                    }
+                                                },
+                                            ),
+                                        )
+                                }.longPressDraggableHandle(
                                     onDragStarted = {
                                         hapticFeedback.performHapticFeedback(
-                                            HapticFeedbackType.GestureThresholdActivate
+                                            HapticFeedbackType.GestureThresholdActivate,
                                         )
                                     },
                                     onDragStopped = {
@@ -204,9 +209,14 @@ private fun GroupsContent(
                                             onAction(UiAction.OnMoveGroup(orig, final))
                                         }
                                     },
-                                )
-                                .clickable(
-                                    onClick = { group.remoteId?.let { onAction(UiAction.OnGroupTap(it, group.name)) } },
+                                ).clickable(
+                                    onClick = {
+                                        group.remoteId?.let {
+                                            onAction(
+                                                UiAction.OnGroupTap(it, group.name),
+                                            )
+                                        }
+                                    },
                                 ),
                         )
                     }
@@ -214,7 +224,8 @@ private fun GroupsContent(
             }
 
             TDButton(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomEnd)
                     .padding(24.dp),
                 text = stringResource(com.todoapp.mobile.R.string.create_new_group),
@@ -224,7 +235,8 @@ private fun GroupsContent(
             )
 
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth(),
             ) {
@@ -276,7 +288,8 @@ private fun GroupEmptyContent(
     onCreateNewGroup: () -> Unit = {},
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(color = TDTheme.colors.background)
             .padding(32.dp),
@@ -287,19 +300,19 @@ private fun GroupEmptyContent(
             painterResource(R.drawable.ic_avatar_new_group),
             contentDescription = stringResource(com.todoapp.mobile.R.string.new_group),
             modifier = Modifier.size(192.dp),
-            tint = TDTheme.colors.pendingGray.copy(0.81f)
+            tint = TDTheme.colors.pendingGray.copy(0.81f),
         )
         Spacer(Modifier.height(32.dp))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             TDText(
                 text = stringResource(com.todoapp.mobile.R.string.you_don_t_have_any),
                 style = TDTheme.typography.heading2,
-                color = TDTheme.colors.onBackground
+                color = TDTheme.colors.onBackground,
             )
             TDText(
                 text = stringResource(com.todoapp.mobile.R.string.groups_yet),
                 style = TDTheme.typography.heading2,
-                color = TDTheme.colors.onBackground
+                color = TDTheme.colors.onBackground,
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -307,25 +320,26 @@ private fun GroupEmptyContent(
             TDText(
                 text = stringResource(com.todoapp.mobile.R.string.create_a_group_to_start_collaborating_on),
                 style = TDTheme.typography.subheading3,
-                color = TDTheme.colors.lightGray
+                color = TDTheme.colors.lightGray,
             )
             TDText(
                 text = stringResource(com.todoapp.mobile.R.string.tasks_with_your_family),
                 style = TDTheme.typography.subheading3,
-                color = TDTheme.colors.lightGray
+                color = TDTheme.colors.lightGray,
             )
         }
         Spacer(Modifier.height(32.dp))
         TDButton(
             modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-            text = if (uiState.isUserAuthenticated) {
+            text =
+            if (uiState.isUserAuthenticated) {
                 stringResource(com.todoapp.mobile.R.string.create_new_group)
             } else {
                 stringResource(
-                com.todoapp.mobile.R.string.login_to_create_a_group
-            )
+                    com.todoapp.mobile.R.string.login_to_create_a_group,
+                )
             },
-            fullWidth = true
+            fullWidth = true,
         ) { onCreateNewGroup() }
     }
 }
@@ -339,7 +353,7 @@ private fun GroupsContentPreview(
     TDTheme {
         GroupScreen(
             uiState = uiState,
-            onAction = {}
+            onAction = {},
         )
     }
 }

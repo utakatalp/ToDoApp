@@ -51,9 +51,7 @@ import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
-fun MemberProfileScreen(
-    viewModel: MemberProfileViewModel = hiltViewModel(),
-) {
+fun MemberProfileScreen(viewModel: MemberProfileViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -76,7 +74,8 @@ private fun MemberProfileContent(
     onAction: (UiAction) -> Unit,
 ) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background),
     ) {
@@ -113,7 +112,8 @@ private fun MemberProfileSuccessContent(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
@@ -123,6 +123,7 @@ private fun MemberProfileSuccessContent(
             MemberAvatar(
                 initials = uiState.member.initials,
                 size = 72,
+                avatarUrl = uiState.member.avatarUrl,
             )
             Spacer(modifier = Modifier.height(12.dp))
             TDText(
@@ -146,7 +147,8 @@ private fun MemberProfileSuccessContent(
         }
 
         AnimatedVisibility(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
             visible = uiState.pendingRemoval,
@@ -202,7 +204,8 @@ private fun MemberProfileSuccessContent(
 @Composable
 private fun MemberInfoCard(member: MemberUiItem) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(TDTheme.colors.background),
@@ -236,7 +239,8 @@ private fun InfoRow(
     label: String,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -261,19 +265,22 @@ private fun InfoRow(
 private fun MemberProfileContentPreview() {
     TDTheme {
         MemberProfileContent(
-            uiState = MemberProfileContract.UiState.Success(
-                member = MemberUiItem(
+            uiState =
+            MemberProfileContract.UiState.Success(
+                member =
+                MemberUiItem(
                     userId = 1,
                     firstName = "John",
                     lastName = "Doe",
                     email = "john@example.com",
+                    avatarUrl = null,
                     role = "ADMIN",
                     joinedAt = "Jan 12, 2024",
                     displayName = "John Doe",
-                    initials = "JD"
-                )
+                    initials = "JD",
+                ),
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }
@@ -283,19 +290,22 @@ private fun MemberProfileContentPreview() {
 private fun MemberProfileContentDarkPreview() {
     TDTheme {
         MemberProfileContent(
-            uiState = MemberProfileContract.UiState.Success(
-                member = MemberUiItem(
+            uiState =
+            MemberProfileContract.UiState.Success(
+                member =
+                MemberUiItem(
                     userId = 2,
                     firstName = "Jane",
                     lastName = "Smith",
                     email = "jane@example.com",
+                    avatarUrl = null,
                     role = "MEMBER",
                     joinedAt = "Feb 05, 2024",
                     displayName = "Jane Smith",
-                    initials = "JS"
-                )
+                    initials = "JS",
+                ),
             ),
-            onAction = {}
+            onAction = {},
         )
     }
 }
