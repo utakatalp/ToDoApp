@@ -134,7 +134,7 @@ fun HomeContent(
                     Row(
                         modifier = Modifier
                             .background(
-                                color = TDTheme.colors.purple.copy(
+                                color = TDTheme.colors.pendingGray.copy(
                                     alpha = (pullState.distanceFraction * 1.5f).coerceIn(0.4f, 1f)
                                 ),
                                 shape = RoundedCornerShape(50.dp),

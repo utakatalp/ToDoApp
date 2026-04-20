@@ -75,7 +75,7 @@ private fun TransferOwnershipContent(
         when (uiState) {
             is TransferOwnershipContract.UiState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = TDTheme.colors.primary)
+                    CircularProgressIndicator(color = TDTheme.colors.pendingGray)
                 }
             }
             is TransferOwnershipContract.UiState.Error -> {
@@ -120,11 +120,11 @@ private fun TransferOwnershipSuccessContent(
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = TDTheme.colors.primary,
+                    focusedBorderColor = TDTheme.colors.pendingGray,
                     unfocusedBorderColor = TDTheme.colors.lightGray,
                     focusedTextColor = TDTheme.colors.onBackground,
                     unfocusedTextColor = TDTheme.colors.onBackground,
-                    cursorColor = TDTheme.colors.primary,
+                    cursorColor = TDTheme.colors.pendingGray,
                 ),
                 singleLine = true,
             )
@@ -201,7 +201,7 @@ private fun TransferMemberRow(
         RadioButton(
             selected = isSelected,
             onClick = onClick,
-            colors = RadioButtonDefaults.colors(selectedColor = TDTheme.colors.primary),
+            colors = RadioButtonDefaults.colors(selectedColor = TDTheme.colors.pendingGray),
             modifier = Modifier.size(24.dp),
         )
     }

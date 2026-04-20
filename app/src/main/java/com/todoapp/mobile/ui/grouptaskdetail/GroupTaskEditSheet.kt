@@ -175,7 +175,7 @@ private fun EditTaskAssigneeSelector(
                             .background(if (isSelected) TDTheme.colors.pendingGray else TDTheme.colors.lightPending)
                             .then(
                                 if (isSelected) {
-                                    Modifier.border(2.dp, TDTheme.colors.primary, CircleShape)
+                                    Modifier.border(2.dp, TDTheme.colors.pendingGray, CircleShape)
                                 } else {
                                     Modifier
                                 }
@@ -184,7 +184,7 @@ private fun EditTaskAssigneeSelector(
                         TDText(
                             text = member.initials,
                             style = TDTheme.typography.subheading2,
-                            color = if (isSelected) TDTheme.colors.surface else TDTheme.colors.primary,
+                            color = if (isSelected) TDTheme.colors.surface else TDTheme.colors.pendingGray,
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -192,7 +192,7 @@ private fun EditTaskAssigneeSelector(
                     TDText(
                         text = member.displayName.split(" ").firstOrNull() ?: member.displayName,
                         style = TDTheme.typography.subheading4,
-                        color = if (isSelected) TDTheme.colors.primary else TDTheme.colors.gray,
+                        color = if (isSelected) TDTheme.colors.pendingGray else TDTheme.colors.gray,
                     )
                 }
             }

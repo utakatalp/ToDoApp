@@ -77,7 +77,7 @@ private fun GroupSettingsContent(
             Spacer(modifier = Modifier.height(48.dp))
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                color = TDTheme.colors.primary,
+                color = TDTheme.colors.pendingGray,
             )
             return@Column
         }
@@ -97,11 +97,11 @@ private fun GroupSettingsContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = TDTheme.colors.primary,
+                    focusedBorderColor = TDTheme.colors.pendingGray,
                     unfocusedBorderColor = TDTheme.colors.lightGray,
                     focusedTextColor = TDTheme.colors.onBackground,
                     unfocusedTextColor = TDTheme.colors.onBackground,
-                    cursorColor = TDTheme.colors.primary,
+                    cursorColor = TDTheme.colors.pendingGray,
                 ),
                 singleLine = true,
             )
@@ -133,11 +133,11 @@ private fun GroupSettingsContent(
                     .height(120.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = TDTheme.colors.primary,
+                    focusedBorderColor = TDTheme.colors.pendingGray,
                     unfocusedBorderColor = TDTheme.colors.lightGray,
                     focusedTextColor = TDTheme.colors.onBackground,
                     unfocusedTextColor = TDTheme.colors.onBackground,
-                    cursorColor = TDTheme.colors.primary,
+                    cursorColor = TDTheme.colors.pendingGray,
                 ),
                 maxLines = 4,
             )
@@ -273,7 +273,7 @@ private fun ManagementRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(TDTheme.colors.bgColorPurple)
+            .background(TDTheme.colors.lightPending)
             .clickable(onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -281,7 +281,7 @@ private fun ManagementRow(
         Icon(
             painter = painterResource(icon),
             contentDescription = null,
-            tint = TDTheme.colors.primary,
+            tint = TDTheme.colors.pendingGray,
             modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(12.dp))

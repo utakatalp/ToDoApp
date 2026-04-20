@@ -86,7 +86,7 @@ private fun ManageMembersContent(
         when (uiState) {
             is ManageMembersContract.UiState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = TDTheme.colors.primary)
+                    CircularProgressIndicator(color = TDTheme.colors.pendingGray)
                 }
             }
 

@@ -100,7 +100,7 @@ fun GroupDetailScreen(
                 TextButton(onClick = { viewModel.onAction(GroupDetailContract.UiAction.OnAssignToMeConfirm) }) {
                     Text(
                         text = stringResource(R.string.assign),
-                        color = TDTheme.colors.primary,
+                        color = TDTheme.colors.pendingGray,
                     )
                 }
             },
@@ -175,7 +175,7 @@ private fun GroupDetailSuccessContent(
             selectedTabIndex = uiState.selectedTab,
             modifier = Modifier.fillMaxWidth(),
             containerColor = TDTheme.colors.background,
-            contentColor = TDTheme.colors.primary,
+            contentColor = TDTheme.colors.pendingGray,
             indicator = { tabPositions ->
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(tabPositions[uiState.selectedTab]),
@@ -212,7 +212,7 @@ private fun GroupDetailLoadingContent() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = androidx.compose.ui.Alignment.Center,
     ) {
-        androidx.compose.material3.CircularProgressIndicator(color = TDTheme.colors.primary)
+        androidx.compose.material3.CircularProgressIndicator(color = TDTheme.colors.pendingGray)
     }
 }
 

@@ -74,7 +74,7 @@ private fun InviteMemberContent(
         Icon(
             painter = painterResource(R.drawable.ic_members),
             contentDescription = null,
-            tint = TDTheme.colors.primary,
+            tint = TDTheme.colors.pendingGray,
             modifier = Modifier.size(100.dp),
         )
 
@@ -121,11 +121,11 @@ private fun InviteMemberContent(
             },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = if (uiState.emailError != null) TDTheme.colors.crossRed else TDTheme.colors.primary,
+                focusedBorderColor = if (uiState.emailError != null) TDTheme.colors.crossRed else TDTheme.colors.pendingGray,
                 unfocusedBorderColor = if (uiState.emailError != null) TDTheme.colors.crossRed else TDTheme.colors.lightGray,
                 focusedTextColor = TDTheme.colors.onBackground,
                 unfocusedTextColor = TDTheme.colors.onBackground,
-                cursorColor = TDTheme.colors.primary,
+                cursorColor = TDTheme.colors.pendingGray,
             ),
             singleLine = true,
             isError = uiState.emailError != null,
@@ -168,13 +168,13 @@ private fun InviteMemberContent(
             TDText(
                 text = stringResource(com.todoapp.mobile.R.string.or_share_invite_link),
                 style = TDTheme.typography.subheading3,
-                color = TDTheme.colors.primary,
+                color = TDTheme.colors.pendingGray,
             )
             Spacer(modifier = Modifier.size(8.dp))
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_forward),
                 contentDescription = null,
-                tint = TDTheme.colors.primary,
+                tint = TDTheme.colors.pendingGray,
                 modifier = Modifier.size(20.dp),
             )
         }

@@ -84,7 +84,7 @@ private fun MemberProfileContent(
             is MemberProfileContract.UiState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = TDTheme.colors.primary,
+                    color = TDTheme.colors.pendingGray,
                 )
             }
 

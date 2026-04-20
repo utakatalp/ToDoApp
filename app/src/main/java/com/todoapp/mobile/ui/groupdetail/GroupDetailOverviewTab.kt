@@ -359,7 +359,7 @@ private fun GroupTaskSwipeBackground(
     val color by animateColorAsState(
         targetValue = when (direction) {
             SwipeToDismissBoxValue.EndToStart -> TDTheme.colors.crossRed
-            SwipeToDismissBoxValue.StartToEnd -> if (hasAssignee) TDTheme.colors.lightOrange else TDTheme.colors.primary
+            SwipeToDismissBoxValue.StartToEnd -> if (hasAssignee) TDTheme.colors.lightOrange else TDTheme.colors.pendingGray
             else -> Color.Transparent
         },
         label = "group_swipe_bg",
@@ -530,7 +530,7 @@ fun AssigneeAvatar(
         modifier = modifier
             .size(20.dp)
             .clip(CircleShape)
-            .background(TDTheme.colors.lightPurple),
+            .background(TDTheme.colors.lightPending),
         contentAlignment = Alignment.Center,
     ) {
         TDText(

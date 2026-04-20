@@ -77,7 +77,7 @@ fun GroupAddTaskSheet(
                 Icon(
                     painter = painterResource(com.todoapp.mobile.R.drawable.ic_groups),
                     contentDescription = null,
-                    tint = TDTheme.colors.primary,
+                    tint = TDTheme.colors.pendingGray,
                     modifier = Modifier.size(20.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -220,14 +220,14 @@ private fun GroupTaskAssigneeSelector(
                             .clip(CircleShape)
                             .background(
                                 if (isSelected) {
-                                    TDTheme.colors.primary
+                                    TDTheme.colors.pendingGray
                                 } else {
-                                    TDTheme.colors.bgColorPurple
+                                    TDTheme.colors.lightPending
                                 }
                             )
                             .then(
                                 if (isSelected) {
-                                    Modifier.border(2.dp, TDTheme.colors.primary, CircleShape)
+                                    Modifier.border(2.dp, TDTheme.colors.pendingGray, CircleShape)
                                 } else {
                                     Modifier
                                 }
@@ -236,7 +236,7 @@ private fun GroupTaskAssigneeSelector(
                         TDText(
                             text = member.initials,
                             style = TDTheme.typography.subheading2,
-                            color = if (isSelected) TDTheme.colors.surface else TDTheme.colors.primary,
+                            color = if (isSelected) TDTheme.colors.surface else TDTheme.colors.pendingGray,
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -244,7 +244,7 @@ private fun GroupTaskAssigneeSelector(
                     TDText(
                         text = member.displayName.split(" ").firstOrNull() ?: member.displayName,
                         style = TDTheme.typography.subheading4,
-                        color = if (isSelected) TDTheme.colors.primary else TDTheme.colors.gray,
+                        color = if (isSelected) TDTheme.colors.pendingGray else TDTheme.colors.gray,
                     )
                 }
             }

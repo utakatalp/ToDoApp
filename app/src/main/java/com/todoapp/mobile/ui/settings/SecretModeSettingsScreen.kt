@@ -129,23 +129,23 @@ private fun SecretModeStatusCard(
     val borderColor by transition.animateColor(
         transitionSpec = { tween(durationMillis = 400) },
         label = "borderColor",
-    ) { active -> if (active) TDTheme.colors.purple else TDTheme.colors.onBackground.copy(alpha = 0.2f) }
+    ) { active -> if (active) TDTheme.colors.pendingGray else TDTheme.colors.onBackground.copy(alpha = 0.2f) }
     val backgroundColor by transition.animateColor(
         transitionSpec = { tween(durationMillis = 400) },
         label = "backgroundColor",
     ) { active ->
-        if (active) TDTheme.colors.purple.copy(
+        if (active) TDTheme.colors.pendingGray.copy(
             alpha = 0.12f
         ) else TDTheme.colors.onBackground.copy(alpha = 0.06f)
     }
     val iconTint by transition.animateColor(
         transitionSpec = { tween(durationMillis = 400) },
         label = "iconTint",
-    ) { active -> if (active) TDTheme.colors.purple else TDTheme.colors.onBackground.copy(alpha = 0.4f) }
+    ) { active -> if (active) TDTheme.colors.pendingGray else TDTheme.colors.onBackground.copy(alpha = 0.4f) }
     val titleColor by transition.animateColor(
         transitionSpec = { tween(durationMillis = 400) },
         label = "titleColor",
-    ) { active -> if (active) TDTheme.colors.purple else TDTheme.colors.onBackground }
+    ) { active -> if (active) TDTheme.colors.pendingGray else TDTheme.colors.onBackground }
     val iconScale by transition.animateFloat(
         transitionSpec = { spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium) },
         label = "iconScale",
@@ -237,8 +237,8 @@ private fun SecretModeOptionRow(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    val backgroundColor = if (isSelected) TDTheme.colors.purple.copy(alpha = 0.12f) else Color.Transparent
-    val labelColor = if (isSelected) TDTheme.colors.purple else TDTheme.colors.onBackground
+    val backgroundColor = if (isSelected) TDTheme.colors.pendingGray.copy(alpha = 0.12f) else Color.Transparent
+    val labelColor = if (isSelected) TDTheme.colors.pendingGray else TDTheme.colors.onBackground
 
     Surface(
         modifier = Modifier
@@ -272,7 +272,7 @@ private fun RadioIndicator(isSelected: Boolean) {
                 .size(20.dp)
                 .clip(CircleShape)
                 .then(
-                    Modifier.border(2.dp, TDTheme.colors.purple, CircleShape)
+                    Modifier.border(2.dp, TDTheme.colors.pendingGray, CircleShape)
                 ),
             contentAlignment = Alignment.Center,
         ) {
@@ -281,7 +281,7 @@ private fun RadioIndicator(isSelected: Boolean) {
                     .size(10.dp)
                     .clip(CircleShape)
                     .then(
-                        Modifier.border(5.dp, TDTheme.colors.purple, CircleShape)
+                        Modifier.border(5.dp, TDTheme.colors.pendingGray, CircleShape)
                     )
             )
         }

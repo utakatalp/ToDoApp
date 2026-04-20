@@ -58,7 +58,7 @@ fun OnboardingScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(TDTheme.colors.purple)
+                    .background(TDTheme.colors.pendingGray)
                     .verticalScroll(rememberScrollState()),
         ) {
             Spacer(Modifier.weight(0.30f))
@@ -158,7 +158,7 @@ fun OnboardingScreen(
                     style = TDTheme.typography.regularTextStyle.copy(color = TDTheme.colors.onBackground),
                     spanStyle =
                         SpanStyle(
-                            color = TDTheme.colors.purple,
+                            color = TDTheme.colors.pendingGray,
                             fontWeight = FontWeight.Bold,
                         ),
                     textAlign = TextAlign.Center,
@@ -175,7 +175,7 @@ fun OnboardingScreen(
                 modifier =
                     Modifier
                         .fillMaxHeight()
-                        .background(TDTheme.colors.purple)
+                        .background(TDTheme.colors.pendingGray)
                         .weight(1f)
                         .padding(horizontal = 24.dp),
                 verticalArrangement = Arrangement.Center,
@@ -283,7 +283,7 @@ fun OnboardingScreen(
                     style = TDTheme.typography.regularTextStyle.copy(color = TDTheme.colors.onBackground),
                     spanStyle =
                         SpanStyle(
-                            color = TDTheme.colors.purple,
+                            color = TDTheme.colors.pendingGray,
                             fontWeight = FontWeight.Bold,
                         ),
                     textAlign = TextAlign.Center,

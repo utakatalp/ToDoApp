@@ -87,7 +87,7 @@ private fun GroupTaskDetailContent(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            CircularProgressIndicator(color = TDTheme.colors.primary)
+            CircularProgressIndicator(color = TDTheme.colors.pendingGray)
         }
         is UiState.Error -> Box(
             modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -139,7 +139,7 @@ private fun TaskDetailBody(
                 Icon(
                     painter = painterResource(UiKitR.drawable.ic_edit_task),
                     contentDescription = stringResource(R.string.edit_task),
-                    tint = TDTheme.colors.primary,
+                    tint = TDTheme.colors.pendingGray,
                     modifier = Modifier.size(22.dp),
                 )
             }
@@ -161,7 +161,7 @@ private fun TaskDetailBody(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(TDTheme.colors.bgColorPurple)
+                .background(TDTheme.colors.lightPending)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {

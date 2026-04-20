@@ -262,7 +262,7 @@ internal fun RegisterFormPanel(
         )
         TDText(
             text = stringResource(R.string.login),
-            color = TDTheme.colors.purple,
+            color = TDTheme.colors.pendingGray,
             style = TDTheme.typography.heading6.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.clickable { onAction(UiAction.OnLoginTap) }
         )

@@ -211,7 +211,7 @@ private fun GroupAssignmentSection(
                 Icon(
                     painter = painterResource(com.todoapp.mobile.R.drawable.ic_groups),
                     contentDescription = null,
-                    tint = TDTheme.colors.primary,
+                    tint = TDTheme.colors.pendingGray,
                     modifier = Modifier.size(24.dp),
                 )
                 Spacer(Modifier.width(12.dp))
@@ -225,7 +225,7 @@ private fun GroupAssignmentSection(
                     checked = selectedGroupId == group.groupId,
                     onCheckedChange = { onGroupSelected(group.groupId) },
                     colors = CheckboxDefaults.colors(
-                        checkedColor = TDTheme.colors.primary,
+                        checkedColor = TDTheme.colors.pendingGray,
                         uncheckedColor = TDTheme.colors.onBackground.copy(alpha = 0.5f),
                     ),
                 )

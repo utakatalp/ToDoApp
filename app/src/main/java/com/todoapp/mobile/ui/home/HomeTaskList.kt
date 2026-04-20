@@ -198,7 +198,7 @@ internal fun HomeSwipeDismissBackground(direction: SwipeToDismissBoxValue) {
     val color by animateColorAsState(
         targetValue = when (direction) {
             SwipeToDismissBoxValue.EndToStart -> TDTheme.colors.crossRed
-            SwipeToDismissBoxValue.StartToEnd -> TDTheme.colors.purple
+            SwipeToDismissBoxValue.StartToEnd -> TDTheme.colors.pendingGray
             else -> Color.Transparent
         },
         label = "swipe_bg_color",

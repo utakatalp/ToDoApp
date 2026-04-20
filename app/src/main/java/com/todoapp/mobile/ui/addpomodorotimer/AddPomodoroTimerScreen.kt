@@ -210,7 +210,7 @@ private fun PomodoroPreviewCard(
             .fillMaxWidth()
             .then(
                 if (isDark) {
-                    Modifier.border(1.dp, TDTheme.colors.primary.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                    Modifier.border(1.dp, TDTheme.colors.pendingGray.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
                 } else {
                     Modifier.neumorphicShadow(
                     lightShadow = TDTheme.colors.white.copy(alpha = 0.9f),
