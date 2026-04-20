@@ -1,76 +1,39 @@
 package com.todoapp.mobile.ui.home
 
 import android.content.Context
-import android.content.res.Configuration
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
-import com.todoapp.mobile.common.maskTitle
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
 import com.todoapp.mobile.ui.security.biometric.BiometricAuthenticator
-import com.todoapp.uikit.components.TDAddTaskButton
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
-import com.todoapp.uikit.components.TDCompactOutlinedTextField
-import com.todoapp.uikit.components.TDDatePickerDialog
 import com.todoapp.uikit.components.TDLoadingBar
 import com.todoapp.uikit.components.TDScreenWithSheet
-import com.todoapp.uikit.components.TDStatisticCard
-import com.todoapp.uikit.components.TDTaskCardWithCheckbox
 import com.todoapp.uikit.components.TDText
-import com.todoapp.uikit.components.TDTimePickerDialog
-import com.todoapp.uikit.components.TDWeeklyDatePicker
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
-import java.time.LocalTime
 
 @Composable
 fun HomeScreen(
@@ -92,28 +55,21 @@ fun HomeScreen(
                 }
             }
 
+            is UiEffect.ShowBiometricForSecretToggle -> {
+                val task = it.task
+                handleBiometricAuthentication(context) {
+                    onAction(UiAction.OnBiometricSuccessForSecretToggle(task))
+                }
+            }
+
             is UiEffect.ShowError -> TODO()
         }
     }
 
     when (uiState) {
-        is UiState.Loading -> {
-            HomeLoadingContent()
-        }
-
-        is UiState.Error -> {
-            HomeErrorContent(
-                message = uiState.message,
-                onAction = onAction
-            )
-        }
-
-        is UiState.Success -> {
-            HomeSuccessContent(
-                uiState = uiState,
-                onAction = onAction
-            )
-        }
+        is UiState.Loading -> HomeLoadingContent()
+        is UiState.Error -> HomeErrorContent(message = uiState.message, onAction = onAction)
+        is UiState.Success -> HomeSuccessContent(uiState = uiState, onAction = onAction)
     }
 }
 
@@ -126,36 +82,33 @@ private fun HomeLoadingContent() {
 private fun HomeErrorContent(
     message: String,
     onAction: (UiAction) -> Unit,
-    ) {
+) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(TDTheme.colors.background)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_error),
             contentDescription = null,
             tint = TDTheme.colors.crossRed,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(64.dp),
         )
-
         Spacer(Modifier.height(16.dp))
-
         TDText(
             text = message,
             style = TDTheme.typography.heading3,
-            color = TDTheme.colors.onBackground
+            color = TDTheme.colors.onBackground,
         )
-
         Spacer(Modifier.height(24.dp))
-
         TDButton(
             text = stringResource(com.todoapp.mobile.R.string.retry),
             onClick = { onAction(UiAction.OnRetry) },
-            size = TDButtonSize.SMALL
+            size = TDButtonSize.SMALL,
         )
     }
 }
@@ -169,336 +122,52 @@ private fun HomeSuccessContent(
         isSheetOpen = uiState.isSheetOpen,
         sheetContent = {
             AddTaskSheet(
-                uiState = uiState,
-                onClick = { onAction(UiAction.OnTaskCreate) },
-                onAction = onAction,
+                formState = uiState.taskFormState,
+                availableGroups = uiState.availableGroups,
+                onAction = { action ->
+                    when (action) {
+                        is TaskFormUiAction.Dismiss -> onAction(UiAction.OnDismissBottomSheet)
+                        is TaskFormUiAction.Create -> onAction(UiAction.OnTaskCreate)
+                        is TaskFormUiAction.TitleChange -> onAction(UiAction.OnTaskTitleChange(action.title))
+                        is TaskFormUiAction.DateSelect -> onAction(UiAction.OnDialogDateSelect(action.date))
+                        is TaskFormUiAction.DateDeselect -> onAction(UiAction.OnDialogDateDeselect)
+                        is TaskFormUiAction.TimeStartChange -> onAction(UiAction.OnTaskTimeStartChange(action.time))
+                        is TaskFormUiAction.TimeEndChange -> onAction(UiAction.OnTaskTimeEndChange(action.time))
+                        is TaskFormUiAction.DescriptionChange ->
+                            onAction(
+                                UiAction.OnTaskDescriptionChange(action.description),
+                            )
+                        is TaskFormUiAction.ToggleAdvancedSettings -> onAction(UiAction.OnToggleAdvancedSettings)
+                        is TaskFormUiAction.SecretChange -> onAction(UiAction.OnTaskSecretChange(action.isSecret))
+                        is TaskFormUiAction.GroupSelectionChanged ->
+                            onAction(
+                                UiAction.OnGroupSelectionChanged(action.groupId),
+                            )
+                        is TaskFormUiAction.PriorityChange -> Unit
+                        is TaskFormUiAction.AssigneeChange -> Unit
+                        is TaskFormUiAction.PhotoPicked ->
+                            onAction(
+                                UiAction.OnPendingPhotoAdd(action.bytes, action.mimeType),
+                            )
+                        is TaskFormUiAction.PhotoRemoveAt ->
+                            onAction(
+                                UiAction.OnPendingPhotoRemove(action.index),
+                            )
+                        is TaskFormUiAction.ExistingPhotoToggleDelete -> Unit
+                    }
+                },
             )
         },
         onDismissSheet = { onAction(UiAction.OnDismissBottomSheet) },
     ) {
         HomeContent(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier =
+            Modifier
+                .fillMaxWidth()
                 .background(TDTheme.colors.background)
                 .padding(horizontal = 16.dp),
             uiState = uiState,
             onAction = onAction,
-        )
-    }
-}
-
-@Composable
-fun HomeContent(
-    modifier: Modifier,
-    uiState: UiState.Success,
-    onAction: (UiAction) -> Unit,
-) {
-    val hapticFeedback = LocalHapticFeedback.current
-    val lazyListState = rememberLazyListState()
-    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        onAction(UiAction.OnMoveTask(from.index, to.index))
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-    }
-    Column(modifier = modifier.fillMaxSize()) {
-        TDWeeklyDatePicker(
-            modifier = Modifier,
-            selectedDate = uiState.selectedDate,
-            onDateSelect = { onAction(UiAction.OnDateSelect(it)) },
-        )
-        Spacer(Modifier.height(32.dp))
-        Row(modifier = Modifier.fillMaxWidth()) {
-            TDStatisticCard(
-                text = stringResource(com.todoapp.mobile.R.string.task_complete),
-                taskAmount = uiState.completedTaskCountThisWeek,
-                modifier = Modifier.weight(1f),
-                isCompleted = true,
-            )
-            Spacer(modifier = Modifier.size(20.dp))
-            TDStatisticCard(
-                text = stringResource(com.todoapp.mobile.R.string.task_pending),
-                taskAmount = uiState.pendingTaskCountThisWeek,
-                modifier = Modifier.weight(1f),
-                isCompleted = false,
-            )
-        }
-        Spacer(Modifier.height(32.dp))
-        TDText(
-            text = stringResource(com.todoapp.mobile.R.string.tasks_today),
-            color = TDTheme.colors.onBackground,
-            style = TDTheme.typography.heading3
-        )
-        Spacer(Modifier.height(16.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize(),
-                state = lazyListState,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                itemsIndexed(
-                    items = uiState.tasks,
-                    key = { _, task -> task.id }
-                ) { index, task ->
-                    ReorderableItem(
-                        state = reorderableLazyListState,
-                        key = task.id
-                    ) { isDragging ->
-                        val interactionSource = remember { MutableInteractionSource() }
-
-                        Card(
-                            onClick = { onAction(UiAction.OnTaskClick(task)) },
-                            modifier = Modifier
-                                .semantics {
-                                    customActions = listOf(
-                                        CustomAccessibilityAction(
-                                            label = "Move Up",
-                                            action = {
-                                                if (index > 0) {
-                                                    onAction(UiAction.OnMoveTask(index, index - 1))
-                                                    true
-                                                } else {
-                                                    false
-                                                }
-                                            }
-                                        ),
-                                        CustomAccessibilityAction(
-                                            label = "Move Down",
-                                            action = {
-                                                if (index < uiState.tasks.lastIndex) {
-                                                    onAction(UiAction.OnMoveTask(index, index + 1))
-                                                    true
-                                                } else {
-                                                    false
-                                                }
-                                            }
-                                        ),
-                                    )
-                                },
-                            interactionSource = interactionSource,
-                        ) {
-                            TDTaskCardWithCheckbox(
-                                taskText = if (task.isSecret) task.title.maskTitle() else task.title,
-                                isChecked = task.isCompleted,
-                                onCheckBoxClick = {
-                                    onAction(UiAction.OnTaskCheck(task))
-                                },
-                                modifier = Modifier.combinedClickable(
-                                    onClick = { onAction(UiAction.OnTaskClick(task)) },
-                                    onLongClick = { onAction(UiAction.OnTaskLongPress(task)) }
-                                ),
-                                hamburgerModifier = Modifier
-                                    .longPressDraggableHandle(
-                                        onDragStarted = {
-                                            hapticFeedback.performHapticFeedback(
-                                                HapticFeedbackType.GestureThresholdActivate
-                                            )
-                                        },
-                                        onDragStopped = {
-                                            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                        },
-                                        interactionSource = interactionSource,
-                                    )
-                                    .clearAndSetSemantics { },
-                            )
-                        }
-                    }
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                IconButton(
-                    modifier = Modifier.size(56.dp),
-                    onClick = { onAction(UiAction.OnPomodoroTap) }
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_pomodoro),
-                        contentDescription = null
-                    )
-                }
-
-                TDAddTaskButton(
-                    modifier = Modifier.size(56.dp),
-                    onClick = { onAction(UiAction.OnShowBottomSheet) }
-                )
-            }
-        }
-        if (uiState.isDeleteDialogOpen) {
-            AlertDialog(
-                onDismissRequest = { onAction(UiAction.OnDeleteDialogDismiss) },
-                title = { Text(stringResource(com.todoapp.mobile.R.string.delete_task_title)) },
-                titleContentColor = TDTheme.colors.onBackground,
-                containerColor = TDTheme.colors.background,
-                textContentColor = TDTheme.colors.onBackground,
-                text = { Text(stringResource(com.todoapp.mobile.R.string.delete_task_message)) },
-                confirmButton = {
-                    TextButton(onClick = { onAction(UiAction.OnDeleteDialogConfirm) }) {
-                        Text(stringResource(com.todoapp.mobile.R.string.delete))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { onAction(UiAction.OnDeleteDialogDismiss) }) {
-                        Text(stringResource(com.todoapp.mobile.R.string.cancel))
-                    }
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun AdvancedSettings(
-    isExpanded: Boolean,
-    isSecret: Boolean,
-    onToggleExpanded: () -> Unit,
-    onSecretChange: (Boolean) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onToggleExpanded() }
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            TDText(
-                text = stringResource(com.todoapp.mobile.R.string.advanced_settings),
-                style = TDTheme.typography.heading3,
-                color = TDTheme.colors.onBackground.copy(alpha = 0.7f)
-            )
-            Icon(
-                painter = painterResource(
-                    if (isExpanded) {
-                        R.drawable.ic_outline_expand_circle_down_24
-                    } else {
-                        R.drawable.ic_outline_expand_circle_right_24
-                    }
-                ),
-                contentDescription = null,
-                tint = TDTheme.colors.onBackground.copy(alpha = 0.7f)
-            )
-        }
-
-        AnimatedVisibility(visible = isExpanded) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = isSecret,
-                    onCheckedChange = { onSecretChange(it) },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = TDTheme.colors.primary,
-                        uncheckedColor = TDTheme.colors.onBackground.copy(alpha = 0.6f)
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                TDText(
-                    text = stringResource(com.todoapp.mobile.R.string.secret_task),
-                    style = TDTheme.typography.heading6,
-                    color = TDTheme.colors.onBackground
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AddTaskSheet(
-    uiState: UiState.Success,
-    onClick: () -> Unit,
-    onAction: (UiAction) -> Unit,
-) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            TDText(text = stringResource(com.todoapp.mobile.R.string.add_new_task), color = TDTheme.colors.onBackground)
-            IconButton(
-                onClick = { onAction(UiAction.OnDismissBottomSheet) },
-            ) {
-                Icon(
-                    painterResource(R.drawable.ic_close),
-                    tint = TDTheme.colors.onBackground,
-                    contentDescription = stringResource(com.todoapp.mobile.R.string.close_button),
-                )
-            }
-        }
-        Spacer(Modifier.height(12.dp))
-        TDCompactOutlinedTextField(
-            label = stringResource(com.todoapp.mobile.R.string.task_title),
-            value = uiState.taskTitle,
-            onValueChange = { onAction(UiAction.OnTaskTitleChange(it)) },
-            isError = uiState.isTitleError
-        )
-        Spacer(Modifier.height(12.dp))
-        TDDatePickerDialog(
-            selectedDate = uiState.dialogSelectedDate,
-            onDateSelect = { onAction(UiAction.OnDialogDateSelect(it)) },
-            onDateDeselect = { onAction(UiAction.OnDialogDateDeselect) },
-            isError = uiState.isDateError
-        )
-        Spacer(Modifier.height(12.dp))
-        Row(modifier = Modifier.fillMaxWidth()) {
-            TDTimePickerDialog(
-                modifier = Modifier.weight(1f),
-                title = stringResource(com.todoapp.mobile.R.string.set_time),
-                placeholder = stringResource(com.todoapp.mobile.R.string.starts),
-                selectedTime = uiState.taskTimeStart,
-                onTimeChange = { onAction(UiAction.OnTaskTimeStartChange(it)) },
-                isError = uiState.isTimeError
-            )
-            Spacer(Modifier.width(12.dp))
-            TDTimePickerDialog(
-                modifier = Modifier.weight(1f),
-                title = "",
-                placeholder = stringResource(com.todoapp.mobile.R.string.ends),
-                selectedTime = uiState.taskTimeEnd,
-                onTimeChange = { onAction(UiAction.OnTaskTimeEndChange(it)) },
-                isError = uiState.isTimeError
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-        TDCompactOutlinedTextField(
-            label = stringResource(com.todoapp.mobile.R.string.description),
-            value = uiState.taskDescription,
-            onValueChange = { onAction(UiAction.OnTaskDescriptionChange(it)) },
-            singleLine = false,
-        )
-        Spacer(Modifier.height(12.dp))
-
-        AdvancedSettings(
-            isExpanded = uiState.isAdvancedSettingsExpanded,
-            isSecret = uiState.isTaskSecret,
-            onToggleExpanded = { onAction(UiAction.OnToggleAdvancedSettings) },
-            onSecretChange = { onAction(UiAction.OnTaskSecretChange(it)) }
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        TDButton(
-            text = stringResource(com.todoapp.mobile.R.string.create_task),
-            onClick = onClick,
-            size = TDButtonSize.SMALL,
-            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -508,7 +177,6 @@ private suspend fun handleBiometricAuthentication(
     onSuccess: () -> Unit,
 ) {
     val activity = context as? FragmentActivity ?: return
-
     val isAuthenticated = BiometricAuthenticator.authenticate(activity)
     if (isAuthenticated) onSuccess()
 }
@@ -527,70 +195,6 @@ private fun HomeErrorPreview() {
     TDTheme {
         HomeErrorContent(
             message = "Something went wrong",
-            onAction = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeContentPreview() {
-    TDTheme {
-        HomeContent(
-            uiState = HomePreviewData.successState(
-                tasks = HomePreviewData.sampleTasks,
-                completedTaskCountThisWeek = 5,
-                pendingTaskCountThisWeek = 8,
-            ),
-            onAction = {},
-            modifier = Modifier.padding(horizontal = 24.dp),
-        )
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun HomeContentPreview_Dark() {
-    TDTheme(darkTheme = true) {
-        HomeContent(
-            uiState = HomePreviewData.successState(
-                tasks = HomePreviewData.sampleTasks,
-                completedTaskCountThisWeek = 5,
-                pendingTaskCountThisWeek = 8,
-            ),
-            onAction = {},
-            modifier = Modifier.padding(horizontal = 24.dp),
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 360)
-@Composable
-private fun AddTaskSheetPreview() {
-    TDTheme {
-        AddTaskSheet(
-            uiState = HomePreviewData.successState(
-                taskTitle = "Read 10 pages",
-                taskTimeEnd = LocalTime.of(10, 15),
-                taskDescription = "Focus mode on. No phone.",
-            ),
-            onClick = {},
-            onAction = {},
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 360, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun AddTaskSheetPreview_Dark() {
-    TDTheme(darkTheme = true) {
-        AddTaskSheet(
-            uiState = HomePreviewData.successState(
-                taskTitle = "Read 10 pages",
-                taskTimeEnd = LocalTime.of(10, 15),
-                taskDescription = "Focus mode on. No phone.",
-            ),
-            onClick = {},
             onAction = {},
         )
     }

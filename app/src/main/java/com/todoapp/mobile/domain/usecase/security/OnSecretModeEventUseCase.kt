@@ -5,7 +5,7 @@ import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.security.SecretModeEndEvent
 
 class OnSecretModeEventUseCase(
-    private val secretPreferences: SecretPreferences
+    private val secretPreferences: SecretPreferences,
 ) {
     suspend operator fun invoke(event: SecretModeEndEvent) {
         val condition = secretPreferences.getCondition()

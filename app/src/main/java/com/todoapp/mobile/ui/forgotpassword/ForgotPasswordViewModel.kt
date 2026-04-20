@@ -14,8 +14,9 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
-class ForgotPasswordViewModel @Inject constructor() : ViewModel() {
-
+class ForgotPasswordViewModel
+@Inject
+constructor() : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
@@ -26,12 +27,13 @@ class ForgotPasswordViewModel @Inject constructor() : ViewModel() {
 
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
-            is UiAction.OnEmailChange -> _uiState.update {
-                it.copy(
-                    email = uiAction.email,
-                    error = validateEmail(uiAction.email)
-                )
-            }
+            is UiAction.OnEmailChange ->
+                _uiState.update {
+                    it.copy(
+                        email = uiAction.email,
+                        error = validateEmail(uiAction.email),
+                    )
+                }
 
             UiAction.OnForgotPasswordTap -> handleForgotPassword()
             UiAction.OnBackToLoginTap -> navigateToBackToLogin()
@@ -59,7 +61,10 @@ class ForgotPasswordViewModel @Inject constructor() : ViewModel() {
     private fun validateEmail(email: String): String? {
         if (firstSubmit) return null
 
-        return if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        return if (!android.util.Patterns.EMAIL_ADDRESS
+                .matcher(email)
+                .matches()
+        ) {
             "Please enter a valid email address"
         } else {
             null

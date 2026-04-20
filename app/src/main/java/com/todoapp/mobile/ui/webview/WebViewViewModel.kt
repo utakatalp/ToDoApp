@@ -13,10 +13,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class WebViewViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle
+class WebViewViewModel
+@Inject
+constructor(
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val _navEffect = Channel<NavigationEffect>()
     val navEffect = _navEffect.receiveAsFlow()
 

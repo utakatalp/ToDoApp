@@ -38,9 +38,10 @@ class OnboardingViewModel : ViewModel() {
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
             is UiAction.OnLoginClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Login()))
-            is UiAction.OnGetStartedClick -> _navEffect.trySend(
-                NavigationEffect.Navigate(Screen.Home, popUpTo = Screen.Onboarding, isInclusive = true)
-            )
+            is UiAction.OnGetStartedClick ->
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(Screen.Home, popUpTo = Screen.Onboarding, isInclusive = true),
+                )
         }
     }
 }

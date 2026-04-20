@@ -2,53 +2,88 @@ package com.todoapp.mobile.data.repository
 
 import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.data.mapper.toDomain
+import com.todoapp.mobile.data.mapper.toEntity
+import com.todoapp.mobile.data.mapper.toGroupTask
 import com.todoapp.mobile.data.model.entity.GroupEntity
 import com.todoapp.mobile.data.model.network.data.GroupData
+import com.todoapp.mobile.data.model.network.data.GroupMemberData
 import com.todoapp.mobile.data.model.network.data.GroupSummaryData
 import com.todoapp.mobile.data.model.network.data.GroupSummaryDataList
 import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
+import com.todoapp.mobile.data.model.network.request.GroupTaskUpdateRequest
+import com.todoapp.mobile.data.model.network.request.InviteMemberRequest
+import com.todoapp.mobile.data.model.network.request.TransferOwnershipRequest
+import com.todoapp.mobile.data.model.network.request.UpdateGroupRequest
+import com.todoapp.mobile.data.source.local.datasource.GroupActivityLocalDataSource
 import com.todoapp.mobile.data.source.local.datasource.GroupLocalDataSource
+import com.todoapp.mobile.data.source.local.datasource.GroupMemberLocalDataSource
+import com.todoapp.mobile.data.source.local.datasource.GroupTaskLocalDataSource
+import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.remote.datasource.GroupRemoteDataSource
+import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.domain.model.Group
+import com.todoapp.mobile.domain.model.GroupActivity
+import com.todoapp.mobile.domain.model.GroupMember
+import com.todoapp.mobile.domain.model.GroupTask
+import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.repository.GroupRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
-class GroupRepositoryImpl @Inject constructor(
+class GroupRepositoryImpl
+@Inject
+constructor(
     private val groupRemoteDataSource: GroupRemoteDataSource,
     private val groupLocalDataSource: GroupLocalDataSource,
+    private val groupTaskLocalDataSource: GroupTaskLocalDataSource,
+    private val groupMemberLocalDataSource: GroupMemberLocalDataSource,
+    private val groupActivityLocalDataSource: GroupActivityLocalDataSource,
+    private val taskRemoteDataSource: TaskRemoteDataSource,
+    private val taskLocalDataSource: TaskLocalDataSource,
+    private val todoApi: com.todoapp.mobile.data.source.remote.api.ToDoApi,
 ) : GroupRepository {
+    override suspend fun createGroup(request: CreateGroupRequest): Result<GroupData> = groupRemoteDataSource
+        .createGroup(request)
+        .onSuccess { remote ->
+            val entity = remote.toEntity()
+            groupLocalDataSource.insert(withInitializedOrder(entity))
+        }
 
-    override suspend fun createGroup(request: CreateGroupRequest): Result<GroupData> {
-        return groupRemoteDataSource.createGroup(request)
-            .onSuccess { remote ->
-                val entity = remote.toEntity()
-                groupLocalDataSource.insert(withInitializedOrder(entity))
-            }
-    }
-
-    override suspend fun getGroups(): Result<GroupSummaryDataList> {
-        return groupRemoteDataSource.getGroups()
-            .onSuccess { result ->
-                val entities = result.groups.map { summary ->
+    override suspend fun getGroups(): Result<GroupSummaryDataList> = groupRemoteDataSource
+        .getGroups()
+        .onSuccess { result ->
+            val entities =
+                result.groups.map { summary ->
                     summary.toEntity()
                 }
-                syncRemoteGroupsWithLocal(entities)
-            }
-    }
+            syncRemoteGroupsWithLocal(entities)
+        }
 
     override suspend fun deleteGroup(id: Long): Result<Unit> {
         val localEntity =
             groupLocalDataSource.getGroupById(id) ?: return Result.failure(Exception("Group not found"))
-        return groupRemoteDataSource.deleteGroup(localEntity.remoteId!!)
+        return groupRemoteDataSource
+            .deleteGroup(localEntity.remoteId!!)
             .onSuccess {
                 groupLocalDataSource.delete(localEntity)
             }
     }
+
+    override suspend fun deleteGroupByRemoteId(remoteId: Long): Result<Unit> = groupRemoteDataSource
+        .deleteGroup(remoteId)
+        .onSuccess {
+            val allGroups = groupLocalDataSource.getAllGroupsOrdered().first()
+            val localEntity = allGroups.find { it.remoteId == remoteId }
+            if (localEntity != null) {
+                groupLocalDataSource.delete(localEntity)
+            }
+        }
 
     override suspend fun deleteAllLocalGroups(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
@@ -57,10 +92,8 @@ class GroupRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun observeAllGroups(): Flow<List<Group>> {
-        return groupLocalDataSource.getAllGroupsOrdered().map { list ->
-            list.map { it.toDomain() }
-        }
+    override fun observeAllGroups(): Flow<List<Group>> = groupLocalDataSource.getAllGroupsOrdered().map { list ->
+        list.map { it.toDomain() }
     }
 
     override suspend fun reorderGroups(
@@ -76,21 +109,23 @@ class GroupRepositoryImpl @Inject constructor(
                 return@runCatching
             }
 
-            val reordered = current.toMutableList().apply {
-                add(toIndex, removeAt(fromIndex))
-            }
+            val reordered =
+                current.toMutableList().apply {
+                    add(toIndex, removeAt(fromIndex))
+                }
 
             val start = minOf(fromIndex, toIndex)
             val end = maxOf(fromIndex, toIndex)
 
-            val updates = (start..end).map { index ->
-                reordered[index].id to index
-            }
+            val updates =
+                (start..end).map { index ->
+                    reordered[index].id to index
+                }
 
             groupLocalDataSource.updateOrderIndices(updates)
         }.fold(
             onSuccess = { Result.success(Unit) },
-            onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) }
+            onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) },
         )
     }
 
@@ -109,39 +144,419 @@ class GroupRepositoryImpl @Inject constructor(
                         role = remote.role,
                         memberCount = remote.memberCount,
                         pendingTaskCount = remote.pendingTaskCount,
-                        createdAt = remote.createdAt
-                    )
+                        createdAt = remote.createdAt,
+                    ),
                 )
             }
         }
     }
 
-    private suspend fun withInitializedOrder(entity: GroupEntity): GroupEntity {
-        return if (entity.orderIndex != 0) {
-            entity
-        } else {
-            val current = groupLocalDataSource.getAllGroupsOrdered().first()
-            val nextIndex = (current.maxOfOrNull { it.orderIndex } ?: -1) + 1
-            entity.copy(orderIndex = nextIndex)
+    private suspend fun withInitializedOrder(entity: GroupEntity): GroupEntity = if (entity.orderIndex != 0) {
+        entity
+    } else {
+        val current = groupLocalDataSource.getAllGroupsOrdered().first()
+        val nextIndex = (current.maxOfOrNull { it.orderIndex } ?: -1) + 1
+        entity.copy(orderIndex = nextIndex)
+    }
+
+    override suspend fun getGroupDetail(groupId: Long): Result<GroupData> {
+        val remote = groupRemoteDataSource.getGroupDetail(groupId)
+        if (remote.isSuccess) {
+            remote.onSuccess { data ->
+                val localGroup =
+                    groupLocalDataSource
+                        .getAllGroupsOrdered()
+                        .first()
+                        .find { it.remoteId == groupId }
+                if (localGroup != null) {
+                    persistMembersLocally(localGroup.id, data.members)
+                }
+            }
+            return remote
+        }
+        val localGroup =
+            groupLocalDataSource
+                .getAllGroupsOrdered()
+                .first()
+                .find { it.remoteId == groupId } ?: return remote
+        val cachedMembers = groupMemberLocalDataSource.getByGroupIdOnce(localGroup.id)
+        return Result.success(
+            GroupData(
+                id = groupId,
+                name = localGroup.name,
+                description = localGroup.description,
+                createdAt = localGroup.createdAt,
+                updatedAt = localGroup.createdAt,
+                members =
+                cachedMembers.map { entity ->
+                    GroupMemberData(
+                        userId = entity.userId,
+                        displayName = entity.displayName,
+                        email = entity.email,
+                        avatarUrl = entity.avatarUrl,
+                        role = entity.role,
+                        joinedAt = entity.joinedAt,
+                    )
+                },
+            ),
+        )
+    }
+
+    private suspend fun persistMembersLocally(
+        localGroupId: Long,
+        members: List<GroupMemberData>,
+    ) {
+        val entities = members.map { it.toEntity(localGroupId) }
+        groupMemberLocalDataSource.replaceAll(localGroupId, entities)
+    }
+
+    override suspend fun updateGroup(
+        groupId: Long,
+        name: String,
+        description: String,
+    ): Result<Unit> = groupRemoteDataSource.updateGroup(
+        groupId,
+        UpdateGroupRequest(id = groupId, name = name, description = description),
+    )
+
+    override suspend fun createGroupTask(
+        groupId: Long,
+        task: Task,
+        priority: String?,
+        assignedToUserId: Long?,
+    ): Result<Long> = taskRemoteDataSource
+        .addTask(
+            task,
+            familyGroupId = groupId,
+            assignedToUserId = assignedToUserId,
+            priority = priority,
+        ).map { it.id }
+        .onSuccess { syncGroupTasks(groupId) }
+
+    override suspend fun deleteGroupTask(
+        groupId: Long,
+        taskId: Long,
+    ): Result<Unit> = groupRemoteDataSource
+        .deleteGroupTask(groupId, taskId)
+        .onSuccess { groupTaskLocalDataSource.deleteByRemoteId(taskId) }
+
+    override suspend fun updateGroupTaskStatus(
+        groupId: Long,
+        taskId: Long,
+        groupTask: GroupTask,
+        isCompleted: Boolean,
+    ): Result<Unit> = groupRemoteDataSource
+        .updateGroupTask(
+            groupId = groupId,
+            taskId = taskId,
+            request = GroupTaskUpdateRequest(isCompleted = isCompleted),
+        ).map { }
+        .onSuccess {
+            groupTaskLocalDataSource.updateCompletion(remoteId = taskId, isCompleted = isCompleted)
+        }
+
+    override suspend fun updateGroupTask(
+        groupId: Long,
+        taskId: Long,
+        title: String,
+        description: String?,
+        dueDate: Long?,
+        priority: String?,
+        assignedToUserId: Long?,
+    ): Result<Unit> {
+        val localGroup = groupLocalDataSource.getAllGroupsOrdered().first().find { it.remoteId == groupId }
+        val assigneeMember =
+            if (localGroup != null && assignedToUserId != null) {
+                groupMemberLocalDataSource.getByGroupIdOnce(localGroup.id).find { it.userId == assignedToUserId }
+            } else {
+                null
+            }
+        return groupRemoteDataSource
+            .updateGroupTask(
+                groupId = groupId,
+                taskId = taskId,
+                request =
+                GroupTaskUpdateRequest(
+                    title = title,
+                    description = description,
+                    dueDate = dueDate,
+                    priority = priority,
+                    assigneeId = assignedToUserId,
+                    clearAssignee = assignedToUserId == null,
+                ),
+            ).map { }
+            .onSuccess {
+                groupTaskLocalDataSource.updateTask(
+                    remoteId = taskId,
+                    title = title,
+                    description = description,
+                    dueDate = dueDate,
+                    priority = priority,
+                    assigneeUserId = assignedToUserId,
+                    assigneeDisplayName = assigneeMember?.displayName,
+                    assigneeAvatarUrl = assigneeMember?.avatarUrl,
+                )
+            }
+    }
+
+    override suspend fun assignGroupTask(
+        groupId: Long,
+        taskId: Long,
+        userId: Long,
+    ): Result<Unit> = groupRemoteDataSource
+        .updateGroupTask(
+            groupId = groupId,
+            taskId = taskId,
+            request = GroupTaskUpdateRequest(assigneeId = userId),
+        ).map { }
+        .onSuccess { syncGroupTasks(groupId) }
+
+    override suspend fun unassignGroupTask(
+        groupId: Long,
+        taskId: Long,
+    ): Result<Unit> {
+        val existing = groupTaskLocalDataSource.getByRemoteId(taskId)
+        return groupRemoteDataSource
+            .updateGroupTask(
+                groupId = groupId,
+                taskId = taskId,
+                request = GroupTaskUpdateRequest(clearAssignee = true),
+            ).map { }
+            .onSuccess {
+                if (existing != null) {
+                    groupTaskLocalDataSource.updateTask(
+                        remoteId = taskId,
+                        title = existing.title,
+                        description = existing.description,
+                        dueDate = existing.dueDate,
+                        priority = existing.priority,
+                        assigneeUserId = null,
+                        assigneeDisplayName = null,
+                        assigneeAvatarUrl = null,
+                    )
+                }
+                syncGroupTasks(groupId)
+            }
+    }
+
+    override suspend fun uploadTaskPhoto(
+        taskId: Long,
+        bytes: ByteArray,
+        mimeType: String,
+    ): Result<String> {
+        val body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+        val part = okhttp3.MultipartBody.Part.createFormData("file", "photo.jpg", body)
+        return com.todoapp.mobile.common
+            .handleRequest { todoApi.uploadTaskPhoto(taskId, part) }
+            .map { it.url }
+    }
+
+    override suspend fun deleteTaskPhoto(
+        taskId: Long,
+        photoId: Long,
+    ): Result<Unit> = com.todoapp.mobile.common.handleRequest {
+        todoApi.deleteTaskPhoto(taskId, photoId)
+    }
+
+    override suspend fun uploadGroupAvatar(
+        groupId: Long,
+        bytes: ByteArray,
+        mimeType: String,
+    ): Result<Unit> {
+        val body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+        val part = okhttp3.MultipartBody.Part.createFormData("file", "group-avatar.jpg", body)
+        return com.todoapp.mobile.common
+            .handleRequest { todoApi.uploadGroupAvatar(groupId, part) }
+            .map { }
+    }
+
+    override suspend fun searchGroupTasksAcrossGroups(query: String): Result<List<Pair<Group, List<GroupTask>>>> = withContext(
+        Dispatchers.IO
+    ) {
+        runCatching {
+            val groups = groupLocalDataSource.getAllGroupsOrdered().first()
+            val matchingTasks = groupTaskLocalDataSource.searchAll(query).first()
+            val tasksByLocalGroupId = matchingTasks.groupBy { it.localGroupId }
+            groups
+                .filter { entity ->
+                    val nameMatches =
+                        entity.name.contains(query, ignoreCase = true) ||
+                            entity.description.contains(query, ignoreCase = true)
+                    nameMatches || tasksByLocalGroupId.containsKey(entity.id)
+                }.map { entity ->
+                    val group = entity.toDomain()
+                    val tasks =
+                        (tasksByLocalGroupId[entity.id] ?: emptyList())
+                            .map { it.toDomain() }
+                    group to tasks
+                }
         }
     }
 
-    private fun GroupData.toEntity(): GroupEntity =
-        GroupEntity(
-            remoteId = id,
-            name = name,
-            description = description,
-            createdAt = createdAt,
-        )
+    override suspend fun getGroupMembers(groupId: Long): Result<List<GroupMember>> {
+        val detailResult = groupRemoteDataSource.getGroupDetail(groupId)
+        if (detailResult.isSuccess) {
+            val data = detailResult.getOrThrow()
+            val localGroup =
+                groupLocalDataSource
+                    .getAllGroupsOrdered()
+                    .first()
+                    .find { it.remoteId == groupId }
+            if (localGroup != null) {
+                persistMembersLocally(localGroup.id, data.members)
+            }
+            return Result.success(data.members.map { it.toGroupMember() })
+        }
+        val localGroup =
+            groupLocalDataSource
+                .getAllGroupsOrdered()
+                .first()
+                .find { it.remoteId == groupId } ?: return detailResult.map { emptyList() }
+        return runCatching {
+            groupMemberLocalDataSource.getByGroupIdOnce(localGroup.id).map { it.toDomain() }
+        }
+    }
 
-    private fun GroupSummaryData.toEntity(): GroupEntity =
-        GroupEntity(
-            remoteId = id,
-            name = name,
-            description = description,
-            createdAt = createdAt,
-            role = role,
-            memberCount = memberCount,
-            pendingTaskCount = pendingTaskCount,
-        )
+    override fun observeGroupMembers(localGroupId: Long): Flow<List<GroupMember>> = groupMemberLocalDataSource.observeByGroupId(
+        localGroupId
+    ).map { entities ->
+        entities.map { it.toDomain() }
+    }
+
+    override fun observeGroupActivity(localGroupId: Long): Flow<List<GroupActivity>> = groupActivityLocalDataSource.observeByGroupId(
+        localGroupId
+    ).map { entities ->
+        entities.map { it.toDomain() }
+    }
+
+    override suspend fun inviteMember(
+        groupId: Long,
+        email: String,
+    ): Result<Unit> = groupRemoteDataSource.inviteMember(InviteMemberRequest(groupId = groupId, email = email))
+
+    override suspend fun removeMember(
+        groupId: Long,
+        userId: Long,
+    ): Result<Unit> = groupRemoteDataSource.removeMember(groupId, userId)
+
+    override suspend fun transferOwnership(
+        groupId: Long,
+        userId: Long,
+    ): Result<Unit> = groupRemoteDataSource.transferOwnership(groupId, TransferOwnershipRequest(userId))
+
+    override suspend fun getGroupActivity(groupId: Long): Result<List<GroupActivity>> {
+        val remote = groupRemoteDataSource.getGroupActivity(groupId)
+        if (remote.isSuccess) {
+            remote.onSuccess { data ->
+                val localGroup =
+                    groupLocalDataSource
+                        .getAllGroupsOrdered()
+                        .first()
+                        .find { it.remoteId == groupId }
+                if (localGroup != null) {
+                    val entities = data.activities.map { it.toEntity(localGroup.id) }
+                    groupActivityLocalDataSource.replaceAll(localGroup.id, entities)
+                }
+            }
+            return remote.map { data -> data.activities.map { it.toGroupActivity() } }
+        }
+        val localGroup =
+            groupLocalDataSource
+                .getAllGroupsOrdered()
+                .first()
+                .find { it.remoteId == groupId } ?: return remote.map { emptyList() }
+        return runCatching {
+            groupActivityLocalDataSource.getByGroupIdOnce(localGroup.id).map { it.toDomain() }
+        }
+    }
+
+    override suspend fun getGroupTasks(groupId: Long): Result<List<GroupTask>> {
+        val remote =
+            taskRemoteDataSource.getTasks(familyGroupId = groupId).map { data ->
+                data.tasks.map { it.toGroupTask() }
+            }
+        if (remote.isSuccess) {
+            remote.onSuccess { tasks -> persistGroupTasksLocally(remoteGroupId = groupId, tasks = tasks) }
+            return remote
+        }
+        // Fallback to locally cached tasks
+        val localGroup =
+            groupLocalDataSource
+                .getAllGroupsOrdered()
+                .first()
+                .find { it.remoteId == groupId } ?: return remote
+        return runCatching {
+            groupTaskLocalDataSource.observeByGroupId(localGroup.id).first().map { it.toDomain() }
+        }
+    }
+
+    override fun observeGroupTasks(localGroupId: Long): Flow<List<GroupTask>> = groupTaskLocalDataSource.observeByGroupId(
+        localGroupId
+    ).map { entities ->
+        entities.map { it.toDomain() }
+    }
+
+    override suspend fun syncGroupTasks(remoteGroupId: Long): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val tasks =
+                taskRemoteDataSource
+                    .getTasks(familyGroupId = remoteGroupId)
+                    .getOrThrow()
+                    .tasks
+                    .map { it.toGroupTask() }
+            persistGroupTasksLocally(remoteGroupId = remoteGroupId, tasks = tasks)
+        }
+    }
+
+    private suspend fun persistGroupTasksLocally(
+        remoteGroupId: Long,
+        tasks: List<GroupTask>,
+    ) {
+        val localGroup =
+            groupLocalDataSource
+                .getAllGroupsOrdered()
+                .first()
+                .find { it.remoteId == remoteGroupId } ?: return
+        val entities = tasks.map { it.toEntity(localGroupId = localGroup.id, remoteGroupId = remoteGroupId) }
+        groupTaskLocalDataSource.deleteByGroupId(localGroup.id)
+        groupTaskLocalDataSource.insertAll(entities)
+        val remoteIds = tasks.map { it.id }
+        if (remoteIds.isNotEmpty()) taskLocalDataSource.deleteByRemoteIds(remoteIds)
+    }
+
+    private fun GroupData.toEntity(): GroupEntity = GroupEntity(
+        remoteId = id,
+        name = name,
+        description = description,
+        createdAt = createdAt,
+    )
+
+    private fun GroupSummaryData.toEntity(): GroupEntity = GroupEntity(
+        remoteId = id,
+        name = name,
+        description = description,
+        createdAt = createdAt,
+        role = role,
+        memberCount = memberCount,
+        pendingTaskCount = pendingTaskCount,
+    )
+
+    private fun GroupMemberData.toGroupMember(): GroupMember = GroupMember(
+        userId = userId,
+        displayName = displayName,
+        email = email,
+        avatarUrl = avatarUrl,
+        role = role,
+        joinedAt = joinedAt,
+    )
+
+    private fun com.todoapp.mobile.data.model.network.data.GroupActivityData.toGroupActivity(): GroupActivity = GroupActivity(
+        id = id,
+        type = type,
+        actorName = actorName,
+        actorAvatarUrl = actorAvatarUrl,
+        description = description,
+        timestamp = timestamp,
+        taskTitle = taskTitle,
+    )
 }

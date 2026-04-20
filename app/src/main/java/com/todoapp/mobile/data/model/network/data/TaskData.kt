@@ -3,6 +3,12 @@ package com.todoapp.mobile.data.model.network.data
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class TaskUserData(
+    val userId: Long,
+    val displayName: String,
+)
+
+@Serializable
 data class TaskData(
     val id: Long,
     val title: String,
@@ -12,10 +18,15 @@ data class TaskData(
     val timeEnd: Long,
     val isCompleted: Boolean,
     val isSecret: Boolean,
+    val assignedTo: TaskUserData? = null,
+    val createdBy: TaskUserData? = null,
+    val familyGroupId: Long? = null,
+    val priority: String? = null,
+    val photoUrls: List<String> = emptyList(),
 )
 
 @Serializable
 data class TaskListData(
     val tasks: List<TaskData>,
-    val count: Int
+    val count: Int,
 )

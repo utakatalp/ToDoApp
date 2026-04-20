@@ -2,6 +2,7 @@
     <string name="app_name">UIKit</string>
     <string name="pick_a_date">Pick a date</string>
     <string name="ok">OK</string>
+    <string name="weekly">Weekly</string>
     <string name="activity_screen_weekly_progress_text">Weekly Progress</string>
     <string name="activity_screen_weekly_progress_legend_complete_text">Complete</string>
     <string name="activity_screen_weekly_progress_legend_in_progress_text">In Progress</string>
@@ -23,4 +24,23 @@
     <string name="close">Close</string>
     <string name="notification_permission">Notification Permission</string>
     <string name="allows_the_app_to_display_notifications">Allows the app to display notifications</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_pending">Pending</string>
+    <string name="notify_me_at">Notify me at %1$s</string>
+    <string name="notify_hint">I will notify you when clock hits!</string>
+    <string name="overlay_notification_reminder">Reminder</string>
+    <string name="overlay_notification_now">Now</string>
+    <string name="overlay_notification_minutes_ago">%1$dm ago</string>
+    <string name="overlay_notification_tap_to_open">Tap to open details</string>
+    <string name="overlay_notification_dismiss">Dismiss</string>
+    <string name="general_progress_tasks_done">%1$d tasks done</string>
+    <string name="general_progress_total">%1$d total</string>
+    <string name="undo">UNDO</string>
+    <string name="group_card_reorder_cd">Reorder</string>
+    <string name="group_card_delete_cd">Delete group</string>
+    <string name="group_card_members_label">Members</string>
+    <string name="group_card_pending_label">Pending</string>
+    <string name="group_card_created_label">Created %1$s</string>
+    <string name="group_card_view_details">View Details</string>
+    <string name="today">Today</string>
 </resources>

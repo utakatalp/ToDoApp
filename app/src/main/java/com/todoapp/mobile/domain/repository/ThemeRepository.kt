@@ -5,5 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface ThemeRepository {
     val themeFlow: Flow<ThemePreference>
+
     suspend fun saveTheme(theme: ThemePreference)
 }

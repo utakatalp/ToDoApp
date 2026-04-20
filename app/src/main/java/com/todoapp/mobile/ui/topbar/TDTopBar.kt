@@ -1,7 +1,13 @@
 package com.todoapp.mobile.ui.topbar
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -9,15 +15,24 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.toRoute
+import coil.compose.AsyncImage
 import com.example.uikit.R
+import com.todoapp.mobile.BuildConfig
 import com.todoapp.mobile.LocalNavController
 import com.todoapp.mobile.navigation.AppDestination
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.navigation.appDestinationFromRoute
 import com.todoapp.mobile.ui.topbar.TopBarContract.UiAction
 import com.todoapp.uikit.theme.TDTheme
@@ -26,15 +41,15 @@ import com.todoapp.uikit.theme.TDTheme
 @Composable
 fun TDTopBar(
     state: TDTopBarState,
-    isBannerActivated: Boolean
+    isBannerActivated: Boolean,
 ) {
     CenterAlignedTopAppBar(
         title = {
             Text(
                 text = state.title,
                 textAlign = TextAlign.Center,
-                style = TDTheme.typography.heading4,
-                color = TDTheme.colors.onBackground
+                style = TDTheme.typography.heading3,
+                color = TDTheme.colors.onBackground,
             )
         },
         navigationIcon = {
@@ -50,9 +65,16 @@ fun TDTopBar(
                     Icon(painterResource(it.icon), tint = TDTheme.colors.onBackground, contentDescription = null)
                 }
             }
+            state.profileChip?.let { chip ->
+                AvatarChip(
+                    url = chip.avatarUrl,
+                    initials = chip.initials,
+                    onClick = chip.onClick,
+                )
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = TDTheme.colors.background),
-        windowInsets = if (isBannerActivated) WindowInsets(0, 0, 0, 0) else TopAppBarDefaults.windowInsets
+        windowInsets = if (isBannerActivated) WindowInsets(0, 0, 0, 0) else TopAppBarDefaults.windowInsets,
     )
 }
 
@@ -60,7 +82,7 @@ fun TDTopBar(
 fun ShowTopBar(
     isBannerActivated: Boolean,
     onEvent: (UiAction) -> Unit,
-    uiState: TopBarContract.UiState
+    uiState: TopBarContract.UiState,
 ) {
     val navController = LocalNavController.current
     val route =
@@ -73,40 +95,67 @@ fun ShowTopBar(
     val normalizedRoute = normalizeRoute(route)
     val destination = appDestinationFromRoute(normalizedRoute) ?: return
     val titleText = stringResource(destination.title)
-    val state = when (destination) {
-        AppDestination.Home ->
-            TDTopBarState(
-                title = titleText,
-                onNavigationClick = { onEvent(UiAction.OnSettingsClick) },
-                navigationIcon = R.drawable.ic_settings,
-                actions =
-                    listOf(
-                        if (uiState.isUserAuthenticated) {
+    val currentEntry = navController.currentBackStackEntryAsState().value
+    val state =
+        when (destination) {
+            AppDestination.Home ->
+                TDTopBarState(
+                    title = titleText,
+                    onNavigationClick = { onEvent(UiAction.OnSettingsClick) },
+                    navigationIcon = R.drawable.ic_settings,
+                    actions =
+                    buildList {
+                        add(
                             TDTopBarAction(
-                                icon = com.todoapp.mobile.R.drawable.ic_logout,
-                                onClick = { onEvent(UiAction.OnLogoutClick) }
-                            )
-                        } else {
+                                icon = R.drawable.ic_search,
+                                onClick = { onEvent(UiAction.OnSearchClick) },
+                            ),
+                        )
+                        add(
                             TDTopBarAction(
-                                icon = com.todoapp.mobile.R.drawable.ic_person,
-                                onClick = { onEvent(UiAction.OnProfileClick) }
+                                icon = R.drawable.ic_notification,
+                                onClick = { onEvent(UiAction.OnNotificationClick) },
+                            ),
+                        )
+                    },
+                    profileChip =
+                    if (uiState.isUserAuthenticated) {
+                        TDProfileChip(
+                            avatarUrl = absoluteAvatarUrl(uiState.avatarUrl, uiState.avatarVersion),
+                            initials = initialsFrom(uiState.displayName),
+                            onClick = { onEvent(UiAction.OnProfileClick) },
+                        )
+                    } else {
+                        null
+                    },
+                )
+
+            AppDestination.GroupDetail -> {
+                val groupDetailArgs = runCatching { currentEntry?.toRoute<Screen.GroupDetail>() }.getOrNull()
+                TDTopBarState(
+                    title = groupDetailArgs?.groupName ?: titleText,
+                    onNavigationClick = { onEvent(UiAction.OnBackClick) },
+                    navigationIcon = R.drawable.ic_arrow_back,
+                    actions =
+                    listOfNotNull(
+                        groupDetailArgs?.let { args ->
+                            TDTopBarAction(
+                                icon = com.example.uikit.R.drawable.ic_settings,
+                                onClick = { onEvent(UiAction.OnGroupSettingsClick(args.groupId)) },
                             )
                         },
-                        TDTopBarAction(
-                            icon = R.drawable.ic_notification,
-                            onClick = { onEvent(UiAction.OnNotificationClick) },
-                        ),
                     ),
-            )
+                )
+            }
 
-        else -> {
-            TDTopBarState(
-                title = titleText,
-                onNavigationClick = { onEvent(UiAction.OnBackClick) },
-                navigationIcon = R.drawable.ic_arrow_back,
-            )
+            else -> {
+                TDTopBarState(
+                    title = titleText,
+                    onNavigationClick = { onEvent(UiAction.OnBackClick) },
+                    navigationIcon = R.drawable.ic_arrow_back,
+                )
+            }
         }
-    }
 
     TDTopBar(state = state, isBannerActivated)
 }
@@ -116,6 +165,7 @@ data class TDTopBarState(
     @DrawableRes val navigationIcon: Int,
     val onNavigationClick: (() -> Unit)? = null,
     val actions: List<TDTopBarAction> = emptyList(),
+    val profileChip: TDProfileChip? = null,
 )
 
 data class TDTopBarAction(
@@ -123,9 +173,63 @@ data class TDTopBarAction(
     val onClick: () -> Unit,
 )
 
-private fun normalizeRoute(route: String?): String? {
-    return route?.substringBefore("/")?.substringBefore("?")
+data class TDProfileChip(
+    val avatarUrl: String?,
+    val initials: String,
+    val onClick: () -> Unit,
+)
+
+@Composable
+private fun AvatarChip(
+    url: String?,
+    initials: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier =
+        Modifier
+            .padding(end = 8.dp)
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(TDTheme.colors.lightPending)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (url != null) {
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(36.dp),
+            )
+        } else {
+            Text(
+                text = initials,
+                style = TDTheme.typography.subheading2,
+                color = TDTheme.colors.pendingGray,
+            )
+        }
+    }
 }
+
+private fun absoluteAvatarUrl(
+    path: String?,
+    version: Long,
+): String? {
+    if (path.isNullOrBlank()) return null
+    val base = BuildConfig.BASE_URL.trimEnd('/')
+    val relative = path.trimStart('/')
+    return "$base/$relative?v=$version"
+}
+
+private fun initialsFrom(name: String): String = name
+    .split(" ")
+    .mapNotNull { it.firstOrNull()?.toString() }
+    .take(2)
+    .joinToString("")
+    .uppercase()
+
+private fun normalizeRoute(route: String?): String? = route?.substringBefore("/")?.substringBefore("?")
 
 @Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, widthDp = 360)
 @Composable
@@ -133,22 +237,22 @@ private fun TDTopBarPreview_Home() {
     TDTheme {
         TDTopBar(
             state =
-                TDTopBarState(
-                    title = "Home",
-                    navigationIcon = R.drawable.ic_settings,
-                    onNavigationClick = {},
-                    actions =
-                        listOf(
-                            TDTopBarAction(
-                                icon = R.drawable.ic_hamburger,
-                                onClick = {},
-                            ),
-                            TDTopBarAction(
-                                icon = R.drawable.ic_notification,
-                                onClick = {},
-                            ),
-                        ),
+            TDTopBarState(
+                title = "Home",
+                navigationIcon = R.drawable.ic_settings,
+                onNavigationClick = {},
+                actions =
+                listOf(
+                    TDTopBarAction(
+                        icon = R.drawable.ic_hamburger,
+                        onClick = {},
+                    ),
+                    TDTopBarAction(
+                        icon = R.drawable.ic_notification,
+                        onClick = {},
+                    ),
                 ),
+            ),
             isBannerActivated = false,
         )
     }
@@ -160,17 +264,18 @@ private fun TDTopBarPreview_Calendar() {
     TDTheme {
         TDTopBar(
             state =
-                TDTopBarState(
-                    title = "Calendar",
-                    navigationIcon = R.drawable.ic_arrow_back,
-                    onNavigationClick = { },
-                    actions = listOf(
-                        TDTopBarAction(
-                            icon = R.drawable.ic_hamburger,
-                            onClick = {},
-                        ),
+            TDTopBarState(
+                title = "Calendar",
+                navigationIcon = R.drawable.ic_arrow_back,
+                onNavigationClick = { },
+                actions =
+                listOf(
+                    TDTopBarAction(
+                        icon = R.drawable.ic_hamburger,
+                        onClick = {},
                     ),
                 ),
+            ),
             isBannerActivated = true,
         )
     }

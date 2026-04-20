@@ -11,13 +11,10 @@ plugins {
 
 android {
     namespace = "com.example.uikit"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 36
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -77,6 +74,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.lottie.compose)
+    implementation(libs.coil.compose)
     debugImplementation(libs.androidx.ui.tooling)
     detektPlugins(libs.detekt.formatting)
 }

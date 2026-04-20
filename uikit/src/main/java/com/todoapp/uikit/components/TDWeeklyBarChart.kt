@@ -15,8 +15,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,10 +34,13 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
 import kotlin.math.max
@@ -41,17 +49,34 @@ import kotlin.math.max
 fun TDWeeklyBarChart(
     modifier: Modifier,
     title: String,
-    days: List<String> = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+    days: List<String>? = null,
     values: List<Int>,
+    pendingValues: List<Int> = emptyList(),
+    pendingBarColor: Color = TDTheme.colors.pendingGray,
     yLabelColor: Color = TDTheme.colors.onBackground,
     height: Dp,
     autoScaleHeightToMaxY: Boolean = true,
     minGridStep: Dp = 24.dp,
+    scrollableHeight: Dp? = null,
+    onExpandClick: (() -> Unit)? = null,
 ) {
-    if (values.size != days.size) return
+    val resolvedDays =
+        days ?: listOf(
+            stringResource(R.string.bar_chart_days_mon),
+            stringResource(R.string.bar_chart_days_tue),
+            stringResource(R.string.bar_chart_days_wed),
+            stringResource(R.string.bar_chart_days_thu),
+            stringResource(R.string.bar_chart_days_fri),
+            stringResource(R.string.bar_chart_days_sat),
+            stringResource(R.string.bar_chart_days_sun),
+        )
+
+    if (values.size != resolvedDays.size) return
+
+    val hasPending = pendingValues.size == resolvedDays.size
 
     val barWidth = 24.dp
-    val barColor = TDTheme.colors.purple
+    val barColor = TDTheme.colors.mediumGreen
     val gridColor = TDTheme.colors.gray
     val xAxisHeight = 36.dp
     val yLabelWidth = 24.dp
@@ -59,33 +84,42 @@ fun TDWeeklyBarChart(
 
     val density = LocalDensity.current
 
-    val maxY = values.maxOrNull() ?: 0
+    val maxY =
+        if (hasPending) {
+            values.zip(pendingValues) { c, p -> c + p }.maxOrNull() ?: 0
+        } else {
+            values.maxOrNull() ?: 0
+        }
     val safeMaxY = max(1, maxY)
 
     val requiredPlotHeight = (safeMaxY * minGridStep.value).dp
     val plotHeight = if (autoScaleHeightToMaxY && requiredPlotHeight > height) requiredPlotHeight else height
+
     val labelTextSizePx = with(density) { 12.sp.toPx() }
     val labelXOffsetPx = with(density) { 10.dp.toPx() }
-    val yLabelPaint = remember(yLabelColor, labelTextSizePx) {
-        Paint().apply {
-            isAntiAlias = true
-            textSize = labelTextSizePx
-            textAlign = Paint.Align.RIGHT
-            color = yLabelColor.toArgb()
+    val yLabelPaint =
+        remember(yLabelColor, labelTextSizePx) {
+            Paint().apply {
+                isAntiAlias = true
+                textSize = labelTextSizePx
+                textAlign = Paint.Align.RIGHT
+                color = yLabelColor.toArgb()
+            }
         }
-    }
 
     val dashedLines = remember { PathEffect.dashPathEffect(floatArrayOf(48f, 4f), 0f) }
 
     TDWeeklyBarChartContent(
         modifier = modifier,
         title = title,
-        days = days,
+        days = resolvedDays,
         values = values,
+        pendingValues = if (hasPending) pendingValues else null,
         safeMaxY = safeMaxY,
         plotHeight = plotHeight,
         barWidth = barWidth,
         barColor = barColor,
+        pendingBarColor = pendingBarColor,
         gridColor = gridColor,
         xAxisHeight = xAxisHeight,
         yLabelWidth = yLabelWidth,
@@ -93,7 +127,9 @@ fun TDWeeklyBarChart(
         density = density,
         yLabelPaint = yLabelPaint,
         labelXOffsetPx = labelXOffsetPx,
-        dashedLines = dashedLines
+        dashedLines = dashedLines,
+        scrollableHeight = scrollableHeight,
+        onExpandClick = onExpandClick,
     )
 }
 
@@ -103,10 +139,12 @@ private fun TDWeeklyBarChartContent(
     title: String,
     days: List<String>,
     values: List<Int>,
+    pendingValues: List<Int>?,
     safeMaxY: Int,
     plotHeight: Dp,
     barWidth: Dp,
     barColor: Color,
+    pendingBarColor: Color,
     gridColor: Color,
     xAxisHeight: Dp,
     yLabelWidth: Dp,
@@ -115,106 +153,169 @@ private fun TDWeeklyBarChartContent(
     yLabelPaint: Paint,
     labelXOffsetPx: Float,
     dashedLines: PathEffect,
+    scrollableHeight: Dp?,
+    onExpandClick: (() -> Unit)?,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        TDText(
-            text = title,
-            style = TDTheme.typography.heading4,
-            color = TDTheme.colors.onBackground,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Box(
-            modifier = Modifier
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier =
+            Modifier
                 .fillMaxWidth()
-                .height(plotHeight + xAxisHeight)
-                .padding(horizontal = 16.dp)
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 8.dp)
-            ) {
-                val plotLeft = with(density) { (yLabelWidth + leftGapToPlot).toPx() }
-                val plotRight = size.width
-                val plotTop = 0f
-                val plotBottom = with(density) { plotHeight.toPx() }
-                val stepPx = (plotBottom - plotTop) / safeMaxY.toFloat()
-
-                for (i in 0..safeMaxY) {
-                    val y = plotBottom - i * stepPx
-
-                    drawLine(
-                        color = gridColor,
-                        start = Offset(plotLeft, y),
-                        end = Offset(plotRight, y),
-                        strokeWidth = with(density) { 1.dp.toPx() },
-                        pathEffect = dashedLines
+            TDText(
+                text = title,
+                style = TDTheme.typography.heading4,
+                color = TDTheme.colors.onBackground,
+            )
+            if (onExpandClick != null) {
+                IconButton(
+                    onClick = onExpandClick,
+                    modifier = Modifier.size(24.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_fullscreen),
+                        contentDescription = null,
+                        tint = TDTheme.colors.onBackground,
+                        modifier = Modifier.size(18.dp),
                     )
-
-                    val label = if (i == 0) "0" else i.toString().padStart(2, '0')
-
-                    drawContext.canvas.nativeCanvas.apply {
-                        drawText(
-                            label,
-                            plotLeft - labelXOffsetPx,
-                            y + yLabelPaint.textSize / 3f,
-                            yLabelPaint
-                        )
-                    }
                 }
             }
+        }
 
-            Row(
-                modifier = Modifier
+        val chartPlot: @Composable () -> Unit = {
+            Box(
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .padding(start = yLabelWidth + leftGapToPlot)
-                    .height(plotHeight + xAxisHeight),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
+                    .height(plotHeight + xAxisHeight)
+                    .padding(horizontal = 16.dp),
             ) {
-                values.forEachIndexed { index, v ->
-                    val clamped = v.coerceIn(0, safeMaxY)
-                    val target = clamped / safeMaxY.toFloat()
+                Canvas(
+                    modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(top = 8.dp),
+                ) {
+                    val plotLeft = with(density) { (yLabelWidth + leftGapToPlot).toPx() }
+                    val plotRight = size.width
+                    val plotTop = 0f
+                    val plotBottom = with(density) { plotHeight.toPx() }
+                    val stepPx = (plotBottom - plotTop) / safeMaxY.toFloat()
 
-                    val anim by animateFloatAsState(
-                        targetValue = target,
-                        animationSpec = tween(durationMillis = 650),
-                    )
+                    for (i in 0..safeMaxY) {
+                        val y = plotBottom - i * stepPx
 
-                    Column(
-                        modifier = Modifier.height(plotHeight + xAxisHeight),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Bottom
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .height(plotHeight)
-                                .width(barWidth),
-                            contentAlignment = Alignment.BottomCenter
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight(anim)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(barColor)
+                        drawLine(
+                            color = gridColor,
+                            start = Offset(plotLeft, y),
+                            end = Offset(plotRight, y),
+                            strokeWidth = with(density) { 1.dp.toPx() },
+                            pathEffect = dashedLines,
+                        )
+
+                        val label = if (i == 0) "0" else i.toString().padStart(2, '0')
+                        drawContext.canvas.nativeCanvas.apply {
+                            drawText(
+                                label,
+                                plotLeft - labelXOffsetPx,
+                                y + yLabelPaint.textSize / 3f,
+                                yLabelPaint,
                             )
                         }
+                    }
+                }
 
-                        Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = yLabelWidth + leftGapToPlot)
+                        .height(plotHeight + xAxisHeight),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    values.forEachIndexed { index, v ->
+                        val pendingV = pendingValues?.getOrNull(index) ?: 0
+                        val total = (v + pendingV).coerceIn(0, safeMaxY)
+                        val totalTarget = total / safeMaxY.toFloat()
+                        val completedTarget = v.coerceIn(0, total) / safeMaxY.toFloat()
 
-                        TDText(
-                            text = days[index],
-                            style = TDTheme.typography.regularTextStyle,
-                            color = TDTheme.colors.onBackground
+                        val totalAnim by animateFloatAsState(
+                            targetValue = totalTarget,
+                            animationSpec = tween(durationMillis = 650),
                         )
+
+                        val completedAnim by animateFloatAsState(
+                            targetValue = completedTarget,
+                            animationSpec = tween(durationMillis = 650),
+                        )
+
+                        Column(
+                            modifier = Modifier.height(plotHeight + xAxisHeight),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Bottom,
+                        ) {
+                            Box(
+                                modifier =
+                                Modifier
+                                    .height(plotHeight)
+                                    .width(barWidth),
+                                contentAlignment = Alignment.BottomCenter,
+                            ) {
+                                if (pendingValues != null) {
+                                    Box(
+                                        modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .fillMaxHeight(totalAnim)
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .background(pendingBarColor),
+                                    )
+                                }
+                                Box(
+                                    modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(if (pendingValues != null) completedAnim else totalAnim)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(barColor),
+                                )
+                            }
+
+                            Spacer(Modifier.height(8.dp))
+
+                            TDText(
+                                text = days[index],
+                                style = TDTheme.typography.regularTextStyle,
+                                color = TDTheme.colors.onBackground,
+                            )
+                        }
                     }
                 }
             }
+        }
+
+        if (scrollableHeight != null) {
+            Box(
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(scrollableHeight),
+            ) {
+                Column(
+                    modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    chartPlot()
+                }
+            }
+        } else {
+            chartPlot()
         }
     }
 }
@@ -224,17 +325,21 @@ private fun TDWeeklyBarChartContent(
 fun TDWeeklyBarChartPreview() {
     TDTheme {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(8.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             TDWeeklyBarChart(
                 modifier = Modifier,
                 title = "Task",
                 values = listOf(9, 4, 5, 2, 2, 3, 4),
+                pendingValues = listOf(3, 1, 2, 4, 0, 1, 2),
                 height = 220.dp,
+                scrollableHeight = 180.dp,
+                onExpandClick = {},
             )
         }
     }

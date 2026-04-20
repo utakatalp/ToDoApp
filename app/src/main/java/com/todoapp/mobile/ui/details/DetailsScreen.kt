@@ -1,32 +1,42 @@
 package com.todoapp.mobile.ui.details
 
+import android.content.res.Configuration
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.todoapp.mobile.R
 import com.todoapp.mobile.ui.details.DetailsContract.UiAction
 import com.todoapp.mobile.ui.details.DetailsContract.UiEffect
@@ -34,14 +44,17 @@ import com.todoapp.mobile.ui.details.DetailsContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
+import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
 import com.todoapp.uikit.components.TDLoadingBar
+import com.todoapp.uikit.components.TDPickerField
 import com.todoapp.uikit.components.TDText
-import com.todoapp.uikit.components.TDTextField
-import com.todoapp.uikit.components.TDTimePickerDialog
+import com.todoapp.uikit.components.TDWheelTimePicker
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun DetailsScreen(
@@ -59,30 +72,25 @@ fun DetailsScreen(
         }
     }
 
-    when (uiState) {
-        is UiState.Loading -> {
-            DetailsLoadingContent()
-        }
-
-        is UiState.Error -> {
-            DetailsErrorContent(
-                message = uiState.message,
-                onAction = onAction
-            )
-        }
-
-        is UiState.Success -> {
-            DetailsSuccessContent(
-                uiState = uiState,
-                onAction = onAction
-            )
+    Box(
+        modifier =
+        Modifier
+            .fillMaxSize()
+            .background(TDTheme.colors.background),
+    ) {
+        when (uiState) {
+            is UiState.Loading -> DetailsLoadingContent()
+            is UiState.Error -> DetailsErrorContent(uiState.message, onAction)
+            is UiState.Success -> DetailsSuccessContent(uiState, onAction)
         }
     }
 }
 
 @Composable
 private fun DetailsLoadingContent() {
-    TDLoadingBar()
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        TDLoadingBar()
+    }
 }
 
 @Composable
@@ -91,30 +99,30 @@ private fun DetailsErrorContent(
     onAction: (UiAction) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .background(TDTheme.colors.background)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Icon(
             painter = painterResource(com.example.uikit.R.drawable.ic_error),
             contentDescription = null,
             tint = TDTheme.colors.crossRed,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(64.dp),
         )
         Spacer(Modifier.height(16.dp))
         TDText(
             text = message,
             style = TDTheme.typography.heading3,
-            color = TDTheme.colors.onBackground
+            color = TDTheme.colors.onSurface,
         )
         Spacer(Modifier.height(24.dp))
         TDButton(
             text = stringResource(R.string.retry),
             onClick = { onAction(UiAction.OnRetry) },
-            size = TDButtonSize.SMALL
+            size = TDButtonSize.SMALL,
         )
     }
 }
@@ -125,155 +133,243 @@ private fun DetailsSuccessContent(
     onAction: (UiAction) -> Unit,
 ) {
     val verticalScroll = rememberScrollState()
+    val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
+
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
-            .background(TDTheme.colors.background)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .systemBarsPadding()
-            .imePadding()
+        modifier =
+        Modifier
+            .fillMaxSize()
+            .imePadding(),
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
+        Column(
+            modifier =
+            Modifier
+                .weight(1f)
+                .verticalScroll(verticalScroll)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            Spacer(Modifier.height(8.dp))
+
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .verticalScroll(verticalScroll),
-                verticalArrangement = Arrangement.Center,
+                    .clip(RoundedCornerShape(16.dp))
+                    .padding(vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                TDTextField(
+                TDCompactOutlinedTextField(
                     label = stringResource(R.string.task_title),
                     value = uiState.taskTitle,
                     onValueChange = { onAction(UiAction.OnTaskTitleEdit(it)) },
                     isError = uiState.titleError != null,
                     supportingText = uiState.titleError?.let { stringResource(it) },
-
-                    )
-
-                Spacer(Modifier.height(12.dp))
-
-                TDDatePickerDialog(
-                    selectedDate = uiState.dialogSelectedDate,
-                    onDateSelect = { onAction(UiAction.OnDialogDateSelect(it)) },
-                    onDateDeselect = { onAction(UiAction.OnDialogDateDeselect) },
                 )
 
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    TDTimePickerDialog(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(R.string.set_time),
-                        placeholder = stringResource(R.string.starts),
-                        selectedTime = uiState.taskTimeStart,
-                        onTimeChange = { onAction(UiAction.OnTaskTimeStartEdit(it)) },
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TDText(
+                        text = stringResource(R.string.task_date),
+                        style = TDTheme.typography.heading6,
+                        color = TDTheme.colors.onSurface,
                     )
-                    Spacer(Modifier.width(12.dp))
-
-                    TDTimePickerDialog(
-                        modifier = Modifier.weight(1f),
-                        title = "",
-                        placeholder = stringResource(R.string.ends),
-                        selectedTime = uiState.taskTimeEnd,
-                        onTimeChange = { onAction(UiAction.OnTaskTimeEndEdit(it)) },
+                    TDDatePickerDialog(
+                        selectedDate = uiState.dialogSelectedDate,
+                        onDateSelect = { onAction(UiAction.OnDialogDateSelect(it)) },
+                        onDateDeselect = { onAction(UiAction.OnDialogDateDeselect) },
                     )
                 }
-                Spacer(Modifier.height(12.dp))
-                TDTextField(
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        TDPickerField(
+                            title = stringResource(R.string.set_time),
+                            value =
+                            uiState.taskTimeStart?.format(timeFormatter)
+                                ?: stringResource(R.string.starts),
+                            onClick = { showStartTimePicker = true },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(com.example.uikit.R.drawable.ic_clock),
+                                    tint = TDTheme.colors.onBackground,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            },
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        TDPickerField(
+                            title = "",
+                            value =
+                            uiState.taskTimeEnd?.format(timeFormatter)
+                                ?: stringResource(R.string.ends),
+                            onClick = { showEndTimePicker = true },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(com.example.uikit.R.drawable.ic_clock),
+                                    tint = TDTheme.colors.onBackground,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            },
+                        )
+                    }
+                }
+
+                TDCompactOutlinedTextField(
                     label = stringResource(R.string.description),
                     value = uiState.taskDescription,
                     onValueChange = { onAction(UiAction.OnTaskDescriptionEdit(it)) },
                     singleLine = false,
                 )
-                Spacer(Modifier.height(24.dp))
+            }
 
-                Column {
-                    TDButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(R.string.save_changes),
-                        onClick = { onAction(UiAction.OnSaveChanges) },
-                        size = TDButtonSize.SMALL,
-                        isEnable = uiState.isDirty
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    TDButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(R.string.cancel),
-                        onClick = { onAction(UiAction.OnCancelClick) },
-                        size = TDButtonSize.SMALL,
-                        type = TDButtonType.SECONDARY,
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TDText(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(R.string.edit_details_hint),
+                    style = TDTheme.typography.subheading3,
+                    color = TDTheme.colors.onBackground.copy(alpha = 0.6f),
+                )
+                Spacer(Modifier.width(12.dp))
+                Image(
+                    painter =
+                    painterResource(
+                        if (TDTheme.isDark) R.drawable.ic_edit_robot_dark else R.drawable.ic_edit_robot_light,
+                    ),
+                    contentDescription = null,
+                    modifier =
+                    Modifier
+                        .fillMaxWidth(0.28f)
+                        .aspectRatio(1f),
+                )
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            com.todoapp.mobile.ui.grouptaskdetail.TaskPhotosSection(
+                photoUrls = uiState.photoUrls,
+                onPick = { bytes, mime -> onAction(UiAction.OnPhotoPicked(bytes, mime)) },
+                onDelete = { photoId -> onAction(UiAction.OnPhotoDelete(photoId)) },
+            )
+        }
+
+        Column(
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(TDTheme.colors.background)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            TDButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.save_changes),
+                onClick = { onAction(UiAction.OnSaveChanges) },
+                size = TDButtonSize.MEDIUM,
+                isEnable = uiState.isDirty && !uiState.isSaving,
+                fullWidth = true,
+            )
+            TDButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.cancel),
+                onClick = { onAction(UiAction.OnCancelClick) },
+                size = TDButtonSize.MEDIUM,
+                type = TDButtonType.SECONDARY,
+                fullWidth = true,
+            )
+        }
+    }
+
+    if (showStartTimePicker) {
+        WheelTimePickerDialog(
+            initialTime = uiState.taskTimeStart,
+            onConfirm = {
+                onAction(UiAction.OnTaskTimeStartEdit(it))
+                showStartTimePicker = false
+            },
+            onDismiss = { showStartTimePicker = false },
+        )
+    }
+
+    if (showEndTimePicker) {
+        WheelTimePickerDialog(
+            initialTime = uiState.taskTimeEnd,
+            onConfirm = {
+                onAction(UiAction.OnTaskTimeEndEdit(it))
+                showEndTimePicker = false
+            },
+            onDismiss = { showEndTimePicker = false },
+        )
+    }
+}
+
+@Composable
+private fun WheelTimePickerDialog(
+    initialTime: LocalTime?,
+    onConfirm: (LocalTime) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val now = LocalTime.now()
+    var hour by remember { mutableIntStateOf(initialTime?.hour ?: now.hour) }
+    var minute by remember { mutableIntStateOf(initialTime?.minute ?: now.minute) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            tonalElevation = 8.dp,
+            contentColor = TDTheme.colors.onBackground,
+            color = TDTheme.colors.background,
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                TDWheelTimePicker(
+                    hour = hour,
+                    minute = minute,
+                    onHourChange = { hour = it },
+                    onMinuteChange = { minute = it },
+                )
+                TDButton(
+                    text = stringResource(com.example.uikit.R.string.ok),
+                    onClick = { onConfirm(LocalTime.of(hour, minute)) },
+                    size = TDButtonSize.SMALL,
+                )
             }
         }
     }
 }
 
-@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
+@Preview("Light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
 private fun DetailsLoadingPreview() {
-    TDTheme {
-        DetailsLoadingContent()
-    }
+    TDTheme { DetailsLoadingContent() }
 }
 
-@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
+@Preview("Light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
 private fun DetailsErrorPreview() {
-    TDTheme {
-        DetailsErrorContent(
-            message = "Task not found",
-            onAction = {}
-        )
-    }
+    TDTheme { DetailsErrorContent("Task not found") {} }
 }
 
-@Preview("Dark", uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, showBackground = true)
+@Preview("Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 private fun DetailsSuccessPreview_Dark() {
-    TDTheme {
-        DetailsSuccessContent(
-            uiState = DetailsPreviewData.successState(),
-            onAction = {}
-        )
-    }
+    TDTheme { DetailsSuccessContent(DetailsPreviewData.successState()) {} }
 }
 
-@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
+@Preview("Light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
 private fun DetailsSuccessPreview_Light() {
-    TDTheme {
-        DetailsSuccessContent(
-            uiState = DetailsPreviewData.successState(),
-            onAction = {}
-        )
-    }
-}
-
-@Preview("Dirty State")
-@Composable
-private fun DetailsSuccessPreview_Dirty() {
-    TDTheme {
-        DetailsSuccessContent(
-            uiState = DetailsPreviewData.successState(
-                isDirty = true,
-                taskTitle = "Modified Task"
-            ),
-            onAction = {}
-        )
-    }
-}
-
-@Preview("Error State")
-@Composable
-private fun DetailsSuccessPreview_WithError() {
-    TDTheme {
-        DetailsSuccessContent(
-            uiState = DetailsPreviewData.successState(
-                titleError = R.string.error_title_required
-            ),
-            onAction = {}
-        )
-    }
+    TDTheme { DetailsSuccessContent(DetailsPreviewData.successState()) {} }
 }

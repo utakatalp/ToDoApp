@@ -2,6 +2,7 @@ package com.todoapp.mobile.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.todoapp.mobile.data.model.network.data.UserData
@@ -10,11 +11,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-class DataStoreHelper @Inject constructor(
+class DataStoreHelper
+@Inject
+constructor(
     private val dataStore: DataStore<Preferences>,
 ) {
-
-    fun getString(key: String, defaultValue: String = ""): Flow<String> {
+    fun getString(
+        key: String,
+        defaultValue: String = "",
+    ): Flow<String> {
         val prefKey = stringPreferencesKey(key)
         return dataStore.data.map { preferences ->
             preferences[prefKey] ?: defaultValue
@@ -28,19 +33,20 @@ class DataStoreHelper @Inject constructor(
         }
     }
 
-    suspend fun saveString(key: String, value: String) {
+    suspend fun saveString(
+        key: String,
+        value: String,
+    ) {
         val prefKey = stringPreferencesKey(key)
         dataStore.edit { preferences ->
             preferences[prefKey] = value
         }
     }
 
-    fun observeUser(): Flow<UserData?> {
-        return dataStore.data.map { preferences ->
-            preferences[USER_KEY]?.let { rawJson ->
-                runCatching { json.decodeFromString<UserData>(rawJson) }
-                    .getOrNull()
-            }
+    fun observeUser(): Flow<UserData?> = dataStore.data.map { preferences ->
+        preferences[USER_KEY]?.let { rawJson ->
+            runCatching { json.decodeFromString<UserData>(rawJson) }
+                .getOrNull()
         }
     }
 
@@ -57,12 +63,25 @@ class DataStoreHelper @Inject constructor(
         }
     }
 
-    companion object {
-        private val json = Json {
-            ignoreUnknownKeys = true
-            encodeDefaults = true
-            explicitNulls = false
+    val isLoggedIn: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[IS_LOGGED_IN] ?: false
         }
+
+    suspend fun setLoggedIn(value: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_LOGGED_IN] = value
+        }
+    }
+
+    companion object {
+        private val json =
+            Json {
+                ignoreUnknownKeys = true
+                encodeDefaults = true
+                explicitNulls = false
+            }
         private val USER_KEY = stringPreferencesKey("user")
+        private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
     }
 }

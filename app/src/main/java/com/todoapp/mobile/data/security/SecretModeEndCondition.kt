@@ -6,24 +6,18 @@ sealed interface SecretModeEndCondition {
     fun isActive(nowMillis: Long): Boolean
 
     data class UntilTime(
-        val epochMillis: Long
+        val epochMillis: Long,
     ) : SecretModeEndCondition {
-        override fun isActive(nowMillis: Long): Boolean {
-            return nowMillis < epochMillis
-        }
+        override fun isActive(nowMillis: Long): Boolean = nowMillis < epochMillis
     }
 
     data class UntilEvent(
         val event: SecretModeEndEvent,
     ) : SecretModeEndCondition {
-        override fun isActive(nowMillis: Long): Boolean {
-            return true
-        }
+        override fun isActive(nowMillis: Long): Boolean = true
     }
 
     data object Disabled : SecretModeEndCondition {
-        override fun isActive(nowMillis: Long): Boolean {
-            return false
-        }
+        override fun isActive(nowMillis: Long): Boolean = false
     }
 }

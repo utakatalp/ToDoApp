@@ -13,6 +13,7 @@ import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.model.network.request.RefreshTokenRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
+import com.todoapp.mobile.data.model.network.request.UpdateUserRequest
 import com.todoapp.mobile.data.source.remote.api.ToDoApi
 import com.todoapp.mobile.data.source.remote.api.TodoAuthApi
 import com.todoapp.mobile.domain.repository.AuthEvent
@@ -23,28 +24,34 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.tasks.await
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
 import javax.inject.Inject
 
-class UserRepositoryImpl @Inject constructor(
+class UserRepositoryImpl
+@Inject
+constructor(
     private val todoApi: ToDoApi,
     private val fcmTokenPreferences: FCMTokenPreferences,
+    private val dataStoreHelper: DataStoreHelper,
 ) : UserRepository {
-
-    override suspend fun fcmToken(request: FCMTokenRequest): Result<FCMTokenResponseData> {
-        return handleRequest { todoApi.fcmToken(request) }
+    override suspend fun fcmToken(request: FCMTokenRequest): Result<FCMTokenResponseData> = handleRequest {
+        todoApi.fcmToken(request)
     }
 
     override suspend fun syncPendingFcmToken(): Result<Unit> {
         var pendingToken = fcmTokenPreferences.getPendingToken()
 
         if (pendingToken.isNullOrBlank()) {
-            pendingToken = try {
-                FirebaseMessaging.getInstance().token.await()
-            } catch (e: IOException) {
-                Log.d("FCM_SYNC", "Failed to get Firebase token", e)
-                return Result.success(Unit)
-            }
+            pendingToken =
+                try {
+                    FirebaseMessaging.getInstance().token.await()
+                } catch (e: IOException) {
+                    Log.d("FCM_SYNC", "Failed to get Firebase token", e)
+                    return Result.success(Unit)
+                }
         }
 
         val lastSentToken = fcmTokenPreferences.getLastSentToken()
@@ -58,51 +65,67 @@ class UserRepositoryImpl @Inject constructor(
             return Result.success(Unit)
         }
 
-        val apiResult: Result<FCMTokenResponseData> = fcmToken(
-            FCMTokenRequest(
-                token = pendingToken,
-                deviceId = deviceId,
-                deviceName = deviceName
+        val apiResult: Result<FCMTokenResponseData> =
+            fcmToken(
+                FCMTokenRequest(
+                    token = pendingToken,
+                    deviceId = deviceId,
+                    deviceName = deviceName,
+                ),
             )
-        )
 
         apiResult
             .onSuccess {
                 fcmTokenPreferences.setLastSentToken(pendingToken)
                 fcmTokenPreferences.clearPendingToken()
-            }
-            .onFailure { e ->
+            }.onFailure { e ->
                 Log.e("FCM_SYNC", "Token send FAILED. Pending token preserved.", e)
             }
 
         return apiResult.map {}
     }
 
-    override suspend fun register(request: RegisterRequest): Result<AuthResponseData> {
-        return handleRequest { todoApi.register(request) }
+    override suspend fun register(request: RegisterRequest): Result<AuthResponseData> = handleRequest {
+        todoApi.register(request)
     }
 
-    override suspend fun login(request: LoginRequest): Result<AuthResponseData> {
-        return handleRequest { todoApi.login(request) }
+    override suspend fun login(request: LoginRequest): Result<AuthResponseData> = handleRequest {
+        todoApi.login(
+            request,
+        )
     }
 
-    override suspend fun googleLogin(token: String): Result<AuthResponseData> {
-        return handleRequest { todoApi.googleLogin(GoogleLoginRequest(token = token)) }
+    override suspend fun googleLogin(token: String): Result<AuthResponseData> = handleRequest {
+        todoApi.googleLogin(GoogleLoginRequest(token = token))
     }
 
-    override suspend fun facebookLogin(request: FacebookLoginRequest): Result<AuthResponseData> {
-        return handleRequest { todoApi.facebookLogin(request) }
+    override suspend fun facebookLogin(request: FacebookLoginRequest): Result<AuthResponseData> = handleRequest {
+        todoApi.facebookLogin(request)
     }
 
-    override suspend fun getUserInfo(): Result<UserData> {
-        return handleRequest { todoApi.getUserInfo() }
+    override suspend fun getUserInfo(): Result<UserData> = handleRequest { todoApi.getUserInfo() }
+
+    override suspend fun updateDisplayName(displayName: String): Result<UserData> {
+        return handleRequest { todoApi.updateUser(UpdateUserRequest(displayName = displayName)) }
+            .onSuccess { dataStoreHelper.setUser(it) }
+    }
+
+    override suspend fun uploadAvatar(
+        bytes: ByteArray,
+        mimeType: String,
+    ): Result<UserData> {
+        val body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+        val part = MultipartBody.Part.createFormData("file", "avatar.jpg", body)
+        return handleRequest { todoApi.uploadAvatar(part) }
+            .onSuccess { dataStoreHelper.setUser(it) }
     }
 }
 
-class AuthRepositoryImpl @Inject constructor(
+class AuthRepositoryImpl
+@Inject
+constructor(
     private val authApi: TodoAuthApi,
 ) : AuthRepository {
-
     private val _events = MutableSharedFlow<AuthEvent>(replay = 0)
     override val events: SharedFlow<AuthEvent> = _events.asSharedFlow()
 

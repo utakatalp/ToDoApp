@@ -40,8 +40,8 @@ fun TDWeeklyCircularProgressIndicator(
     modifier: Modifier = Modifier,
     progress: Float,
     inProgress: Float = 0f,
-    color: Color = TDTheme.colors.purple,
-    inProgressColor: Color = TDTheme.colors.lightPurple,
+    color: Color = TDTheme.colors.mediumGreen,
+    inProgressColor: Color = TDTheme.colors.pendingGray,
     strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth,
     strokeCap: StrokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
     animationSpec: AnimationSpec<Float> = ProgressIndicatorDefaults.ProgressAnimationSpec,
@@ -51,20 +51,22 @@ fun TDWeeklyCircularProgressIndicator(
     val animatedCompleted by animateFloatAsState(
         targetValue = targetCompleted,
         animationSpec = animationSpec,
+        label = "completedProgress",
     )
     val animatedInProgress by animateFloatAsState(
         targetValue = targetInProgress,
         animationSpec = animationSpec,
+        label = "inProgressArc",
     )
 
     BoxWithConstraints(
-        modifier = modifier
+        modifier = modifier,
     ) {
         val indicatorSize = maxWidth * 0.35f
 
         Row(
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier,
@@ -91,7 +93,7 @@ fun TDWeeklyCircularProgressIndicator(
                         sweepAngle = completedSweep,
                         useCenter = false,
                         size = arcSize,
-                        style = stroke
+                        style = stroke,
                     )
 
                     drawArc(
@@ -100,7 +102,7 @@ fun TDWeeklyCircularProgressIndicator(
                         sweepAngle = -inProgressSweep,
                         useCenter = false,
                         size = arcSize,
-                        style = stroke
+                        style = stroke,
                     )
                 }
             }
@@ -124,22 +126,15 @@ fun TDWeeklyCircularProgressIndicator(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 LegendColoredBoxItem(
-                    color = TDTheme.colors.purple,
+                    color = TDTheme.colors.mediumGreen,
                     text = stringResource(id = R.string.activity_screen_weekly_progress_legend_complete_text),
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 LegendColoredBoxItem(
-                    color = TDTheme.colors.lightPurple,
+                    color = TDTheme.colors.pendingGray,
                     text = stringResource(id = R.string.activity_screen_weekly_progress_legend_in_progress_text),
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                LegendColoredBoxItem(
-                    color = TDTheme.colors.gray,
-                    text = stringResource(id = R.string.activity_screen_weekly_progress_legend_not_started_text),
                 )
             }
         }
@@ -152,12 +147,13 @@ fun LegendColoredBoxItem(
     text: String,
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(12.dp)
-                .background(color)
+                .background(color),
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -174,12 +170,11 @@ fun LegendColoredBoxItem(
 
 @TDPreviewWide
 @Composable
-fun TDWeeklyCircularProgressIndicatorPreview(
-    modifier: Modifier = Modifier,
-) {
+fun TDWeeklyCircularProgressIndicatorPreview(modifier: Modifier = Modifier) {
     TDTheme {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -189,8 +184,8 @@ fun TDWeeklyCircularProgressIndicatorPreview(
                 modifier = modifier.fillMaxWidth(),
                 progress = 0.65f,
                 inProgress = 0.35f,
-                color = TDTheme.colors.purple,
-                inProgressColor = TDTheme.colors.lightPurple,
+                color = TDTheme.colors.mediumGreen,
+                inProgressColor = TDTheme.colors.pendingGray,
                 strokeWidth = 14.dp,
                 strokeCap = Butt,
             )

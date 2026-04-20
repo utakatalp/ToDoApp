@@ -7,10 +7,14 @@ import com.todoapp.mobile.domain.model.Pomodoro
 import com.todoapp.mobile.domain.repository.PomodoroRepository
 import javax.inject.Inject
 
-class PomodoroRepositoryImpl @Inject constructor(
-    private val pomodoroDao: PomodoroDao
+class PomodoroRepositoryImpl
+@Inject
+constructor(
+    private val pomodoroDao: PomodoroDao,
 ) : PomodoroRepository {
     override suspend fun getSavedPomodoroSettings(): Pomodoro? = pomodoroDao.getPomodoro()?.toDomain()
+
     override suspend fun updatePomodoro(pomodoro: Pomodoro) = pomodoroDao.updatePomodoro(pomodoro.toEntity())
+
     override suspend fun insertPomodoro(pomodoro: Pomodoro) = pomodoroDao.insertPomodoro(pomodoro.toEntity())
 }

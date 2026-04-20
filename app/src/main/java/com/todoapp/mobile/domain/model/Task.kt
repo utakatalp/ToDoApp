@@ -8,44 +8,49 @@ import java.time.LocalTime
 
 data class Task(
     val id: Long = 0L,
+    val remoteId: Long? = null,
     val title: String,
     val description: String?,
     val date: LocalDate,
     val timeStart: LocalTime,
     val timeEnd: LocalTime,
     val isCompleted: Boolean,
-    val isSecret: Boolean
+    val isSecret: Boolean,
+    val photoUrls: List<String> = emptyList(),
 )
 
-fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem {
-    return AlarmItem(
-        time = LocalDateTime.of(date, timeStart.minusMinutes(remindBeforeMinutes)),
-        message = title,
-        minutesBefore = remindBeforeMinutes,
-    )
-}
+fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem = AlarmItem(
+    time = LocalDateTime.of(date, timeStart.minusMinutes(remindBeforeMinutes)),
+    message = title,
+    minutesBefore = remindBeforeMinutes,
+)
 
-fun Task.toCreateTaskRequestDto(): TaskRequest {
-    return TaskRequest(
-        title = title,
-        description = description,
-        date = date.toEpochDay(),
-        timeStart = timeStart.toSecondOfDay().toLong(),
-        timeEnd = timeEnd.toSecondOfDay().toLong(),
-        isCompleted = isCompleted,
-        isSecret = isSecret,
-    )
-}
+fun Task.toCreateTaskRequestDto(
+    familyGroupId: Long? = null,
+    assignedToUserId: Long? = null,
+    priority: String? = null,
+): TaskRequest = TaskRequest(
+    id = if (id != 0L) id else null,
+    title = title,
+    description = description,
+    date = date.toEpochDay(),
+    timeStart = timeStart.toSecondOfDay().toLong(),
+    timeEnd = timeEnd.toSecondOfDay().toLong(),
+    isCompleted = isCompleted,
+    isSecret = isSecret,
+    familyGroupId = familyGroupId,
+    assignedToUserId = assignedToUserId,
+    priority = priority,
+)
 
-fun TaskData.toDomain(): Task {
-    return Task(
-        id = id,
-        title = title,
-        description = description,
-        date = LocalDate.ofEpochDay(date),
-        timeStart = LocalTime.ofSecondOfDay(timeStart),
-        timeEnd = LocalTime.ofSecondOfDay(timeEnd),
-        isCompleted = isCompleted,
-        isSecret = isSecret,
-    )
-}
+fun TaskData.toDomain(): Task = Task(
+    id = id,
+    title = title,
+    description = description,
+    date = LocalDate.ofEpochDay(date),
+    timeStart = LocalTime.ofSecondOfDay(timeStart),
+    timeEnd = LocalTime.ofSecondOfDay(timeEnd),
+    isCompleted = isCompleted,
+    isSecret = isSecret,
+    photoUrls = photoUrls,
+)

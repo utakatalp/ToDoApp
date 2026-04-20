@@ -3,14 +3,21 @@ package com.todoapp.mobile.di
 import com.todoapp.mobile.data.engine.PomodoroEngineImpl
 import com.todoapp.mobile.data.repository.AuthRepositoryImpl
 import com.todoapp.mobile.data.repository.GroupRepositoryImpl
+import com.todoapp.mobile.data.repository.LanguageRepositoryImpl
 import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.SessionPreferencesImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
 import com.todoapp.mobile.data.repository.TaskSyncRepositoryImpl
 import com.todoapp.mobile.data.repository.ThemeRepositoryImpl
 import com.todoapp.mobile.data.repository.UserRepositoryImpl
+import com.todoapp.mobile.data.source.local.datasource.GroupActivityLocalDataSource
+import com.todoapp.mobile.data.source.local.datasource.GroupActivityLocalDataSourceImpl
 import com.todoapp.mobile.data.source.local.datasource.GroupLocalDataSource
 import com.todoapp.mobile.data.source.local.datasource.GroupLocalDataSourceImpl
+import com.todoapp.mobile.data.source.local.datasource.GroupMemberLocalDataSource
+import com.todoapp.mobile.data.source.local.datasource.GroupMemberLocalDataSourceImpl
+import com.todoapp.mobile.data.source.local.datasource.GroupTaskLocalDataSource
+import com.todoapp.mobile.data.source.local.datasource.GroupTaskLocalDataSourceImpl
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSourceImpl
 import com.todoapp.mobile.data.source.remote.datasource.GroupRemoteDataSource
@@ -20,6 +27,7 @@ import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSourceImpl
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.GroupRepository
+import com.todoapp.mobile.domain.repository.LanguageRepository
 import com.todoapp.mobile.domain.repository.PomodoroRepository
 import com.todoapp.mobile.domain.repository.SessionPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
@@ -35,7 +43,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-
     @Binds
     @Singleton
     abstract fun bindTaskRemoteDataSource(impl: TaskRemoteDataSourceImpl): TaskRemoteDataSource
@@ -50,11 +57,27 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindGroupTaskLocalDataSource(impl: GroupTaskLocalDataSourceImpl): GroupTaskLocalDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindGroupMemberLocalDataSource(impl: GroupMemberLocalDataSourceImpl): GroupMemberLocalDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindGroupActivityLocalDataSource(impl: GroupActivityLocalDataSourceImpl): GroupActivityLocalDataSource
+
+    @Binds
+    @Singleton
     abstract fun bindSessionPreferences(impl: SessionPreferencesImpl): SessionPreferences
 
     @Binds
     @Singleton
     abstract fun bindThemeRepository(impl: ThemeRepositoryImpl): ThemeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLanguageRepository(impl: LanguageRepositoryImpl): LanguageRepository
 
     @Binds
     @Singleton
@@ -78,9 +101,7 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindGroupDataSource(
-        groupRemoteDataSourceImpl: GroupRemoteDataSourceImpl
-    ): GroupRemoteDataSource
+    abstract fun bindGroupDataSource(groupRemoteDataSourceImpl: GroupRemoteDataSourceImpl): GroupRemoteDataSource
 
     @Binds
     @Singleton

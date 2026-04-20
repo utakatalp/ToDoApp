@@ -1,27 +1,48 @@
 package com.todoapp.uikit.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.uikit.R
+import com.todoapp.uikit.modifier.neumorphicShadow
 import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun TDStatisticCard(
@@ -29,150 +50,176 @@ fun TDStatisticCard(
     taskAmount: Int,
     modifier: Modifier = Modifier,
     isCompleted: Boolean = true,
+    onClick: (() -> Unit)? = null,
 ) {
-    if (isCompleted) {
-        Column(
-            modifier =
-                modifier
-                    .size(width = 162.dp, height = 96.dp)
-                    .background(TDTheme.colors.bgColorPurple),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+    val cardBg = if (isCompleted) TDTheme.colors.lightGreen else TDTheme.colors.lightPending
+    val numberColor = if (isCompleted) TDTheme.colors.darkGreen else TDTheme.colors.darkPending
+    val iconBg = if (isCompleted) TDTheme.colors.mediumGreen else TDTheme.colors.pendingGray
+    val isDark = TDTheme.isDark
+    val shadowAccent = if (isCompleted) TDTheme.colors.darkGreen else TDTheme.colors.darkPending
+    val cornerShape = RoundedCornerShape(20.dp)
+
+    val scale = remember { Animatable(0.85f) }
+    val alpha = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        launch { scale.animateTo(1f, spring(dampingRatio = 0.6f, stiffness = 400f)) }
+        alpha.animateTo(1f, spring(stiffness = 300f))
+    }
+
+    val surfaceModifier =
+        modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale.value
+                scaleY = scale.value
+                this.alpha = alpha.value
+            }.then(
+                if (isDark) {
+                    Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.25f), cornerShape)
+                } else {
+                    Modifier.neumorphicShadow(
+                        lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
+                        darkShadow = shadowAccent.copy(alpha = 0.18f),
+                        cornerRadius = 20.dp,
+                        elevation = 6.dp,
+                    )
+                },
+            )
+
+    val content: @Composable () -> Unit = {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+            StatisticIcon(
+                isCompleted = isCompleted,
+                backgroundColor = iconBg,
+            )
+            Spacer(Modifier.width(14.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
             ) {
-                CheckInBoxComponent()
-                Spacer(Modifier.width(10.dp))
+                AnimatedContent(
+                    modifier = Modifier.fillMaxWidth(),
+                    targetState = taskAmount,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            slideInVertically { -it } + fadeIn(tween(250)) togetherWith
+                                slideOutVertically { it } + fadeOut(tween(250))
+                        } else {
+                            slideInVertically { it } + fadeIn(tween(250)) togetherWith
+                                slideOutVertically { -it } + fadeOut(tween(250))
+                        }
+                    },
+                    label = "taskAmountAnim",
+                ) { amount ->
+                    TDText(
+                        text = amount.toString(),
+                        style = TDTheme.typography.heading5.copy(fontWeight = FontWeight.Bold),
+                        color = numberColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Spacer(Modifier.height(2.dp))
+                TDText(
+                    text = stringResource(R.string.weekly),
+                    style = TDTheme.typography.subheading4,
+                    color = numberColor,
+                )
                 TDText(
                     text = text,
-                    color = TDTheme.colors.onBackground,
                     style = TDTheme.typography.subheading1,
+                    color = TDTheme.colors.onBackground.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Spacer(Modifier.weight(1f))
-                TDSpannableText(
-                    fullText = "$taskAmount This Week",
-                    spanText = "$taskAmount",
-                    spanStyle =
-                        SpanStyle(
-                            color = TDTheme.colors.onBackground,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                        ),
-                    style = TDTheme.typography.subheading2,
-                    color = TDTheme.colors.statusCardGray,
-                )
-                Spacer(Modifier.weight(0.6f))
             }
         }
+    }
+
+    if (onClick != null) {
+        Surface(
+            onClick = onClick,
+            modifier = surfaceModifier,
+            shape = RoundedCornerShape(20.dp),
+            color = cardBg,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+            content = content,
+        )
     } else {
-        Column(
-            modifier =
-                modifier
-                    .size(width = 162.dp, height = 96.dp)
-                    .background(TDTheme.colors.lightRed),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CrossInBoxComponent()
-                Spacer(Modifier.width(10.dp))
-                TDText(
-                    text = text,
-                    color = TDTheme.colors.onBackground,
-                    style = TDTheme.typography.subheading1,
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Spacer(Modifier.weight(1f))
-                TDSpannableText(
-                    fullText = "$taskAmount This Week",
-                    spanText = "$taskAmount",
-                    spanStyle =
-                        SpanStyle(
-                            color = TDTheme.colors.onBackground,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                        ),
-                    style = TDTheme.typography.subheading2,
-                    color = TDTheme.colors.statusCardGray,
-                )
-                Spacer(Modifier.weight(0.6f))
-            }
+        Surface(
+            modifier = surfaceModifier,
+            shape = RoundedCornerShape(20.dp),
+            color = cardBg,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+            content = content,
+        )
+    }
+}
+
+@Composable
+private fun StatisticIcon(
+    isCompleted: Boolean,
+    backgroundColor: Color,
+) {
+    val iconScale = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        iconScale.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 500f))
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier =
+        Modifier
+            .size(44.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(backgroundColor),
+    ) {
+        if (isCompleted) {
+            Icon(
+                modifier =
+                Modifier
+                    .size(20.dp)
+                    .scale(iconScale.value),
+                painter = painterResource(R.drawable.ic_rectangle_svg),
+                contentDescription = null,
+                tint = TDTheme.colors.white,
+            )
+            Icon(
+                modifier =
+                Modifier
+                    .size(13.dp)
+                    .scale(iconScale.value),
+                painter = painterResource(R.drawable.ic_check_svg),
+                contentDescription = null,
+                tint = TDTheme.colors.white,
+            )
+        } else {
+            Icon(
+                modifier =
+                Modifier
+                    .size(20.dp)
+                    .scale(iconScale.value),
+                painter = painterResource(R.drawable.ic_sand_clock),
+                contentDescription = null,
+                tint = TDTheme.colors.white,
+            )
         }
-    }
-}
-
-@Composable
-private fun CheckInBoxComponent() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier =
-            Modifier
-                .background(TDTheme.colors.lightPurple)
-                .padding(4.dp),
-    ) {
-        Icon(
-            modifier = Modifier.size(13.dp),
-            painter = painterResource(R.drawable.ic_check_svg),
-            contentDescription = "check",
-            tint = TDTheme.colors.darkPurple,
-        )
-        Icon(
-            modifier = Modifier.size(20.dp),
-            painter = painterResource(R.drawable.ic_rectangle_svg),
-            contentDescription = "rectangle",
-            tint = TDTheme.colors.darkPurple,
-        )
-    }
-}
-
-@Composable
-private fun CrossInBoxComponent() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier =
-            Modifier
-                .background(TDTheme.colors.red)
-                .padding(4.dp),
-    ) {
-        Icon(
-            modifier = Modifier.size(13.dp),
-            painter = painterResource(R.drawable.ic_back_slash),
-            contentDescription = "check",
-            tint = TDTheme.colors.crossRed,
-        )
-        Icon(
-            modifier = Modifier.size(13.dp),
-            painter = painterResource(R.drawable.ic_forward_slash),
-            contentDescription = "check",
-            tint = TDTheme.colors.crossRed,
-        )
-        Icon(
-            modifier = Modifier.size(20.dp),
-            painter = painterResource(R.drawable.ic_rectangle_svg),
-            contentDescription = "rectangle",
-            tint = TDTheme.colors.crossRed,
-        )
     }
 }
 
 @TDPreview
 @Composable
-fun TDStatisticCardCompletedPreview() {
+private fun TDStatisticCardCompletedPreview() {
     TDTheme {
         TDStatisticCard(
-            "Task Complete",
+            text = "Task Complete",
             taskAmount = 10,
             isCompleted = true,
         )
@@ -181,10 +228,10 @@ fun TDStatisticCardCompletedPreview() {
 
 @TDPreview
 @Composable
-fun TDStatisticCardPendingPreview() {
+private fun TDStatisticCardPendingPreview() {
     TDTheme {
         TDStatisticCard(
-            "Task Pending",
+            text = "Task Pending",
             taskAmount = 3,
             isCompleted = false,
         )

@@ -1,0 +1,142 @@
+package com.todoapp.mobile.ui.groupdetail
+
+import com.todoapp.mobile.ui.home.TaskFormState
+import com.todoapp.mobile.ui.home.TaskFormUiAction
+
+object GroupDetailContract {
+    data class GroupTaskUiItem(
+        val id: Long,
+        val title: String,
+        val description: String?,
+        val assigneeId: Long?,
+        val assigneeAvatarUrl: String?,
+        val assigneeName: String?,
+        val assigneeInitials: String?,
+        val dueTime: String?,
+        val rawDueDate: Long?,
+        val priority: String?,
+        val isCompleted: Boolean,
+        val isAssignedToMe: Boolean,
+        val canDelete: Boolean = false,
+        val photoUrls: List<String> = emptyList(),
+    )
+
+    data class GroupMemberUiItem(
+        val userId: Long,
+        val displayName: String,
+        val email: String,
+        val avatarUrl: String?,
+        val initials: String,
+        val role: String,
+        val joinedAt: String,
+        val pendingTaskCount: Int,
+        val isCurrentUser: Boolean,
+    )
+
+    data class GroupActivityUiItem(
+        val id: Long,
+        val type: String,
+        val actorName: String,
+        val actorAvatarUrl: String?,
+        val actorInitials: String,
+        val description: String,
+        val relativeTime: String,
+        val taskTitle: String?,
+    )
+
+    sealed interface UiState {
+        data object Loading : UiState
+
+        data class Success(
+            val groupId: Long,
+            val groupName: String,
+            val description: String,
+            val memberCount: Int,
+            val completedCount: Int,
+            val pendingCount: Int,
+            val tasks: List<GroupTaskUiItem>,
+            val members: List<GroupMemberUiItem>,
+            val activities: List<GroupActivityUiItem>,
+            val selectedTab: Int = 0,
+            val taskFilter: TaskFilter = TaskFilter.ALL,
+            val currentUserRole: String = "",
+            val isTaskSheetOpen: Boolean = false,
+            val taskFormState: TaskFormState = TaskFormState(),
+            val editingTaskId: Long? = null,
+            val pendingDeleteTaskId: Long? = null,
+            val undoDeleteTaskId: Long? = null,
+            val pendingAssignTaskId: Long? = null,
+        ) : UiState
+
+        data class Error(
+            val message: String,
+        ) : UiState
+    }
+
+    enum class TaskFilter { ALL, ASSIGNED_TO_ME }
+
+    sealed interface UiAction {
+        data class OnTabSelected(
+            val index: Int,
+        ) : UiAction
+
+        data class OnTaskFilterSelected(
+            val filter: TaskFilter,
+        ) : UiAction
+
+        data class OnTaskChecked(
+            val taskId: Long,
+            val isChecked: Boolean,
+        ) : UiAction
+
+        data object OnNewTaskTap : UiAction
+
+        data object OnDismissGroupTaskSheet : UiAction
+
+        data object OnGroupTaskCreate : UiAction
+
+        data class OnGroupTaskFormAction(
+            val action: TaskFormUiAction,
+        ) : UiAction
+
+        data object OnInviteTap : UiAction
+
+        data class OnRemoveMemberTap(
+            val userId: Long,
+        ) : UiAction
+
+        data class OnTaskTapped(
+            val taskId: Long,
+        ) : UiAction
+
+        data class OnTaskLongPress(
+            val taskId: Long,
+        ) : UiAction
+
+        data class OnDeleteTask(
+            val taskId: Long,
+        ) : UiAction
+
+        data class OnAssignToMe(
+            val taskId: Long,
+        ) : UiAction
+
+        data object OnUndoDeleteTask : UiAction
+
+        data object OnScreenResumed : UiAction
+
+        data object OnAssignToMeConfirm : UiAction
+
+        data object OnAssignToMeDismiss : UiAction
+
+        data object OnDeleteTaskConfirm : UiAction
+
+        data object OnDeleteTaskDismiss : UiAction
+    }
+
+    sealed interface UiEffect {
+        data class ShowToast(
+            val message: String,
+        ) : UiEffect
+    }
+}

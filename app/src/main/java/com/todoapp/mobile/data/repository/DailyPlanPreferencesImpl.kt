@@ -9,10 +9,11 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-class DailyPlanPreferencesImpl @Inject constructor(
+class DailyPlanPreferencesImpl
+@Inject
+constructor(
     private val dataStoreHelper: DataStoreHelper,
 ) : DailyPlanPreferences {
-
     companion object {
         private const val PLAN_TIME_KEY = "daily_plan_time"
         private const val CARD_POSITION_X_KEY = "daily_plan_card_position_x"
@@ -20,13 +21,13 @@ class DailyPlanPreferencesImpl @Inject constructor(
         private val FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     }
 
-    override fun observePlanTime(): Flow<LocalTime?> {
-        return dataStoreHelper.observeOptionalString(PLAN_TIME_KEY).map { value ->
-            if (value.isNullOrBlank()) {
-                null
-            } else {
-                runCatching { LocalTime.parse(value, FORMATTER) }.getOrNull()
-            }
+    override fun observePlanTime(): Flow<LocalTime?> = dataStoreHelper.observeOptionalString(
+        PLAN_TIME_KEY
+    ).map { value ->
+        if (value.isNullOrBlank()) {
+            null
+        } else {
+            runCatching { LocalTime.parse(value, FORMATTER) }.getOrNull()
         }
     }
 
@@ -34,16 +35,14 @@ class DailyPlanPreferencesImpl @Inject constructor(
         dataStoreHelper.saveString(PLAN_TIME_KEY, time.format(FORMATTER))
     }
 
-    override fun observeCardPosition(): Flow<DailyCardPosition> {
-        return combine(
-            dataStoreHelper.observeOptionalString(CARD_POSITION_X_KEY),
-            dataStoreHelper.observeOptionalString(CARD_POSITION_Y_KEY)
-        ) { x, y ->
-            DailyCardPosition(
-                x?.toFloatOrNull() ?: 0f,
-                y?.toFloatOrNull() ?: 0f
-            )
-        }
+    override fun observeCardPosition(): Flow<DailyCardPosition> = combine(
+        dataStoreHelper.observeOptionalString(CARD_POSITION_X_KEY),
+        dataStoreHelper.observeOptionalString(CARD_POSITION_Y_KEY),
+    ) { x, y ->
+        DailyCardPosition(
+            x?.toFloatOrNull() ?: 0f,
+            y?.toFloatOrNull() ?: 0f,
+        )
     }
 
     override suspend fun saveCardPosition(position: DailyCardPosition) {

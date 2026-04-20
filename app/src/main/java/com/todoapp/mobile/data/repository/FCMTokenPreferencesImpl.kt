@@ -9,16 +9,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
 import javax.inject.Inject
 
-class FCMTokenPreferencesImpl @Inject constructor(
+class FCMTokenPreferencesImpl
+@Inject
+constructor(
     @ApplicationContext private val context: Context,
 ) : FCMTokenPreferences {
-
     private val prefs: SharedPreferences =
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
-    override fun getPendingToken(): String? {
-        return prefs.getString(KEY_PENDING_TOKEN, null)
-    }
+    override fun getPendingToken(): String? = prefs.getString(KEY_PENDING_TOKEN, null)
 
     override fun getDeviceId(): String {
         val stored = prefs.getString(KEY_DEVICE_ID, null)
@@ -29,9 +28,7 @@ class FCMTokenPreferencesImpl @Inject constructor(
         return newId
     }
 
-    override fun getDeviceName(): String {
-        return "${Build.MANUFACTURER} ${Build.MODEL}"
-    }
+    override fun getDeviceName(): String = "${Build.MANUFACTURER} ${Build.MODEL}"
 
     override fun setPendingToken(token: String) {
         prefs.edit { putString(KEY_PENDING_TOKEN, token) }
@@ -41,9 +38,7 @@ class FCMTokenPreferencesImpl @Inject constructor(
         prefs.edit { remove(KEY_PENDING_TOKEN) }
     }
 
-    override fun getLastSentToken(): String? {
-        return prefs.getString(KEY_LAST_SENT_TOKEN, null)
-    }
+    override fun getLastSentToken(): String? = prefs.getString(KEY_LAST_SENT_TOKEN, null)
 
     override fun setLastSentToken(token: String) {
         prefs.edit { putString(KEY_LAST_SENT_TOKEN, token) }

@@ -8,36 +8,33 @@ import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.todoapp.mobile.data.model.entity.GroupActivityEntity
 import com.todoapp.mobile.data.model.entity.GroupEntity
+import com.todoapp.mobile.data.model.entity.GroupMemberEntity
+import com.todoapp.mobile.data.model.entity.GroupTaskEntity
 import com.todoapp.mobile.data.model.entity.PomodoroEntity
 import com.todoapp.mobile.data.model.entity.SyncStatus
 import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.data.source.local.datasource.GroupDao
 
 @Database(
-    version = 5,
-    entities = [TaskEntity::class, PomodoroEntity::class, GroupEntity::class],
+    version = 7,
+    entities = [
+        TaskEntity::class,
+        PomodoroEntity::class,
+        GroupEntity::class,
+        GroupTaskEntity::class,
+        GroupMemberEntity::class,
+        GroupActivityEntity::class,
+    ],
     autoMigrations = [
-        AutoMigration(
-            from = 1,
-            to = 2,
-            spec = AppDatabase.Migration1To2Spec::class
-        ),
-        AutoMigration(
-            from = 2,
-            to = 3,
-        ),
-        AutoMigration(
-            from = 3,
-            to = 4,
-            spec = AppDatabase.Migration3To4Spec::class
-        ),
-        AutoMigration(
-            from = 4,
-            to = 5,
-            spec = AppDatabase.Migration4To5Spec::class
-        ),
-    ]
+        AutoMigration(from = 1, to = 2, spec = AppDatabase.Migration1To2Spec::class),
+        AutoMigration(from = 2, to = 3),
+        AutoMigration(from = 3, to = 4, spec = AppDatabase.Migration3To4Spec::class),
+        AutoMigration(from = 4, to = 5, spec = AppDatabase.Migration4To5Spec::class),
+        AutoMigration(from = 5, to = 6),
+        AutoMigration(from = 6, to = 7),
+    ],
 )
 @TypeConverters(AppDatabase.SyncStatusConverter::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -65,19 +62,22 @@ abstract class AppDatabase : RoomDatabase() {
     }
 
     abstract fun taskDao(): TaskDao
+
     abstract fun groupDao(): GroupDao
+
+    abstract fun groupTaskDao(): GroupTaskDao
+
+    abstract fun groupMemberDao(): GroupMemberDao
+
+    abstract fun groupActivityDao(): GroupActivityDao
+
     abstract fun pomodoroDao(): PomodoroDao
 
     class SyncStatusConverter {
+        @TypeConverter
+        fun fromSyncStatus(status: SyncStatus?): String? = status?.name
 
         @TypeConverter
-        fun fromSyncStatus(status: SyncStatus?): String? {
-            return status?.name
-        }
-
-        @TypeConverter
-        fun toSyncStatus(value: String?): SyncStatus? {
-            return value?.let { SyncStatus.valueOf(it) }
-        }
+        fun toSyncStatus(value: String?): SyncStatus? = value?.let { SyncStatus.valueOf(it) }
     }
 }

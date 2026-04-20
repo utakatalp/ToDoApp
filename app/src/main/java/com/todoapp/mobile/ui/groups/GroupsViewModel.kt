@@ -1,8 +1,10 @@
 package com.todoapp.mobile.ui.groups
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.todoapp.mobile.data.model.network.data.GroupSummaryData
 import com.todoapp.mobile.domain.model.Group
 import com.todoapp.mobile.domain.repository.GroupRepository
@@ -13,7 +15,9 @@ import com.todoapp.mobile.ui.groups.GroupsContract.UiAction
 import com.todoapp.mobile.ui.groups.GroupsContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -25,10 +29,15 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class GroupsViewModel @Inject constructor(
+class GroupsViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+    private val pendingDeleteGroupId = savedStateHandle.toRoute<Screen.Groups>().pendingDeleteGroupId
+    private var pendingDeleteHandled = false
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
@@ -37,6 +46,8 @@ class GroupsViewModel @Inject constructor(
     val navEffect = _navEffect.receiveAsFlow()
 
     private var remoteSummaryCache = mapOf<Long, GroupSummaryData>()
+    private var selectedGroup: GroupsContract.GroupUiItem? = null
+    private var pendingDeleteJob: Job? = null
 
     init {
         fetchRemoteGroups()
@@ -46,9 +57,21 @@ class GroupsViewModel @Inject constructor(
     fun onAction(action: UiAction) {
         when (action) {
             UiAction.OnCreateNewGroupTap -> createNewGroup()
-            is UiAction.OnDeleteGroupTap -> deleteGroup(action)
-            is UiAction.OnGroupTap -> TODO("Grup Detayı gelecek...")
+            is UiAction.OnDeleteGroupTap -> onDeleteGroupTapped(action)
+            UiAction.OnDeleteGroupDialogConfirm -> onDeleteGroupDialogConfirmed()
+            UiAction.OnDeleteGroupDialogDismiss -> closeDeleteDialog()
+            UiAction.OnUndoDeleteGroup -> undoDeleteGroup()
+            is UiAction.OnGroupTap -> {
+                action.remoteId.let { remoteId ->
+                    _navEffect.trySend(
+                        NavigationEffect.Navigate(
+                            Screen.GroupDetail(groupId = remoteId, groupName = action.groupName),
+                        ),
+                    )
+                }
+            }
             is UiAction.OnMoveGroup -> reorderGroups(action)
+            UiAction.OnScreenResumed -> fetchRemoteGroups()
         }
     }
 
@@ -57,12 +80,12 @@ class GroupsViewModel @Inject constructor(
             val isUserAuthenticated = userRepository.getUserInfo().isSuccess
 
             if (isUserAuthenticated) {
-                _navEffect.trySend(NavigationEffect.Navigate(Screen.CreateNewGroup()))
+                _navEffect.trySend(NavigationEffect.Navigate(Screen.CreateNewGroup))
             } else {
                 _navEffect.trySend(
                     NavigationEffect.Navigate(
-                        Screen.Login(redirectAfterLogin = Screen.CreateNewGroup::class.qualifiedName)
-                    )
+                        Screen.Login(redirectAfterLogin = Screen.Groups::class.qualifiedName),
+                    ),
                 )
             }
         }
@@ -70,13 +93,21 @@ class GroupsViewModel @Inject constructor(
 
     private fun fetchRemoteGroups() {
         viewModelScope.launch {
-            groupRepository.getGroups()
-                .onSuccess { result ->
-                    remoteSummaryCache = result.groups.associateBy { it.id }
-                }
-                .onFailure { t ->
-                    Log.e("GroupsViewModel", "Failed to fetch remote groups", t)
-                }
+            repeat(MAX_RETRY_COUNT) { attempt ->
+                groupRepository
+                    .getGroups()
+                    .onSuccess { result ->
+                        remoteSummaryCache = result.groups.associateBy { it.id }
+                        result.groups.forEach { group ->
+                            launch { groupRepository.syncGroupTasks(group.id) }
+                        }
+                        return@launch
+                    }.onFailure { t ->
+                        if (attempt < MAX_RETRY_COUNT - 1) {
+                            delay(RETRY_DELAY_MS)
+                        }
+                    }
+            }
         }
     }
 
@@ -86,26 +117,62 @@ class GroupsViewModel @Inject constructor(
                 _uiState.update {
                     (
                         if (groups.isEmpty()) {
-                        UiState.Empty(isUserAuthenticated = userRepository.getUserInfo().isSuccess)
-                    } else {
-                        UiState.Success(
-                            groups = groups.map { it.toUiItem() },
-                            isUserAuthenticated = userRepository.getUserInfo().isSuccess
+                            UiState.Empty(isUserAuthenticated = userRepository.getUserInfo().isSuccess)
+                        } else {
+                            UiState.Success(
+                                groups = groups.map { it.toUiItem() },
+                                isUserAuthenticated = userRepository.getUserInfo().isSuccess,
+                            )
+                        }
                         )
-                    }
-                    )
+                }
+                if (!pendingDeleteHandled && pendingDeleteGroupId > 0 && groups.isNotEmpty()) {
+                    pendingDeleteHandled = true
+                    val target = groups.find { it.remoteId == pendingDeleteGroupId }
+                    target?.let { startPendingDelete(it.toUiItem()) }
                 }
             }
         }
     }
 
-    private fun deleteGroup(action: UiAction.OnDeleteGroupTap) {
-        viewModelScope.launch {
-            groupRepository.deleteGroup(action.id)
-                .onFailure { t ->
-                    Log.e("GroupsViewModel", "Failed to delete group", t)
-                }
-        }
+    private fun onDeleteGroupTapped(action: UiAction.OnDeleteGroupTap) {
+        val current = (_uiState.value as? UiState.Success) ?: return
+        selectedGroup = current.groups.find { it.id == action.id }
+        updateSuccessState { it.copy(isDeleteDialogOpen = true) }
+    }
+
+    private fun onDeleteGroupDialogConfirmed() {
+        selectedGroup?.let { startPendingDelete(it) }
+        selectedGroup = null
+        updateSuccessState { it.copy(isDeleteDialogOpen = false) }
+    }
+
+    private fun closeDeleteDialog() {
+        selectedGroup = null
+        updateSuccessState { it.copy(isDeleteDialogOpen = false) }
+    }
+
+    private fun startPendingDelete(group: GroupsContract.GroupUiItem) {
+        updateSuccessState { it.copy(pendingDeleteGroup = group) }
+        pendingDeleteJob?.cancel()
+        pendingDeleteJob =
+            viewModelScope.launch {
+                delay(UNDO_DELAY_MS)
+                groupRepository
+                    .deleteGroup(group.id)
+                    .onFailure { t -> Log.e("GroupsViewModel", "Failed to delete group", t) }
+                updateSuccessState { it.copy(pendingDeleteGroup = null) }
+            }
+    }
+
+    private fun undoDeleteGroup() {
+        pendingDeleteJob?.cancel()
+        pendingDeleteJob = null
+        updateSuccessState { it.copy(pendingDeleteGroup = null) }
+    }
+
+    private fun updateSuccessState(transform: (UiState.Success) -> UiState.Success) {
+        _uiState.update { current -> (current as? UiState.Success)?.let(transform) ?: current }
     }
 
     private fun reorderGroups(action: UiAction.OnMoveGroup) {
@@ -117,12 +184,13 @@ class GroupsViewModel @Inject constructor(
         _uiState.value = current.copy(groups = mutable)
 
         viewModelScope.launch(Dispatchers.IO) {
-            groupRepository.reorderGroups(
-                fromIndex = action.from,
-                toIndex = action.to,
-            ).onFailure { t ->
-                Log.e("GroupsViewModel", "Failed to persist group reorder", t)
-            }
+            groupRepository
+                .reorderGroups(
+                    fromIndex = action.from,
+                    toIndex = action.to,
+                ).onFailure { t ->
+                    Log.e("GroupsViewModel", "Failed to persist group reorder", t)
+                }
         }
     }
 
@@ -130,17 +198,31 @@ class GroupsViewModel @Inject constructor(
         val remote = remoteSummaryCache[remoteId]
         return GroupsContract.GroupUiItem(
             id = id,
+            remoteId = remoteId,
             name = name,
-            role = remote?.role ?: "",
+            role = remote?.role ?: role,
             description = description,
-            memberCount = remote?.memberCount ?: 0,
-            pendingTaskCount = remote?.pendingTaskCount ?: 0,
+            memberCount = remote?.memberCount ?: memberCount,
+            pendingTaskCount = remote?.pendingTaskCount ?: pendingTaskCount,
             createdAt = formatTimestamp(createdAt),
+            avatarUrl =
+            remote?.avatarUrl?.takeIf { it.isNotBlank() }?.let {
+                val base =
+                    com.todoapp.mobile.BuildConfig.BASE_URL
+                        .trimEnd('/')
+                "$base/${it.trimStart('/')}"
+            },
         )
     }
 
     private fun formatTimestamp(timestamp: Long): String {
-        val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH)
+        val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         return sdf.format(Date(timestamp))
+    }
+
+    companion object {
+        private const val MAX_RETRY_COUNT = 3
+        private const val RETRY_DELAY_MS = 500L
+        private const val UNDO_DELAY_MS = 5000L
     }
 }

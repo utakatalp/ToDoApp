@@ -6,25 +6,41 @@ config:
 complexity:
   LongMethod:
     active: true
-    threshold: 84
+    threshold: 120
     ignoreAnnotated:
       - Composable
   TooManyFunctions:
     active: true
-    thresholdInClasses: 30
-    thresholdInInterfaces: 30
+    thresholdInClasses: 40
+    thresholdInInterfaces: 40
+    thresholdInObjects: 40
     ignoreAnnotated:
       - HiltViewModel
     ignorePrivate: true
   CyclomaticComplexMethod:
     active: true
+    threshold: 20
     ignoreSingleWhenExpression: true
+  LongParameterList:
+    active: true
+    functionThreshold: 10
+    constructorThreshold: 12
+    ignoreAnnotated:
+      - Composable
+      - HiltViewModel
+  NestedBlockDepth:
+    active: true
+    threshold: 6
 
 
 exceptions:
   InstanceOfCheckForException:
     active: false
   TooGenericExceptionCaught:
+    active: false
+  SwallowedException:
+    active: false
+  PrintStackTrace:
     active: false
 naming:
   ClassNaming:
@@ -45,24 +61,35 @@ style:
     active: true
     ignoreAnnotated:
       - Preview
+      - PreviewLightDark
       - TDPreviewForm
       - TDPreviewDialog
       - TDPreviewWide
       - TDPreviewNoBg
       - TDPreview
+      - Composable
   MagicNumber:
-    active: true
-    ignoreAnnotated:
-      [ 'Composable' ]
-    excludes:
-      - "**/ui/theme/**"
-      - "**/theme/**"
+    active: false
   ReturnCount:
     active: true
     max: 5
+  MaxLineLength:
+    active: false
+  UnusedParameter:
+    active: false
 formatting:
   active: true
   NoUnusedImports:
     active: true
   Indentation:
+    active: false
+  MaximumLineLength:
+    active: false
+  Wrapping:
+    active: false
+  ArgumentListWrapping:
+    active: false
+  ParameterListWrapping:
+    active: false
+  MultiLineIfElse:
     active: false

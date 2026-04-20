@@ -1,19 +1,21 @@
 package com.todoapp.mobile.ui.groups
 
 object GroupsContract {
-
     data class GroupUiItem(
         val id: Long,
+        val remoteId: Long?,
         val name: String,
         val role: String,
         val description: String,
         val memberCount: Int,
         val pendingTaskCount: Int,
         val createdAt: String,
+        val avatarUrl: String? = null,
     )
 
     sealed interface UiState {
         data object Loading : UiState
+
         data class Empty(
             val isUserAuthenticated: Boolean,
         ) : UiState
@@ -21,15 +23,38 @@ object GroupsContract {
         data class Success(
             val isUserAuthenticated: Boolean,
             val groups: List<GroupUiItem>,
+            val isDeleteDialogOpen: Boolean = false,
+            val pendingDeleteGroup: GroupUiItem? = null,
         ) : UiState
 
-        data class Error(val message: String) : UiState
+        data class Error(
+            val message: String,
+        ) : UiState
     }
 
     sealed interface UiAction {
         data object OnCreateNewGroupTap : UiAction
-        data class OnGroupTap(val id: Long) : UiAction
-        data class OnMoveGroup(val from: Int, val to: Int) : UiAction
-        data class OnDeleteGroupTap(val id: Long) : UiAction
+
+        data class OnGroupTap(
+            val remoteId: Long,
+            val groupName: String,
+        ) : UiAction
+
+        data class OnMoveGroup(
+            val from: Int,
+            val to: Int,
+        ) : UiAction
+
+        data class OnDeleteGroupTap(
+            val id: Long,
+        ) : UiAction
+
+        data object OnDeleteGroupDialogConfirm : UiAction
+
+        data object OnDeleteGroupDialogDismiss : UiAction
+
+        data object OnUndoDeleteGroup : UiAction
+
+        data object OnScreenResumed : UiAction
     }
 }

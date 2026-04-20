@@ -8,7 +8,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class TDFireBaseMessagingService : FirebaseMessagingService() {
-
     @Inject
     lateinit var fcmTokenPreferences: FCMTokenPreferences
 

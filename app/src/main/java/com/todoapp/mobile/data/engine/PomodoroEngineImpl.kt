@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -24,18 +25,20 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
-
+class PomodoroEngineImpl
+@Inject
+constructor() : PomodoroEngine {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val _state = MutableStateFlow(PomodoroEngineState())
     override val state = _state.asStateFlow()
 
-    private val _events = MutableSharedFlow<PomodoroEvent>(
-        replay = 0,
-        extraBufferCapacity = 64,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
+    private val _events =
+        MutableSharedFlow<PomodoroEvent>(
+            replay = 0,
+            extraBufferCapacity = 64,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
     override val events = _events.asSharedFlow()
 
     private val sessionQueue: ArrayDeque<Session> = ArrayDeque()
@@ -46,11 +49,17 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
     private var remainingMillis: Long = 0L
     private var overtimeMillis: Long = 0L
 
+    private var totalSessionsCount: Int = 0
+    private var sessionIndexCounter: Int = -1
+
     // ---------------- QUEUE ----------------
 
     override fun setSessionQueue(queue: ArrayDeque<Session>) {
         sessionQueue.clear()
         queue.forEach { sessionQueue.addLast(it) }
+        totalSessionsCount = queue.size
+        sessionIndexCounter = -1
+        _state.update { it.copy(totalSessions = totalSessionsCount, currentSessionIndex = 0) }
     }
 
     override fun prepare() {
@@ -84,37 +93,47 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
         _state.update { it.copy(isVisible = isVisible) }
     }
 
+    override fun shutdown() {
+        cancelRunningJobs()
+        scope.cancel()
+    }
+
     // ---------------- CORE LOGIC ----------------
 
     private fun startCountdown() {
         if (timerJob?.isActive == true) return
         if (remainingMillis <= ZERO_MILLIS) return
 
-        timerJob = scope.launch {
-            runCountdown()
-        }
+        timerJob =
+            scope.launch {
+                runCountdown()
+            }
     }
 
     private fun startOvertime() {
         overtimeJob?.cancel()
         overtimeMillis = ZERO_MILLIS
+        sessionIndexCounter++
 
         _state.update {
             it.copy(
                 isOvertime = true,
                 isRunning = true,
                 mode = PomodoroMode.OverTime,
+                currentSessionIndex = sessionIndexCounter,
             )
         }
 
         _events.tryEmit(PomodoroEvent.SessionFinished)
 
-        overtimeJob = scope.launch {
-            runOvertime()
-        }
+        overtimeJob =
+            scope.launch {
+                runOvertime()
+            }
     }
 
     private fun startNextSession(autoStart: Boolean) {
+        val wasOvertime = _state.value.isOvertime
         pause()
         overtimeMillis = ZERO_MILLIS
 
@@ -127,8 +146,19 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
             return
         }
 
+        // When coming from overtime, startOvertime() already incremented the counter.
+        // Only increment here for initial prepare() and manual skips mid-session.
+        if (!wasOvertime) {
+            sessionIndexCounter++
+        }
+
         remainingMillis = next.durationSeconds * MILLIS_PER_SECOND
-        _state.update { it.copy(mode = next.mode) }
+        _state.update {
+            it.copy(
+                mode = next.mode,
+                currentSessionIndex = sessionIndexCounter.coerceAtLeast(0),
+            )
+        }
         publishRemaining(remainingMillis)
 
         if (autoStart) start()

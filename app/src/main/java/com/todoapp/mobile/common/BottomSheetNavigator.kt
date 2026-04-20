@@ -101,183 +101,182 @@ fun rememberBottomSheetNavigator(
  */
 @Navigator.Name("bottomSheet")
 class BottomSheetNavigator
-    @OptIn(ExperimentalMaterial3Api::class)
-    constructor(
-        internal val sheetState: SheetState,
-    ) : Navigator<BottomSheetNavigator.Destination>() {
-        internal var sheetEnabled by mutableStateOf(false)
-            private set
+@OptIn(ExperimentalMaterial3Api::class)
+constructor(
+    internal val sheetState: SheetState,
+) : Navigator<BottomSheetNavigator.Destination>() {
+    internal var sheetEnabled by mutableStateOf(false)
+        private set
 
-        private var attached by mutableStateOf(false)
+    private var attached by mutableStateOf(false)
 
-        /**
-         * Get the back stack from the [state]. In some cases, the [sheetInitializer] might be composed
-         * before the Navigator is attached, so we specifically return an empty flow if we aren't
-         * attached yet.
-         */
-        private val backStack: StateFlow<List<NavBackStackEntry>>
-            get() =
-                if (attached) {
-                    state.backStack
-                } else {
-                    MutableStateFlow(emptyList())
-                }
-
-        /**
-         * Get the transitionsInProgress from the [state]. In some cases, the [sheetInitializer] might be
-         * composed before the Navigator is attached, so we specifically return an empty flow if we
-         * aren't attached yet.
-         */
-        private val transitionsInProgress: StateFlow<Set<NavBackStackEntry>>
-            get() =
-                if (attached) {
-                    state.transitionsInProgress
-                } else {
-                    MutableStateFlow(emptySet())
-                }
-
-        /**
-         * Access properties of the [TeliModalBottomSheetLayout]'s [BottomSheetNavigatorSheetState]
-         */
-        @OptIn(ExperimentalMaterial3Api::class)
-        val navigatorSheetState: BottomSheetNavigatorSheetState =
-            BottomSheetNavigatorSheetState(sheetState)
-
-        /**
-         * A [Composable] function that hosts the current sheet content. This should be set as
-         * sheetContent of your [TeliModalBottomSheetLayout].
-         */
-
-        internal var sheetContent: @Composable ColumnScope.() -> Unit = {}
-        internal var onDismissRequest: () -> Unit = {}
-
-        private var animateToDismiss: () -> Unit = {}
-
-        @OptIn(ExperimentalMaterial3Api::class)
-        internal val sheetInitializer: @Composable () -> Unit = {
-            val saveableStateHolder = rememberSaveableStateHolder()
-            val transitionsInProgressEntries by transitionsInProgress.collectAsState()
-
-            // The latest back stack entry, retained until the sheet is completely hidden
-            // While the back stack is updated immediately, we might still be hiding the sheet, so
-            // we keep the entry around until the sheet is hidden
-            val retainedEntry by produceState<NavBackStackEntry?>(
-                initialValue = null,
-                key1 = backStack,
-            ) {
-                backStack
-                    .transform { backStackEntries ->
-                        // Always hide the sheet when the back stack is updated
-                        // Regardless of whether we're popping or pushing, we always want to hide
-                        // the sheet first before deciding whether to re-show it or keep it hidden
-                        try {
-                            sheetEnabled = false
-                        } catch (_: CancellationException) {
-                            // We catch but ignore possible cancellation exceptions as we don't want
-                            // them to bubble up and cancel the whole produceState coroutine
-                        } finally {
-                            emit(backStackEntries.lastOrNull())
-                        }
-                    }.collect {
-                        value = it
-                    }
-            }
-
-            if (retainedEntry != null) {
-                val currentOnSheetShown by rememberUpdatedState {
-                    transitionsInProgressEntries.forEach(state::markTransitionComplete)
-                }
-                LaunchedEffect(sheetState, retainedEntry) {
-                    snapshotFlow { sheetState.isVisible }
-                        // We are only interested in changes in the sheet's visibility
-                        .distinctUntilChanged()
-                        // distinctUntilChanged emits the initial value which we don't need
-                        .drop(1)
-                        .collect { visible ->
-                            if (visible) {
-                                currentOnSheetShown()
-                            }
-                        }
-                }
-
-                val scope = rememberCoroutineScope()
-
-                LaunchedEffect(key1 = retainedEntry) {
-                    sheetEnabled = true
-
-                    sheetContent = {
-                        retainedEntry?.let { retainedEntry ->
-                            retainedEntry.LocalOwnersProvider(saveableStateHolder) {
-                                val content =
-                                    (retainedEntry.destination as Destination).content
-                                content(retainedEntry)
-                            }
-                        }
-                    }
-                    onDismissRequest = {
-                        sheetEnabled = false
-                        retainedEntry?.let {
-                            state.pop(popUpTo = it, saveState = false)
-                        }
-                    }
-
-                    animateToDismiss = {
-                        scope
-                            .launch { sheetState.hide() }
-                            .invokeOnCompletion {
-                                onDismissRequest()
-                            }
-                    }
-                }
-
-                BackHandler {
-                    animateToDismiss()
-                }
+    /**
+     * Get the back stack from the [state]. In some cases, the [sheetInitializer] might be composed
+     * before the Navigator is attached, so we specifically return an empty flow if we aren't
+     * attached yet.
+     */
+    private val backStack: StateFlow<List<NavBackStackEntry>>
+        get() =
+            if (attached) {
+                state.backStack
             } else {
-                LaunchedEffect(key1 = Unit) {
-                    sheetContent = {}
-                    onDismissRequest = {}
-                    animateToDismiss = {}
+                MutableStateFlow(emptyList())
+            }
+
+    /**
+     * Get the transitionsInProgress from the [state]. In some cases, the [sheetInitializer] might be
+     * composed before the Navigator is attached, so we specifically return an empty flow if we
+     * aren't attached yet.
+     */
+    private val transitionsInProgress: StateFlow<Set<NavBackStackEntry>>
+        get() =
+            if (attached) {
+                state.transitionsInProgress
+            } else {
+                MutableStateFlow(emptySet())
+            }
+
+    /**
+     * Access properties of the [TeliModalBottomSheetLayout]'s [BottomSheetNavigatorSheetState]
+     */
+    @OptIn(ExperimentalMaterial3Api::class)
+    val navigatorSheetState: BottomSheetNavigatorSheetState =
+        BottomSheetNavigatorSheetState(sheetState)
+
+    /**
+     * A [Composable] function that hosts the current sheet content. This should be set as
+     * sheetContent of your [TeliModalBottomSheetLayout].
+     */
+
+    internal var sheetContent: @Composable ColumnScope.() -> Unit = {}
+    internal var onDismissRequest: () -> Unit = {}
+
+    private var animateToDismiss: () -> Unit = {}
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    internal val sheetInitializer: @Composable () -> Unit = {
+        val saveableStateHolder = rememberSaveableStateHolder()
+        val transitionsInProgressEntries by transitionsInProgress.collectAsState()
+
+        // The latest back stack entry, retained until the sheet is completely hidden
+        // While the back stack is updated immediately, we might still be hiding the sheet, so
+        // we keep the entry around until the sheet is hidden
+        val retainedEntry by produceState<NavBackStackEntry?>(
+            initialValue = null,
+            key1 = backStack,
+        ) {
+            backStack
+                .transform { backStackEntries ->
+                    // Always hide the sheet when the back stack is updated
+                    // Regardless of whether we're popping or pushing, we always want to hide
+                    // the sheet first before deciding whether to re-show it or keep it hidden
+                    try {
+                        sheetEnabled = false
+                    } catch (_: CancellationException) {
+                        // We catch but ignore possible cancellation exceptions as we don't want
+                        // them to bubble up and cancel the whole produceState coroutine
+                    } finally {
+                        emit(backStackEntries.lastOrNull())
+                    }
+                }.collect {
+                    value = it
+                }
+        }
+
+        if (retainedEntry != null) {
+            val currentOnSheetShown by rememberUpdatedState {
+                transitionsInProgressEntries.forEach(state::markTransitionComplete)
+            }
+            LaunchedEffect(sheetState, retainedEntry) {
+                snapshotFlow { sheetState.isVisible }
+                    // We are only interested in changes in the sheet's visibility
+                    .distinctUntilChanged()
+                    // distinctUntilChanged emits the initial value which we don't need
+                    .drop(1)
+                    .collect { visible ->
+                        if (visible) {
+                            currentOnSheetShown()
+                        }
+                    }
+            }
+
+            val scope = rememberCoroutineScope()
+
+            LaunchedEffect(key1 = retainedEntry) {
+                sheetEnabled = true
+
+                sheetContent = {
+                    retainedEntry?.let { retainedEntry ->
+                        retainedEntry.LocalOwnersProvider(saveableStateHolder) {
+                            val content =
+                                (retainedEntry.destination as Destination).content
+                            content(retainedEntry)
+                        }
+                    }
+                }
+                onDismissRequest = {
+                    sheetEnabled = false
+                    retainedEntry?.let {
+                        state.pop(popUpTo = it, saveState = false)
+                    }
+                }
+
+                animateToDismiss = {
+                    scope
+                        .launch { sheetState.hide() }
+                        .invokeOnCompletion {
+                            onDismissRequest()
+                        }
                 }
             }
-        }
 
-        override fun onAttach(state: NavigatorState) {
-            super.onAttach(state)
-            attached = true
-        }
-
-        override fun createDestination(): Destination =
-            Destination(
-                navigator = this,
-                content = {},
-            )
-
-        override fun navigate(
-            entries: List<NavBackStackEntry>,
-            navOptions: NavOptions?,
-            navigatorExtras: Extras?,
-        ) {
-            onDismissRequest()
-            entries.fastForEach { entry ->
-                state.push(entry)
+            BackHandler {
+                animateToDismiss()
+            }
+        } else {
+            LaunchedEffect(key1 = Unit) {
+                sheetContent = {}
+                onDismissRequest = {}
+                animateToDismiss = {}
             }
         }
-
-        override fun popBackStack(
-            popUpTo: NavBackStackEntry,
-            savedState: Boolean,
-        ) {
-            state.pop(popUpTo, savedState)
-        }
-
-        /**
-         * [NavDestination] specific to [BottomSheetNavigator]
-         */
-        @NavDestination.ClassType(Composable::class)
-        class Destination(
-            navigator: BottomSheetNavigator,
-            internal val content: @Composable ColumnScope.(NavBackStackEntry) -> Unit,
-        ) : NavDestination(navigator),
-            FloatingWindow
     }
+
+    override fun onAttach(state: NavigatorState) {
+        super.onAttach(state)
+        attached = true
+    }
+
+    override fun createDestination(): Destination = Destination(
+        navigator = this,
+        content = {},
+    )
+
+    override fun navigate(
+        entries: List<NavBackStackEntry>,
+        navOptions: NavOptions?,
+        navigatorExtras: Extras?,
+    ) {
+        onDismissRequest()
+        entries.fastForEach { entry ->
+            state.push(entry)
+        }
+    }
+
+    override fun popBackStack(
+        popUpTo: NavBackStackEntry,
+        savedState: Boolean,
+    ) {
+        state.pop(popUpTo, savedState)
+    }
+
+    /**
+     * [NavDestination] specific to [BottomSheetNavigator]
+     */
+    @NavDestination.ClassType(Composable::class)
+    class Destination(
+        navigator: BottomSheetNavigator,
+        internal val content: @Composable ColumnScope.(NavBackStackEntry) -> Unit,
+    ) : NavDestination(navigator),
+        FloatingWindow
+}

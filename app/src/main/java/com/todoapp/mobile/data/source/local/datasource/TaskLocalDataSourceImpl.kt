@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
-class TaskLocalDataSourceImpl @Inject constructor(
+class TaskLocalDataSourceImpl
+@Inject
+constructor(
     private val taskDao: TaskDao,
 ) : TaskLocalDataSource {
     override fun observeAll(): Flow<List<TaskEntity>> = taskDao.getAllTasks()
@@ -34,6 +36,11 @@ class TaskLocalDataSourceImpl @Inject constructor(
         endDate: Long,
     ): Flow<List<DayCount>> = taskDao.observeCompletedCountsByDay(startDate, endDate)
 
+    override fun observePendingCountsByDay(
+        startDate: Long,
+        endDate: Long,
+    ): Flow<List<DayCount>> = taskDao.observePendingCountsByDay(startDate, endDate)
+
     override suspend fun insert(task: TaskEntity) {
         taskDao.insert(task)
     }
@@ -46,7 +53,10 @@ class TaskLocalDataSourceImpl @Inject constructor(
         taskDao.update(task)
     }
 
-    override suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean) {
+    override suspend fun updateTaskCompletion(
+        id: Long,
+        isCompleted: Boolean,
+    ) {
         taskDao.updateTask(id, isCompleted)
     }
 
@@ -60,7 +70,17 @@ class TaskLocalDataSourceImpl @Inject constructor(
     override suspend fun insertAll(tasks: List<TaskEntity>) {
         taskDao.insertAll(tasks)
     }
-    override suspend fun updateOrderIndex(id: Long, orderIndex: Int) {
+
+    override fun observeByWeekAndStatus(
+        startDate: Long,
+        endDate: Long,
+        isCompleted: Boolean,
+    ): Flow<List<TaskEntity>> = taskDao.observeTasksByWeekAndStatus(startDate, endDate, isCompleted)
+
+    override suspend fun updateOrderIndex(
+        id: Long,
+        orderIndex: Int,
+    ) {
         taskDao.updateOrderIndex(id = id, orderIndex = orderIndex)
     }
 
@@ -68,5 +88,11 @@ class TaskLocalDataSourceImpl @Inject constructor(
         for ((id, orderIndex) in orderUpdates) {
             taskDao.updateOrderIndex(id = id, orderIndex = orderIndex)
         }
+    }
+
+    override fun search(query: String): Flow<List<TaskEntity>> = taskDao.searchTasks(query)
+
+    override suspend fun deleteByRemoteIds(remoteIds: List<Long>) {
+        taskDao.deleteByRemoteIds(remoteIds)
     }
 }

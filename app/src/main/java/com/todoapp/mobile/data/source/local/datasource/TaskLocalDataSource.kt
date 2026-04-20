@@ -25,19 +25,42 @@ interface TaskLocalDataSource {
         endDate: Long,
     ): Flow<List<DayCount>>
 
+    fun observePendingCountsByDay(
+        startDate: Long,
+        endDate: Long,
+    ): Flow<List<DayCount>>
+
     suspend fun insert(task: TaskEntity)
 
     suspend fun delete(task: TaskEntity)
 
     suspend fun update(task: TaskEntity)
 
-    suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean)
+    suspend fun updateTaskCompletion(
+        id: Long,
+        isCompleted: Boolean,
+    )
 
     suspend fun getTaskById(id: Long): TaskEntity?
 
     suspend fun deleteAll()
 
     suspend fun insertAll(tasks: List<TaskEntity>)
-    suspend fun updateOrderIndex(id: Long, orderIndex: Int)
+
+    fun observeByWeekAndStatus(
+        startDate: Long,
+        endDate: Long,
+        isCompleted: Boolean,
+    ): Flow<List<TaskEntity>>
+
+    suspend fun updateOrderIndex(
+        id: Long,
+        orderIndex: Int,
+    )
+
     suspend fun updateOrderIndices(orderUpdates: List<Pair<Long, Int>>)
+
+    fun search(query: String): Flow<List<TaskEntity>>
+
+    suspend fun deleteByRemoteIds(remoteIds: List<Long>)
 }

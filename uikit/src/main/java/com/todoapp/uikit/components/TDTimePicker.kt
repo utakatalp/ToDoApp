@@ -58,11 +58,11 @@ fun TDTimePickerDialog(
         TDPickerField(
             title = title,
             value =
-                selectedTime?.format(
-                    DateTimeFormatter.ofPattern(
-                        "HH:mm",
-                    ),
-                ) ?: placeholder,
+            selectedTime?.format(
+                DateTimeFormatter.ofPattern(
+                    "HH:mm",
+                ),
+            ) ?: placeholder,
             onClick = { isPickerOpen = true },
             leadingIcon = {
                 Icon(
@@ -72,7 +72,7 @@ fun TDTimePickerDialog(
                     modifier = Modifier.size(24.dp),
                 )
             },
-            isError = isError
+            isError = isError,
         )
         if (isPickerOpen) {
             Dialog(
@@ -106,7 +106,8 @@ fun TDTimePicker(
     timePickerState: TimePickerState,
 ) {
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .widthIn(max = 300.dp)
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -150,11 +151,12 @@ fun TDTimePickerPreview() {
 @Composable
 fun TDTimePickerDialogOpenPreview() {
     TDTheme {
-        val timePickerState = rememberTimePickerState(
-            initialHour = 10,
-            initialMinute = 15,
-            is24Hour = true,
-        )
+        val timePickerState =
+            rememberTimePickerState(
+                initialHour = 10,
+                initialMinute = 15,
+                is24Hour = true,
+            )
 
         Dialog(onDismissRequest = {}) {
             Surface(

@@ -1,7 +1,6 @@
 package com.todoapp.mobile.domain.repository
 
 interface SessionPreferences {
-
     suspend fun setAccessToken(token: String)
 
     suspend fun getAccessToken(): String?

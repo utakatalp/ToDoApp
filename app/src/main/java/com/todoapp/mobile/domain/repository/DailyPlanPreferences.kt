@@ -10,7 +10,10 @@ data class DailyCardPosition(
 
 interface DailyPlanPreferences {
     fun observePlanTime(): Flow<LocalTime?>
+
     suspend fun savePlanTime(time: LocalTime)
+
     fun observeCardPosition(): Flow<DailyCardPosition>
+
     suspend fun saveCardPosition(position: DailyCardPosition)
 }

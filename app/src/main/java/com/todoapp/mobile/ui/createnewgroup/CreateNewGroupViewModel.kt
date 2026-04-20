@@ -1,6 +1,5 @@
 package com.todoapp.mobile.ui.createnewgroup
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
@@ -20,14 +19,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateNewGroupViewModel @Inject constructor(
+class CreateNewGroupViewModel
+@Inject
+constructor(
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
-    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
-    private val cameFromAuth: Boolean = savedStateHandle["cameFromAuth"] ?: false
-
     private val _uiState = MutableStateFlow(UiState(isUserAuthenticated = false))
     val uiState = _uiState.asStateFlow()
 
@@ -36,36 +33,28 @@ class CreateNewGroupViewModel @Inject constructor(
 
     private var isErrorFlagActive = false
 
+    init {
+        checkAuthState()
+    }
+
     fun onAction(action: UiAction) {
         when (action) {
             is UiAction.OnCreateTap -> createGroup()
-            is UiAction.OnGroupDescriptionChange -> _uiState.update {
-                it.copy(
-                    groupDescription = action.groupDescription
-                )
-            }
-
-            UiAction.OnBackClick -> onBackClick()
+            is UiAction.OnGroupDescriptionChange ->
+                _uiState.update {
+                    it.copy(
+                        groupDescription = action.groupDescription,
+                    )
+                }
 
             is UiAction.OnGroupNameChange -> updateGroupName(action.groupName)
         }
     }
 
-    fun onBackClick() {
+    private fun checkAuthState() {
         viewModelScope.launch {
-            if (cameFromAuth) {
-                _navEffect.send(
-                    NavigationEffect.Navigate(
-                        route = Screen.Home,
-                        popUpTo = Screen.Home,
-                        isInclusive = false
-                    )
-                )
-            } else {
-                _navEffect.send(
-                    NavigationEffect.Back
-                )
-            }
+            val isAuthenticated = userRepository.getUserInfo().isSuccess
+            _uiState.update { it.copy(isUserAuthenticated = isAuthenticated) }
         }
     }
 
@@ -88,22 +77,23 @@ class CreateNewGroupViewModel @Inject constructor(
             if (!isUserAuthenticated) {
                 _navEffect.send(
                     NavigationEffect.Navigate(
-                        Screen.Login(redirectAfterLogin = Screen.CreateNewGroup::class.qualifiedName)
-                    )
+                        Screen.Login(redirectAfterLogin = "CreateNewGroup"),
+                    ),
                 )
                 return@launch
             }
 
-            groupRepository.createGroup(
-                CreateGroupRequest(
-                    uiState.value.groupName,
-                    uiState.value.groupDescription ?: ""
-                )
-            ).onSuccess {
-                _navEffect.send(NavigationEffect.Navigate(Screen.Groups, popUpTo = Screen.Groups, isInclusive = true))
-            }.onFailure {
-                _uiState.update { it.copy(error = "Something went wrong. Try again later.") }
-            }
+            groupRepository
+                .createGroup(
+                    CreateGroupRequest(
+                        uiState.value.groupName,
+                        uiState.value.groupDescription ?: "",
+                    ),
+                ).onSuccess {
+                    _navEffect.send(NavigationEffect.Back)
+                }.onFailure {
+                    _uiState.update { it.copy(error = "Something went wrong. Try again later.") }
+                }
         }
     }
 

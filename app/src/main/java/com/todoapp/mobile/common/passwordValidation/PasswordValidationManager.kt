@@ -1,7 +1,6 @@
 package com.todoapp.mobile.common.passwordValidation
 
 object ValidationManager {
-
     object ValidationErrors {
         const val EMAIL_BLANK = "error_email_blank"
         const val EMAIL_INVALID = "error_email_invalid"
@@ -33,12 +32,15 @@ object ValidationManager {
     fun validateEmail(email: String): String = runRules(
         { if (email.isBlank()) ValidationErrors.EMAIL_BLANK else "" },
         {
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            if (!android.util.Patterns.EMAIL_ADDRESS
+                    .matcher(email)
+                    .matches()
+            ) {
                 ValidationErrors.EMAIL_INVALID
             } else {
                 ""
             }
-        }
+        },
     )
 
     fun validatePassword(password: String): String = runRules(
@@ -49,7 +51,7 @@ object ValidationManager {
             } else {
                 ""
             }
-        }
+        },
     )
 
     fun computePasswordStrength(password: String): PasswordStrength? {
@@ -57,11 +59,12 @@ object ValidationManager {
 
         var score = 0
 
-        score += when {
-            password.length >= PasswordRules.STRONG_THRESHOLD_LENGTH -> PasswordRules.SCORE_LENGTH_STRONG
-            password.length >= PasswordRules.MEDIUM_THRESHOLD_LENGTH -> PasswordRules.SCORE_LENGTH_MEDIUM
-            else -> PasswordRules.SCORE_LENGTH_NONE
-        }
+        score +=
+            when {
+                password.length >= PasswordRules.STRONG_THRESHOLD_LENGTH -> PasswordRules.SCORE_LENGTH_STRONG
+                password.length >= PasswordRules.MEDIUM_THRESHOLD_LENGTH -> PasswordRules.SCORE_LENGTH_MEDIUM
+                else -> PasswordRules.SCORE_LENGTH_NONE
+            }
 
         if (password.any { it.isLowerCase() }) score++
         if (password.any { it.isUpperCase() }) score++

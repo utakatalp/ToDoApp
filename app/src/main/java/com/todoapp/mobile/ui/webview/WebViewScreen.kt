@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.todoapp.mobile.ui.webview.WebViewContract.UiAction
@@ -35,11 +36,12 @@ import com.todoapp.mobile.ui.webview.WebViewContract.UiEffect
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun WebViewScreen(
     uiEffect: Flow<UiEffect>,
-    onAction: (UiAction) -> Unit
+    onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
     val webView = remember { WebView(context) }
@@ -57,7 +59,7 @@ fun WebViewScreen(
     }
 
     DisposableEffect(Unit) {
-        onDispose {
+        return@DisposableEffect onDispose {
             Log.d("triggered", "1")
             webView.stopLoading()
             webView.destroy()
@@ -73,12 +75,14 @@ fun WebViewScreen(
     }
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .background(TDTheme.colors.white)
+            .background(TDTheme.colors.white),
     ) {
         AndroidView(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding(),
@@ -86,7 +90,8 @@ fun WebViewScreen(
         )
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(12.dp),
@@ -96,7 +101,8 @@ fun WebViewScreen(
                 painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
                 contentDescription = "Close",
                 tint = TDTheme.colors.black,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(TDTheme.colors.white.copy(alpha = 0.9f))
@@ -104,8 +110,19 @@ fun WebViewScreen(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() },
                     ) { onAction(UiAction.OnCloseWebView) }
-                    .padding(8.dp)
+                    .padding(8.dp),
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WebViewScreenPreview() {
+    TDTheme {
+        WebViewScreen(
+            uiEffect = emptyFlow(),
+            onAction = {},
+        )
     }
 }

@@ -20,23 +20,22 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
     @Provides
     @Singleton
     fun provideTokenRefreshMutex(): Mutex = Mutex()
 
     @Provides
     @Singleton
-    fun provideRetrofit(
-        okHttpClient: OkHttpClient
-    ): Retrofit {
-        val json = Json {
-            ignoreUnknownKeys = false
-            isLenient = true
-            encodeDefaults = true
-        }
-        return Retrofit.Builder()
-            .baseUrl("https://api.candroid.dev/todos/")
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        val json =
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+                encodeDefaults = true
+            }
+        return Retrofit
+            .Builder()
+            .baseUrl(com.todoapp.mobile.BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -46,13 +45,15 @@ object NetworkModule {
     @Singleton
     @Named("token")
     fun provideTokenRetrofit(): Retrofit {
-        val json = Json {
-            ignoreUnknownKeys = false
-            isLenient = true
-            encodeDefaults = true
-        }
-        return Retrofit.Builder()
-            .baseUrl("https://api.candroid.dev/todos/")
+        val json =
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+                encodeDefaults = true
+            }
+        return Retrofit
+            .Builder()
+            .baseUrl(com.todoapp.mobile.BuildConfig.BASE_URL)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
@@ -61,12 +62,12 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(
         authInterceptor: AuthInterceptor,
-        tokenRefreshAuthenticator: TokenRefreshAuthenticator
-    ): OkHttpClient =
-        OkHttpClient.Builder()
-            .addInterceptor(authInterceptor)
-            .authenticator(tokenRefreshAuthenticator)
-            .build()
+        tokenRefreshAuthenticator: TokenRefreshAuthenticator,
+    ): OkHttpClient = OkHttpClient
+        .Builder()
+        .addInterceptor(authInterceptor)
+        .authenticator(tokenRefreshAuthenticator)
+        .build()
 
     @Provides
     @Singleton
@@ -74,5 +75,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideTokenApi(@Named("token") retrofit: Retrofit): TodoAuthApi = retrofit.create(TodoAuthApi::class.java)
+    fun provideTokenApi(
+        @Named("token") retrofit: Retrofit,
+    ): TodoAuthApi = retrofit.create(TodoAuthApi::class.java)
 }

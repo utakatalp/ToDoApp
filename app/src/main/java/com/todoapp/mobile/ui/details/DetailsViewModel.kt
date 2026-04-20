@@ -25,11 +25,12 @@ import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
-class DetailsViewModel @Inject constructor(
+class DetailsViewModel
+@Inject
+constructor(
     private val taskRepository: TaskRepository,
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
 
@@ -43,9 +44,10 @@ class DetailsViewModel @Inject constructor(
     private var currentTaskId: Long? = null
 
     init {
-        currentTaskId = savedStateHandle.get("taskId")
+        currentTaskId = savedStateHandle["taskId"]
         loadTask(currentTaskId!!)
     }
+
     fun loadTask(taskId: Long) {
         currentTaskId = taskId
         viewModelScope.launch {
@@ -57,20 +59,28 @@ class DetailsViewModel @Inject constructor(
                     return@launch
                 }
                 originalTask = task
-                _uiState.value = UiState.Success(
-                    taskTitle = task.title,
-                    taskTimeStart = task.timeStart,
-                    taskTimeEnd = task.timeEnd,
-                    taskDate = task.date,
-                    taskDescription = task.description ?: "",
-                    dialogSelectedDate = task.date,
-                    isDirty = false,
-                    titleError = null,
-                    isSaving = false
-                )
+                _uiState.value =
+                    UiState.Success(
+                        taskId = task.remoteId ?: -1L,
+                        taskTitle = task.title,
+                        taskTimeStart = task.timeStart,
+                        taskTimeEnd = task.timeEnd,
+                        taskDate = task.date,
+                        taskDescription = task.description ?: "",
+                        dialogSelectedDate = task.date,
+                        isDirty = false,
+                        titleError = null,
+                        isSaving = false,
+                        photoUrls = task.photoUrls,
+                    )
+                // Photos live server-side; fetch authoritative list via remoteId
+                task.remoteId?.let { remoteId ->
+                    taskRepository.fetchRemoteTask(remoteId).onSuccess { remote ->
+                        updateSuccessState { it.copy(photoUrls = remote.photoUrls) }
+                    }
+                }
             } catch (e: IOException) {
                 _uiState.value = UiState.Error(message = "Failed to load task", throwable = e)
-                Log.e("EditViewModel", "Failed to load task", e)
             }
         }
     }
@@ -88,6 +98,41 @@ class DetailsViewModel @Inject constructor(
             is UiAction.OnDialogDateSelect -> selectDialogDate(uiAction.date)
             UiAction.OnDialogDateDeselect -> deselectDialogDate()
             UiAction.OnRetry -> retry()
+            is UiAction.OnPhotoPicked -> uploadPhoto(uiAction.bytes, uiAction.mimeType)
+            is UiAction.OnPhotoDelete -> deletePhoto(uiAction.photoId)
+        }
+    }
+
+    private fun uploadPhoto(
+        bytes: ByteArray,
+        mimeType: String,
+    ) {
+        viewModelScope.launch {
+            val state = _uiState.value as? UiState.Success ?: return@launch
+            if (state.taskId <= 0) {
+                _uiEffect.trySend(UiEffect.ShowToast(R.string.photo_requires_sync))
+                return@launch
+            }
+            taskRepository
+                .uploadTaskPhoto(state.taskId, bytes, mimeType)
+                .onSuccess { refreshPhotos(state.taskId) }
+                .onFailure { _uiEffect.trySend(UiEffect.ShowToast(R.string.failed_to_upload_photo)) }
+        }
+    }
+
+    private fun deletePhoto(photoId: Long) {
+        viewModelScope.launch {
+            val state = _uiState.value as? UiState.Success ?: return@launch
+            if (state.taskId <= 0) return@launch
+            taskRepository
+                .deleteTaskPhoto(state.taskId, photoId)
+                .onSuccess { refreshPhotos(state.taskId) }
+        }
+    }
+
+    private suspend fun refreshPhotos(taskId: Long) {
+        taskRepository.fetchRemoteTask(taskId).onSuccess { remote ->
+            updateSuccessState { it.copy(photoUrls = remote.photoUrls) }
         }
     }
 
@@ -174,17 +219,20 @@ class DetailsViewModel @Inject constructor(
             return
         }
 
-        _uiState.value = UiState.Success(
-            taskTitle = existingTask.title,
-            titleError = null,
-            taskTimeStart = existingTask.timeStart,
-            taskTimeEnd = existingTask.timeEnd,
-            taskDate = existingTask.date,
-            taskDescription = existingTask.description ?: "",
-            dialogSelectedDate = existingTask.date,
-            isDirty = false,
-            isSaving = true
-        )
+        _uiState.value =
+            UiState.Success(
+                taskId = existingTask.remoteId ?: -1L,
+                taskTitle = existingTask.title,
+                titleError = null,
+                taskTimeStart = existingTask.timeStart,
+                taskTimeEnd = existingTask.timeEnd,
+                taskDate = existingTask.date,
+                taskDescription = existingTask.description ?: "",
+                dialogSelectedDate = existingTask.date,
+                isDirty = false,
+                isSaving = false,
+                photoUrls = (currentState as? UiState.Success)?.photoUrls ?: emptyList(),
+            )
         _uiEffect.trySend(UiEffect.ShowToast(R.string.changes_cancelled))
     }
 
@@ -200,11 +248,12 @@ class DetailsViewModel @Inject constructor(
     }
 
     private fun validateFields(state: UiState.Success): Boolean {
-        val titleError = when {
-            state.taskTitle.isBlank() -> R.string.error_title_required
-            state.taskTitle.length < MIN_TITLE_LENGTH -> R.string.error_title_too_short
-            else -> null
-        }
+        val titleError =
+            when {
+                state.taskTitle.isBlank() -> R.string.error_title_required
+                state.taskTitle.length < MIN_TITLE_LENGTH -> R.string.error_title_too_short
+                else -> null
+            }
 
         if (titleError != null) {
             updateSuccessState { it.copy(titleError = titleError) }
@@ -217,25 +266,27 @@ class DetailsViewModel @Inject constructor(
         _navEffect.trySend(NavigationEffect.Back)
     }
 
-    private fun buildUpdatedTask(current: UiState.Success, existingTask: Task): Task {
-        return existingTask.copy(
-            title = current.taskTitle,
-            description = current.taskDescription.ifBlank { null },
-            date = current.taskDate,
-            timeStart = current.taskTimeStart ?: existingTask.timeStart,
-            timeEnd = current.taskTimeEnd ?: existingTask.timeEnd
-        )
-    }
+    private fun buildUpdatedTask(
+        current: UiState.Success,
+        existingTask: Task,
+    ): Task = existingTask.copy(
+        title = current.taskTitle,
+        description = current.taskDescription.ifBlank { null },
+        date = current.taskDate,
+        timeStart = current.taskTimeStart ?: existingTask.timeStart,
+        timeEnd = current.taskTimeEnd ?: existingTask.timeEnd,
+    )
 
     private fun computeIsDirty(state: UiState.Success): Boolean {
         val original = originalTask ?: return false
-        val candidateTask = original.copy(
-            title = state.taskTitle,
-            description = state.taskDescription.ifBlank { null },
-            date = state.taskDate,
-            timeStart = state.taskTimeStart ?: original.timeStart,
-            timeEnd = state.taskTimeEnd ?: original.timeEnd
-        )
+        val candidateTask =
+            original.copy(
+                title = state.taskTitle,
+                description = state.taskDescription.ifBlank { null },
+                date = state.taskDate,
+                timeStart = state.taskTimeStart ?: original.timeStart,
+                timeEnd = state.taskTimeEnd ?: original.timeEnd,
+            )
         return candidateTask != original
     }
 

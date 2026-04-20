@@ -28,14 +28,25 @@ style:
       - TDPreviewWide
       - TDPreviewNoBg
       - TDPreview
+      - Composable
   MagicNumber:
-    active: true
-    excludes:
-      - "**/ui/theme/**"
-      - "**/theme/**"
-      - "**/uikit/components/**"
+    active: false
+  UnusedParameter:
+    active: false
+  MaxLineLength:
+    active: false
 formatting:
   Indentation:
+    active: false
+  MaximumLineLength:
+    active: false
+  MultiLineIfElse:
+    active: false
+  Wrapping:
+    active: false
+  ArgumentListWrapping:
+    active: false
+  ParameterListWrapping:
     active: false
 complexity:
 

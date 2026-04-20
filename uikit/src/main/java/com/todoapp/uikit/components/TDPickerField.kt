@@ -18,7 +18,7 @@ import com.todoapp.uikit.theme.TDTheme
 
 @Composable
 fun TDPickerField(
-    title: String,
+    title: String?,
     value: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -37,7 +37,8 @@ fun TDPickerField(
 
         Spacer(Modifier.height(8.dp))
         Box(
-            modifier = modifier
+            modifier =
+            modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
         ) {
@@ -47,8 +48,8 @@ fun TDPickerField(
                 value = value.orEmpty(),
                 onValueChange = { },
                 modifier =
-                    Modifier
-                        .fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth(),
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
                 isError = isError,
@@ -78,7 +79,7 @@ fun TDPickerFieldErrorPreview() {
                     painter = painterResource(id = R.drawable.ic_close),
                     contentDescription = null,
                 )
-            }
+            },
         )
     }
 }

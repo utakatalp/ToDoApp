@@ -12,39 +12,57 @@ import com.todoapp.mobile.domain.repository.TaskSyncRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class TaskSyncRepositoryImpl @Inject constructor(@ApplicationContext context: Context) : TaskSyncRepository {
+class TaskSyncRepositoryImpl
+@Inject
+constructor(
+    @ApplicationContext context: Context,
+) : TaskSyncRepository {
     private val workManager = WorkManager.getInstance(context)
 
     override fun syncPendingTasks() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+        val constraints =
+            Constraints
+                .Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
 
-        val sync = OneTimeWorkRequestBuilder<SyncWorker>()
-            .setConstraints(constraints)
-            .build()
+        val sync =
+            OneTimeWorkRequestBuilder<SyncWorker>()
+                .setConstraints(constraints)
+                .build()
 
-        workManager.beginUniqueWork(
-            SYNC_WORK,
-            ExistingWorkPolicy.REPLACE,
-            sync
-        ).enqueue()
+        workManager
+            .beginUniqueWork(
+                SYNC_WORK,
+                ExistingWorkPolicy.REPLACE,
+                sync,
+            ).enqueue()
     }
 
     override fun fetchTasks() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+        val constraints =
+            Constraints
+                .Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
 
-        val fetch = OneTimeWorkRequestBuilder<FetchTasksWorker>()
-            .setConstraints(constraints)
-            .build()
+        val sync =
+            OneTimeWorkRequestBuilder<SyncWorker>()
+                .setConstraints(constraints)
+                .build()
 
-        workManager.beginUniqueWork(
-            FETCH_WORK,
-            ExistingWorkPolicy.REPLACE,
-            fetch
-        ).enqueue()
+        val fetch =
+            OneTimeWorkRequestBuilder<FetchTasksWorker>()
+                .setConstraints(constraints)
+                .build()
+
+        workManager
+            .beginUniqueWork(
+                FETCH_WORK,
+                ExistingWorkPolicy.REPLACE,
+                sync,
+            ).then(fetch)
+            .enqueue()
     }
 
     companion object {

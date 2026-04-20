@@ -3,7 +3,6 @@ package com.todoapp.mobile.ui.topbar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.repository.DataStoreHelper
-import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -18,12 +17,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TopBarViewModel @Inject constructor(
+class TopBarViewModel
+@Inject
+constructor(
     private val userRepository: UserRepository,
     private val dataStoreHelper: DataStoreHelper,
-    private val authRepository: AuthRepository,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(TopBarContract.UiState(isUserAuthenticated = false))
     val uiState = _uiState.asStateFlow()
 
@@ -36,19 +35,33 @@ class TopBarViewModel @Inject constructor(
 
     fun onAction(action: UiAction) {
         when (action) {
-            UiAction.OnBackClick -> sendNavEffect(NavigationEffect.SystemBack)
-            UiAction.OnLogoutClick -> handleLogout()
-            UiAction.OnNotificationClick -> handleNotificationClick()
-            UiAction.OnProfileClick -> sendNavEffect(
-                NavigationEffect.NavigateClearingBackstack(
-                    Screen.Login(
-                        redirectAfterLogin = Screen.Home::class.qualifiedName
-                    )
+            UiAction.OnBackClick ->
+                sendNavEffect(
+                    effect = NavigationEffect.Back,
                 )
-            )
+
+            UiAction.OnNotificationClick -> handleNotificationClick()
+            UiAction.OnProfileClick -> {
+                if (_uiState.value.isUserAuthenticated) {
+                    sendNavEffect(NavigationEffect.Navigate(Screen.Profile))
+                } else {
+                    sendNavEffect(
+                        NavigationEffect.Navigate(
+                            Screen.Login(
+                                redirectAfterLogin = Screen.Home::class.qualifiedName,
+                            ),
+                        ),
+                    )
+                }
+            }
 
             UiAction.OnSettingsClick -> sendNavEffect(NavigationEffect.Navigate(Screen.Settings))
+            UiAction.OnSearchClick -> sendNavEffect(NavigationEffect.Navigate(Screen.Search))
             UiAction.OnAuthenticationUpdate -> refreshAuthenticationState()
+            is UiAction.OnGroupSettingsClick ->
+                sendNavEffect(
+                    NavigationEffect.Navigate(Screen.GroupSettings(action.groupId)),
+                )
         }
     }
 
@@ -56,13 +69,22 @@ class TopBarViewModel @Inject constructor(
         viewModelScope.launch {
             dataStoreHelper.observeUser().collect { user ->
                 updateAuthenticationState(isAuthenticated = user != null)
+                if (user != null) refreshUserProfile()
             }
         }
     }
 
-    private fun handleLogout() {
+    private fun refreshUserProfile() {
         viewModelScope.launch {
-            authRepository.logout()
+            userRepository.getUserInfo().onSuccess { u ->
+                _uiState.update {
+                    it.copy(
+                        avatarUrl = u.avatarUrl,
+                        displayName = u.displayName,
+                        avatarVersion = System.currentTimeMillis(),
+                    )
+                }
+            }
         }
     }
 
@@ -73,7 +95,7 @@ class TopBarViewModel @Inject constructor(
     private fun refreshAuthenticationState() {
         viewModelScope.launch {
             updateAuthenticationState(
-                isAuthenticated = userRepository.getUserInfo().isSuccess
+                isAuthenticated = userRepository.getUserInfo().isSuccess,
             )
         }
     }

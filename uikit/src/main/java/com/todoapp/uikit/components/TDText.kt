@@ -17,24 +17,26 @@ import com.todoapp.uikit.theme.TDTheme
 @Composable
 fun TDText(
     modifier: Modifier = Modifier,
-    text: String,
-    color: Color = TDTheme.colors.black,
+    text: String?,
+    color: Color = TDTheme.colors.onSurface,
     style: TextStyle = TDTheme.typography.regularTextStyle,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
     textAlign: TextAlign? = null,
 ) {
-    Text(
-        text = text,
-        modifier = modifier,
-        textAlign = textAlign,
-        style =
+    if (text != null) {
+        Text(
+            text = text,
+            modifier = modifier,
+            textAlign = textAlign,
+            style =
             style.merge(
                 color = color,
             ),
-        overflow = overflow,
-        maxLines = maxLines,
-    )
+            overflow = overflow,
+            maxLines = maxLines,
+        )
+    }
 }
 
 @Composable
@@ -42,17 +44,18 @@ fun TDSpannableText(
     modifier: Modifier = Modifier,
     fullText: String,
     spanText: String,
-    color: Color = TDTheme.colors.brown,
+    color: Color = TDTheme.colors.onSurface,
     style: TextStyle = TDTheme.typography.regularTextStyle,
     spanStyle: SpanStyle = SpanStyle(),
     textAlign: TextAlign? = null,
 ) {
     Text(
         text =
-            buildAnnotatedString {
-                withStyle(style = style.toSpanStyle()) {
-                    append(fullText)
-                    val mStartIndex = fullText.indexOf(spanText)
+        buildAnnotatedString {
+            withStyle(style = style.toSpanStyle()) {
+                append(fullText)
+                val mStartIndex = fullText.indexOf(spanText)
+                if (mStartIndex != -1) {
                     val mEndIndex = mStartIndex.plus(spanText.length)
                     addStyle(
                         style = spanStyle,
@@ -60,34 +63,39 @@ fun TDSpannableText(
                         end = mEndIndex,
                     )
                 }
-            },
+            }
+        },
         modifier = modifier,
         textAlign = textAlign,
         style =
-            style.merge(
-                color = color,
-            ),
+        style.merge(
+            color = color,
+        ),
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun TDTextExample() {
-    TDText(
-        text = "This is a text.",
-    )
+    TDTheme {
+        TDText(
+            text = "This is a text.",
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun TDAnnotatedTextExample() {
-    TDSpannableText(
-        fullText = "This should be a text.",
-        spanText = "should",
-        spanStyle =
+    TDTheme {
+        TDSpannableText(
+            fullText = "This should be a text.",
+            spanText = "should",
+            spanStyle =
             SpanStyle(
-                color = TDTheme.colors.gray,
+                color = TDTheme.colors.pendingGray,
                 fontWeight = FontWeight.Bold,
             ),
-    )
+        )
+    }
 }

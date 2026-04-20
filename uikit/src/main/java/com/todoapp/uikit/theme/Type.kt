@@ -29,11 +29,11 @@ class TDTypography {
                 fontSize = 96.sp,
                 fontWeight = FontWeight.W800,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
-                color = TDTheme.colors.primary,
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
+                color = TDTheme.colors.pendingGray,
             )
     val heading1: TextStyle
         @Composable
@@ -43,10 +43,10 @@ class TDTypography {
                 fontSize = 24.sp,
                 fontWeight = FontWeight.W600,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val heading2: TextStyle
@@ -57,10 +57,10 @@ class TDTypography {
                 fontSize = 22.sp,
                 fontWeight = FontWeight.W600,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val heading3: TextStyle
@@ -71,10 +71,10 @@ class TDTypography {
                 fontSize = 18.sp,
                 fontWeight = FontWeight.W600,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val heading4: TextStyle
@@ -85,10 +85,10 @@ class TDTypography {
                 fontSize = 18.sp,
                 fontWeight = FontWeight.W500,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val heading5: TextStyle
@@ -99,10 +99,10 @@ class TDTypography {
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W600,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val heading6: TextStyle
@@ -113,10 +113,10 @@ class TDTypography {
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W500,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val heading7: TextStyle
@@ -127,10 +127,10 @@ class TDTypography {
                 fontSize = 14.sp,
                 fontWeight = FontWeight.W500,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val dayOfTheCalendar: TextStyle
@@ -141,10 +141,10 @@ class TDTypography {
                 fontSize = 12.sp,
                 fontWeight = FontWeight.W600,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
 
@@ -156,10 +156,10 @@ class TDTypography {
                 fontSize = 14.sp,
                 fontWeight = FontWeight.W500,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val subheading1: TextStyle
@@ -170,10 +170,10 @@ class TDTypography {
                 fontSize = 12.sp,
                 fontWeight = FontWeight.W400,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val subheading2: TextStyle
@@ -184,10 +184,10 @@ class TDTypography {
                 fontSize = 10.sp,
                 fontWeight = FontWeight.W400,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
             )
     val subheading3: TextStyle
         @Composable
@@ -197,10 +197,10 @@ class TDTypography {
                 fontSize = 14.sp,
                 fontWeight = FontWeight.W500,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.black,
             )
     val subheading4: TextStyle
@@ -211,10 +211,10 @@ class TDTypography {
                 fontSize = 12.sp,
                 fontWeight = FontWeight.W500,
                 lineHeightStyle =
-                    LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    ),
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
                 color = TDTheme.colors.brown,
             )
 }

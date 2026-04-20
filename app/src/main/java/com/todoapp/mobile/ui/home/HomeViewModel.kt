@@ -9,6 +9,7 @@ import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toAlarmItem
+import com.todoapp.mobile.domain.repository.GroupRepository
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.domain.repository.TaskSyncRepository
@@ -34,17 +35,20 @@ import kotlinx.coroutines.launch
 import okio.IOException
 import java.time.Clock
 import java.time.LocalDate
+import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class HomeViewModel
+@Inject
+constructor(
     private val taskRepository: TaskRepository,
     private val taskSyncRepository: TaskSyncRepository,
     private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
     private val pomodoroEngine: PomodoroEngine,
+    private val groupRepository: GroupRepository,
 ) : ViewModel() {
-
     private data class DailyData(
         val tasks: List<Task>,
         val pendingTaskCountThisWeek: Int,
@@ -62,10 +66,10 @@ class HomeViewModel @Inject constructor(
 
     private lateinit var selectedTask: Task
     private var fetchJob: Job? = null
+    private var pendingDeleteJob: Job? = null
 
     init {
         taskSyncRepository.fetchTasks()
-        taskSyncRepository.syncPendingTasks()
         loadInitialData()
     }
 
@@ -92,7 +96,36 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnToggleAdvancedSettings -> toggleAdvancedSettings()
             is UiAction.OnTaskClick -> openTaskDetail(uiAction.task)
             is UiAction.OnPomodoroTap -> navigateToPomodoro()
+            is UiAction.OnCompletedStatCardTap -> navigateToFilteredTasks(isCompleted = true)
+            is UiAction.OnPendingStatCardTap -> navigateToFilteredTasks(isCompleted = false)
             is UiAction.OnSuccessfulBiometricAuthenticationHandle -> handleSuccessfulBiometricAuthentication()
+            is UiAction.OnToggleTaskSecret -> toggleExistingTaskSecret(uiAction)
+            is UiAction.OnBiometricSuccessForSecretToggle -> performSecretToggle(uiAction)
+            is UiAction.OnUndoDelete -> undoDelete()
+            is UiAction.OnPreviousMonth -> navigateToPreviousMonth()
+            is UiAction.OnNextMonth -> navigateToNextMonth()
+            is UiAction.OnGroupSelectionChanged ->
+                updateSuccessState {
+                    it.copy(taskFormState = it.taskFormState.copy(selectedGroupId = uiAction.groupId))
+                }
+            is UiAction.OnPendingPhotoAdd ->
+                updateSuccessState { s ->
+                    s.copy(
+                        taskFormState =
+                        s.taskFormState.copy(
+                            pendingPhotos = s.taskFormState.pendingPhotos + PendingPhoto(uiAction.bytes, uiAction.mimeType),
+                        ),
+                    )
+                }
+            is UiAction.OnPendingPhotoRemove ->
+                updateSuccessState { s ->
+                    s.copy(
+                        taskFormState =
+                        s.taskFormState.copy(
+                            pendingPhotos = s.taskFormState.pendingPhotos.filterIndexed { i, _ -> i != uiAction.index },
+                        ),
+                    )
+                }
         }
     }
 
@@ -111,10 +144,11 @@ class HomeViewModel @Inject constructor(
                 val today = LocalDate.now()
                 fetchDailyTask(today)
             } catch (e: IOException) {
-                _uiState.value = UiState.Error(
-                    message = e.message ?: "Unknown error",
-                    throwable = e,
-                )
+                _uiState.value =
+                    UiState.Error(
+                        message = e.message ?: "Unknown error",
+                        throwable = e,
+                    )
             }
         }
     }
@@ -124,64 +158,94 @@ class HomeViewModel @Inject constructor(
         loadInitialData()
     }
 
+    private fun navigateToFilteredTasks(isCompleted: Boolean) {
+        val date = (uiState.value as? UiState.Success)?.selectedDate ?: LocalDate.now()
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.FilteredTasks(isCompleted, date.toEpochDay())))
+    }
+
     private fun navigateToPomodoro() {
         if (pomodoroEngine.state.value.isRunning) {
             _navEffect.trySend(NavigationEffect.Navigate(Screen.Pomodoro))
         } else {
-            _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
+            _navEffect.trySend(NavigationEffect.Navigate(Screen.PomodoroLaunch))
         }
     }
 
     private fun fetchDailyTask(date: LocalDate) {
         fetchJob?.cancel()
-        fetchJob = viewModelScope.launch {
-            delay(LOADING_DELAY)
-            combine(
-                taskRepository.observeTasksByDate(date),
-                taskRepository.observePendingTasksInAWeek(date),
-                taskRepository.countCompletedTasksInAWeek(date)
-            ) { tasks, pendingTaskCount, completedTaskCount ->
-                DailyData(tasks, pendingTaskCount, completedTaskCount)
-            }.collect { data ->
-                _uiState.update { current ->
-                    when (current) {
-                        is UiState.Success -> current.copy(
-                            tasks = data.tasks,
-                            pendingTaskCountThisWeek = data.pendingTaskCountThisWeek,
-                            completedTaskCountThisWeek = data.completedTaskCountThisWeek
-                        )
+        fetchJob =
+            viewModelScope.launch {
+                delay(LOADING_DELAY)
+                combine(
+                    taskRepository.observeTasksByDate(date),
+                    taskRepository.observePendingTasksInAWeek(date),
+                    taskRepository.countCompletedTasksInAWeek(date),
+                    taskRepository.observeTaskPhotoUrls(),
+                ) { tasks, pendingTaskCount, completedTaskCount, photoUrls ->
+                    val withPhotos =
+                        tasks.map { t ->
+                            val urls = t.remoteId?.let { photoUrls[it] } ?: emptyList()
+                            if (urls.isNotEmpty()) t.copy(photoUrls = urls) else t
+                        }
+                    DailyData(withPhotos, pendingTaskCount, completedTaskCount)
+                }.collect { data ->
+                    _uiState.update { current ->
+                        when (current) {
+                            is UiState.Success ->
+                                current.copy(
+                                    tasks = data.tasks,
+                                    pendingTaskCountThisWeek = data.pendingTaskCountThisWeek,
+                                    completedTaskCountThisWeek = data.completedTaskCountThisWeek,
+                                )
 
-                        else -> createInitialState(date, data)
+                            else -> createInitialState(date, data)
+                        }
                     }
                 }
             }
-        }
     }
 
-    private fun createInitialState(date: LocalDate, data: DailyData) = UiState.Success(
+    private fun createInitialState(
+        date: LocalDate,
+        data: DailyData,
+    ) = UiState.Success(
         selectedDate = date,
+        displayedMonth = YearMonth.from(date),
         tasks = data.tasks,
         completedTaskCountThisWeek = data.completedTaskCountThisWeek,
         pendingTaskCountThisWeek = data.pendingTaskCountThisWeek,
-        dialogSelectedDate = null,
-        taskTitle = "",
-        taskTimeStart = null,
-        taskTimeEnd = null,
-        taskDate = date,
-        taskDescription = "",
         isSheetOpen = false,
         isDeleteDialogOpen = false,
-        isAdvancedSettingsExpanded = false,
-        isTaskSecret = false,
         isSecretModeEnabled = false,
-        isTitleError = false,
-        isTimeError = false,
-        isDateError = false,
+        taskFormState = TaskFormState(),
     )
 
     private fun changeSelectedDate(uiAction: UiAction.OnDateSelect) {
-        updateSuccessState { it.copy(selectedDate = uiAction.date) }
+        updateSuccessState {
+            it.copy(
+                selectedDate = uiAction.date,
+                displayedMonth = YearMonth.from(uiAction.date),
+            )
+        }
         fetchDailyTask(uiAction.date)
+    }
+
+    private fun navigateToPreviousMonth() {
+        val current = _uiState.value as? UiState.Success ?: return
+        val newMonth = current.displayedMonth.minusMonths(1)
+        val newDate = newMonth.atDay(1)
+        updateSuccessState { it.copy(displayedMonth = newMonth, selectedDate = newDate) }
+        fetchDailyTask(newDate)
+    }
+
+    private fun navigateToNextMonth() {
+        val current = _uiState.value as? UiState.Success ?: return
+        val thisMonth = YearMonth.now()
+        if (current.displayedMonth >= thisMonth) return
+        val newMonth = current.displayedMonth.plusMonths(1)
+        val newDate = if (newMonth == thisMonth) LocalDate.now() else newMonth.atDay(1)
+        updateSuccessState { it.copy(displayedMonth = newMonth, selectedDate = newDate) }
+        fetchDailyTask(newDate)
     }
 
     private fun createTask() {
@@ -190,17 +254,29 @@ class HomeViewModel @Inject constructor(
         if (!validateTaskForm(currentState)) return
 
         viewModelScope.launch {
-            val task = Task(
-                title = currentState.taskTitle,
-                description = currentState.taskDescription,
-                date = currentState.dialogSelectedDate!!,
-                timeStart = currentState.taskTimeStart!!,
-                timeEnd = currentState.taskTimeEnd!!,
-                isCompleted = false,
-                isSecret = currentState.isTaskSecret
-            )
-            taskRepository.insert(task)
-            scheduleTaskReminders(task)
+            val form = currentState.taskFormState
+            val task =
+                Task(
+                    title = form.taskTitle,
+                    description = form.taskDescription.ifBlank { null },
+                    date = form.dialogSelectedDate!!,
+                    timeStart = form.taskTimeStart!!,
+                    timeEnd = form.taskTimeEnd!!,
+                    isCompleted = false,
+                    isSecret = form.isTaskSecret,
+                )
+            if (form.selectedGroupId != null) {
+                groupRepository.createGroupTask(form.selectedGroupId, task)
+            } else if (form.pendingPhotos.isNotEmpty()) {
+                taskRepository.insertWithPhotos(
+                    task,
+                    form.pendingPhotos.map { it.bytes to it.mimeType },
+                )
+                scheduleTaskReminders(task)
+            } else {
+                taskRepository.insert(task)
+                scheduleTaskReminders(task)
+            }
             clearTaskForm()
             dismissBottomSheet()
         }
@@ -210,13 +286,26 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             taskRepository.updateTaskCompletion(
                 uiAction.task.id,
-                isCompleted = !uiAction.task.isCompleted
+                isCompleted = !uiAction.task.isCompleted,
             )
         }
     }
 
     private fun deleteTask(task: Task) {
-        viewModelScope.launch { taskRepository.delete(task) }
+        updateSuccessState { it.copy(pendingDeleteTask = task) }
+        pendingDeleteJob?.cancel()
+        pendingDeleteJob =
+            viewModelScope.launch {
+                delay(UNDO_DELAY_MS)
+                taskRepository.delete(task)
+                updateSuccessState { it.copy(pendingDeleteTask = null) }
+            }
+    }
+
+    private fun undoDelete() {
+        pendingDeleteJob?.cancel()
+        pendingDeleteJob = null
+        updateSuccessState { it.copy(pendingDeleteTask = null) }
     }
 
     private fun updateTaskIndices(uiAction: UiAction.OnMoveTask) {
@@ -235,8 +324,7 @@ class HomeViewModel @Inject constructor(
                     date = currentState.selectedDate,
                     fromIndex = uiAction.from,
                     toIndex = uiAction.to,
-                )
-                .onFailure { t ->
+                ).onFailure { t ->
                     Log.e("HomeViewModel", "Failed to persist task reorder", t)
                 }
         }
@@ -248,19 +336,23 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun changeTaskTitle(uiAction: UiAction.OnTaskTitleChange) {
-        updateSuccessState { it.copy(taskTitle = uiAction.title) }
+        updateSuccessState { it.copy(taskFormState = it.taskFormState.copy(taskTitle = uiAction.title)) }
     }
 
     private fun changeTaskDescription(uiAction: UiAction.OnTaskDescriptionChange) {
-        updateSuccessState { it.copy(taskDescription = uiAction.description) }
+        updateSuccessState {
+            it.copy(
+                taskFormState = it.taskFormState.copy(taskDescription = uiAction.description),
+            )
+        }
     }
 
     private fun changeTaskDate(uiAction: UiAction.OnTaskDateChange) {
-        updateSuccessState { it.copy(taskDate = uiAction.date) }
+        updateSuccessState { it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = uiAction.date)) }
     }
 
     private fun changeTaskTimeStart(uiAction: UiAction.OnTaskTimeStartChange) {
-        updateSuccessState { it.copy(taskTimeStart = uiAction.time) }
+        updateSuccessState { it.copy(taskFormState = it.taskFormState.copy(taskTimeStart = uiAction.time)) }
     }
 
     private fun onDeleteDialogConfirmed() {
@@ -269,54 +361,58 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun changeTaskTimeEnd(uiAction: UiAction.OnTaskTimeEndChange) {
-        updateSuccessState { it.copy(taskTimeEnd = uiAction.time) }
+        updateSuccessState { it.copy(taskFormState = it.taskFormState.copy(taskTimeEnd = uiAction.time)) }
     }
 
     private fun toggleTaskSecret(uiAction: UiAction.OnTaskSecretChange) {
-        updateSuccessState { it.copy(isTaskSecret = uiAction.isSecret) }
+        updateSuccessState { it.copy(taskFormState = it.taskFormState.copy(isTaskSecret = uiAction.isSecret)) }
     }
 
-    private fun updateDialogDate(uiAction: UiAction.OnDialogDateSelect) {
-        updateSuccessState { it.copy(dialogSelectedDate = uiAction.date) }
+    private fun toggleExistingTaskSecret(action: UiAction.OnToggleTaskSecret) {
+        _uiEffect.trySend(UiEffect.ShowBiometricForSecretToggle(action.task))
     }
 
-    private fun deselectDialogDate() {
-        updateSuccessState { it.copy(dialogSelectedDate = null) }
-    }
-
-    private fun clearTaskForm() {
-        updateSuccessState {
-            it.copy(
-                taskTitle = "",
-                taskDescription = "",
-                taskTimeStart = null,
-                taskTimeEnd = null,
-                taskDate = it.selectedDate,
-            )
+    private fun performSecretToggle(action: UiAction.OnBiometricSuccessForSecretToggle) {
+        viewModelScope.launch {
+            taskRepository.update(action.task.copy(isSecret = !action.task.isSecret))
         }
     }
 
+    private fun updateDialogDate(uiAction: UiAction.OnDialogDateSelect) {
+        updateSuccessState { it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = uiAction.date)) }
+    }
+
+    private fun deselectDialogDate() {
+        updateSuccessState { it.copy(taskFormState = it.taskFormState.copy(dialogSelectedDate = null)) }
+    }
+
+    private fun clearTaskForm() {
+        updateSuccessState { it.copy(taskFormState = TaskFormState()) }
+    }
+
     private fun validateTaskForm(state: UiState.Success): Boolean {
+        val form = state.taskFormState
         return when {
-            state.taskTitle.isBlank() -> {
-                showTransientError { s, v -> s.copy(isTitleError = v) }
+            form.taskTitle.isBlank() -> {
+                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTitleError = v)) }
                 false
             }
 
-            state.dialogSelectedDate == null -> {
-                showTransientError { s, v -> s.copy(isDateError = v) }
+            form.dialogSelectedDate == null -> {
+                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isDateError = v)) }
                 false
             }
 
-            state.taskTimeStart == null || state.taskTimeEnd == null -> {
-                showTransientError { s, v -> s.copy(isTimeError = v) }
+            form.taskTimeStart == null || form.taskTimeEnd == null -> {
+                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTimeError = v)) }
                 false
             }
 
-            state.taskTimeStart.isAfter(state.taskTimeEnd) -> {
-                showTransientError { s, v -> s.copy(isTimeError = v) }
+            form.taskTimeStart.isAfter(form.taskTimeEnd) -> {
+                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTimeError = v)) }
                 false
             }
+
             else -> true
         }
     }
@@ -325,11 +421,13 @@ class HomeViewModel @Inject constructor(
         task: Task,
         remindBeforeMinutes: List<Long> = DEFAULT_REMINDER_MINUTES,
     ) {
-        remindBeforeMinutes.forEach { minutes ->
-            alarmScheduler.schedule(
-                task.toAlarmItem(remindBeforeMinutes = minutes),
-                type = AlarmType.TASK
-            )
+        viewModelScope.launch(Dispatchers.IO) {
+            remindBeforeMinutes.forEach { minutes ->
+                alarmScheduler.schedule(
+                    task.toAlarmItem(remindBeforeMinutes = minutes),
+                    type = AlarmType.TASK,
+                )
+            }
         }
     }
 
@@ -346,6 +444,22 @@ class HomeViewModel @Inject constructor(
 
     private fun showBottomSheet() {
         updateSuccessState { it.copy(isSheetOpen = true) }
+        viewModelScope.launch {
+            groupRepository
+                .observeAllGroups()
+                .collect { groups ->
+                    val items =
+                        groups.mapNotNull { group ->
+                            group.remoteId?.let { remoteId ->
+                                HomeContract.GroupSelectionItem(
+                                    remoteId,
+                                    group.name,
+                                )
+                            }
+                        }
+                    updateSuccessState { it.copy(availableGroups = items) }
+                }
+        }
     }
 
     private fun dismissBottomSheet() {
@@ -353,7 +467,14 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun toggleAdvancedSettings() {
-        updateSuccessState { it.copy(isAdvancedSettingsExpanded = !it.isAdvancedSettingsExpanded) }
+        updateSuccessState {
+            it.copy(
+                taskFormState =
+                it.taskFormState.copy(
+                    isAdvancedSettingsExpanded = !it.taskFormState.isAdvancedSettingsExpanded,
+                ),
+            )
+        }
     }
 
     private fun openDeleteDialog() {
@@ -373,9 +494,10 @@ class HomeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val isActive = secretModePreferences
-                .getCondition()
-                .isActive(System.currentTimeMillis())
+            val isActive =
+                secretModePreferences
+                    .getCondition()
+                    .isActive(System.currentTimeMillis())
 
             if (isActive) navigateToTaskDetail() else authenticate()
         }
@@ -393,12 +515,14 @@ class HomeViewModel @Inject constructor(
 
     private fun handleSuccessfulBiometricAuthentication() {
         viewModelScope.launch {
-            val selectedOption = SecretModeReopenOptions.byId(
-                secretModePreferences.getLastSelectedOptionId()
-            )
-            val condition = SecretModeConditionFactory(
-                clock = Clock.systemDefaultZone()
-            ).create(selectedOption)
+            val selectedOption =
+                SecretModeReopenOptions.byId(
+                    secretModePreferences.getLastSelectedOptionId(),
+                )
+            val condition =
+                SecretModeConditionFactory(
+                    clock = Clock.systemDefaultZone(),
+                ).create(selectedOption)
             secretModePreferences.saveCondition(condition)
             navigateToTaskDetail()
         }
@@ -407,5 +531,6 @@ class HomeViewModel @Inject constructor(
     companion object {
         private val DEFAULT_REMINDER_MINUTES = listOf(0L, 1L, 2L, 5L, 10L)
         private const val LOADING_DELAY = 200L
+        private const val UNDO_DELAY_MS = 5000L
     }
 }

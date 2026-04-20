@@ -10,4 +10,5 @@ data class Group(
     val role: String = "",
     val memberCount: Int = 0,
     val pendingTaskCount: Int = 0,
+    val avatarUrl: String? = null,
 )

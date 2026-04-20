@@ -18,7 +18,10 @@ interface GroupLocalDataSource {
 
     suspend fun getGroupByName(name: String): GroupEntity
 
-    suspend fun updateOrderIndex(id: Long, orderIndex: Int)
+    suspend fun updateOrderIndex(
+        id: Long,
+        orderIndex: Int,
+    )
 
     suspend fun updateOrderIndices(updates: List<Pair<Long, Int>>)
 

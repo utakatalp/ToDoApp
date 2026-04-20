@@ -14,17 +14,14 @@ data class TaskEntity(
     @ColumnInfo(name = "is_completed") val isCompleted: Boolean,
     @ColumnInfo(name = "is_secret") val isSecret: Boolean = false,
     @ColumnInfo(name = "remote_id") val remoteId: Long? = null,
-
     @ColumnInfo(
         name = "sync_status",
-        defaultValue = "PENDING_CREATE"
+        defaultValue = "PENDING_CREATE",
     )
     val syncStatus: SyncStatus = SyncStatus.PENDING_CREATE,
-
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Long = 0L,
     @ColumnInfo(name = "order_index", defaultValue = "0") val orderIndex: Int = 0,
-
 )
 
 enum class SyncStatus {

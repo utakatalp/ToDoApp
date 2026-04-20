@@ -28,7 +28,10 @@ interface TaskDao {
     suspend fun insertAll(task: List<TaskEntity>)
 
     @Query("UPDATE tasks SET is_completed = :isCompleted WHERE id = :id")
-    fun updateTask(id: Long, isCompleted: Boolean)
+    fun updateTask(
+        id: Long,
+        isCompleted: Boolean,
+    )
 
     @Query("SELECT * FROM tasks WHERE date BETWEEN :startDate AND :endDate")
     fun loadTasksBetweenRange(
@@ -44,9 +47,24 @@ interface TaskDao {
           AND is_completed = 1
         GROUP BY date
         ORDER BY date ASC
-        """
+        """,
     )
     fun observeCompletedCountsByDay(
+        startDate: Long,
+        endDate: Long,
+    ): Flow<List<DayCount>>
+
+    @Query(
+        """
+        SELECT date, COUNT(*) AS count
+        FROM tasks
+        WHERE date BETWEEN :startDate AND :endDate
+          AND is_completed = 0
+        GROUP BY date
+        ORDER BY date ASC
+        """,
+    )
+    fun observePendingCountsByDay(
         startDate: Long,
         endDate: Long,
     ): Flow<List<DayCount>>
@@ -70,6 +88,29 @@ interface TaskDao {
     @Delete
     suspend fun deleteAll(tasks: List<TaskEntity>)
 
+    @Query(
+        """
+        SELECT * FROM tasks
+        WHERE date BETWEEN :startDate AND :endDate
+          AND is_completed = :isCompleted
+        ORDER BY date ASC, order_index ASC
+        """,
+    )
+    fun observeTasksByWeekAndStatus(
+        startDate: Long,
+        endDate: Long,
+        isCompleted: Boolean,
+    ): Flow<List<TaskEntity>>
+
     @Query("UPDATE tasks SET order_index = :orderIndex WHERE id = :id")
-    suspend fun updateOrderIndex(id: Long, orderIndex: Int)
+    suspend fun updateOrderIndex(
+        id: Long,
+        orderIndex: Int,
+    )
+
+    @Query("SELECT * FROM tasks WHERE (title LIKE :query OR description LIKE :query) ORDER BY date DESC")
+    fun searchTasks(query: String): Flow<List<TaskEntity>>
+
+    @Query("DELETE FROM tasks WHERE remote_id IN (:remoteIds)")
+    suspend fun deleteByRemoteIds(remoteIds: List<Long>)
 }

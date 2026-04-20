@@ -45,10 +45,12 @@ class RingtoneHolder {
         ringtone = RingtoneManager.getRingtone(context, uri)?.apply {
             // On newer APIs you can set usage; safe-guard with runCatching.
             runCatching {
-                audioAttributes = AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
+                audioAttributes =
+                    AudioAttributes
+                        .Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
             }
             play()
             // Auto-stop after a short duration (some devices loop indefinitely).

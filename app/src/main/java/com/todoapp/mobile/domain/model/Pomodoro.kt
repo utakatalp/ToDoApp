@@ -6,5 +6,5 @@ data class Pomodoro(
     val focusTime: Int,
     val shortBreak: Int,
     val longBreak: Int,
-    val sectionCount: Int
+    val sectionCount: Int,
 )

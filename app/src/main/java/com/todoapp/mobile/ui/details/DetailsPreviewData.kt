@@ -21,6 +21,7 @@ object DetailsPreviewData {
     ) = UiState.Success(
         isDirty = isDirty,
         isSaving = isSaving,
+        taskId = 1L,
         taskTitle = taskTitle,
         taskTimeStart = taskTimeStart,
         taskTimeEnd = taskTimeEnd,

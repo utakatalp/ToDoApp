@@ -7,26 +7,29 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 private const val MINUTE_IN_HOUR = 60
+
 private fun LocalDate.toEpochDayLong(): Long = toEpochDay()
+
 private fun Long.toLocalDate(): LocalDate = LocalDate.ofEpochDay(this)
 
-private fun Long.toLocalTimeFromMinuteOfDay(): LocalTime =
-    LocalTime.of((this / MINUTE_IN_HOUR).toInt(), (this % MINUTE_IN_HOUR).toInt())
+private fun Long.toLocalTimeFromMinuteOfDay(): LocalTime = LocalTime.of(
+    (this / MINUTE_IN_HOUR).toInt(),
+    (this % MINUTE_IN_HOUR).toInt(),
+)
 
-private fun LocalTime.toMinuteOfDayLong(): Long =
-    (hour * MINUTE_IN_HOUR + minute).toLong()
+private fun LocalTime.toMinuteOfDayLong(): Long = (hour * MINUTE_IN_HOUR + minute).toLong()
 
-fun TaskEntity.toDomain(): Task =
-    Task(
-        id = id,
-        title = title,
-        description = description,
-        date = date.toLocalDate(),
-        timeStart = timeStart.toLocalTimeFromMinuteOfDay(),
-        timeEnd = timeEnd.toLocalTimeFromMinuteOfDay(),
-        isCompleted = isCompleted,
-        isSecret = isSecret,
-    )
+fun TaskEntity.toDomain(): Task = Task(
+    id = id,
+    remoteId = remoteId,
+    title = title,
+    description = description,
+    date = date.toLocalDate(),
+    timeStart = timeStart.toLocalTimeFromMinuteOfDay(),
+    timeEnd = timeEnd.toLocalTimeFromMinuteOfDay(),
+    isCompleted = isCompleted,
+    isSecret = isSecret,
+)
 
 fun Task.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TaskEntity {
     val remoteIdOrNull = if (syncStatus == SyncStatus.SYNCED) id else null
