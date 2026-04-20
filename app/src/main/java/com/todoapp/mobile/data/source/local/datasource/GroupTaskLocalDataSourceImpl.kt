@@ -32,6 +32,9 @@ class GroupTaskLocalDataSourceImpl @Inject constructor(
     override suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity? =
         groupTaskDao.getByRemoteId(remoteId)
 
+    override suspend fun getAllRemoteIds(): List<Long> =
+        groupTaskDao.getAllRemoteIds()
+
     override suspend fun updateCompletion(remoteId: Long, isCompleted: Boolean) =
         groupTaskDao.updateCompletion(remoteId, isCompleted)
 

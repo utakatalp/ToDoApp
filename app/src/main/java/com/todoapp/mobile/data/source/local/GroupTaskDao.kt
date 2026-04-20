@@ -18,6 +18,9 @@ interface GroupTaskDao {
     @Query("SELECT * FROM group_tasks WHERE remote_id = :remoteId LIMIT 1")
     suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity?
 
+    @Query("SELECT remote_id FROM group_tasks WHERE remote_id IS NOT NULL")
+    suspend fun getAllRemoteIds(): List<Long>
+
     @Query(
         "SELECT * FROM group_tasks WHERE " +
             "(title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%')",

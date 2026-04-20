@@ -7,6 +7,7 @@ import com.todoapp.mobile.data.mapper.toEntity
 import com.todoapp.mobile.data.model.entity.SyncStatus
 import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.data.source.local.DayCount
+import com.todoapp.mobile.data.source.local.datasource.GroupTaskLocalDataSource
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.domain.model.Task
@@ -25,6 +26,7 @@ import javax.inject.Inject
 class TaskRepositoryImpl @Inject constructor(
     private val remoteDataSource: TaskRemoteDataSource,
     private val localDataSource: TaskLocalDataSource,
+    private val groupTaskLocalDataSource: GroupTaskLocalDataSource,
 ) : TaskRepository {
     override fun observeAllTaskEntities(): Flow<List<TaskEntity>> {
         return localDataSource.observeAll()
@@ -231,11 +233,16 @@ class TaskRepositoryImpl @Inject constructor(
                 }
             }
 
-        return runCatching { localDataSource.insertAll(addedTaskEntities) }
-            .fold(
-                onSuccess = { Result.success(Unit) },
-                onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) }
-            )
+        return runCatching {
+            localDataSource.insertAll(addedTaskEntities)
+            // Safety net: purge any personal-task rows whose remoteId actually belongs to a
+            // group task (from stale data on earlier builds). Keeps Home free of dups.
+            val groupRemoteIds = groupTaskLocalDataSource.getAllRemoteIds()
+            if (groupRemoteIds.isNotEmpty()) localDataSource.deleteByRemoteIds(groupRemoteIds)
+        }.fold(
+            onSuccess = { Result.success(Unit) },
+            onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) }
+        )
     }
 
     override suspend fun syncLocalTasksToServer(): Result<Unit> = withContext(Dispatchers.IO) {

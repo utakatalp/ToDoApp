@@ -13,6 +13,7 @@ interface GroupTaskLocalDataSource {
     suspend fun deleteByGroupId(localGroupId: Long)
     suspend fun deleteByRemoteId(remoteId: Long)
     suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity?
+    suspend fun getAllRemoteIds(): List<Long>
     suspend fun updateCompletion(remoteId: Long, isCompleted: Boolean)
     suspend fun updateTask(
         remoteId: Long,
