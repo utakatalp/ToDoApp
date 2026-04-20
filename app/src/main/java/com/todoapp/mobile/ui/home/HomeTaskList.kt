@@ -189,6 +189,12 @@ fun HomeTaskList(
                                             onCheckBoxClick = { onTaskCheck(task) },
                                             isDragging = isDragging,
                                             isAnyDragging = isAnyDragging,
+                                            shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                                topStart = 0.dp,
+                                                topEnd = 0.dp,
+                                                bottomStart = 12.dp,
+                                                bottomEnd = 12.dp,
+                                            ),
                                             modifier = Modifier.longPressDraggableHandle(
                                                 onDragStarted = {
                                                     hapticFeedback.performHapticFeedback(

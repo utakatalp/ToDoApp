@@ -53,6 +53,7 @@ fun TDTaskCardWithCheckbox(
     onCheckBoxClick: (Boolean) -> Unit,
     isDragging: Boolean = false,
     isAnyDragging: Boolean = false,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(12.dp),
 ) {
     var showConfetti by remember { mutableStateOf(false) }
 
@@ -102,7 +103,7 @@ fun TDTaskCardWithCheckbox(
                 .border(
                     width = effectiveBorderWidth,
                     color = effectiveBorderColor,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = shape,
                 )
                 .graphicsLayer {
                     scaleX = dragScale
@@ -112,7 +113,7 @@ fun TDTaskCardWithCheckbox(
                 }
                 .background(
                     color = cardBg,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = shape,
                 )
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -153,7 +154,7 @@ fun TDTaskCardWithCheckbox(
             ConfettiEffect(
                 modifier = Modifier
                     .matchParentSize()
-                    .clip(RoundedCornerShape(12.dp)),
+                    .clip(shape),
                 onAnimFinished = { showConfetti = false }
             )
         }
