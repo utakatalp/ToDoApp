@@ -33,6 +33,7 @@ import com.todoapp.uikit.theme.TDTheme
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.util.Locale
 import kotlin.math.max
 
 @Composable
@@ -93,7 +94,10 @@ private fun MonthNavigationHeader(
     onNextMonth: () -> Unit,
 ) {
     val isCurrentMonth = displayedMonth >= YearMonth.now()
-    val monthLabel = displayedMonth.month.getDisplayName(TextStyle.FULL, LocalConfiguration.current.locales[0])
+    // Use Locale.getDefault() as a fallback to avoid rendering issues in Previews where locales might be empty
+    val configuration = LocalConfiguration.current
+    val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else Locale.getDefault()
+    val monthLabel = displayedMonth.month.getDisplayName(TextStyle.FULL, locale)
     val yearLabel = displayedMonth.year.toString()
 
     Row(

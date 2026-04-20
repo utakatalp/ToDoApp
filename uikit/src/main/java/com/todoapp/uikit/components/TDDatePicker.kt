@@ -38,6 +38,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -51,8 +52,9 @@ fun TDDatePicker(
     onDaySelect: (LocalDate) -> Unit,
     onDayDeselect: () -> Unit,
 ) {
-    // Use ComposeLocale to safely obtain the platform locale, which is more robust in Preview environments
-    val locale = LocalConfiguration.current.locales[0]
+    // Safely obtain the locale from configuration to avoid exceptions in Preview environments
+    val configuration = LocalConfiguration.current
+    val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else Locale.getDefault()
 
     val daysOfWeek =
         remember(locale) {
@@ -252,7 +254,9 @@ fun TDDatePickerSingleInput(
     onDaySelect: (LocalDate) -> Unit,
     onDayDeselect: () -> Unit,
 ) {
-    val locale = LocalConfiguration.current.locales[0]
+    // Safely obtain the locale from configuration to avoid exceptions in Preview environments
+    val configuration = LocalConfiguration.current
+    val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else Locale.getDefault()
 
     val daysOfWeek =
         remember(locale) {

@@ -17,6 +17,7 @@ import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 import java.time.LocalDate
 import java.time.format.TextStyle
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -26,7 +27,9 @@ fun TDTaskCardListByDay(
     tasks: List<TaskCardItem>,
     onTaskClick: (taskId: Long) -> Unit = {},
 ) {
-    val locale = LocalConfiguration.current.locales[0]
+    // Safely obtain the locale from configuration to avoid exceptions in Preview environments
+    val configuration = LocalConfiguration.current
+    val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else Locale.getDefault()
     Row(modifier = modifier) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
