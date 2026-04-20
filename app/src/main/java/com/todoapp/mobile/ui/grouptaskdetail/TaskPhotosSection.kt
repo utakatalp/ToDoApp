@@ -137,27 +137,53 @@ private fun PhotoViewerDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(TDTheme.colors.onBackground.copy(alpha = 0.92f))
-                .clickable(onClick = onDismiss),
-            contentAlignment = Alignment.Center,
+                .background(androidx.compose.ui.graphics.Color(0xEE000000)),
         ) {
-            AsyncImage(
-                model = url,
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxWidth().padding(24.dp),
-            )
+            // Image (tap anywhere on it to dismiss)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(onClick = onDismiss),
+                contentAlignment = Alignment.Center,
+            ) {
+                AsyncImage(
+                    model = url,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                )
+            }
+
+            // Solid-red Delete button at the bottom (prominent, thumb-friendly)
             if (onDelete != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp),
+                        .padding(horizontal = 24.dp, vertical = 32.dp),
                     contentAlignment = Alignment.BottomCenter,
                 ) {
-                    TextButton(onClick = onDelete) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(TDTheme.colors.crossRed)
+                            .clickable(onClick = onDelete)
+                            .padding(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(com.example.uikit.R.drawable.ic_delete),
+                            contentDescription = null,
+                            tint = androidx.compose.ui.graphics.Color.White,
+                            modifier = Modifier.size(22.dp),
+                        )
+                        Spacer(modifier = Modifier.padding(horizontal = 6.dp))
                         TDText(
                             text = stringResource(R.string.delete),
-                            color = TDTheme.colors.crossRed,
+                            style = TDTheme.typography.subheading2,
+                            color = androidx.compose.ui.graphics.Color.White,
                         )
                     }
                 }

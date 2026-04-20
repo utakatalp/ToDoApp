@@ -166,6 +166,8 @@ class TaskRepositoryImpl @Inject constructor(
             for ((bytes, mime) in photos) {
                 uploadTaskPhoto(remoteId, bytes, mime).getOrNull()  // best effort per photo
             }
+            // final refresh once all uploads attempted
+            refreshPhotoUrlsForTask(remoteId)
         }
     }
 
@@ -204,10 +206,22 @@ class TaskRepositoryImpl @Inject constructor(
         val part = okhttp3.MultipartBody.Part.createFormData("file", "photo.jpg", body)
         return com.todoapp.mobile.common.handleRequest { todoApi.uploadTaskPhoto(taskId, part) }
             .map { it.url }
+            .onSuccess { refreshPhotoUrlsForTask(taskId) }
     }
 
     override suspend fun deleteTaskPhoto(taskId: Long, photoId: Long): Result<Unit> {
         return com.todoapp.mobile.common.handleRequest { todoApi.deleteTaskPhoto(taskId, photoId) }
+            .onSuccess { refreshPhotoUrlsForTask(taskId) }
+    }
+
+    /** Pull the current photo URL list for a single task and patch the in-memory map. */
+    private suspend fun refreshPhotoUrlsForTask(taskId: Long) {
+        com.todoapp.mobile.common.handleRequest { todoApi.getTaskById(taskId) }
+            .onSuccess { data ->
+                val current = _taskPhotoUrls.value.toMutableMap()
+                if (data.photoUrls.isEmpty()) current.remove(taskId) else current[taskId] = data.photoUrls
+                _taskPhotoUrls.value = current
+            }
     }
 
     override suspend fun update(task: Task) = withContext(Dispatchers.IO) {
