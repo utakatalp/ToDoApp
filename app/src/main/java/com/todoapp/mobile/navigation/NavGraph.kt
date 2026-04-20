@@ -334,7 +334,11 @@ fun NavGraph(
                 onAction = viewModel::onAction,
             )
         }
-        composable<Screen.Profile> { }
+        composable<Screen.Profile> {
+            val viewModel: com.todoapp.mobile.ui.profile.ProfileViewModel = hiltViewModel()
+            NavigationEffectController(viewModel.navEffect)
+            com.todoapp.mobile.ui.profile.ProfileScreen(viewModel = viewModel)
+        }
 
         composable<Screen.GroupDetail> {
             val viewModel: GroupDetailViewModel = hiltViewModel()

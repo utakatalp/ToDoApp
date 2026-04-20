@@ -19,6 +19,8 @@ interface UserRepository {
     suspend fun googleLogin(token: String): Result<AuthResponseData>
     suspend fun facebookLogin(request: FacebookLoginRequest): Result<AuthResponseData>
     suspend fun getUserInfo(): Result<UserData>
+    suspend fun updateDisplayName(displayName: String): Result<UserData>
+    suspend fun uploadAvatar(bytes: ByteArray, mimeType: String): Result<UserData>
 }
 
 interface AuthRepository {

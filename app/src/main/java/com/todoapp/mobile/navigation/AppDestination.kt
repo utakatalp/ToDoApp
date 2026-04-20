@@ -157,13 +157,20 @@ sealed class AppDestination(
         selectedIcon = null,
     )
 
+    data object Profile : AppDestination(
+        title = R.string.profile,
+        route = Screen.Profile::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
     companion object {
         val bottomBarItems = listOf(Home, Groups, Calendar, Activity)
         val topBarItems = listOf(
             Home, Calendar, Activity, PomodoroAddTimer, Settings, Task, SecretMode, PlanYourDay, Groups,
             CreateNewGroup, FilteredTasks, Search, PomodoroLaunch, PomodoroSummary,
             GroupDetail, GroupSettings, InviteMember, ManageMembers, GroupTaskDetail,
-            MemberProfile, TransferOwnership,
+            MemberProfile, TransferOwnership, Profile,
         )
     }
 }

@@ -12,6 +12,7 @@ import com.todoapp.mobile.data.model.network.data.TaskData
 import com.todoapp.mobile.data.model.network.data.TaskListData
 import com.todoapp.mobile.data.model.network.data.UserData
 import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
+import com.todoapp.mobile.data.model.network.request.UpdateUserRequest
 import com.todoapp.mobile.data.model.network.request.FCMTokenRequest
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
@@ -82,6 +83,15 @@ interface ToDoApi {
 
     @GET("users/me")
     suspend fun getUserInfo(): Response<BaseResponse<UserData?>>
+
+    @PUT("users/me")
+    suspend fun updateUser(@Body request: UpdateUserRequest): Response<BaseResponse<UserData?>>
+
+    @retrofit2.http.Multipart
+    @POST("users/me/avatar")
+    suspend fun uploadAvatar(
+        @retrofit2.http.Part file: okhttp3.MultipartBody.Part,
+    ): Response<BaseResponse<UserData?>>
 
     @POST("family-groups")
     suspend fun createGroup(

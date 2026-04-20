@@ -191,6 +191,7 @@ class SettingsViewModel @Inject constructor(
             is UiAction.OnDisableSecretModeTap -> disableSecretMode()
             is UiAction.OnDailyPlanTimeChange -> updateDailyPlanTime(action.time)
             is UiAction.OnNavigateToSecretModeSettings -> navigateToSecretModeSettings()
+            UiAction.OnNavigateToProfile -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Profile))
             UiAction.OnNavigateToPlanYourDay -> navigateToDailyPlanSettings()
             UiAction.OnNavigateToPomodoroSettings -> navigateToPomodoroSettings()
             UiAction.OnLogoutClick -> _uiState.update { it.copy(showLogoutDialog = true) }

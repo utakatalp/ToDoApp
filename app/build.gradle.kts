@@ -167,4 +167,5 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.lottie.compose)
+    implementation(libs.coil.compose)
 }

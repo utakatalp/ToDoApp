@@ -54,6 +54,8 @@
     <string name="ok">OK</string>
     <string name="only_assignee_can_complete">Only the assignee or an admin can complete this task</string>
     <string name="only_admin_can_edit_task">Only admins can edit this task</string>
+    <string name="profile">Profile</string>
+    <string name="change_photo">Change photo</string>
     <string name="home">Home</string>
     <string name="settings">Settings</string>
     <string name="search">Search</string>

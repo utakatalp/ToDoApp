@@ -32,6 +32,7 @@ object SettingsContract {
         data object OnDisableSecretModeTap : UiAction
         data class OnDailyPlanTimeChange(val time: LocalTime) : UiAction
         data object OnNavigateToSecretModeSettings : UiAction
+        data object OnNavigateToProfile : UiAction
         data object OnLogoutClick : UiAction
         data object OnLogoutConfirm : UiAction
         data object OnLogoutDismiss : UiAction

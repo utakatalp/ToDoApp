@@ -13,7 +13,11 @@ import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.model.network.request.RefreshTokenRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
+import com.todoapp.mobile.data.model.network.request.UpdateUserRequest
 import com.todoapp.mobile.data.source.remote.api.ToDoApi
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import com.todoapp.mobile.data.source.remote.api.TodoAuthApi
 import com.todoapp.mobile.domain.repository.AuthEvent
 import com.todoapp.mobile.domain.repository.AuthRepository
@@ -96,6 +100,16 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun getUserInfo(): Result<UserData> {
         return handleRequest { todoApi.getUserInfo() }
+    }
+
+    override suspend fun updateDisplayName(displayName: String): Result<UserData> {
+        return handleRequest { todoApi.updateUser(UpdateUserRequest(displayName = displayName)) }
+    }
+
+    override suspend fun uploadAvatar(bytes: ByteArray, mimeType: String): Result<UserData> {
+        val body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+        val part = MultipartBody.Part.createFormData("file", "avatar.jpg", body)
+        return handleRequest { todoApi.uploadAvatar(part) }
     }
 }
 
