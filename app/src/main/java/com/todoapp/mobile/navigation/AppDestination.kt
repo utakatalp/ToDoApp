@@ -150,13 +150,20 @@ sealed class AppDestination(
         selectedIcon = null,
     )
 
+    data object TransferOwnership : AppDestination(
+        title = R.string.transfer_ownership,
+        route = Screen.TransferOwnership::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
     companion object {
         val bottomBarItems = listOf(Home, Groups, Calendar, Activity)
         val topBarItems = listOf(
             Home, Calendar, Activity, PomodoroAddTimer, Settings, Task, SecretMode, PlanYourDay, Groups,
             CreateNewGroup, FilteredTasks, Search, PomodoroLaunch, PomodoroSummary,
             GroupDetail, GroupSettings, InviteMember, ManageMembers, GroupTaskDetail,
-            MemberProfile,
+            MemberProfile, TransferOwnership,
         )
     }
 }

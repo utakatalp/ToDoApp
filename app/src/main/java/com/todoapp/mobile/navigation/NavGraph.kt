@@ -369,6 +369,12 @@ fun NavGraph(
         composable<Screen.GroupTaskDetail> {
             GroupTaskDetailScreen()
         }
+
+        composable<Screen.TransferOwnership> {
+            val viewModel: com.todoapp.mobile.ui.transferownership.TransferOwnershipViewModel = hiltViewModel()
+            NavigationEffectController(viewModel.navEffect)
+            com.todoapp.mobile.ui.transferownership.TransferOwnershipScreen(viewModel = viewModel)
+        }
     }
 }
 

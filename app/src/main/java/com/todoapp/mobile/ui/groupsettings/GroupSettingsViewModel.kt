@@ -48,6 +48,7 @@ class GroupSettingsViewModel @Inject constructor(
             is UiAction.OnDescriptionChange -> _uiState.update { it.copy(description = action.description) }
             UiAction.OnSaveTap -> saveChanges()
             UiAction.OnManageMembersTap -> _navEffect.trySend(NavigationEffect.Navigate(Screen.ManageMembers(groupId)))
+            UiAction.OnTransferOwnershipTap -> _navEffect.trySend(NavigationEffect.Navigate(Screen.TransferOwnership(groupId)))
         }
     }
 

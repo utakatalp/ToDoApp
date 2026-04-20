@@ -181,6 +181,15 @@ private fun GroupSettingsContent(
                 onClick = { onAction(UiAction.OnManageMembersTap) },
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ManagementRow(
+                icon = R.drawable.ic_members,
+                title = stringResource(com.todoapp.mobile.R.string.transfer_ownership),
+                subtitle = stringResource(com.todoapp.mobile.R.string.transfer_ownership_info),
+                onClick = { onAction(UiAction.OnTransferOwnershipTap) },
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
         }
     }

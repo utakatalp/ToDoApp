@@ -17,6 +17,7 @@ object GroupSettingsContract {
         data class OnDescriptionChange(val description: String) : UiAction
         data object OnSaveTap : UiAction
         data object OnManageMembersTap : UiAction
+        data object OnTransferOwnershipTap : UiAction
     }
 
     sealed interface UiEffect {
