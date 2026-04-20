@@ -31,6 +31,10 @@ class TaskRepositoryImpl @Inject constructor(
     private val groupTaskLocalDataSource: GroupTaskLocalDataSource,
     private val todoApi: com.todoapp.mobile.data.source.remote.api.ToDoApi,
 ) : TaskRepository {
+
+    private val _taskPhotoUrls = kotlinx.coroutines.flow.MutableStateFlow<Map<Long, List<String>>>(emptyMap())
+
+    override fun observeTaskPhotoUrls(): Flow<Map<Long, List<String>>> = _taskPhotoUrls
     override fun observeAllTaskEntities(): Flow<List<TaskEntity>> {
         return localDataSource.observeAll()
     }
@@ -235,6 +239,11 @@ class TaskRepositoryImpl @Inject constructor(
             onSuccess = { it },
             onFailure = { return Result.failure(it) }
         )
+
+        // Refresh the in-memory photo-url map so Home/Calendar can show thumbnails.
+        _taskPhotoUrls.value = remoteTasks.tasks
+            .filter { it.photoUrls.isNotEmpty() }
+            .associate { it.id to it.photoUrls }
 
         val localTasks = localDataSource.observeAll().first()
         val remoteNotInLocalTasks = remoteTasks.tasks.filter { remoteTask ->

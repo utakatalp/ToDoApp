@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
@@ -164,25 +167,66 @@ fun HomeTaskList(
                                 },
                                 interactionSource = interactionSource,
                             ) {
-                                TDTaskCardWithCheckbox(
-                                    taskText = if (task.isSecret) task.title.maskTitle() else task.title,
-                                    taskDescription = if (task.isSecret) task.description?.maskDescription() else task.description,
-                                    isChecked = task.isCompleted,
-                                    onCheckBoxClick = { onTaskCheck(task) },
-                                    isDragging = isDragging,
-                                    isAnyDragging = isAnyDragging,
-                                    modifier = Modifier.longPressDraggableHandle(
-                                        onDragStarted = {
-                                            hapticFeedback.performHapticFeedback(
-                                                HapticFeedbackType.GestureThresholdActivate
-                                            )
-                                        },
-                                        onDragStopped = {
-                                            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                            onReorderFinished()
-                                        },
-                                    ),
-                                )
+                                val firstPhoto = task.photoUrls.firstOrNull()
+                                if (firstPhoto != null) {
+                                    androidx.compose.foundation.layout.Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                                            .background(com.todoapp.uikit.theme.TDTheme.colors.lightPending),
+                                    ) {
+                                        coil.compose.AsyncImage(
+                                            model = run {
+                                                val base = com.todoapp.mobile.BuildConfig.BASE_URL.trimEnd('/')
+                                                "$base/${firstPhoto.trimStart('/')}"
+                                            },
+                                            contentDescription = null,
+                                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(140.dp),
+                                        )
+                                        TDTaskCardWithCheckbox(
+                                            taskText = if (task.isSecret) task.title.maskTitle() else task.title,
+                                            taskDescription = if (task.isSecret) task.description?.maskDescription() else task.description,
+                                            isChecked = task.isCompleted,
+                                            onCheckBoxClick = { onTaskCheck(task) },
+                                            isDragging = isDragging,
+                                            isAnyDragging = isAnyDragging,
+                                            modifier = Modifier.longPressDraggableHandle(
+                                                onDragStarted = {
+                                                    hapticFeedback.performHapticFeedback(
+                                                        HapticFeedbackType.GestureThresholdActivate
+                                                    )
+                                                },
+                                                onDragStopped = {
+                                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                                                    onReorderFinished()
+                                                },
+                                            ),
+                                        )
+                                    }
+                                } else {
+                                    TDTaskCardWithCheckbox(
+                                        taskText = if (task.isSecret) task.title.maskTitle() else task.title,
+                                        taskDescription = if (task.isSecret) task.description?.maskDescription() else task.description,
+                                        isChecked = task.isCompleted,
+                                        onCheckBoxClick = { onTaskCheck(task) },
+                                        isDragging = isDragging,
+                                        isAnyDragging = isAnyDragging,
+                                        modifier = Modifier.longPressDraggableHandle(
+                                            onDragStarted = {
+                                                hapticFeedback.performHapticFeedback(
+                                                    HapticFeedbackType.GestureThresholdActivate
+                                                )
+                                            },
+                                            onDragStopped = {
+                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                                                onReorderFinished()
+                                            },
+                                        ),
+                                    )
+                                }
                             }
                         }
                     }

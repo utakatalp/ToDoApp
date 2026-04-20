@@ -11,6 +11,8 @@ data class CompletedCountByDay(
 )
 
 interface TaskRepository {
+    /** Map of remote task id -> list of photo URLs. Populated on every remote sync. */
+    fun observeTaskPhotoUrls(): Flow<Map<Long, List<String>>>
     fun observeRange(startDate: LocalDate, endDate: LocalDate): Flow<List<Task>>
     fun observeTasksByDate(date: LocalDate): Flow<List<Task>>
     fun countCompletedTasksInAWeek(date: LocalDate): Flow<Int>

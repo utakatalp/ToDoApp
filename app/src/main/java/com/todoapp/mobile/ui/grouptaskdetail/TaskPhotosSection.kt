@@ -5,11 +5,13 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,6 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TextButton
@@ -56,7 +61,8 @@ fun TaskPhotosSection(
             .getOrNull() ?: return@rememberLauncherForActivityResult
         onPick(bytes, mime)
     }
-    var pendingDeleteId by remember { mutableStateOf<Long?>(null) }
+    var viewerUrl by remember { mutableStateOf<String?>(null) }
+    var viewerPhotoId by remember { mutableStateOf<Long?>(null) }
 
     Column {
         Row(
@@ -87,37 +93,76 @@ fun TaskPhotosSection(
                 })
             }
             items(photoUrls, key = { it }) { relativeUrl ->
+                val url = absoluteUrl(relativeUrl)
+                val photoId = photoIdFromUrl(relativeUrl)
                 PhotoTile(
-                    url = absoluteUrl(relativeUrl),
+                    url = url,
                     onLongPress = {
-                        val id = photoIdFromUrl(relativeUrl)
-                        if (id != null) pendingDeleteId = id
+                        viewerUrl = url
+                        viewerPhotoId = photoId
                     },
                 )
             }
         }
     }
 
-    pendingDeleteId?.let { id ->
-        AlertDialog(
-            onDismissRequest = { pendingDeleteId = null },
-            title = { TDText(text = stringResource(R.string.delete_photo_title)) },
-            text = { TDText(text = stringResource(R.string.delete_photo_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    onDelete(id)
-                    pendingDeleteId = null
-                }) {
-                    TDText(text = stringResource(R.string.delete), color = TDTheme.colors.crossRed)
+    if (viewerUrl != null) {
+        PhotoViewerDialog(
+            url = viewerUrl!!,
+            onDismiss = {
+                viewerUrl = null
+                viewerPhotoId = null
+            },
+            onDelete = viewerPhotoId?.let {
+                {
+                    onDelete(it)
+                    viewerUrl = null
+                    viewerPhotoId = null
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { pendingDeleteId = null }) {
-                    TDText(text = stringResource(R.string.cancel))
-                }
-            },
-            containerColor = TDTheme.colors.background,
         )
+    }
+}
+
+@Composable
+private fun PhotoViewerDialog(
+    url: String,
+    onDismiss: () -> Unit,
+    onDelete: (() -> Unit)?,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(TDTheme.colors.onBackground.copy(alpha = 0.92f))
+                .clickable(onClick = onDismiss),
+            contentAlignment = Alignment.Center,
+        ) {
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxWidth().padding(24.dp),
+            )
+            if (onDelete != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.BottomCenter,
+                ) {
+                    TextButton(onClick = onDelete) {
+                        TDText(
+                            text = stringResource(R.string.delete),
+                            color = TDTheme.colors.crossRed,
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -146,7 +191,12 @@ private fun PhotoTile(url: String, onLongPress: () -> Unit) {
             .size(80.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(TDTheme.colors.lightPending)
-            .clickable(onClick = onLongPress),
+            .pointerInput(url) {
+                detectTapGestures(
+                    onLongPress = { onLongPress() },
+                    onTap = { onLongPress() },
+                )
+            },
     ) {
         AsyncImage(
             model = url,

@@ -172,8 +172,13 @@ class HomeViewModel @Inject constructor(
                 taskRepository.observeTasksByDate(date),
                 taskRepository.observePendingTasksInAWeek(date),
                 taskRepository.countCompletedTasksInAWeek(date),
-            ) { tasks, pendingTaskCount, completedTaskCount ->
-                DailyData(tasks, pendingTaskCount, completedTaskCount)
+                taskRepository.observeTaskPhotoUrls(),
+            ) { tasks, pendingTaskCount, completedTaskCount, photoUrls ->
+                val withPhotos = tasks.map { t ->
+                    val urls = t.remoteId?.let { photoUrls[it] } ?: emptyList()
+                    if (urls.isNotEmpty()) t.copy(photoUrls = urls) else t
+                }
+                DailyData(withPhotos, pendingTaskCount, completedTaskCount)
             }.collect { data ->
                 _uiState.update { current ->
                     when (current) {

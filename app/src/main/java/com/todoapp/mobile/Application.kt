@@ -21,13 +21,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
-class Application : Application(), DefaultLifecycleObserver, Configuration.Provider {
+class Application : Application(), DefaultLifecycleObserver, Configuration.Provider, coil.ImageLoaderFactory {
 
     @Inject
     lateinit var secretPreferences: SecretPreferences
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject
+    lateinit var okHttpClient: okhttp3.OkHttpClient
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -43,6 +46,15 @@ class Application : Application(), DefaultLifecycleObserver, Configuration.Provi
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         createNotificationChannel()
     }
+
+    // Coil picks this up automatically as the app-wide ImageLoader; wires the shared OkHttpClient
+    // (with the AuthInterceptor) so authenticated endpoints like /users/{id}/avatar and
+    // /tasks/{id}/photos/{photoId} send the Bearer token.
+    override fun newImageLoader(): coil.ImageLoader =
+        coil.ImageLoader.Builder(this)
+            .okHttpClient { okHttpClient }
+            .crossfade(true)
+            .build()
 
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
