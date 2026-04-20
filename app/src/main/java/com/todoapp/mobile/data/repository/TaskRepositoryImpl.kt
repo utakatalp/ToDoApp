@@ -152,6 +152,19 @@ class TaskRepositoryImpl @Inject constructor(
             }
     }
 
+    override suspend fun insertWithPhotos(task: Task, photos: List<Pair<ByteArray, String>>): Result<Unit> {
+        // Unlike insert(), this requires a successful server create so we have a remoteId to
+        // attach the photos to. If the network call fails, we surface the failure upwards.
+        return remoteDataSource.addTask(task).mapCatching { remoteTask ->
+            val remoteId = remoteTask.id
+            val entity = remoteTask.toDomain().toEntity().copy(id = 0L)
+            localDataSource.insert(withInitializedOrder(entity))
+            for ((bytes, mime) in photos) {
+                uploadTaskPhoto(remoteId, bytes, mime).getOrNull()  // best effort per photo
+            }
+        }
+    }
+
     override suspend fun delete(task: Task) {
         val taskEntity = localDataSource.getTaskById(task.id)
         taskEntity?.let { taskEntity ->

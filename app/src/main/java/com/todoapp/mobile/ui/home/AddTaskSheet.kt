@@ -149,6 +149,12 @@ internal fun AddTaskSheet(
             )
         }
         Spacer(Modifier.height(12.dp))
+        PendingPhotosRow(
+            pending = formState.pendingPhotos,
+            onPick = { bytes, mime -> onAction(TaskFormUiAction.PhotoPicked(bytes, mime)) },
+            onRemoveAt = { idx -> onAction(TaskFormUiAction.PhotoRemoveAt(idx)) },
+        )
+        Spacer(Modifier.height(12.dp))
         AdvancedSettings(
             isExpanded = formState.isAdvancedSettingsExpanded,
             isSecret = formState.isTaskSecret,

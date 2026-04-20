@@ -21,6 +21,7 @@ interface TaskRepository {
     fun countCompletedTasksYearToDate(date: LocalDate): Flow<Int>
     fun observePendingTasksYearToDate(date: LocalDate): Flow<Int>
     suspend fun insert(task: Task)
+    suspend fun insertWithPhotos(task: Task, photos: List<Pair<ByteArray, String>>): Result<Unit>
     suspend fun delete(task: Task)
     suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean)
     suspend fun getTaskById(id: Long): Task?

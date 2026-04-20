@@ -19,6 +19,12 @@ data class TaskFormState(
     val selectedGroupId: Long? = null,
     val selectedPriority: String? = null,
     val selectedAssigneeId: Long? = null,
+    val pendingPhotos: List<PendingPhoto> = emptyList(),
+)
+
+data class PendingPhoto(
+    val bytes: ByteArray,
+    val mimeType: String,
 )
 
 sealed interface TaskFormUiAction {
@@ -35,4 +41,6 @@ sealed interface TaskFormUiAction {
     data class GroupSelectionChanged(val groupId: Long?) : TaskFormUiAction
     data class PriorityChange(val priority: String?) : TaskFormUiAction
     data class AssigneeChange(val userId: Long?) : TaskFormUiAction
+    data class PhotoPicked(val bytes: ByteArray, val mimeType: String) : TaskFormUiAction
+    data class PhotoRemoveAt(val index: Int) : TaskFormUiAction
 }

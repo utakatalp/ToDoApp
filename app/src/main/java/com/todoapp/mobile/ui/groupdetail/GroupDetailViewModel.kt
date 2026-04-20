@@ -256,6 +256,12 @@ class GroupDetailViewModel @Inject constructor(
 
                 TaskFormUiAction.Create -> return@updateSuccessState s
                 is TaskFormUiAction.GroupSelectionChanged -> return@updateSuccessState s
+                is TaskFormUiAction.PhotoPicked -> f.copy(
+                    pendingPhotos = f.pendingPhotos + com.todoapp.mobile.ui.home.PendingPhoto(action.bytes, action.mimeType),
+                )
+                is TaskFormUiAction.PhotoRemoveAt -> f.copy(
+                    pendingPhotos = f.pendingPhotos.filterIndexed { i, _ -> i != action.index },
+                )
             }
             s.copy(taskFormState = updated)
         }

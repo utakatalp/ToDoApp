@@ -66,6 +66,8 @@ object HomeContract {
         data class OnGroupSelectionChanged(val groupId: Long?) : UiAction
         data object OnPreviousMonth : UiAction
         data object OnNextMonth : UiAction
+        data class OnPendingPhotoAdd(val bytes: ByteArray, val mimeType: String) : UiAction
+        data class OnPendingPhotoRemove(val index: Int) : UiAction
     }
 
     sealed interface UiEffect {

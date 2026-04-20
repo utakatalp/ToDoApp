@@ -106,6 +106,20 @@ class HomeViewModel @Inject constructor(
             is UiAction.OnGroupSelectionChanged -> updateSuccessState {
                 it.copy(taskFormState = it.taskFormState.copy(selectedGroupId = uiAction.groupId))
             }
+            is UiAction.OnPendingPhotoAdd -> updateSuccessState { s ->
+                s.copy(
+                    taskFormState = s.taskFormState.copy(
+                        pendingPhotos = s.taskFormState.pendingPhotos + PendingPhoto(uiAction.bytes, uiAction.mimeType),
+                    ),
+                )
+            }
+            is UiAction.OnPendingPhotoRemove -> updateSuccessState { s ->
+                s.copy(
+                    taskFormState = s.taskFormState.copy(
+                        pendingPhotos = s.taskFormState.pendingPhotos.filterIndexed { i, _ -> i != uiAction.index },
+                    ),
+                )
+            }
         }
     }
 
@@ -234,6 +248,12 @@ class HomeViewModel @Inject constructor(
             )
             if (form.selectedGroupId != null) {
                 groupRepository.createGroupTask(form.selectedGroupId, task)
+            } else if (form.pendingPhotos.isNotEmpty()) {
+                taskRepository.insertWithPhotos(
+                    task,
+                    form.pendingPhotos.map { it.bytes to it.mimeType },
+                )
+                scheduleTaskReminders(task)
             } else {
                 taskRepository.insert(task)
                 scheduleTaskReminders(task)

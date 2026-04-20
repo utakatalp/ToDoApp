@@ -142,6 +142,12 @@ private fun HomeSuccessContent(
                         )
                         is TaskFormUiAction.PriorityChange -> Unit
                         is TaskFormUiAction.AssigneeChange -> Unit
+                        is TaskFormUiAction.PhotoPicked -> onAction(
+                            UiAction.OnPendingPhotoAdd(action.bytes, action.mimeType)
+                        )
+                        is TaskFormUiAction.PhotoRemoveAt -> onAction(
+                            UiAction.OnPendingPhotoRemove(action.index)
+                        )
                     }
                 },
             )
