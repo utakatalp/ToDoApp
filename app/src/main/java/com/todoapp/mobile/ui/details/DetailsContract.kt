@@ -11,6 +11,7 @@ object DetailsContract {
         data class Success(
             val isDirty: Boolean,
             val isSaving: Boolean,
+            val taskId: Long,
             val taskTitle: String,
             val taskTimeStart: LocalTime?,
             val taskTimeEnd: LocalTime?,
@@ -18,6 +19,7 @@ object DetailsContract {
             val taskDescription: String,
             val dialogSelectedDate: LocalDate?,
             @StringRes val titleError: Int?,
+            val photoUrls: List<String> = emptyList(),
         ) : UiState
 
         data class Error(
@@ -38,6 +40,8 @@ object DetailsContract {
         data object OnDialogDateDeselect : UiAction
         data object OnSaveChanges : UiAction
         data object OnRetry : UiAction
+        data class OnPhotoPicked(val bytes: ByteArray, val mimeType: String) : UiAction
+        data class OnPhotoDelete(val photoId: Long) : UiAction
     }
 
     sealed interface UiEffect {

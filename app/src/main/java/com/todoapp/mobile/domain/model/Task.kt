@@ -14,7 +14,8 @@ data class Task(
     val timeStart: LocalTime,
     val timeEnd: LocalTime,
     val isCompleted: Boolean,
-    val isSecret: Boolean
+    val isSecret: Boolean,
+    val photoUrls: List<String> = emptyList(),
 )
 
 fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem {
@@ -51,5 +52,6 @@ fun TaskData.toDomain(): Task {
         timeEnd = LocalTime.ofSecondOfDay(timeEnd),
         isCompleted = isCompleted,
         isSecret = isSecret,
+        photoUrls = photoUrls,
     )
 }

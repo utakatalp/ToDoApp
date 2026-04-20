@@ -66,6 +66,11 @@ interface ToDoApi {
     @Query("familyGroupId") familyGroupId: Long? = null,
     ): Response<BaseResponse<TaskListData?>>
 
+    @GET("tasks/{id}")
+    suspend fun getTaskById(
+        @Path("id") id: Long,
+    ): Response<BaseResponse<TaskData?>>
+
     @DELETE("tasks/{id}")
     suspend fun deleteTask(
         @Path("id") taskId: Long,

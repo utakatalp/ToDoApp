@@ -59,6 +59,7 @@ class DetailsViewModel @Inject constructor(
                 }
                 originalTask = task
                 _uiState.value = UiState.Success(
+                    taskId = task.id,
                     taskTitle = task.title,
                     taskTimeStart = task.timeStart,
                     taskTimeEnd = task.timeEnd,
@@ -68,7 +69,12 @@ class DetailsViewModel @Inject constructor(
                     isDirty = false,
                     titleError = null,
                     isSaving = false,
+                    photoUrls = task.photoUrls,
                 )
+                // Fetch remote task to get authoritative photoUrls (local cache doesn't store them)
+                taskRepository.fetchRemoteTask(task.id).onSuccess { remote ->
+                    updateSuccessState { it.copy(photoUrls = remote.photoUrls) }
+                }
             } catch (e: IOException) {
                 _uiState.value = UiState.Error(message = "Failed to load task", throwable = e)
             }
@@ -88,6 +94,30 @@ class DetailsViewModel @Inject constructor(
             is UiAction.OnDialogDateSelect -> selectDialogDate(uiAction.date)
             UiAction.OnDialogDateDeselect -> deselectDialogDate()
             UiAction.OnRetry -> retry()
+            is UiAction.OnPhotoPicked -> uploadPhoto(uiAction.bytes, uiAction.mimeType)
+            is UiAction.OnPhotoDelete -> deletePhoto(uiAction.photoId)
+        }
+    }
+
+    private fun uploadPhoto(bytes: ByteArray, mimeType: String) {
+        viewModelScope.launch {
+            val state = _uiState.value as? UiState.Success ?: return@launch
+            taskRepository.uploadTaskPhoto(state.taskId, bytes, mimeType)
+                .onSuccess { refreshPhotos(state.taskId) }
+        }
+    }
+
+    private fun deletePhoto(photoId: Long) {
+        viewModelScope.launch {
+            val state = _uiState.value as? UiState.Success ?: return@launch
+            taskRepository.deleteTaskPhoto(state.taskId, photoId)
+                .onSuccess { refreshPhotos(state.taskId) }
+        }
+    }
+
+    private suspend fun refreshPhotos(taskId: Long) {
+        taskRepository.fetchRemoteTask(taskId).onSuccess { remote ->
+            updateSuccessState { it.copy(photoUrls = remote.photoUrls) }
         }
     }
 
@@ -175,6 +205,7 @@ class DetailsViewModel @Inject constructor(
         }
 
         _uiState.value = UiState.Success(
+            taskId = existingTask.id,
             taskTitle = existingTask.title,
             titleError = null,
             taskTimeStart = existingTask.timeStart,
@@ -183,7 +214,8 @@ class DetailsViewModel @Inject constructor(
             taskDescription = existingTask.description ?: "",
             dialogSelectedDate = existingTask.date,
             isDirty = false,
-            isSaving = false
+            isSaving = false,
+            photoUrls = (currentState as? UiState.Success)?.photoUrls ?: emptyList(),
         )
         _uiEffect.trySend(UiEffect.ShowToast(R.string.changes_cancelled))
     }

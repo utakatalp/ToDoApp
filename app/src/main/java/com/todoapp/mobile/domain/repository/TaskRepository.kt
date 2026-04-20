@@ -24,6 +24,9 @@ interface TaskRepository {
     suspend fun delete(task: Task)
     suspend fun updateTaskCompletion(id: Long, isCompleted: Boolean)
     suspend fun getTaskById(id: Long): Task?
+    suspend fun fetchRemoteTask(id: Long): Result<Task>
+    suspend fun uploadTaskPhoto(taskId: Long, bytes: ByteArray, mimeType: String): Result<String>
+    suspend fun deleteTaskPhoto(taskId: Long, photoId: Long): Result<Unit>
     suspend fun update(task: Task)
     suspend fun syncRemoteTasksWithLocal(): Result<Unit>
     suspend fun syncLocalTasksToServer(): Result<Unit>

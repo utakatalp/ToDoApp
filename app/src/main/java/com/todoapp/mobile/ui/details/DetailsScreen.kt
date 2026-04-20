@@ -245,6 +245,12 @@ private fun DetailsSuccessContent(
             }
 
             Spacer(Modifier.height(4.dp))
+
+            com.todoapp.mobile.ui.grouptaskdetail.TaskPhotosSection(
+                photoUrls = uiState.photoUrls,
+                onPick = { bytes, mime -> onAction(UiAction.OnPhotoPicked(bytes, mime)) },
+                onDelete = { photoId -> onAction(UiAction.OnPhotoDelete(photoId)) },
+            )
         }
 
         Column(

@@ -12,6 +12,8 @@ import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toDomain
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import com.todoapp.mobile.domain.repository.CompletedCountByDay
 import com.todoapp.mobile.domain.repository.TaskRepository
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +29,7 @@ class TaskRepositoryImpl @Inject constructor(
     private val remoteDataSource: TaskRemoteDataSource,
     private val localDataSource: TaskLocalDataSource,
     private val groupTaskLocalDataSource: GroupTaskLocalDataSource,
+    private val todoApi: com.todoapp.mobile.data.source.remote.api.ToDoApi,
 ) : TaskRepository {
     override fun observeAllTaskEntities(): Flow<List<TaskEntity>> {
         return localDataSource.observeAll()
@@ -172,6 +175,22 @@ class TaskRepositoryImpl @Inject constructor(
 
     override suspend fun getTaskById(id: Long): Task? = withContext(Dispatchers.IO) {
         localDataSource.getTaskById(id)?.toDomain()
+    }
+
+    override suspend fun fetchRemoteTask(id: Long): Result<Task> {
+        return com.todoapp.mobile.common.handleRequest { todoApi.getTaskById(id) }
+            .map { it.toDomain() }
+    }
+
+    override suspend fun uploadTaskPhoto(taskId: Long, bytes: ByteArray, mimeType: String): Result<String> {
+        val body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+        val part = okhttp3.MultipartBody.Part.createFormData("file", "photo.jpg", body)
+        return com.todoapp.mobile.common.handleRequest { todoApi.uploadTaskPhoto(taskId, part) }
+            .map { it.url }
+    }
+
+    override suspend fun deleteTaskPhoto(taskId: Long, photoId: Long): Result<Unit> {
+        return com.todoapp.mobile.common.handleRequest { todoApi.deleteTaskPhoto(taskId, photoId) }
     }
 
     override suspend fun update(task: Task) = withContext(Dispatchers.IO) {
