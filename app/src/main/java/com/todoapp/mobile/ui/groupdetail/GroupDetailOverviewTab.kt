@@ -117,6 +117,7 @@ fun GroupDetailOverviewTab(
                         onLongPress = { onAction(UiAction.OnTaskLongPress(task.id)) },
                         onDelete = { onAction(UiAction.OnDeleteTask(task.id)) },
                         onAssignToMe = { onAction(UiAction.OnAssignToMe(task.id)) },
+                        onTap = { onAction(UiAction.OnTaskTapped(task.id)) },
                     )
                 }
             }
@@ -311,6 +312,7 @@ private fun SwipeableGroupTaskCard(
     onLongPress: () -> Unit,
     onDelete: () -> Unit,
     onAssignToMe: () -> Unit,
+    onTap: () -> Unit,
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
     val hasAssignee = task.assigneeId != null
@@ -347,6 +349,7 @@ private fun SwipeableGroupTaskCard(
             task = task,
             onChecked = onChecked,
             onLongPress = onLongPress,
+            onTap = onTap,
         )
     }
 }
@@ -401,6 +404,7 @@ private fun FlippableGroupTaskCard(
     task: GroupTaskUiItem,
     onChecked: (Boolean) -> Unit,
     onLongPress: () -> Unit,
+    onTap: () -> Unit,
 ) {
     var isFlipped by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
@@ -413,7 +417,7 @@ private fun FlippableGroupTaskCard(
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(
-                onClick = { isFlipped = !isFlipped },
+                onClick = onTap,
                 onLongClick = { onLongPress() },
             ),
     ) {
