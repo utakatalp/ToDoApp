@@ -15,9 +15,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.toRoute
 import com.example.uikit.R
 import com.todoapp.mobile.LocalNavController
 import com.todoapp.mobile.navigation.AppDestination
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.navigation.appDestinationFromRoute
 import com.todoapp.mobile.ui.topbar.TopBarContract.UiAction
 import com.todoapp.uikit.theme.TDTheme
@@ -33,7 +35,7 @@ fun TDTopBar(
             Text(
                 text = state.title,
                 textAlign = TextAlign.Center,
-                style = TDTheme.typography.heading4,
+                style = TDTheme.typography.heading3,
                 color = TDTheme.colors.onBackground
             )
         },
@@ -73,6 +75,7 @@ fun ShowTopBar(
     val normalizedRoute = normalizeRoute(route)
     val destination = appDestinationFromRoute(normalizedRoute) ?: return
     val titleText = stringResource(destination.title)
+    val currentEntry = navController.currentBackStackEntryAsState().value
     val state = when (destination) {
         AppDestination.Home ->
             TDTopBarState(
@@ -80,24 +83,38 @@ fun ShowTopBar(
                 onNavigationClick = { onEvent(UiAction.OnSettingsClick) },
                 navigationIcon = R.drawable.ic_settings,
                 actions =
-                    listOf(
-                        if (uiState.isUserAuthenticated) {
+                    buildList {
+                        add(
                             TDTopBarAction(
-                                icon = com.todoapp.mobile.R.drawable.ic_logout,
-                                onClick = { onEvent(UiAction.OnLogoutClick) }
-                            )
-                        } else {
+                            icon = R.drawable.ic_search,
+                            onClick = { onEvent(UiAction.OnSearchClick) },
+                        )
+                        )
+                        add(
                             TDTopBarAction(
-                                icon = com.todoapp.mobile.R.drawable.ic_person,
-                                onClick = { onEvent(UiAction.OnProfileClick) }
-                            )
-                        },
-                        TDTopBarAction(
                             icon = R.drawable.ic_notification,
                             onClick = { onEvent(UiAction.OnNotificationClick) },
-                        ),
-                    ),
+                        )
+                        )
+                    },
             )
+
+        AppDestination.GroupDetail -> {
+            val groupDetailArgs = runCatching { currentEntry?.toRoute<Screen.GroupDetail>() }.getOrNull()
+            TDTopBarState(
+                title = groupDetailArgs?.groupName ?: titleText,
+                onNavigationClick = { onEvent(UiAction.OnBackClick) },
+                navigationIcon = R.drawable.ic_arrow_back,
+                actions = listOfNotNull(
+                    groupDetailArgs?.let { args ->
+                        TDTopBarAction(
+                            icon = com.example.uikit.R.drawable.ic_settings,
+                            onClick = { onEvent(UiAction.OnGroupSettingsClick(args.groupId)) },
+                        )
+                    }
+                ),
+            )
+        }
 
         else -> {
             TDTopBarState(

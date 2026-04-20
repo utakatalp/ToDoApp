@@ -56,6 +56,7 @@ class BannerViewModel @Inject constructor(
                         isBannerActivated = state.isRunning,
                         isOverTime = state.isOvertime,
                         isVisible = state.isVisible,
+                        mode = state.mode,
                     )
                 }
             }

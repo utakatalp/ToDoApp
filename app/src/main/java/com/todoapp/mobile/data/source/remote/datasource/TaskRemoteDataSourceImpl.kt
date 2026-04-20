@@ -11,19 +11,28 @@ import javax.inject.Inject
 class TaskRemoteDataSourceImpl @Inject constructor(
     private val todoApi: ToDoApi
 ) : TaskRemoteDataSource {
-    override suspend fun addTask(task: Task): Result<TaskData> {
-        return handleRequest { todoApi.addTask(task.toCreateTaskRequestDto()) }
+    override suspend fun addTask(
+        task: Task,
+        familyGroupId: Long?,
+        assignedToUserId: Long?,
+        priority: String?
+    ): Result<TaskData> {
+        return handleRequest { todoApi.addTask(task.toCreateTaskRequestDto(familyGroupId, assignedToUserId, priority)) }
     }
 
-    override suspend fun updateTask(id: Long, task: Task): Result<TaskData> {
-        return handleRequest { todoApi.updateTask(id, task.toCreateTaskRequestDto()) }
+    override suspend fun updateTask(id: Long, task: Task, familyGroupId: Long?, assignedToUserId: Long?): Result<TaskData> {
+        return handleRequest {
+            todoApi.updateTask(
+            task.toCreateTaskRequestDto(familyGroupId = familyGroupId, assignedToUserId = assignedToUserId)
+        )
+        }
     }
 
     override suspend fun deleteTask(id: Long): Result<Unit> {
         return handleRequest { todoApi.deleteTask(id) }
     }
 
-    override suspend fun getTasks(): Result<TaskListData> {
-        return handleRequest { todoApi.getTasks() }
+    override suspend fun getTasks(familyGroupId: Long?): Result<TaskListData> {
+        return handleRequest { todoApi.getTasks(familyGroupId) }
     }
 }

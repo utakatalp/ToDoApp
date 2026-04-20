@@ -5,11 +5,16 @@ import com.todoapp.mobile.data.model.network.data.TaskListData
 import com.todoapp.mobile.domain.model.Task
 
 interface TaskRemoteDataSource {
-    suspend fun addTask(task: Task): Result<TaskData>
+    suspend fun addTask(
+        task: Task,
+        familyGroupId: Long? = null,
+        assignedToUserId: Long? = null,
+        priority: String? = null
+    ): Result<TaskData>
 
-    suspend fun updateTask(id: Long, task: Task): Result<TaskData>
+    suspend fun updateTask(id: Long, task: Task, familyGroupId: Long? = null, assignedToUserId: Long? = null): Result<TaskData>
 
     suspend fun deleteTask(id: Long): Result<Unit>
 
-    suspend fun getTasks(): Result<TaskListData>
+    suspend fun getTasks(familyGroupId: Long? = null): Result<TaskListData>
 }

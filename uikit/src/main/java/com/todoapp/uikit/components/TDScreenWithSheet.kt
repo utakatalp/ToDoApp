@@ -1,5 +1,9 @@
 package com.todoapp.uikit.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -11,7 +15,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.launch
 
@@ -22,6 +30,7 @@ fun TDScreenWithSheet(
     skipPartiallyExpanded: Boolean = true,
     containerColor: Color = TDTheme.colors.background,
     contentColor: Color = TDTheme.colors.onBackground,
+    sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
     sheetContent: @Composable () -> Unit,
     onDismissSheet: () -> Unit,
     content: @Composable () -> Unit,
@@ -57,9 +66,39 @@ fun TDScreenWithSheet(
             sheetState = bottomSheetState,
             containerColor = containerColor,
             contentColor = contentColor,
+            sheetMaxWidth = sheetMaxWidth,
             dragHandle = null,
         ) {
             sheetContent()
+        }
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDScreenWithSheetPreview() {
+    TDTheme {
+        TDScreenWithSheet(
+            isSheetOpen = true,
+            sheetContent = {
+                Box(
+                    modifier = Modifier
+                        .background(TDTheme.colors.background)
+                        .padding(24.dp)
+                ) {
+                    TDText(text = "Sheet Content")
+                }
+            },
+            onDismissSheet = {},
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(TDTheme.colors.background)
+                    .padding(16.dp)
+            ) {
+                TDText(text = "Main Content")
+            }
         }
     }
 }

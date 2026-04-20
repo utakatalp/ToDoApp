@@ -6,9 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresPermission
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
-import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.repository.DataStoreHelper
@@ -186,7 +184,7 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update { it.copy(currentLanguage = action.language) }
                 languageRepository.saveLanguage(action.language)
                 val tag = action.language.toLocale().toLanguageTag()
-                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
+                _uiEffect.send(UiEffect.ApplyLocale(tag))
             }
             is UiAction.OnSelectedSecretModeChange -> updateSelectedSecretMode(action)
             is UiAction.OnSettingsSave -> updateOption()

@@ -14,6 +14,9 @@ import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.data.repository.FCMTokenPreferencesImpl
 import com.todoapp.mobile.data.repository.SecretPreferencesImpl
 import com.todoapp.mobile.data.source.local.AppDatabase
+import com.todoapp.mobile.data.source.local.GroupActivityDao
+import com.todoapp.mobile.data.source.local.GroupMemberDao
+import com.todoapp.mobile.data.source.local.GroupTaskDao
 import com.todoapp.mobile.data.source.local.PomodoroDao
 import com.todoapp.mobile.data.source.local.TaskDao
 import com.todoapp.mobile.data.source.local.datasource.GroupDao
@@ -26,6 +29,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.io.File
 import java.time.Clock
 import javax.inject.Singleton
 
@@ -33,7 +37,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object LocalStorageModule {
     private const val DB_NAME = "todo_db"
-    private val Context.dataStore by preferencesDataStore(name = "settings")
+    private val Context.dataStore by preferencesDataStore(name = "user_prefs")
     private const val PREFS_NAME = "todo_prefs"
 
     @Provides
@@ -57,13 +61,38 @@ object LocalStorageModule {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
+
+        return try {
+            createEncryptedSharedPreferences(context, PREFS_NAME, masterKey)
+        } catch (e: Exception) {
+            deleteSharedPreferencesFile(context, PREFS_NAME)
+            createEncryptedSharedPreferences(context, PREFS_NAME, masterKey)
+        }
+    }
+
+    private fun createEncryptedSharedPreferences(
+        context: Context,
+        fileName: String,
+        masterKey: MasterKey,
+    ): SharedPreferences {
         return EncryptedSharedPreferences.create(
             context,
-            PREFS_NAME,
+            fileName,
             masterKey,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
         )
+    }
+
+    private fun deleteSharedPreferencesFile(context: Context, fileName: String) {
+        try {
+            val sharedPrefsFile = File(context.applicationInfo.dataDir, "shared_prefs/$fileName.xml")
+            if (sharedPrefsFile.exists()) {
+                sharedPrefsFile.delete()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     @Provides
@@ -84,6 +113,18 @@ object LocalStorageModule {
     @Provides
     @Singleton
     fun provideGroupDao(database: AppDatabase): GroupDao = database.groupDao()
+
+    @Provides
+    @Singleton
+    fun provideGroupTaskDao(database: AppDatabase): GroupTaskDao = database.groupTaskDao()
+
+    @Provides
+    @Singleton
+    fun provideGroupMemberDao(database: AppDatabase): GroupMemberDao = database.groupMemberDao()
+
+    @Provides
+    @Singleton
+    fun provideGroupActivityDao(database: AppDatabase): GroupActivityDao = database.groupActivityDao()
 
     @Provides
     @Singleton

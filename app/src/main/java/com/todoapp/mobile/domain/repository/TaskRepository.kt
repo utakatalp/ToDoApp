@@ -16,6 +16,7 @@ interface TaskRepository {
     fun countCompletedTasksInAWeek(date: LocalDate): Flow<Int>
     fun countCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<CompletedCountByDay>>
     fun observeCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<Int>>
+    fun observePendingCountsByDayInAWeek(date: LocalDate): Flow<List<Int>>
     fun observePendingTasksInAWeek(date: LocalDate): Flow<Int>
     fun countCompletedTasksYearToDate(date: LocalDate): Flow<Int>
     fun observePendingTasksYearToDate(date: LocalDate): Flow<Int>
@@ -34,4 +35,6 @@ interface TaskRepository {
 
     suspend fun getAllTasks(): Result<Unit>
     suspend fun reorderTasksForDate(date: LocalDate, fromIndex: Int, toIndex: Int): Result<Unit>
+    fun observeTasksByWeekAndStatus(date: LocalDate, isCompleted: Boolean): Flow<List<Task>>
+    fun searchTasks(query: String): Flow<List<Task>>
 }

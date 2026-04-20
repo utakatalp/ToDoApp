@@ -36,6 +36,10 @@ class TaskSyncRepositoryImpl @Inject constructor(@ApplicationContext context: Co
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
+        val sync = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setConstraints(constraints)
+            .build()
+
         val fetch = OneTimeWorkRequestBuilder<FetchTasksWorker>()
             .setConstraints(constraints)
             .build()
@@ -43,8 +47,10 @@ class TaskSyncRepositoryImpl @Inject constructor(@ApplicationContext context: Co
         workManager.beginUniqueWork(
             FETCH_WORK,
             ExistingWorkPolicy.REPLACE,
-            fetch
-        ).enqueue()
+            sync
+        )
+            .then(fetch)
+            .enqueue()
     }
 
     companion object {

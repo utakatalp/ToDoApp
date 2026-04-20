@@ -2,6 +2,7 @@ package com.todoapp.mobile.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.todoapp.mobile.data.model.network.data.UserData
@@ -57,6 +58,16 @@ class DataStoreHelper @Inject constructor(
         }
     }
 
+    val isLoggedIn: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[IS_LOGGED_IN] ?: false
+    }
+
+    suspend fun setLoggedIn(value: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_LOGGED_IN] = value
+        }
+    }
+
     companion object {
         private val json = Json {
             ignoreUnknownKeys = true
@@ -64,5 +75,6 @@ class DataStoreHelper @Inject constructor(
             explicitNulls = false
         }
         private val USER_KEY = stringPreferencesKey("user")
+        private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
     }
 }

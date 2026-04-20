@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,19 +34,19 @@ fun ThemeSelector(
     onThemeChange: (ThemePreference) -> Unit,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TDText(
             text = stringResource(R.string.app_theme),
-            style = TDTheme.typography.heading4,
+            style = TDTheme.typography.heading6,
             color = TDTheme.colors.onBackground,
+            modifier = Modifier.weight(1f)
         )
-
-        Spacer(modifier = Modifier.weight(1f))
 
         Row(
             modifier = Modifier
+                .padding(start = 16.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(TDTheme.colors.background)
                 .border(
@@ -60,7 +58,7 @@ fun ThemeSelector(
             ThemeItem(
                 selected = currentTheme == ThemePreference.LIGHT_MODE,
                 onClick = { onThemeChange(ThemePreference.LIGHT_MODE) },
-                icon = painterResource(com.example.uikit.R.drawable.ic_light_mode)
+                icon = painterResource(com.example.uikit.R.drawable.ic_light_mode),
             )
 
             ThemeItem(
@@ -89,7 +87,7 @@ private fun ThemeItem(
             .clip(RoundedCornerShape(8.dp))
             .background(
                 if (selected) {
-                    TDTheme.colors.primary
+                    TDTheme.colors.pendingGray
                 } else {
                     Color.Transparent
                 }
@@ -100,9 +98,9 @@ private fun ThemeItem(
     ) {
         Icon(
             painter = icon,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.app_theme),
             tint = if (selected) {
-                TDTheme.colors.onBackground
+                TDTheme.colors.onPrimary
             } else {
                 TDTheme.colors.gray
             },

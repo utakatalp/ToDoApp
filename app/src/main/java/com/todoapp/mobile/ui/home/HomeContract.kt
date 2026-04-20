@@ -3,29 +3,26 @@ package com.todoapp.mobile.ui.home
 import com.todoapp.mobile.domain.model.Task
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
 
 object HomeContract {
+
+    data class GroupSelectionItem(val groupId: Long, val name: String)
+
     sealed interface UiState {
         data object Loading : UiState
         data class Success(
             val selectedDate: LocalDate,
+            val displayedMonth: YearMonth = YearMonth.now(),
             val tasks: List<Task>,
             val completedTaskCountThisWeek: Int,
             val pendingTaskCountThisWeek: Int,
-            val dialogSelectedDate: LocalDate?,
-            val taskTitle: String,
-            val taskTimeStart: LocalTime?,
-            val taskTimeEnd: LocalTime?,
-            val taskDate: LocalDate,
-            val taskDescription: String,
             val isSheetOpen: Boolean,
             val isDeleteDialogOpen: Boolean,
-            val isAdvancedSettingsExpanded: Boolean,
-            val isTaskSecret: Boolean,
             val isSecretModeEnabled: Boolean,
-            val isTitleError: Boolean,
-            val isTimeError: Boolean,
-            val isDateError: Boolean,
+            val taskFormState: TaskFormState = TaskFormState(),
+            val pendingDeleteTask: Task? = null,
+            val availableGroups: List<GroupSelectionItem> = emptyList(),
         ) : UiState
 
         data class Error(
@@ -61,11 +58,20 @@ object HomeContract {
         data class OnTaskSecretChange(val isSecret: Boolean) : UiAction
         data class OnTaskClick(val task: Task) : UiAction
         data object OnSuccessfulBiometricAuthenticationHandle : UiAction
+        data class OnToggleTaskSecret(val task: Task) : UiAction
+        data class OnBiometricSuccessForSecretToggle(val task: Task) : UiAction
+        data object OnUndoDelete : UiAction
+        data object OnCompletedStatCardTap : UiAction
+        data object OnPendingStatCardTap : UiAction
+        data class OnGroupSelectionChanged(val groupId: Long?) : UiAction
+        data object OnPreviousMonth : UiAction
+        data object OnNextMonth : UiAction
     }
 
     sealed interface UiEffect {
         data class ShowToast(val message: String) : UiEffect
         data object ShowBiometricAuthenticator : UiEffect
+        data class ShowBiometricForSecretToggle(val task: Task) : UiEffect
         data class ShowError(val message: String) : UiEffect
     }
 }

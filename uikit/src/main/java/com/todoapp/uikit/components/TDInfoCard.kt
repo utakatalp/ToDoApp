@@ -10,7 +10,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,9 +27,9 @@ fun TDInfoCard(
             .background(color = TDTheme.colors.infoCardBgColor)
             .padding(16.dp)
     ) {
-        Icon(painter = painterResource(id = R.drawable.ic_info), contentDescription = null, tint = Color.Unspecified)
+        Icon(painter = painterResource(id = R.drawable.ic_info), contentDescription = null, tint = TDTheme.colors.pendingGray)
         Spacer(modifier = Modifier.width(12.dp))
-        TDText(text = text, color = TDTheme.colors.primary)
+        TDText(text = text, color = TDTheme.colors.pendingGray)
     }
 }
 

@@ -10,7 +10,6 @@ object CreateNewGroupContract {
     )
 
     sealed interface UiAction {
-        data object OnBackClick : UiAction
         data class OnGroupNameChange(val groupName: String) : UiAction
         data class OnGroupDescriptionChange(val groupDescription: String) : UiAction
         data object OnCreateTap : UiAction

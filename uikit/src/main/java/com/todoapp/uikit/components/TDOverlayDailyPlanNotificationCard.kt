@@ -1,6 +1,7 @@
 package com.todoapp.uikit.components
 
 import android.os.SystemClock
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -94,7 +95,7 @@ fun TDOverlayDailyPlanNotificationCard(
                     .fillMaxWidth()
                     .height(3.dp)
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 22.dp))
-                    .background(TDTheme.colors.primary.copy(alpha = 0.2f))
+                    .background(TDTheme.colors.pendingGray.copy(alpha = 0.2f))
             ) {
                 Box(
                     modifier = Modifier
@@ -110,15 +111,21 @@ fun TDOverlayDailyPlanNotificationCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(64.dp)
                         .clip(CircleShape)
                         .background(TDTheme.colors.background.copy(alpha = 0.14f)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = "🗓️",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = overlayTextColor,
+                    Image(
+                        painter = painterResource(
+                            if (TDTheme.isDark) {
+                                R.drawable.ic_daily_overlay_robot_dark
+                            } else {
+                                R.drawable.ic_daily_overlay_robot_light
+                            }
+                        ),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(64.dp)
                     )
                 }
 

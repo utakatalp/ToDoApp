@@ -123,10 +123,22 @@ class TaskRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun observePendingCountsByDayInAWeek(date: LocalDate): Flow<List<Int>> {
+        val weekStart = date.with(DayOfWeek.MONDAY)
+        val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
+        return localDataSource.observePendingCountsByDay(
+            startDate = weekStart.toEpochDay(),
+            endDate = weekEnd.toEpochDay(),
+        ).map { rows ->
+            val map = rows.associate { LocalDate.ofEpochDay(it.date) to it.count }
+            (0 until DAYS_IN_WEEK).map { offset -> map[weekStart.plusDays(offset.toLong())] ?: 0 }
+        }
+    }
+
     override suspend fun insert(task: Task) {
         remoteDataSource.addTask(task)
             .onSuccess { remoteTask ->
-                val entity = remoteTask.toDomain().toEntity()
+                val entity = remoteTask.toDomain().toEntity().copy(id = 0L)
                 localDataSource.insert(withInitializedOrder(entity))
             }
             .onFailure {
@@ -165,16 +177,22 @@ class TaskRepositoryImpl @Inject constructor(
 
         if (taskEntity?.syncStatus != SyncStatus.SYNCED) {
             // no need to update remote because its not synced
-            localDataSource.update(task.toEntity(SyncStatus.PENDING_CREATE))
+            localDataSource.update(
+                task.toEntity(SyncStatus.PENDING_CREATE).copy(remoteId = taskEntity?.remoteId)
+            )
             return@withContext
         }
 
         remoteDataSource.updateTask(taskEntity.remoteId!!, taskEntity.toDomain())
-            .onSuccess {
-                localDataSource.update(it.toDomain().toEntity(SyncStatus.SYNCED))
+            .onSuccess { remoteTask ->
+                localDataSource.update(
+                    remoteTask.toDomain().toEntity(SyncStatus.SYNCED).copy(id = taskEntity.id)
+                )
             }
             .onFailure {
-                localDataSource.update(task.toEntity().copy(syncStatus = SyncStatus.PENDING_UPDATE))
+                localDataSource.update(
+                    task.toEntity(SyncStatus.PENDING_UPDATE).copy(remoteId = taskEntity.remoteId)
+                )
             }
     }
 
@@ -186,6 +204,7 @@ class TaskRepositoryImpl @Inject constructor(
 
         val localTasks = localDataSource.observeAll().first()
         val remoteNotInLocalTasks = remoteTasks.tasks.filter { remoteTask ->
+            remoteTask.familyGroupId == null &&
             localTasks.none { localTask ->
                 localTask.remoteId == remoteTask.id
             }
@@ -203,7 +222,7 @@ class TaskRepositoryImpl @Inject constructor(
         }
 
         val addedTaskEntities = remoteNotInLocalTasks
-            .map { it.toDomain().toEntity() }
+            .map { it.toDomain().toEntity().copy(id = 0L) }
             .map { entity ->
                 if (entity.orderIndex != 0) {
                     entity
@@ -212,9 +231,11 @@ class TaskRepositoryImpl @Inject constructor(
                 }
             }
 
-        localDataSource.insertAll(addedTaskEntities)
-
-        return Result.success(Unit)
+        return runCatching { localDataSource.insertAll(addedTaskEntities) }
+            .fold(
+                onSuccess = { Result.success(Unit) },
+                onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) }
+            )
     }
 
     override suspend fun syncLocalTasksToServer(): Result<Unit> = withContext(Dispatchers.IO) {
@@ -265,7 +286,7 @@ class TaskRepositoryImpl @Inject constructor(
                     }
 
                     val entities = tasks.tasks
-                        .map { it.toDomain().toEntity() }
+                        .map { it.toDomain().toEntity().copy(id = 0L) }
                         .map { entity ->
                             if (entity.orderIndex != 0) {
                                 entity
@@ -323,7 +344,6 @@ class TaskRepositoryImpl @Inject constructor(
         return remoteResult.fold(
             onSuccess = { remoteTask ->
                 val updated = taskEntity.copy(
-                    id = remoteTask.id,
                     remoteId = remoteTask.id,
                     syncStatus = SyncStatus.SYNCED
                 )
@@ -362,6 +382,21 @@ class TaskRepositoryImpl @Inject constructor(
             )
         )
         }
+    }
+
+    override fun searchTasks(query: String): Flow<List<Task>> {
+        val likeQuery = "%$query%"
+        return localDataSource.search(likeQuery).map { list -> list.map { it.toDomain() } }
+    }
+
+    override fun observeTasksByWeekAndStatus(date: LocalDate, isCompleted: Boolean): Flow<List<Task>> {
+        val weekStart = date.with(DayOfWeek.MONDAY)
+        val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
+        return localDataSource.observeByWeekAndStatus(
+            startDate = weekStart.toEpochDay(),
+            endDate = weekEnd.toEpochDay(),
+            isCompleted = isCompleted,
+        ).map { list -> list.map { it.toDomain() } }
     }
 
     override suspend fun reorderTasksForDate(

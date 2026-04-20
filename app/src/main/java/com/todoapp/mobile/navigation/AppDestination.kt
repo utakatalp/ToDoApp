@@ -59,6 +59,13 @@ sealed class AppDestination(
         selectedIcon = null
     )
 
+    data object PlanYourDay : AppDestination(
+        title = R.string.plan_your_day,
+        route = Screen.PlanYourDay::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
     data object Groups : AppDestination(
         title = R.string.groups,
         route = Screen.Groups::class.qualifiedName!!,
@@ -73,11 +80,83 @@ sealed class AppDestination(
         selectedIcon = null,
     )
 
+    data object FilteredTasks : AppDestination(
+        title = R.string.filtered_tasks_title,
+        route = Screen.FilteredTasks::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object Search : AppDestination(
+        title = R.string.search,
+        route = Screen.Search::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object PomodoroLaunch : AppDestination(
+        title = R.string.add_timer,
+        route = Screen.PomodoroLaunch::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object PomodoroSummary : AppDestination(
+        title = R.string.pomodoro_summary,
+        route = Screen.PomodoroSummary::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object GroupDetail : AppDestination(
+        title = R.string.group_detail,
+        route = Screen.GroupDetail::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object GroupSettings : AppDestination(
+        title = R.string.group_settings,
+        route = Screen.GroupSettings::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object InviteMember : AppDestination(
+        title = R.string.invite_member,
+        route = Screen.InviteMember::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object ManageMembers : AppDestination(
+        title = R.string.manage_members,
+        route = Screen.ManageMembers::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object GroupTaskDetail : AppDestination(
+        title = R.string.group_task_detail,
+        route = Screen.GroupTaskDetail::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object MemberProfile : AppDestination(
+        title = R.string.member_profile,
+        route = Screen.MemberProfile::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
     companion object {
         val bottomBarItems = listOf(Home, Groups, Calendar, Activity)
         val topBarItems = listOf(
-            Home, Calendar, Activity, PomodoroAddTimer, Settings, Task, SecretMode, Groups,
-            CreateNewGroup
+            Home, Calendar, Activity, PomodoroAddTimer, Settings, Task, SecretMode, PlanYourDay, Groups,
+            CreateNewGroup, FilteredTasks, Search, PomodoroLaunch, PomodoroSummary,
+            GroupDetail, GroupSettings, InviteMember, ManageMembers, GroupTaskDetail,
+            MemberProfile,
         )
     }
 }

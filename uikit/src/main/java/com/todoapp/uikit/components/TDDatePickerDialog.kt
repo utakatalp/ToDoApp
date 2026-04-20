@@ -84,13 +84,21 @@ fun TDDatePickerDialog(
                             onDayDeselect = onDateDeselect,
                         )
                         Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .background(TDTheme.colors.background)
-                                    .padding(horizontal = 8.dp),
-                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(TDTheme.colors.background)
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
+                            TDButton(
+                                text = stringResource(R.string.today),
+                                type = TDButtonType.OUTLINE,
+                                size = TDButtonSize.SMALL,
+                                onClick = {
+                                    onDateSelect(LocalDate.now())
+                                    isPickerOpen = false
+                                },
+                            )
                             TDButton(
                                 text = stringResource(R.string.ok),
                                 onClick = { isPickerOpen = false },

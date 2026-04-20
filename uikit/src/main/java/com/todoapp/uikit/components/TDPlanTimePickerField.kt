@@ -94,7 +94,7 @@ fun TDPlanTimePickerField(
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(999.dp))
-                    .background(TDTheme.colors.primary)
+                    .background(TDTheme.colors.pendingGray)
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),

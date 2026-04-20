@@ -27,7 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DetailsViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -43,9 +43,10 @@ class DetailsViewModel @Inject constructor(
     private var currentTaskId: Long? = null
 
     init {
-        currentTaskId = savedStateHandle.get("taskId")
+        currentTaskId = savedStateHandle["taskId"]
         loadTask(currentTaskId!!)
     }
+
     fun loadTask(taskId: Long) {
         currentTaskId = taskId
         viewModelScope.launch {
@@ -66,11 +67,10 @@ class DetailsViewModel @Inject constructor(
                     dialogSelectedDate = task.date,
                     isDirty = false,
                     titleError = null,
-                    isSaving = false
+                    isSaving = false,
                 )
             } catch (e: IOException) {
                 _uiState.value = UiState.Error(message = "Failed to load task", throwable = e)
-                Log.e("EditViewModel", "Failed to load task", e)
             }
         }
     }
@@ -183,7 +183,7 @@ class DetailsViewModel @Inject constructor(
             taskDescription = existingTask.description ?: "",
             dialogSelectedDate = existingTask.date,
             isDirty = false,
-            isSaving = true
+            isSaving = false
         )
         _uiEffect.trySend(UiEffect.ShowToast(R.string.changes_cancelled))
     }

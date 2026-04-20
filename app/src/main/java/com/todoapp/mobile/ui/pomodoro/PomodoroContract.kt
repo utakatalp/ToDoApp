@@ -1,9 +1,12 @@
 package com.todoapp.mobile.ui.pomodoro
 
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.R
 
 object PomodoroContract {
 
+    @Immutable
     data class UiState(
         val min: Int = 25,
         val second: Int = 0,
@@ -11,6 +14,10 @@ object PomodoroContract {
         val isRunning: Boolean = false,
         val isOvertime: Boolean = false,
         val infoMessage: String? = null,
+        val totalSessionSeconds: Long = 25L * 60L,
+        val currentSessionIndex: Int = 0,
+        val totalSessions: Int = 0,
+        val showFinishEarlyDialog: Boolean = false,
     )
 
     sealed interface UiAction {
@@ -18,7 +25,9 @@ object PomodoroContract {
         data object StartCountDown : UiAction
         data object StopCountDown : UiAction
         data class ToggleBannerVisibility(val isVisible: Boolean) : UiAction
-        data object Back : UiAction
+        data object OnEndSessionTap : UiAction
+        data object ConfirmEndSession : UiAction
+        data object DismissEndSessionDialog : UiAction
     }
 
     sealed interface UiEffect {
@@ -27,7 +36,7 @@ object PomodoroContract {
 }
 
 data class PomodoroModeUi(
-    val title: String,
+    @StringRes val titleRes: Int,
     val iconRes: Int,
     val colorKey: ModeColorKey
 )
@@ -36,7 +45,7 @@ sealed interface PomodoroModeUiPreset {
 
     data object Focus : PomodoroModeUiPreset {
         override val value = PomodoroModeUi(
-            title = "Focus",
+            titleRes = R.string.pomodoro_mode_focus,
             iconRes = R.drawable.ic_focus,
             colorKey = ModeColorKey.Focus,
         )
@@ -44,7 +53,7 @@ sealed interface PomodoroModeUiPreset {
 
     data object ShortBreak : PomodoroModeUiPreset {
         override val value = PomodoroModeUi(
-            title = "Short Break",
+            titleRes = R.string.pomodoro_mode_short_break,
             iconRes = R.drawable.ic_short_break,
             colorKey = ModeColorKey.ShortBreak,
         )
@@ -52,7 +61,7 @@ sealed interface PomodoroModeUiPreset {
 
     data object LongBreak : PomodoroModeUiPreset {
         override val value = PomodoroModeUi(
-            title = "Long Break",
+            titleRes = R.string.pomodoro_mode_long_break,
             iconRes = R.drawable.ic_long_break,
             colorKey = ModeColorKey.LongBreak,
         )
@@ -60,7 +69,7 @@ sealed interface PomodoroModeUiPreset {
 
     data object OverTime : PomodoroModeUiPreset {
         override val value = PomodoroModeUi(
-            title = "Overtime",
+            titleRes = R.string.pomodoro_mode_overtime,
             iconRes = R.drawable.ic_overtime,
             colorKey = ModeColorKey.OverTime,
         )

@@ -39,8 +39,13 @@ fun String.maskTitle(): String {
     return this.first() + "*".repeat(this.length - 1)
 }
 
+fun String.maskDescription(): String {
+    if (length <= 3) return this
+    return take(3) + "*".repeat(length - 3)
+}
+
 suspend fun <T> handleRequest(
-    request: suspend () -> Response<BaseResponse<T?>>
+    request: suspend () -> Response<BaseResponse<T?>>,
 ): Result<T> {
     return try {
         val response = request()
@@ -89,7 +94,9 @@ sealed class DomainException(message: String) : Exception(message) {
 
         fun fromThrowable(t: Throwable): DomainException = when (t) {
             is UnknownHostException,
-            is SocketTimeoutException -> NoInternet()
+            is SocketTimeoutException,
+                -> NoInternet()
+
             is HttpException -> {
                 if (t.code() == HTTP_STATUS_UNAUTHORIZED) {
                     Unauthorized()
@@ -97,6 +104,7 @@ sealed class DomainException(message: String) : Exception(message) {
                     Server("Server error")
                 }
             }
+
             is SQLiteException -> Database(t.message ?: "Database error")
             else -> Unknown(t)
         }
@@ -105,7 +113,7 @@ sealed class DomainException(message: String) : Exception(message) {
 
 @OptIn(InternalCoroutinesApi::class)
 suspend fun loginWithFacebook(
-    activity: FragmentActivity
+    activity: FragmentActivity,
 ): Result<String> = suspendCancellableCoroutine { cont ->
 
     val callbackManager = CallbackManager.Factory.create()
@@ -156,7 +164,7 @@ suspend fun loginWithFacebook(
 @Composable
 fun PomodoroModeUi.resolveTextColor(): Color {
     return when (colorKey) {
-        ModeColorKey.Focus -> TDTheme.colors.primary
+        ModeColorKey.Focus -> TDTheme.colors.pendingGray
         ModeColorKey.ShortBreak -> TDTheme.colors.softPink
         ModeColorKey.LongBreak -> TDTheme.colors.green
         ModeColorKey.OverTime -> TDTheme.colors.red

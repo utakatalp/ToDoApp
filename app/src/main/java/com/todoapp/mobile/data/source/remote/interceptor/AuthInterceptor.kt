@@ -1,5 +1,6 @@
 package com.todoapp.mobile.data.source.remote.interceptor
 
+import android.util.Log
 import com.todoapp.mobile.domain.repository.SessionPreferences
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -26,6 +27,12 @@ class AuthInterceptor @Inject constructor(
 
         val token = runBlocking {
             sessionPreferences.getAccessToken()
+        }
+        if (token == null) {
+            Log.w(
+                "AuthInterceptor",
+                "Access token is null — request will be unauthenticated: ${original.url.encodedPath}"
+            )
         }
         val request = if (token != null) {
             original.newBuilder()

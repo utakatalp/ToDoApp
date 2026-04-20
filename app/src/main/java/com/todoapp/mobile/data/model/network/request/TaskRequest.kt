@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TaskRequest(
+    val id: Long? = null,
     val title: String,
     val description: String?,
     val date: Long,
@@ -11,4 +12,7 @@ data class TaskRequest(
     val timeEnd: Long,
     val isCompleted: Boolean,
     val isSecret: Boolean,
+    val familyGroupId: Long? = null,
+    val assignedToUserId: Long? = null,
+    val priority: String? = null,
 )

@@ -1,6 +1,7 @@
 package com.todoapp.uikit.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -8,12 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,9 +21,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,18 +35,20 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
-import com.todoapp.uikit.previews.TDPreviewForm
 import com.todoapp.uikit.theme.TDTheme
 import com.todoapp.uikit.theme.textFieldColors
 import kotlinx.coroutines.delay
@@ -98,6 +97,7 @@ fun TDTextField(
                                     },
                                 ),
                             contentDescription = null,
+                            tint = if (isError) TDTheme.colors.red else if (isFocused) TDTheme.colors.pendingGray else TDTheme.colors.gray
                         )
                     }
                 }
@@ -125,7 +125,7 @@ fun TDTextField(
         onValueChange = onValueChange,
         label = {
             if (label != null) {
-                Text(text = label)
+                TDText(text = label, style = TDTheme.typography.subheading1)
             }
         },
         singleLine = singleLine,
@@ -137,16 +137,13 @@ fun TDTextField(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         colors = textFieldColors(),
+        shape = RoundedCornerShape(12.dp),
         supportingText = {
             if (!supportingText.isNullOrEmpty()) {
-                Text(
+                TDText(
                     text = supportingText,
-                    color =
-                        if (isError) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
+                    style = TDTheme.typography.subheading2,
+                    color = if (isError) TDTheme.colors.red else TDTheme.colors.gray,
                 )
             }
         },
@@ -165,8 +162,8 @@ fun TDLabeledTextField(
     singleLine: Boolean = false,
     minLines: Int = 1,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    style: TextStyle = TDTheme.typography.regularTextStyle,
-    color: Color = TDTheme.colors.gray,
+    style: TextStyle = TDTheme.typography.heading6,
+    color: Color = TDTheme.colors.onSurface,
 ) {
     Column(modifier = modifier) {
         TDText(
@@ -188,9 +185,16 @@ fun TDLabeledTextField(
             colors = textFieldColors(),
             visualTransformation = visualTransformation,
             placeholder = {
-                if (placeholder != null) TDText(text = placeholder, color = TDTheme.colors.lightGray)
+                if (placeholder != null) {
+                    TDText(
+                        text = placeholder,
+                        color = TDTheme.colors.gray.copy(alpha = 0.6f),
+                        style = TDTheme.typography.regularTextStyle
+                    )
+                }
             },
-            textStyle = TDTheme.typography.regularTextStyle,
+            shape = RoundedCornerShape(12.dp),
+            textStyle = TDTheme.typography.regularTextStyle.copy(color = TDTheme.colors.onSurface),
         )
     }
 }
@@ -205,15 +209,30 @@ fun TDCompactOutlinedTextField(
     enabled: Boolean = true,
     isError: Boolean = false,
     singleLine: Boolean = true,
-    style: TextStyle = TDTheme.typography.regularTextStyle,
+    style: TextStyle = TDTheme.typography.heading6,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    color: Color = TDTheme.colors.onBackground,
+    color: Color = TDTheme.colors.onSurface,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     supportingText: String? = null,
-    roundedCornerShape: RoundedCornerShape = RoundedCornerShape(4.dp),
-    height: Dp = 40.dp
+    roundedCornerShape: RoundedCornerShape = RoundedCornerShape(12.dp),
+    height: Dp = 48.dp,
 ) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    var textFieldValueState by remember {
+        mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
+    }
+
+    LaunchedEffect(value) {
+        if (value != textFieldValueState.text) {
+            textFieldValueState = textFieldValueState.copy(
+                text = value,
+                selection = TextRange(value.length)
+            )
+        }
+    }
+
     Column(modifier = modifier.padding(vertical = 6.dp)) {
         if (!label.isNullOrEmpty()) {
             TDText(
@@ -226,21 +245,14 @@ fun TDCompactOutlinedTextField(
         val borderColor =
             when {
                 isError -> TDTheme.colors.red
-                !enabled -> TDTheme.colors.gray.copy(alpha = 0.3f)
-                else -> TDTheme.colors.onBackground
+                !enabled -> TDTheme.colors.lightGray.copy(alpha = 0.38f)
+                isFocused -> TDTheme.colors.pendingGray
+                else -> TDTheme.colors.lightGray
             }
 
         val focusRequester = remember { FocusRequester() }
         val keyboardController = LocalSoftwareKeyboardController.current
         val coroutineScope = rememberCoroutineScope()
-
-        LaunchedEffect(enabled) {
-            if (enabled) {
-                focusRequester.requestFocus()
-                delay(50)
-                keyboardController?.show()
-            }
-        }
 
         Column {
             Box(
@@ -248,35 +260,45 @@ fun TDCompactOutlinedTextField(
                     Modifier
                         .height(height = height)
                         .heightIn(min = 40.dp)
-                        .border(1.dp, borderColor, roundedCornerShape),
+                        .border(1.5.dp, borderColor, roundedCornerShape)
+                        .background(
+                            color = if (enabled) Color.Transparent else TDTheme.colors.background.copy(alpha = 0.5f),
+                            shape = roundedCornerShape
+                        ),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 BasicTextField(
-                    value = value,
-                    onValueChange = onValueChange,
+                    value = textFieldValueState,
+                    onValueChange = {
+                        textFieldValueState = it
+                        if (value != it.text) {
+                            onValueChange(it.text)
+                        }
+                    },
                     enabled = enabled,
                     singleLine = singleLine,
                     visualTransformation = visualTransformation,
+                    cursorBrush = SolidColor(if (isError) TDTheme.colors.red else TDTheme.colors.pendingGray),
                     textStyle =
                         TDTheme.typography.regularTextStyle.copy(
                             color =
                                 if (enabled) {
-                                    TDTheme.colors.onBackground
+                                    TDTheme.colors.onSurface
                                 } else {
-                                    TDTheme.colors.onBackground.copy(alpha = 0.38f)
+                                    TDTheme.colors.onSurface.copy(alpha = 0.38f)
                                 },
                         ),
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
+                            .onFocusChanged { isFocused = it.isFocused }
                             .focusRequester(focusRequester),
                     decorationBox = { innerTextField ->
                         Row(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 0.dp)
+                                    .padding(horizontal = 12.dp)
                                     .then(
                                         if (enabled) {
                                             Modifier
@@ -285,6 +307,10 @@ fun TDCompactOutlinedTextField(
                                                     interactionSource = MutableInteractionSource()
                                                 ) {
                                                     focusRequester.requestFocus()
+                                                    // Ensure cursor is at the end when focusing via the container
+                                                    textFieldValueState = textFieldValueState.copy(
+                                                        selection = TextRange(value.length)
+                                                    )
                                                     coroutineScope.launch {
                                                         delay(50)
                                                         keyboardController?.show()
@@ -301,21 +327,19 @@ fun TDCompactOutlinedTextField(
                             Box(
                                 modifier =
                                     Modifier
-                                        .padding(
-                                            vertical = 8.dp,
-                                            horizontal = 12.dp,
-                                        )
+                                        .padding(vertical = 8.dp)
                                         .weight(1f),
                                 contentAlignment = Alignment.CenterStart,
                             ) {
                                 if (value.isEmpty() && !placeholder.isNullOrEmpty()) {
                                     TDText(
                                         text = placeholder,
+                                        style = TDTheme.typography.regularTextStyle,
                                         color =
                                             if (enabled) {
-                                                TDTheme.colors.onBackground.copy(alpha = 0.4f)
+                                                TDTheme.colors.gray.copy(alpha = 0.6f)
                                             } else {
-                                                TDTheme.colors.onBackground.copy(alpha = 0.2f)
+                                                TDTheme.colors.gray.copy(alpha = 0.3f)
                                             },
                                     )
                                 }
@@ -331,148 +355,60 @@ fun TDCompactOutlinedTextField(
                 Spacer(Modifier.height(4.dp))
                 TDText(
                     text = supportingText,
-                    style = TDTheme.typography.subheading3,
-                    color = if (isError) TDTheme.colors.crossRed else TDTheme.colors.gray,
+                    style = TDTheme.typography.subheading2,
+                    color = if (isError) TDTheme.colors.red else TDTheme.colors.gray,
                 )
             }
         }
     }
 }
 
-@TDPreviewForm
+@Preview(showBackground = true, name = "Light Mode")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
 @Composable
 private fun TextFieldPreview() {
-    var passwordVisible by remember { mutableStateOf(false) }
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxHeight()
-                .padding(top = 24.dp, start = 16.dp, end = 16.dp),
-    ) {
-        TDTextField(
-            value = "john",
-            onValueChange = {},
-            label = "First Name",
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_name),
-                    contentDescription = null,
-                )
-            },
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        TDTextField(
-            value = "Doing Homework",
-            onValueChange = {},
-            label = "",
-            leadingIcon = null,
-        )
-
-        TDTextField(
-            value = "johndoe@hotmail.com",
-            onValueChange = {},
-            label = "",
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_mail),
-                    contentDescription = null,
-                )
-            },
-        )
-
-        TDTextField(
-            value = "Example Password",
-            supportingText = "Example Error",
-            onValueChange = {},
-            label = "Password",
-            isError = true,
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_password),
-                    contentDescription = null,
-                )
-            },
-            passwordVisible = passwordVisible,
-            onTogglePasswordVisible = { passwordVisible = !passwordVisible },
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TDLabeledTextField(
-            title = "Title",
-            value = "Doing Homework",
-            onValueChange = {},
-            placeholder = "Placeholder",
-            isError = true,
-            enabled = false,
-            singleLine = false,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        TDCompactOutlinedTextField(
-            value = "CompactOutlinedTextField",
-            onValueChange = { },
-            placeholder = "Task Title",
-            isError = false,
-            label = "Task title",
-            supportingText = "Example Error"
-        )
-    }
-}
-
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
-@Composable
-private fun TextFieldPreview_Dark() {
     var passwordVisible by remember { mutableStateOf(false) }
 
     TDTheme {
         Column(
             modifier =
                 Modifier
-                    .fillMaxHeight()
-                    .padding(top = 24.dp, start = 16.dp, end = 16.dp),
+                    .background(TDTheme.colors.background)
+                    .padding(16.dp),
         ) {
             TDTextField(
-                value = "john",
+                value = "John Doe",
                 onValueChange = {},
                 label = "First Name",
                 leadingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_name),
                         contentDescription = null,
+                        tint = TDTheme.colors.gray
                     )
                 },
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            TDTextField(
-                value = "Doing Homework",
-                onValueChange = {},
-                label = "",
-                leadingIcon = null,
-            )
+            Spacer(modifier = Modifier.height(12.dp))
 
             TDTextField(
                 value = "johndoe@hotmail.com",
                 onValueChange = {},
-                label = "",
+                label = "Email",
                 leadingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_mail),
                         contentDescription = null,
+                        tint = TDTheme.colors.gray
                     )
                 },
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
+
             TDTextField(
-                value = "Example Password",
-                supportingText = "Example Error",
+                value = "secret123",
+                supportingText = "Password is too weak",
                 onValueChange = {},
                 label = "Password",
                 isError = true,
@@ -480,68 +416,32 @@ private fun TextFieldPreview_Dark() {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_password),
                         contentDescription = null,
+                        tint = TDTheme.colors.red
                     )
                 },
                 passwordVisible = passwordVisible,
                 onTogglePasswordVisible = { passwordVisible = !passwordVisible },
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             TDLabeledTextField(
-                title = "Title",
-                value = "Doing Homework",
+                title = "Description",
+                value = "Working on a new feature for the app.",
                 onValueChange = {},
-                placeholder = "Placeholder",
-                isError = true,
-                enabled = false,
+                placeholder = "Enter description here...",
                 singleLine = false,
+                minLines = 3
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             TDCompactOutlinedTextField(
-                value = "CompactOutlinedTextField",
+                value = "",
                 onValueChange = { },
                 placeholder = "Task Title",
-                isError = false,
-                label = "Task title",
-                supportingText = "Example Error",
-            )
-        }
-    }
-}
-
-@TDPreviewForm
-@Composable
-private fun TDCompactOutlinedTextFieldPreview_Filled_Error() {
-    TDTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            TDCompactOutlinedTextField(
-                value = "Read 10 pages",
-                label = "Task Title",
-                isError = true,
-                onValueChange = {},
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search),
-                        contentDescription = null,
-                        tint = TDTheme.colors.gray,
-                        modifier =
-                            Modifier
-                                .padding(end = 8.dp),
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        contentDescription = null,
-                        tint = TDTheme.colors.gray,
-                        modifier =
-                            Modifier
-                                .padding(start = 8.dp)
-                                .size(24.dp),
-                    )
-                },
-                supportingText = "Example Error",
+                label = "Quick Add",
+                supportingText = "Required field"
             )
         }
     }

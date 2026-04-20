@@ -12,7 +12,7 @@ class SessionPreferencesImpl @Inject constructor(
 ) : SessionPreferences {
     override suspend fun setAccessToken(token: String) {
         return withContext(Dispatchers.IO) {
-            sharedPreferences.edit { putString(KEY_ACCESS_TOKEN, token) }
+            sharedPreferences.edit(commit = true) { putString(KEY_ACCESS_TOKEN, token) }
         }
     }
 
@@ -24,7 +24,7 @@ class SessionPreferencesImpl @Inject constructor(
 
     override suspend fun setRefreshToken(token: String) {
         return withContext(Dispatchers.IO) {
-            sharedPreferences.edit { putString(KEY_REFRESH_TOKEN, token) }
+            sharedPreferences.edit(commit = true) { putString(KEY_REFRESH_TOKEN, token) }
         }
     }
 
@@ -37,7 +37,7 @@ class SessionPreferencesImpl @Inject constructor(
     override suspend fun setExpiresAt(expiresIn: Long) {
         return withContext(Dispatchers.IO) {
             val expiresAtMillis = System.currentTimeMillis() + (expiresIn * MILLIS_IN_SECOND)
-            sharedPreferences.edit {
+            sharedPreferences.edit(commit = true) {
                 putLong(KEY_EXPIRES_AT, expiresAtMillis)
             }
         }
@@ -51,7 +51,7 @@ class SessionPreferencesImpl @Inject constructor(
 
     override suspend fun clear(): Boolean {
         return withContext(Dispatchers.IO) {
-            sharedPreferences.edit { clear() }
+            sharedPreferences.edit(commit = true) { clear() }
             true
         }
     }

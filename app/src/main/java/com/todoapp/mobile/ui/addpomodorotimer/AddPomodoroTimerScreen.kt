@@ -1,13 +1,11 @@
 package com.todoapp.mobile.ui.addpomodorotimer
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,97 +13,181 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.example.uikit.R
+import com.todoapp.mobile.R
 import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerContract.UiAction
 import com.todoapp.mobile.ui.addpomodorotimer.AddPomodoroTimerContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDText
+import com.todoapp.uikit.modifier.neumorphicShadow
 import com.todoapp.uikit.theme.TDTheme
+import com.example.uikit.R as UiKitR
 
 @Composable
 fun AddPomodoroTimerScreen(
     uiState: UiState,
-    onAction: (UiAction) -> Unit
+    onAction: (UiAction) -> Unit,
 ) {
-    AddPomodoroTimerContent(
-        uiState,
-        onAction
-    )
+    AddPomodoroTimerContent(uiState, onAction)
 }
 
 @Composable
 private fun AddPomodoroTimerContent(
     uiState: UiState,
-    onAction: (UiAction) -> Unit
+    onAction: (UiAction) -> Unit,
 ) {
-    Column(
+    val totalMinutes = remember(
+        uiState.sessionCount,
+        uiState.focusTime,
+        uiState.shortBreak,
+        uiState.longBreak,
+        uiState.sectionCount,
+    ) {
+        val s = uiState.sessionCount.toInt()
+        val f = uiState.focusTime.toInt()
+        val sh = uiState.shortBreak.toInt()
+        val lo = uiState.longBreak.toInt()
+        val sec = uiState.sectionCount.toInt()
+        var t = s * f
+        for (i in 1 until s) {
+            t += if (i % sec == 0) lo else sh
+        }
+        t
+    }
 
-        Modifier
+    Column(
+        modifier = Modifier
             .background(TDTheme.colors.background)
             .statusBarsPadding()
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 16.dp),
     ) {
-        PomodoroInputCard(
-            selected = uiState.sessionCount,
-            modifier = Modifier.height(80.dp),
-            sectionMode = true,
-            label = "Session Count",
-            onSelectedChange = { onAction(UiAction.OnSessionCountChange(it)) }
+        Column(modifier = Modifier.padding(bottom = 16.dp)) {
+            TDText(
+                text = stringResource(R.string.pomodoro_configure_timer),
+                style = TDTheme.typography.heading2,
+                color = TDTheme.colors.onBackground,
+            )
+            TDText(
+                text = stringResource(R.string.pomodoro_configure_timer_subtitle),
+                style = TDTheme.typography.subheading1,
+                color = TDTheme.colors.onBackground.copy(alpha = 0.55f),
+            )
+        }
+
+        PomodoroPreviewCard(
+            totalMinutes = totalMinutes,
+            sessionCount = uiState.sessionCount.toInt(),
+            focusTime = uiState.focusTime.toInt(),
+            shortBreak = uiState.shortBreak.toInt(),
+            longBreak = uiState.longBreak.toInt(),
         )
-        PomodoroInputCard(
-            selected = uiState.focusTime,
-            modifier = Modifier.height(80.dp),
-            label = "Focus Time",
-            onSelectedChange = { onAction(UiAction.OnFocusTimeChange(it)) }
+
+        Spacer(Modifier.height(24.dp))
+        PomodoroSectionHeader(stringResource(R.string.pomodoro_sessions_label))
+        Spacer(Modifier.height(10.dp))
+
+        PomodoroStepperCard(
+            value = uiState.sessionCount.toInt(),
+            label = stringResource(R.string.pomodoro_session_count),
+            unit = "",
+            iconRes = UiKitR.drawable.ic_plus,
+            cardBgColor = TDTheme.colors.lightPending,
+            iconTintColor = TDTheme.colors.darkPending,
+            range = 1..15,
+            step = 1,
+            onValueChange = { onAction(UiAction.OnSessionCountChange(it)) },
         )
-        PomodoroInputCard(
-            selected = uiState.shortBreak,
-            modifier = Modifier.height(80.dp),
-            label = "Short Break",
-            onSelectedChange = { onAction(UiAction.OnShortBreakChange(it)) }
+        Spacer(Modifier.height(10.dp))
+        PomodoroStepperCard(
+            value = uiState.sectionCount.toInt(),
+            label = stringResource(R.string.pomodoro_sessions_per_cycle),
+            unit = "",
+            iconRes = UiKitR.drawable.ic_clock,
+            cardBgColor = TDTheme.colors.lightPending,
+            iconTintColor = TDTheme.colors.darkPending,
+            range = 1..10,
+            step = 1,
+            onValueChange = { onAction(UiAction.OnSectionCountChange(it)) },
         )
-        PomodoroInputCard(
-            selected = uiState.longBreak,
-            modifier = Modifier.height(80.dp),
-            label = "Long Break",
-            onSelectedChange = { onAction(UiAction.OnLongBreakChange(it)) }
+
+        Spacer(Modifier.height(24.dp))
+        PomodoroSectionHeader(stringResource(R.string.pomodoro_section_duration))
+        Spacer(Modifier.height(10.dp))
+
+        PomodoroStepperCard(
+            value = uiState.focusTime.toInt(),
+            label = stringResource(R.string.pomodoro_focus_time),
+            unit = stringResource(R.string.pomodoro_unit_min),
+            iconRes = R.drawable.ic_focus,
+            cardBgColor = TDTheme.colors.lightGreen,
+            iconTintColor = TDTheme.colors.darkGreen,
+            range = 5..120,
+            step = 5,
+            onValueChange = { onAction(UiAction.OnFocusTimeChange(it)) },
         )
-        PomodoroInputCard(
-            selected = uiState.sectionCount,
-            modifier = Modifier.height(80.dp),
-            sectionMode = true,
-            label = "Section Count",
-            onSelectedChange = { onAction(UiAction.OnSectionCountChange(it)) }
+        Spacer(Modifier.height(10.dp))
+        PomodoroStepperCard(
+            value = uiState.shortBreak.toInt(),
+            label = stringResource(R.string.pomodoro_short_break_label),
+            unit = stringResource(R.string.pomodoro_unit_min),
+            iconRes = R.drawable.ic_short_break,
+            cardBgColor = TDTheme.colors.lightRed,
+            iconTintColor = TDTheme.colors.crossRed,
+            range = 1..30,
+            step = 1,
+            onValueChange = { onAction(UiAction.OnShortBreakChange(it)) },
         )
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(10.dp))
+        PomodoroStepperCard(
+            value = uiState.longBreak.toInt(),
+            label = stringResource(R.string.pomodoro_long_break_label),
+            unit = stringResource(R.string.pomodoro_unit_min),
+            iconRes = R.drawable.ic_long_break,
+            cardBgColor = TDTheme.colors.lightPending,
+            iconTintColor = TDTheme.colors.darkPending,
+            range = 5..60,
+            step = 5,
+            onValueChange = { onAction(UiAction.OnLongBreakChange(it)) },
+        )
+
+        Spacer(Modifier.height(28.dp))
         Row(Modifier.fillMaxWidth()) {
-            TDButton(modifier = Modifier.weight(1f), text = "Cancel", type = TDButtonType.CANCEL) {
+            TDButton(
+                modifier = Modifier.weight(1f),
+                text = stringResource(R.string.cancel),
+                type = TDButtonType.CANCEL
+            ) {
                 onAction(UiAction.OnCancelTap)
             }
-            Spacer(Modifier.width(25.dp))
-            TDButton(modifier = Modifier.weight(1f), text = "Start", type = TDButtonType.PRIMARY) {
+            Spacer(Modifier.width(16.dp))
+            TDButton(
+                modifier = Modifier.weight(1f),
+                text = stringResource(R.string.start),
+                type = TDButtonType.PRIMARY
+            ) {
                 onAction(UiAction.OnStartTap)
             }
         }
@@ -114,91 +196,247 @@ private fun AddPomodoroTimerContent(
 }
 
 @Composable
-private fun PomodoroInputCard(
+private fun PomodoroPreviewCard(
+    totalMinutes: Int,
+    sessionCount: Int,
+    focusTime: Int,
+    shortBreak: Int,
+    longBreak: Int,
     modifier: Modifier = Modifier,
-    selected: Float,
-    sectionMode: Boolean = false,
-    label: String,
-    onSelectedChange: (Float) -> Unit,
 ) {
-    var expand by rememberSaveable { mutableStateOf(false) }
-    val valueRange = if (sectionMode) 1f..15f else 0f..120f
-    val steps = (valueRange.endInclusive - valueRange.start + 1).toInt()
-
-    Column {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50.dp))
-                .background(TDTheme.colors.lightPurple),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(Modifier.width(32.dp))
-            TDText(text = label, style = TDTheme.typography.heading2)
-            Spacer(Modifier.weight(8f))
-            TDText(
-                text = if (sectionMode) "${selected.toInt()} intervals" else "${selected.toInt()} min",
-                style = TDTheme.typography.heading4,
-                color = TDTheme.colors.primary
-            )
-            Spacer(Modifier.weight(0.1f))
-            IconButton(onClick = { expand = !expand }) {
-                if (expand) {
-                    Icon(painterResource(R.drawable.ic_arrow_up), contentDescription = "Change Time")
+    val isDark = isSystemInDarkTheme()
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (isDark) {
+                    Modifier.border(1.dp, TDTheme.colors.primary.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
                 } else {
-                    Icon(painterResource(R.drawable.ic_arrow_down), contentDescription = "Change Time")
+                    Modifier.neumorphicShadow(
+                    lightShadow = TDTheme.colors.white.copy(alpha = 0.9f),
+                    darkShadow = TDTheme.colors.darkPending.copy(alpha = 0.15f),
+                    cornerRadius = 16.dp,
+                    elevation = 8.dp,
+                )
                 }
-            }
-            Spacer(Modifier.weight(0.6f))
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(TDTheme.colors.background)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(UiKitR.drawable.ic_sand_clock),
+                contentDescription = null,
+                tint = TDTheme.colors.darkPending,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(Modifier.width(8.dp))
+            TDText(
+                text = stringResource(R.string.pomodoro_total_min_preview, totalMinutes),
+                style = TDTheme.typography.heading4,
+                color = TDTheme.colors.darkPending,
+            )
         }
-        AnimatedVisibility(
-            visible = expand,
-            enter = expandVertically(
-                animationSpec = tween(durationMillis = 220)
-            ) + fadeIn(animationSpec = tween(durationMillis = 220)),
-            exit = shrinkVertically(
-                animationSpec = tween(durationMillis = 180)
-            ) + fadeOut(animationSpec = tween(durationMillis = 180)),
+        Spacer(Modifier.height(4.dp))
+        TDText(
+            text = stringResource(R.string.pomodoro_session_breakdown, sessionCount, focusTime, shortBreak, longBreak),
+            style = TDTheme.typography.subheading1,
+            color = TDTheme.colors.onBackground.copy(alpha = 0.55f),
+        )
+    }
+}
+
+@Composable
+private fun PomodoroSectionHeader(
+    title: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        TDText(
+            text = title.uppercase(),
+            style = TDTheme.typography.subheading2,
+            color = TDTheme.colors.onBackground.copy(alpha = 0.45f),
+        )
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = TDTheme.colors.onBackground.copy(alpha = 0.1f),
+        )
+    }
+}
+
+@Composable
+private fun PomodoroStepperCard(
+    value: Int,
+    label: String,
+    unit: String,
+    @DrawableRes iconRes: Int,
+    cardBgColor: Color,
+    iconTintColor: Color,
+    range: IntRange,
+    step: Int,
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val canDecrement = value > range.first
+    val canIncrement = value < range.last
+    val isDark = isSystemInDarkTheme()
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (isDark) {
+                    Modifier.border(1.dp, TDTheme.colors.lightGray.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+                } else {
+                    Modifier.neumorphicShadow(
+                    lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
+                    darkShadow = iconTintColor.copy(alpha = 0.18f),
+                    cornerRadius = 16.dp,
+                    elevation = 6.dp,
+                )
+                }
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(cardBgColor)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            tint = iconTintColor,
+            modifier = Modifier.size(22.dp),
+        )
+        Spacer(Modifier.width(10.dp))
+        TDText(
+            text = label,
+            style = TDTheme.typography.heading6,
+            color = TDTheme.colors.onBackground,
+        )
+        Spacer(Modifier.weight(1f))
+
+        IconButton(
+            onClick = {
+                val next = (value - step).coerceAtLeast(range.first)
+                if (next != value) onValueChange(next.toFloat())
+            },
+            modifier = Modifier.size(36.dp),
         ) {
-            Slider(
-                value = selected,
-                onValueChange = onSelectedChange,
-                steps = steps,
-                colors = SliderDefaults.colors(
-                    thumbColor = TDTheme.colors.primary,
-                    activeTrackColor = TDTheme.colors.purple,
-                    inactiveTickColor = TDTheme.colors.lightPurple
-                ),
-                valueRange = valueRange
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(
+                        width = 1.dp,
+                        color = iconTintColor.copy(alpha = if (canDecrement) 0.5f else 0.2f),
+                        shape = RoundedCornerShape(8.dp),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                TDText(
+                    text = "\u2212",
+                    style = TDTheme.typography.heading5,
+                    color = iconTintColor.copy(alpha = if (canDecrement) 1f else 0.3f),
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+
+        TDText(
+            text = "$value",
+            style = TDTheme.typography.heading4,
+            color = iconTintColor,
+            modifier = Modifier.widthIn(min = 52.dp),
+            textAlign = TextAlign.Center,
+        )
+
+        IconButton(
+            onClick = {
+                val next = (value + step).coerceAtMost(range.last)
+                if (next != value) onValueChange(next.toFloat())
+            },
+            modifier = Modifier.size(36.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(
+                        width = 1.dp,
+                        color = iconTintColor.copy(alpha = if (canIncrement) 0.5f else 0.2f),
+                        shape = RoundedCornerShape(8.dp),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(UiKitR.drawable.ic_plus),
+                    contentDescription = null,
+                    tint = iconTintColor.copy(alpha = if (canIncrement) 1f else 0.3f),
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+        }
+
+        if (unit.isNotEmpty()) {
+            Spacer(Modifier.width(4.dp))
+            TDText(
+                text = unit,
+                style = TDTheme.typography.subheading2,
+                color = iconTintColor.copy(alpha = 0.7f),
+                modifier = Modifier.widthIn(min = 40.dp),
             )
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@PreviewLightDark
 @Composable
-private fun PomodoroInputCardPreview() {
-    var selected by remember { mutableStateOf(25f) }
-
-    PomodoroInputCard(
-        modifier = Modifier
-            .padding(vertical = 32.dp)
-            .height(80.dp),
-        selected = selected,
-        onSelectedChange = { selected = it },
-        label = "Focus Time"
-    )
+private fun PomodoroStepperCardPreview() {
+    TDTheme {
+        Column(
+            Modifier
+                .background(TDTheme.colors.background)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            PomodoroStepperCard(
+                value = 25,
+                label = stringResource(R.string.pomodoro_focus_time),
+                unit = stringResource(R.string.pomodoro_unit_min),
+                iconRes = UiKitR.drawable.ic_sand_clock,
+                cardBgColor = TDTheme.colors.lightGreen,
+                iconTintColor = TDTheme.colors.darkGreen,
+                range = 5..120,
+                step = 5,
+                onValueChange = {},
+            )
+            PomodoroStepperCard(
+                value = 5,
+                label = stringResource(R.string.pomodoro_short_break_label),
+                unit = stringResource(R.string.pomodoro_unit_min),
+                iconRes = UiKitR.drawable.ic_sand_clock,
+                cardBgColor = TDTheme.colors.lightRed,
+                iconTintColor = TDTheme.colors.crossRed,
+                range = 1..30,
+                step = 1,
+                onValueChange = {},
+            )
+        }
+    }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@PreviewLightDark
 @Composable
 private fun AddPomodoroTimerContentPreview() {
-    val uiState = UiState()
-
     TDTheme {
         AddPomodoroTimerContent(
-            uiState = uiState,
-            onAction = {}
+            uiState = UiState(),
+            onAction = {},
         )
     }
 }

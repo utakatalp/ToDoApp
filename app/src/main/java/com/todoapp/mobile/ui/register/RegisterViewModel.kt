@@ -5,6 +5,7 @@ import android.util.Patterns
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.common.passwordValidation.ValidationManager
 import com.todoapp.mobile.data.auth.AuthModel
@@ -39,7 +40,7 @@ class RegisterViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val redirectAfterRegister: String? = savedStateHandle["redirectAfterRegister"]
+    private val redirectAfterRegister: String? = savedStateHandle.toRoute<Screen.Register>().redirectAfterRegister
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -47,7 +48,7 @@ class RegisterViewModel @Inject constructor(
     private val _uiEffect = Channel<UiEffect>()
     val uiEffect = _uiEffect.receiveAsFlow()
 
-    private val _navEffect = Channel<NavigationEffect>()
+    private val _navEffect = Channel<NavigationEffect>(Channel.BUFFERED)
     val navEffect = _navEffect.receiveAsFlow()
 
     private var validationMode: ValidationMode = ValidationMode.Pristine
@@ -230,23 +231,25 @@ class RegisterViewModel @Inject constructor(
 
             val destination = resolveRedirectDestination()
             if (redirectAfterRegister != null) {
-                _navEffect.trySend(
+                _navEffect.send(
                     NavigationEffect.Navigate(
                         route = destination,
-                        popUpTo = Screen.Register(),
-                        isInclusive = true
+                        popUpTo = Screen.Home,
+                        isInclusive = false
                     )
                 )
             } else {
-                _navEffect.trySend(NavigationEffect.Navigate(Screen.Home))
+                _navEffect.send(NavigationEffect.Navigate(Screen.Home))
             }
+            dataStoreHelper.setLoggedIn(true)
         }
     }
 
     private fun resolveRedirectDestination(): Screen {
-        return when (redirectAfterRegister) {
-            Screen.CreateNewGroup::class.qualifiedName -> Screen.CreateNewGroup(cameFromAuth = true)
-            Screen.Groups::class.qualifiedName -> Screen.Groups
+        val redirect = redirectAfterRegister ?: return Screen.Home
+        return when {
+            redirect.contains("CreateNewGroup") -> Screen.CreateNewGroup
+            redirect.contains("Groups") -> Screen.Groups()
             else -> Screen.Home
         }
     }

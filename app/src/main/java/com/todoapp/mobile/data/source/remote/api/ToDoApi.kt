@@ -15,12 +15,12 @@ import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
 import com.todoapp.mobile.data.model.network.request.FCMTokenRequest
 import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
+import com.todoapp.mobile.data.model.network.request.GroupTaskRequest
+import com.todoapp.mobile.data.model.network.request.GroupTaskUpdateRequest
 import com.todoapp.mobile.data.model.network.request.InviteMemberRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.model.network.request.RefreshTokenRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
-import com.todoapp.mobile.data.model.network.request.GroupTaskRequest
-import com.todoapp.mobile.data.model.network.request.GroupTaskUpdateRequest
 import com.todoapp.mobile.data.model.network.request.TaskRequest
 import com.todoapp.mobile.data.model.network.request.TransferOwnershipRequest
 import com.todoapp.mobile.data.model.network.request.UpdateGroupRequest
@@ -150,7 +150,6 @@ interface ToDoApi {
         @Path("taskId") taskId: Long,
         @Body request: GroupTaskUpdateRequest,
     ): Response<BaseResponse<GroupTaskData?>>
-
 }
 
 interface TodoAuthApi {

@@ -3,7 +3,6 @@ package com.todoapp.mobile.ui.topbar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.repository.DataStoreHelper
-import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -21,7 +20,6 @@ import javax.inject.Inject
 class TopBarViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val dataStoreHelper: DataStoreHelper,
-    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TopBarContract.UiState(isUserAuthenticated = false))
@@ -36,11 +34,13 @@ class TopBarViewModel @Inject constructor(
 
     fun onAction(action: UiAction) {
         when (action) {
-            UiAction.OnBackClick -> sendNavEffect(NavigationEffect.SystemBack)
-            UiAction.OnLogoutClick -> handleLogout()
+            UiAction.OnBackClick -> sendNavEffect(
+                effect = NavigationEffect.Back
+            )
+
             UiAction.OnNotificationClick -> handleNotificationClick()
             UiAction.OnProfileClick -> sendNavEffect(
-                NavigationEffect.NavigateClearingBackstack(
+                NavigationEffect.Navigate(
                     Screen.Login(
                         redirectAfterLogin = Screen.Home::class.qualifiedName
                     )
@@ -48,7 +48,11 @@ class TopBarViewModel @Inject constructor(
             )
 
             UiAction.OnSettingsClick -> sendNavEffect(NavigationEffect.Navigate(Screen.Settings))
+            UiAction.OnSearchClick -> sendNavEffect(NavigationEffect.Navigate(Screen.Search))
             UiAction.OnAuthenticationUpdate -> refreshAuthenticationState()
+            is UiAction.OnGroupSettingsClick -> sendNavEffect(
+                NavigationEffect.Navigate(Screen.GroupSettings(action.groupId))
+            )
         }
     }
 
@@ -57,12 +61,6 @@ class TopBarViewModel @Inject constructor(
             dataStoreHelper.observeUser().collect { user ->
                 updateAuthenticationState(isAuthenticated = user != null)
             }
-        }
-    }
-
-    private fun handleLogout() {
-        viewModelScope.launch {
-            authRepository.logout()
         }
     }
 

@@ -3,6 +3,7 @@ package com.todoapp.uikit.components
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,12 +18,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -73,7 +76,9 @@ fun TDOverlayPermissionItem(
 
         IconButton(
             onClick = onDismiss,
-            modifier = Modifier.align(Alignment.TopEnd)
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 4.dp, end = 4.dp)
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_close),
@@ -81,6 +86,20 @@ fun TDOverlayPermissionItem(
                 tint = TDTheme.colors.onBackground,
                 modifier = Modifier.size(20.dp)
             )
+        }
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDOverlayPermissionItemPreview() {
+    TDTheme {
+        Box(
+            modifier = Modifier
+                .background(TDTheme.colors.background)
+                .padding(16.dp)
+        ) {
+            TDOverlayPermissionItem(context = LocalContext.current)
         }
     }
 }

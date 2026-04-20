@@ -31,7 +31,7 @@ fun TDAddTaskButton(
                 modifier = Modifier.fillMaxSize(1f),
                 painter = painterResource(R.drawable.ic_ellipse),
                 contentDescription = null,
-                tint = TDTheme.colors.purple,
+                tint = TDTheme.colors.pendingGray,
             )
             Icon(
                 modifier = Modifier.fillMaxSize(0.57f),

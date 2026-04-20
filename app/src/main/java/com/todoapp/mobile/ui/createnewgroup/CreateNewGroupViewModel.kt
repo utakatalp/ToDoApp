@@ -1,6 +1,5 @@
 package com.todoapp.mobile.ui.createnewgroup
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
@@ -23,10 +22,7 @@ import javax.inject.Inject
 class CreateNewGroupViewModel @Inject constructor(
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
-    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
-    private val cameFromAuth: Boolean = savedStateHandle["cameFromAuth"] ?: false
 
     private val _uiState = MutableStateFlow(UiState(isUserAuthenticated = false))
     val uiState = _uiState.asStateFlow()
@@ -35,6 +31,10 @@ class CreateNewGroupViewModel @Inject constructor(
     val navEffect = _navEffect.receiveAsFlow()
 
     private var isErrorFlagActive = false
+
+    init {
+        checkAuthState()
+    }
 
     fun onAction(action: UiAction) {
         when (action) {
@@ -45,27 +45,14 @@ class CreateNewGroupViewModel @Inject constructor(
                 )
             }
 
-            UiAction.OnBackClick -> onBackClick()
-
             is UiAction.OnGroupNameChange -> updateGroupName(action.groupName)
         }
     }
 
-    fun onBackClick() {
+    private fun checkAuthState() {
         viewModelScope.launch {
-            if (cameFromAuth) {
-                _navEffect.send(
-                    NavigationEffect.Navigate(
-                        route = Screen.Home,
-                        popUpTo = Screen.Home,
-                        isInclusive = false
-                    )
-                )
-            } else {
-                _navEffect.send(
-                    NavigationEffect.Back
-                )
-            }
+            val isAuthenticated = userRepository.getUserInfo().isSuccess
+            _uiState.update { it.copy(isUserAuthenticated = isAuthenticated) }
         }
     }
 
@@ -88,7 +75,7 @@ class CreateNewGroupViewModel @Inject constructor(
             if (!isUserAuthenticated) {
                 _navEffect.send(
                     NavigationEffect.Navigate(
-                        Screen.Login(redirectAfterLogin = Screen.CreateNewGroup::class.qualifiedName)
+                        Screen.Login(redirectAfterLogin = "CreateNewGroup")
                     )
                 )
                 return@launch
@@ -100,7 +87,7 @@ class CreateNewGroupViewModel @Inject constructor(
                     uiState.value.groupDescription ?: ""
                 )
             ).onSuccess {
-                _navEffect.send(NavigationEffect.Navigate(Screen.Groups, popUpTo = Screen.Groups, isInclusive = true))
+                _navEffect.send(NavigationEffect.Back)
             }.onFailure {
                 _uiState.update { it.copy(error = "Something went wrong. Try again later.") }
             }

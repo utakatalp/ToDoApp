@@ -33,7 +33,7 @@ class TDTypography {
                         alignment = LineHeightStyle.Alignment.Center,
                         trim = LineHeightStyle.Trim.None,
                     ),
-                color = TDTheme.colors.primary,
+                color = TDTheme.colors.pendingGray,
             )
     val heading1: TextStyle
         @Composable

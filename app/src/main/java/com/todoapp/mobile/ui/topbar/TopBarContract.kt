@@ -9,7 +9,8 @@ sealed interface TopBarContract {
         data object OnProfileClick : UiAction
         data object OnNotificationClick : UiAction
         data object OnBackClick : UiAction
-        data object OnLogoutClick : UiAction
         data object OnAuthenticationUpdate : UiAction
+        data object OnSearchClick : UiAction
+        data class OnGroupSettingsClick(val groupId: Long) : UiAction
     }
 }

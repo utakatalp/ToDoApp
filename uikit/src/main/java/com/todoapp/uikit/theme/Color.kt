@@ -1,8 +1,6 @@
 package com.todoapp.uikit.theme
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
@@ -11,12 +9,14 @@ internal val LocalDarkColors = staticCompositionLocalOf { darkColors() }
 
 internal fun lightColors(
     infoCardBgColor: Color = Color(0xFFEEF2FF),
+    groupMemberCardBgColor: Color = Color(0xFFEBEBEB),
+    groupTaskFilterColor: Color = Color(0xFFFF0000),
     lightRed: Color = Color(0xFFFFE6E7),
     red: Color = Color(0xFFFFB1B5),
     crossRed: Color = Color(0xFFB2282D),
     statusCardGray: Color = Color(0xFF6E7180),
     bgColorPurple: Color = Color(0xFFEFF2FF),
-    bgColor: Color = Color.White,
+    bgColor: Color = Color(0xFFF8F9FC),
     background: Color = bgColor,
     onBackground: Color = Color(0xFF090E23),
     surface: Color = Color(0xFFFFFAF0),
@@ -30,18 +30,27 @@ internal fun lightColors(
     black: Color = Color(0xFF090E23),
     brown: Color = Color(0xFF3F2D20),
     green: Color = Color(0xFF2AE35A),
+    lightGreen: Color = Color(0xFFE8F5E9),
+    mediumGreen: Color = Color(0xFF81C784),
+    darkGreen: Color = Color(0xFF2E7D32),
     orange: Color = Color(0xFFEF8829),
     darkBrown: Color = Color(0xFF73665C),
     lightBrown: Color = Color(0xFFD3BBAA),
     beige: Color = Color(0xFFE6DCCD),
     lightOrange: Color = Color(0xFFFFE2CD),
-    lightYellow: Color = Color(0xFFCDBC2A),
+    lightYellow: Color = Color(0xFFFFF8E1),
+    lightPending: Color = Color(0xFFEDF4FF),
+    mediumPending: Color = Color(0xFF4E90C4),
+    pendingGray: Color = Color(0xFF7A9CC6),
+    darkPending: Color = Color(0xFF3D6A9E),
     white: Color = Color(0xFFFFFAF0),
     softPink: Color = Color(0xFFF5D3BB),
     lightGray: Color = Color(0xFFC0C0C0),
 ): TDColor =
     TDColor(
         infoCardBgColor = infoCardBgColor,
+        groupMemberCardBgColor = groupMemberCardBgColor,
+        groupTaskFilterColor = groupTaskFilterColor,
         lightRed = lightRed,
         red = red,
         crossRed = crossRed,
@@ -60,12 +69,19 @@ internal fun lightColors(
         purple = purple,
         brown = brown,
         green = green,
+        lightGreen = lightGreen,
+        mediumGreen = mediumGreen,
+        darkGreen = darkGreen,
         orange = orange,
         darkBrown = darkBrown,
         lightBrown = lightBrown,
         beige = beige,
         lightOrange = lightOrange,
         lightYellow = lightYellow,
+        lightPending = lightPending,
+        mediumPending = mediumPending,
+        pendingGray = pendingGray,
+        darkPending = darkPending,
         white = white,
         softPink = softPink,
         lightGray = lightGray,
@@ -73,38 +89,49 @@ internal fun lightColors(
     )
 
 internal fun darkColors(
-    infoCardBgColor: Color = Color(0xFFEEF2FF),
+    infoCardBgColor: Color = Color(0xFF1E2240),
+    groupMemberCardBgColor: Color = Color(0xFF232323),
+    groupTaskFilterColor: Color = Color(0xFFFF0000),
     lightRed: Color = Color(0xFF7A1F2B),
     red: Color = Color(0xFFFFB1B5),
-    crossRed: Color = Color(0xFFB2282D),
+    crossRed: Color = Color(0xFFCF6679), // Standard Material Dark Error
     statusCardGray: Color = Color(0xFF898DA1),
     bgColorPurple: Color = Color(0xFF2B2F5E),
-    bgColor: Color = Color.Black,
-    background: Color = Color(0xFF090E23),
-    onBackground: Color = Color(0xFFFFFAF0),
-    surface: Color = Color.Black,
-    onSurface: Color = Color(0xFFFFFAF0),
-    primary: Color = Color(0xFF4566EC),
-    onPrimary: Color = Color(0xFFFFFAF0),
+    bgColor: Color = Color(0xFF121212),
+    background: Color = Color(0xFF16171B),
+    onBackground: Color = Color(0xFFE1E1E1),
+    surface: Color = Color(0xFF1E1E1E),
+    onSurface: Color = Color(0xFFE1E1E1),
+    primary: Color = Color(0xFF6C8AFF), // Lighter primary for dark mode
+    onPrimary: Color = Color(0xFF000000),
     lightPurple: Color = Color(0xFFA9BAFF),
-    gray: Color = Color(0xFF717171),
+    gray: Color = Color(0xFF9E9E9E),
     darkPurple: Color = Color(0xFF1C3082),
     purple: Color = Color(0xFF4566EC),
-    black: Color = Color(0xFF090E23),
+    black: Color = Color(0xFF000000),
     brown: Color = Color(0xFF3F2D20),
     green: Color = Color(0xFF84BD93),
+    lightGreen: Color = Color(0xFF1B3A1E),
+    mediumGreen: Color = Color(0xFF4CAF50),
+    darkGreen: Color = Color(0xFFA5D6A7),
     orange: Color = Color(0xFFEF8829),
     darkBrown: Color = Color(0xFF73665C),
     lightBrown: Color = Color(0xFFD3BBAA),
     beige: Color = Color(0xFFE6DCCD),
     lightOrange: Color = Color(0xFFFFE2CD),
     lightYellow: Color = Color(0xFFFFF5E0),
+    lightPending: Color = Color(0xFF1A2537),
+    mediumPending: Color = Color(0xFF3A93DB),
+    pendingGray: Color = Color(0xFF6B8DB5),
+    darkPending: Color = Color(0xFF9BBDE0),
     white: Color = Color(0xFFFFFAF0),
     softPink: Color = Color(0xFFF5D3BB),
-    lightGray: Color = Color(0xFFC0C0C0),
+    lightGray: Color = Color(0xFF444444),
 ): TDColor =
     TDColor(
         infoCardBgColor = infoCardBgColor,
+        groupMemberCardBgColor = groupMemberCardBgColor,
+        groupTaskFilterColor = groupTaskFilterColor,
         lightRed = lightRed,
         red = red,
         crossRed = crossRed,
@@ -123,121 +150,63 @@ internal fun darkColors(
         darkPurple = darkPurple,
         brown = brown,
         green = green,
+        lightGreen = lightGreen,
+        mediumGreen = mediumGreen,
+        darkGreen = darkGreen,
         orange = orange,
         darkBrown = darkBrown,
         lightBrown = lightBrown,
         beige = beige,
         lightOrange = lightOrange,
         lightYellow = lightYellow,
+        lightPending = lightPending,
+        mediumPending = mediumPending,
+        pendingGray = pendingGray,
+        darkPending = darkPending,
         white = white,
         softPink = softPink,
         lightGray = lightGray,
         lightPurple = lightPurple,
     )
 
-class TDColor(
-    infoCardBgColor: Color,
-    lightRed: Color,
-    red: Color,
-    crossRed: Color,
-    statusCardGray: Color,
-    bgColorPurple: Color,
-    bgColor: Color,
-    background: Color,
-    onBackground: Color,
-    surface: Color,
-    onSurface: Color,
-    primary: Color,
-    onPrimary: Color,
-    lightPurple: Color,
-    gray: Color,
-    black: Color,
-    darkPurple: Color,
-    purple: Color,
-    brown: Color,
-    green: Color,
-    orange: Color,
-    darkBrown: Color,
-    lightBrown: Color,
-    beige: Color,
-    lightOrange: Color,
-    lightYellow: Color,
-    white: Color,
-    softPink: Color,
-    lightGray: Color,
-) {
-    private var _infoCardBgColor: Color by mutableStateOf(infoCardBgColor)
-    val infoCardBgColor: Color = _infoCardBgColor
-    private var _lightRed: Color by mutableStateOf(lightRed)
-    val lightRed: Color = _lightRed
-    private var _red: Color by mutableStateOf(red)
-    val red: Color = _red
-    private var _crossRed: Color by mutableStateOf(crossRed)
-    val crossRed: Color = _crossRed
-    private var _statusCardGray: Color by mutableStateOf(statusCardGray)
-    val statusCardGray: Color = _statusCardGray
-    private var _bgColorPurple: Color by mutableStateOf(bgColorPurple)
-    val bgColorPurple: Color = _bgColorPurple
-    private var _darkPurple: Color by mutableStateOf(darkPurple)
-    val darkPurple: Color = _darkPurple
-    private var _bgColor: Color by mutableStateOf(bgColor)
-    val bgColor: Color = _bgColor
-    private var _lightPurple: Color by mutableStateOf(lightPurple)
-    val lightPurple: Color = _lightPurple
-    private var _lightGray: Color by mutableStateOf(lightGray)
-    val lightGray: Color = _lightGray
-    private var _gray: Color by mutableStateOf(value = gray)
-    val gray: Color = _gray
-    private var _purple: Color by mutableStateOf(purple)
-    val purple: Color = _purple
-    private var _black: Color by mutableStateOf(black)
-    val black: Color = _black
-
-    private var _brown: Color by mutableStateOf(brown)
-    val brown: Color = _brown
-
-    private var _green: Color by mutableStateOf(green)
-    val green: Color = _green
-
-    private var _orange: Color by mutableStateOf(orange)
-    val orange: Color = _orange
-
-    private var _darkBrown: Color by mutableStateOf(darkBrown)
-    val darkBrown: Color = _darkBrown
-
-    private var _lightBrown: Color by mutableStateOf(lightBrown)
-    val lightBrown: Color = _lightBrown
-
-    private var _beige: Color by mutableStateOf(beige)
-    val beige: Color = _beige
-
-    private var _lightOrange: Color by mutableStateOf(lightOrange)
-    val lightOrange: Color = _lightOrange
-
-    private var _lightYellow: Color by mutableStateOf(lightYellow)
-    val lightYellow: Color = _lightYellow
-
-    private var _white: Color by mutableStateOf(white)
-    val white: Color = _white
-
-    private var _softPink: Color by mutableStateOf(softPink)
-    val softPink: Color = _softPink
-
-    private var _background: Color by mutableStateOf(background)
-    val background: Color = _background
-
-    private var _onBackground: Color by mutableStateOf(onBackground)
-    val onBackground: Color = _onBackground
-
-    private var _surface: Color by mutableStateOf(surface)
-    val surface: Color = _surface
-
-    private var _onSurface: Color by mutableStateOf(onSurface)
-    val onSurface: Color = _onSurface
-
-    private var _primary: Color by mutableStateOf(primary)
-    val primary: Color = _primary
-
-    private var _onPrimary: Color by mutableStateOf(onPrimary)
-    val onPrimary: Color = _onPrimary
-}
+@Immutable
+data class TDColor(
+    val infoCardBgColor: Color,
+    val groupMemberCardBgColor: Color,
+    val groupTaskFilterColor: Color,
+    val lightRed: Color,
+    val red: Color,
+    val crossRed: Color,
+    val statusCardGray: Color,
+    val bgColorPurple: Color,
+    val bgColor: Color,
+    val background: Color,
+    val onBackground: Color,
+    val surface: Color,
+    val onSurface: Color,
+    val primary: Color,
+    val onPrimary: Color,
+    val lightPurple: Color,
+    val gray: Color,
+    val black: Color,
+    val darkPurple: Color,
+    val purple: Color,
+    val brown: Color,
+    val green: Color,
+    val lightGreen: Color,
+    val mediumGreen: Color,
+    val darkGreen: Color,
+    val orange: Color,
+    val darkBrown: Color,
+    val lightBrown: Color,
+    val beige: Color,
+    val lightOrange: Color,
+    val lightYellow: Color,
+    val lightPending: Color,
+    val mediumPending: Color,
+    val pendingGray: Color,
+    val darkPending: Color,
+    val white: Color,
+    val softPink: Color,
+    val lightGray: Color,
+)

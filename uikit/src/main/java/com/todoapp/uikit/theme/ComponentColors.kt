@@ -1,7 +1,6 @@
 package com.todoapp.uikit.theme
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TimePickerColors
@@ -12,20 +11,26 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun textFieldColors(): TextFieldColors =
     OutlinedTextFieldDefaults.colors(
-        focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        focusedTrailingIconColor = MaterialTheme.colorScheme.primary,
-        focusedContainerColor = MaterialTheme.colorScheme.background,
-        focusedLabelColor = MaterialTheme.colorScheme.primary,
+        focusedTextColor = TDTheme.colors.onSurface,
+        unfocusedTextColor = TDTheme.colors.onSurface,
+        focusedTrailingIconColor = TDTheme.colors.pendingGray,
+        unfocusedTrailingIconColor = TDTheme.colors.gray,
+        focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
         errorContainerColor = Color.Transparent,
+        focusedLabelColor = TDTheme.colors.pendingGray,
+        unfocusedLabelColor = TDTheme.colors.gray,
+        errorLabelColor = TDTheme.colors.red,
+        focusedBorderColor = TDTheme.colors.pendingGray,
+        unfocusedBorderColor = TDTheme.colors.lightGray,
+        errorBorderColor = TDTheme.colors.red,
         disabledContainerColor = TDTheme.colors.background.copy(alpha = 0.8f),
-        disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        disabledBorderColor = TDTheme.colors.onBackground.copy(alpha = 0.8f),
-        disabledLabelColor = TDTheme.colors.onBackground.copy(alpha = 0.8f),
-        disabledTrailingIconColor = TDTheme.colors.onBackground.copy(alpha = 0.8f),
-        unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
-        cursorColor = MaterialTheme.colorScheme.primary,
+        disabledTextColor = TDTheme.colors.onSurface.copy(alpha = 0.38f),
+        disabledBorderColor = TDTheme.colors.lightGray.copy(alpha = 0.38f),
+        disabledLabelColor = TDTheme.colors.gray.copy(alpha = 0.38f),
+        disabledTrailingIconColor = TDTheme.colors.gray.copy(alpha = 0.38f),
+        cursorColor = TDTheme.colors.pendingGray,
+        errorCursorColor = TDTheme.colors.red,
     )
 
 @OptIn(ExperimentalMaterial3Api::class)

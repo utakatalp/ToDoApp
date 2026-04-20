@@ -29,6 +29,8 @@ data class PomodoroEngineState(
     val isRunning: Boolean = false,
     val isOvertime: Boolean = false,
     val isVisible: Boolean = true,
+    val totalSessions: Int = 0,
+    val currentSessionIndex: Int = 0,
 )
 
 sealed interface PomodoroEvent {

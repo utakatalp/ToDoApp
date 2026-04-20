@@ -16,6 +16,7 @@ import java.time.LocalDate
 fun TDTaskCardList(
     modifier: Modifier = Modifier,
     tasks: List<TaskDayItem>,
+    onTaskClick: (taskId: Long) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
@@ -23,11 +24,12 @@ fun TDTaskCardList(
     ) {
         items(
             items = tasks,
-            key = { it.date }, // stable key
+            key = { it.date.toEpochDay() },
         ) { item ->
             TDTaskCardListByDay(
                 date = item.date,
                 tasks = item.tasks,
+                onTaskClick = onTaskClick,
             )
         }
     }
@@ -49,6 +51,7 @@ fun TDTaskCardListPreview() {
                     date = LocalDate.of(2025, 1, 12),
                     tasks = listOf(
                         TaskCardItem(
+                            taskId = 1L,
                             taskTitle = "Read Book",
                             taskTimeStart = "09:30",
                             taskTimeEnd = "10:15",
@@ -59,6 +62,7 @@ fun TDTaskCardListPreview() {
                     date = LocalDate.of(2025, 1, 13),
                     tasks = listOf(
                         TaskCardItem(
+                            taskId = 2L,
                             taskTitle = "Study Kotlin",
                             taskTimeStart = "10:00",
                             taskTimeEnd = "12:00",

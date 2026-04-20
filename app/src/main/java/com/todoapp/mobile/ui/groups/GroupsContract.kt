@@ -4,6 +4,7 @@ object GroupsContract {
 
     data class GroupUiItem(
         val id: Long,
+        val remoteId: Long?,
         val name: String,
         val role: String,
         val description: String,
@@ -21,6 +22,8 @@ object GroupsContract {
         data class Success(
             val isUserAuthenticated: Boolean,
             val groups: List<GroupUiItem>,
+            val isDeleteDialogOpen: Boolean = false,
+            val pendingDeleteGroup: GroupUiItem? = null,
         ) : UiState
 
         data class Error(val message: String) : UiState
@@ -28,8 +31,12 @@ object GroupsContract {
 
     sealed interface UiAction {
         data object OnCreateNewGroupTap : UiAction
-        data class OnGroupTap(val id: Long) : UiAction
+        data class OnGroupTap(val remoteId: Long, val groupName: String) : UiAction
         data class OnMoveGroup(val from: Int, val to: Int) : UiAction
         data class OnDeleteGroupTap(val id: Long) : UiAction
+        data object OnDeleteGroupDialogConfirm : UiAction
+        data object OnDeleteGroupDialogDismiss : UiAction
+        data object OnUndoDeleteGroup : UiAction
+        data object OnScreenResumed : UiAction
     }
 }

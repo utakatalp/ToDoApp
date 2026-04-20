@@ -1,6 +1,5 @@
 package com.todoapp.mobile.ui.createnewgroup
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,15 +9,14 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
@@ -42,7 +40,6 @@ fun CreateNewGroupScreen(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
 ) {
-    BackHandler { onAction(UiAction.OnBackClick) }
     CreateNewGroupContent(uiState, onAction)
 }
 
@@ -64,7 +61,7 @@ private fun CreateNewGroupContent(
             painterResource(com.example.uikit.R.drawable.ic_avatar_new_group),
             contentDescription = stringResource(new_group),
             modifier = Modifier.size(140.dp),
-            tint = TDTheme.colors.primary.copy(0.81f)
+            tint = TDTheme.colors.pendingGray.copy(0.81f)
         )
         TDText(text = stringResource(let_s_get_started), style = TDTheme.typography.heading2)
         TDText(text = stringResource(bring_your_group_together_in_one_place), color = TDTheme.colors.lightGray)
@@ -92,10 +89,8 @@ private fun CreateNewGroupContent(
         TDButton(
             text = stringResource(R.string.create),
             fullWidth = true,
-            modifier = Modifier.clip(RoundedCornerShape(9999.dp))
-        ) {
-            onAction(UiAction.OnCreateTap)
-        }
+            onClick = { onAction(UiAction.OnCreateTap) },
+        )
         Spacer(Modifier.height(24.dp))
         TDInfoCard(
             text = stringResource(
@@ -107,6 +102,7 @@ private fun CreateNewGroupContent(
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_YES)
 @Composable
 private fun CreateNewGroupScreenPreview() {
     TDTheme {
@@ -123,6 +119,7 @@ private fun CreateNewGroupScreenPreview() {
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_YES)
 @Composable
 private fun CreateNewGroupScreenPreview2() {
     TDTheme {

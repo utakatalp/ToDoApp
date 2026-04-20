@@ -46,11 +46,17 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
     private var remainingMillis: Long = 0L
     private var overtimeMillis: Long = 0L
 
+    private var totalSessionsCount: Int = 0
+    private var sessionIndexCounter: Int = -1
+
     // ---------------- QUEUE ----------------
 
     override fun setSessionQueue(queue: ArrayDeque<Session>) {
         sessionQueue.clear()
         queue.forEach { sessionQueue.addLast(it) }
+        totalSessionsCount = queue.size
+        sessionIndexCounter = -1
+        _state.update { it.copy(totalSessions = totalSessionsCount, currentSessionIndex = 0) }
     }
 
     override fun prepare() {
@@ -98,12 +104,14 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
     private fun startOvertime() {
         overtimeJob?.cancel()
         overtimeMillis = ZERO_MILLIS
+        sessionIndexCounter++
 
         _state.update {
             it.copy(
                 isOvertime = true,
                 isRunning = true,
                 mode = PomodoroMode.OverTime,
+                currentSessionIndex = sessionIndexCounter,
             )
         }
 
@@ -115,6 +123,7 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
     }
 
     private fun startNextSession(autoStart: Boolean) {
+        val wasOvertime = _state.value.isOvertime
         pause()
         overtimeMillis = ZERO_MILLIS
 
@@ -127,8 +136,19 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
             return
         }
 
+        // When coming from overtime, startOvertime() already incremented the counter.
+        // Only increment here for initial prepare() and manual skips mid-session.
+        if (!wasOvertime) {
+            sessionIndexCounter++
+        }
+
         remainingMillis = next.durationSeconds * MILLIS_PER_SECOND
-        _state.update { it.copy(mode = next.mode) }
+        _state.update {
+            it.copy(
+                mode = next.mode,
+                currentSessionIndex = sessionIndexCounter.coerceAtLeast(0),
+            )
+        }
         publishRemaining(remainingMillis)
 
         if (autoStart) start()

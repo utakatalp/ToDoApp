@@ -24,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PomodoroViewModel @Inject constructor(
     private val pomodoroRepository: PomodoroRepository,
-    private val engine: PomodoroEngine
+    private val engine: PomodoroEngine,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PomodoroContract.UiState())
@@ -39,13 +39,25 @@ class PomodoroViewModel @Inject constructor(
     private val _navEffect by lazy { Channel<NavigationEffect>() }
     val navEffect by lazy { _navEffect.receiveAsFlow() }
 
+    // Full immutable snapshot of all sessions — used for index-based lookups and queue rebuilding
+    private var sessionQueue: List<Session> = emptyList()
+
+    // Tracks which session in [sessionQueue] the engine is currently on
+    private var currentSessionIndex: Int = 0
+
+    // Accumulates completed session stats for the summary screen
+    private var totalFocusSeconds: Long = 0L
+    private var totalBreakSeconds: Long = 0L
+
     fun onAction(action: UiAction) {
         when (action) {
             UiAction.SkipSession -> onSkipSession()
             UiAction.StartCountDown -> onStartCountdown()
             UiAction.StopCountDown -> onStopCountdown()
             is UiAction.ToggleBannerVisibility -> updateBannerVisibility(action.isVisible)
-            UiAction.Back -> onBack()
+            UiAction.OnEndSessionTap -> _uiState.update { it.copy(showFinishEarlyDialog = true) }
+            UiAction.DismissEndSessionDialog -> _uiState.update { it.copy(showFinishEarlyDialog = false) }
+            UiAction.ConfirmEndSession -> onConfirmEndSession()
         }
     }
 
@@ -55,12 +67,19 @@ class PomodoroViewModel @Inject constructor(
         observeEngineState()
     }
 
+    // ── Actions ────────────────────────────────────────────────────────────────
+
     private fun onSkipSession() {
+        if (!uiState.value.isOvertime) {
+            // SessionFinished won't fire naturally for a manual skip, so advance index here.
+            currentSessionIndex++
+        }
         engine.skip(autoStart = uiState.value.isRunning)
     }
 
     private fun onStartCountdown() {
         if (uiState.value.isOvertime) {
+            // SessionFinished already fired when overtime started; index is already correct.
             engine.skip(autoStart = true)
         } else {
             engine.start()
@@ -71,27 +90,65 @@ class PomodoroViewModel @Inject constructor(
         engine.pause()
     }
 
+    private fun onConfirmEndSession() {
+        _uiState.update { it.copy(showFinishEarlyDialog = false) }
+        engine.pause()
+        engine.setSessionQueue(ArrayDeque())
+        _navEffect.trySend(NavigationEffect.Navigate(route = Screen.PomodoroLaunch, popUpTo = Screen.Home))
+    }
+
     private fun updateBannerVisibility(isVisible: Boolean) {
         engine.updateBannerVisibility(isVisible)
     }
 
-    private fun onBack() {
-        _navEffect.trySend(NavigationEffect.Back)
-    }
+    // ── Engine lifecycle ───────────────────────────────────────────────────────
 
     private fun initializeEngineIfNeeded() {
         viewModelScope.launch {
+            val pomodoro = pomodoroRepository.getSavedPomodoroSettings()!!
             if (!engine.state.value.isRunning) {
-                val pomodoro = pomodoroRepository.getSavedPomodoroSettings()!!
                 val queue = buildSessionQueue(pomodoro)
+                sessionQueue = queue.toList()
+                currentSessionIndex = 0
                 engine.setSessionQueue(queue)
                 engine.prepare()
+                _uiState.update {
+                    it.copy(
+                        totalSessions = sessionQueue.size,
+                        totalSessionSeconds = sessionQueue.firstOrNull()?.durationSeconds ?: 0L,
+                        currentSessionIndex = 0,
+                    )
+                }
+            } else {
+                // Engine is already running — user navigated back to this screen.
+                // Rebuild the full queue from settings (for duration lookups by index)
+                // and restore the current index from the engine's tracked state.
+                sessionQueue = buildSessionQueue(pomodoro).toList()
+                val engineState = engine.state.value
+                currentSessionIndex = engineState.currentSessionIndex
+                _uiState.update {
+                    it.copy(
+                        totalSessions = engineState.totalSessions,
+                        currentSessionIndex = engineState.currentSessionIndex,
+                        totalSessionSeconds = sessionQueue.getOrNull(currentSessionIndex)
+                            ?.durationSeconds ?: it.totalSessionSeconds,
+                    )
+                }
             }
         }
     }
 
     private fun navigateToFinishScreen() {
-        _navEffect.trySend(NavigationEffect.Navigate(Screen.PomodoroFinish, Screen.Home))
+        _navEffect.trySend(
+            NavigationEffect.Navigate(
+                route = Screen.PomodoroSummary(
+                    focusSessions = sessionQueue.count { it.mode == PomodoroMode.Focus },
+                    totalFocusMinutes = (totalFocusSeconds / SECONDS_PER_MINUTE).toInt(),
+                    totalBreakMinutes = (totalBreakSeconds / SECONDS_PER_MINUTE).toInt(),
+                ),
+                popUpTo = Screen.Home,
+            )
+        )
     }
 
     private fun observeEngineEvents() {
@@ -105,7 +162,20 @@ class PomodoroViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Called only when the countdown reaches 0 naturally (engine enters overtime).
+     * Manual skips are handled in [onSkipSession] and do NOT reach here.
+     */
     private suspend fun onSessionFinished() {
+        sessionQueue.getOrNull(currentSessionIndex)?.let { finished ->
+            when (finished.mode) {
+                PomodoroMode.Focus -> totalFocusSeconds += finished.durationSeconds
+                PomodoroMode.ShortBreak,
+                PomodoroMode.LongBreak -> totalBreakSeconds += finished.durationSeconds
+                PomodoroMode.OverTime -> Unit
+            }
+        }
+        currentSessionIndex++
         _uiEffect.send(PomodoroContract.UiEffect.SessionFinished)
     }
 
@@ -117,21 +187,28 @@ class PomodoroViewModel @Inject constructor(
         }
     }
 
-    private fun mapEngineStateToUiState(engineStateSnapshot: com.todoapp.mobile.domain.engine.PomodoroEngineState) {
+    private fun mapEngineStateToUiState(
+        engineStateSnapshot: com.todoapp.mobile.domain.engine.PomodoroEngineState,
+    ) {
         val totalSeconds = engineStateSnapshot.remainingSeconds
-        val min = (totalSeconds / SECONDS_PER_MINUTE).toInt()
-        val sec = (totalSeconds % SECONDS_PER_MINUTE).toInt()
+        val currentDuration = sessionQueue.getOrNull(currentSessionIndex)?.durationSeconds
+            ?: (25L * SECONDS_PER_MINUTE)
 
         _uiState.update {
             it.copy(
-                min = min,
-                second = sec,
+                min = (totalSeconds / SECONDS_PER_MINUTE).toInt(),
+                second = (totalSeconds % SECONDS_PER_MINUTE).toInt(),
                 mode = engineStateSnapshot.mode.toUiMode(),
                 isRunning = engineStateSnapshot.isRunning,
                 isOvertime = engineStateSnapshot.isOvertime,
+                totalSessionSeconds = currentDuration,
+                currentSessionIndex = currentSessionIndex,
+                totalSessions = sessionQueue.size,
             )
         }
     }
+
+    // ── Session queue builder ──────────────────────────────────────────────────
 
     private fun buildSessionQueue(pomodoro: Pomodoro): ArrayDeque<Session> {
         val queue: ArrayDeque<Session> = ArrayDeque()
@@ -141,35 +218,17 @@ class PomodoroViewModel @Inject constructor(
         val longSeconds = pomodoro.longBreak * SECONDS_PER_MINUTE
 
         for (i in FIRST_SESSION_INDEX..pomodoro.sessionCount) {
-            queue.addLast(
-                Session(
-                    durationSeconds = focusSeconds,
-                    mode = PomodoroMode.Focus,
-                )
-            )
+            queue.addLast(Session(durationSeconds = focusSeconds, mode = PomodoroMode.Focus))
 
             val isLastFocus = i == pomodoro.sessionCount
             if (!isLastFocus) {
-                val breakMode =
-                    if (i % pomodoro.sectionCount == 0) {
-                        PomodoroMode.LongBreak
-                    } else {
-                        PomodoroMode.ShortBreak
-                    }
-
-                val breakDurationSeconds =
-                    if (breakMode == PomodoroMode.LongBreak) {
-                        longSeconds
-                    } else {
-                        shortSeconds
-                    }
-
-                queue.addLast(
-                    Session(
-                        durationSeconds = breakDurationSeconds,
-                        mode = breakMode,
-                    )
-                )
+                val breakMode = if (i % pomodoro.sectionCount == 0) {
+                    PomodoroMode.LongBreak
+                } else {
+                    PomodoroMode.ShortBreak
+                }
+                val breakDuration = if (breakMode == PomodoroMode.LongBreak) longSeconds else shortSeconds
+                queue.addLast(Session(durationSeconds = breakDuration, mode = breakMode))
             }
         }
 

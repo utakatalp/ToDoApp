@@ -9,8 +9,6 @@ import com.todoapp.mobile.data.model.network.data.GroupData
 import com.todoapp.mobile.data.model.network.data.GroupMemberData
 import com.todoapp.mobile.data.model.network.data.GroupSummaryData
 import com.todoapp.mobile.data.model.network.data.GroupSummaryDataList
-import java.time.Instant
-import java.time.ZoneId
 import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
 import com.todoapp.mobile.data.model.network.request.GroupTaskUpdateRequest
 import com.todoapp.mobile.data.model.network.request.InviteMemberRequest
@@ -34,6 +32,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
 import javax.inject.Inject
 
 class GroupRepositoryImpl @Inject constructor(
@@ -202,11 +202,19 @@ class GroupRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateGroup(groupId: Long, name: String, description: String): Result<Unit> {
-        return groupRemoteDataSource.updateGroup(groupId, UpdateGroupRequest(id = groupId, name = name, description = description))
+        return groupRemoteDataSource.updateGroup(
+            groupId,
+            UpdateGroupRequest(id = groupId, name = name, description = description)
+        )
     }
 
     override suspend fun createGroupTask(groupId: Long, task: Task, priority: String?, assignedToUserId: Long?): Result<Unit> {
-        return taskRemoteDataSource.addTask(task, familyGroupId = groupId, assignedToUserId = assignedToUserId, priority = priority)
+        return taskRemoteDataSource.addTask(
+            task,
+            familyGroupId = groupId,
+            assignedToUserId = assignedToUserId,
+            priority = priority
+        )
             .map { }
             .onSuccess { syncGroupTasks(groupId) }
     }
@@ -259,8 +267,15 @@ class GroupRepositoryImpl @Inject constructor(
         val localGroup = groupLocalDataSource.getAllGroupsOrdered().first().find { it.remoteId == groupId }
         val assigneeMember = if (localGroup != null && assignedToUserId != null) {
             groupMemberLocalDataSource.getByGroupIdOnce(localGroup.id).find { it.userId == assignedToUserId }
-        } else null
-        return taskRemoteDataSource.updateTask(taskId, updatedTask, familyGroupId = groupId, assignedToUserId = assignedToUserId)
+        } else {
+            null
+        }
+        return taskRemoteDataSource.updateTask(
+            taskId,
+            updatedTask,
+            familyGroupId = groupId,
+            assignedToUserId = assignedToUserId
+        )
             .map { }
             .onSuccess {
                 groupTaskLocalDataSource.updateTask(
@@ -467,5 +482,4 @@ class GroupRepositoryImpl @Inject constructor(
             timestamp = timestamp,
             taskTitle = taskTitle,
         )
-
 }

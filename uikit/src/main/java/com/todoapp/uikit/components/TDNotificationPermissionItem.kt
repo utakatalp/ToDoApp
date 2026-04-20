@@ -1,6 +1,7 @@
 package com.todoapp.uikit.components
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -8,6 +9,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +31,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -44,15 +48,15 @@ fun TDNotificationPermissionItem(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (!isGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val activity = context as? android.app.Activity
+        if (!isGranted) {
+            val activity = context as? Activity
             val shouldShowRationale = activity?.let {
-                androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale(it, permission)
+                ActivityCompat.shouldShowRequestPermissionRationale(it, permission)
             } ?: true
             if (!shouldShowRationale) {
                 shouldOpenSettingsOnNextGrantClick.value = true
             }
-        } else if (isGranted) {
+        } else {
             shouldOpenSettingsOnNextGrantClick.value = false
         }
     }
@@ -93,7 +97,6 @@ fun TDNotificationPermissionItem(
                         openNotificationSettings(context)
                         return@TDButton
                     }
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return@TDButton
                     launcher.launch(permission)
                 }
             )
@@ -113,10 +116,26 @@ fun TDNotificationPermissionItem(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun openNotificationSettings(context: Context) {
     val intent = Intent().apply {
         action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
         putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
     }
     context.startActivity(intent)
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@TDPreview
+@Composable
+private fun TDNotificationPermissionItemPreview() {
+    TDTheme {
+        Box(
+            modifier = Modifier
+                .background(TDTheme.colors.background)
+                .padding(16.dp)
+        ) {
+            TDNotificationPermissionItem()
+        }
+    }
 }

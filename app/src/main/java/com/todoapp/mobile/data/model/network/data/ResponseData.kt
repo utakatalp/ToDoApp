@@ -96,15 +96,15 @@ data class GroupMemberData(
 
     @SerialName("avatarUrl")
     val avatarUrl: String?,
-    val emailVerified: Boolean,
-    val providers: List<String>,
-    val createdAt: String,
+    val emailVerified: Boolean = false,
+    val providers: List<String> = emptyList(),
+    val createdAt: String = "",
 
     @SerialName("role")
-    val role: String,
+    val role: String = "",
 
     @SerialName("joinedAt")
-    val joinedAt: Long
+    val joinedAt: Long = 0L,
 )
 
 @Serializable
@@ -112,5 +112,36 @@ data class FCMTokenResponseData(
     val token: String,
     val deviceId: String,
     val deviceName: String,
+)
 
+@Serializable
+data class GroupActivityData(
+    @SerialName("id") val id: Long,
+    @SerialName("type") val type: String,
+    @SerialName("actorName") val actorName: String,
+    @SerialName("actorAvatarUrl") val actorAvatarUrl: String? = null,
+    @SerialName("description") val description: String,
+    @SerialName("timestamp") val timestamp: Long,
+    @SerialName("taskTitle") val taskTitle: String? = null,
+)
+
+@Serializable
+data class GroupActivityDataList(
+    @SerialName("activities") val activities: List<GroupActivityData>,
+)
+
+@Serializable
+data class GroupTaskData(
+    @SerialName("id") val id: Long,
+    @SerialName("title") val title: String,
+    @SerialName("description") val description: String? = null,
+    @SerialName("isCompleted") val isCompleted: Boolean = false,
+    @SerialName("priority") val priority: String? = null,
+    @SerialName("dueDate") val dueDate: Long? = null,
+    @SerialName("assignee") val assignee: GroupMemberData? = null,
+)
+
+@Serializable
+data class GroupTaskListData(
+    @SerialName("tasks") val tasks: List<GroupTaskData>,
 )

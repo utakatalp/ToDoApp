@@ -7,7 +7,9 @@ import android.os.IBinder
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,10 +28,13 @@ import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.alarm.buildDailyPlanAlarmItem
 import com.todoapp.mobile.domain.constants.DailyPlanDefaults
+import com.todoapp.mobile.domain.model.ThemePreference
 import com.todoapp.mobile.domain.repository.DailyCardPosition
 import com.todoapp.mobile.domain.repository.DailyPlanPreferences
+import com.todoapp.mobile.domain.repository.ThemeRepository
 import com.todoapp.uikit.components.TDOverlayDailyPlanNotificationCard
 import com.todoapp.uikit.components.TDOverlayNotificationCard
+import com.todoapp.uikit.theme.TDTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +52,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     @Inject
     lateinit var alarmScheduler: AlarmScheduler
+
+    @Inject
+    lateinit var themeRepository: ThemeRepository
     private lateinit var windowManager: WindowManager
     private val _lifecycleRegistry = LifecycleRegistry(this)
     private val _savedStateRegistryController: SavedStateRegistryController = SavedStateRegistryController.create(this)
@@ -112,6 +120,15 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             setViewTreeLifecycleOwner(this@OverlayService)
             setViewTreeSavedStateRegistryOwner(this@OverlayService)
             setContent {
+                val themePreference by themeRepository.themeFlow
+                    .collectAsState(initial = ThemePreference.SYSTEM_DEFAULT)
+                val isSystemDark = isSystemInDarkTheme()
+                val darkTheme = when (themePreference) {
+                    ThemePreference.DARK_MODE -> true
+                    ThemePreference.LIGHT_MODE -> false
+                    ThemePreference.SYSTEM_DEFAULT -> isSystemDark
+                }
+                TDTheme(darkTheme = darkTheme) {
                 var show by remember { mutableStateOf(true) }
                 LaunchedEffect(show) {
                     if (!show) {
@@ -160,6 +177,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                         )
                     }
                 }
+                } // TDTheme
             }
         }
         when (overlayType) {

@@ -25,8 +25,9 @@ fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem {
     )
 }
 
-fun Task.toCreateTaskRequestDto(): TaskRequest {
+fun Task.toCreateTaskRequestDto(familyGroupId: Long? = null, assignedToUserId: Long? = null, priority: String? = null): TaskRequest {
     return TaskRequest(
+        id = if (id != 0L) id else null,
         title = title,
         description = description,
         date = date.toEpochDay(),
@@ -34,6 +35,9 @@ fun Task.toCreateTaskRequestDto(): TaskRequest {
         timeEnd = timeEnd.toSecondOfDay().toLong(),
         isCompleted = isCompleted,
         isSecret = isSecret,
+        familyGroupId = familyGroupId,
+        assignedToUserId = assignedToUserId,
+        priority = priority,
     )
 }
 
