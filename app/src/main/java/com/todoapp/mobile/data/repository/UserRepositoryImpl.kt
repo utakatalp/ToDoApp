@@ -8,7 +8,6 @@ import com.todoapp.mobile.data.model.network.data.FCMTokenResponseData
 import com.todoapp.mobile.data.model.network.data.RefreshTokenData
 import com.todoapp.mobile.data.model.network.data.UserData
 import com.todoapp.mobile.data.model.network.request.FCMTokenRequest
-import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.model.network.request.RefreshTokenRequest
@@ -97,10 +96,6 @@ constructor(
 
     override suspend fun googleLogin(token: String): Result<AuthResponseData> = handleRequest {
         todoApi.googleLogin(GoogleLoginRequest(token = token))
-    }
-
-    override suspend fun facebookLogin(request: FacebookLoginRequest): Result<AuthResponseData> = handleRequest {
-        todoApi.facebookLogin(request)
     }
 
     override suspend fun getUserInfo(): Result<UserData> = handleRequest { todoApi.getUserInfo() }

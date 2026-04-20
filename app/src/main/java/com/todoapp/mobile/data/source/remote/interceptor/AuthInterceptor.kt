@@ -17,7 +17,6 @@ constructor(
             "/auth/register",
             "/auth/login",
             "/auth/google",
-            "/auth/facebook",
         )
 
     override fun intercept(chain: Interceptor.Chain): Response {

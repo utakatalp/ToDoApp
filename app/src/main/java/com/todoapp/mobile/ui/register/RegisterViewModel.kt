@@ -11,7 +11,6 @@ import com.todoapp.mobile.common.passwordValidation.ValidationManager
 import com.todoapp.mobile.data.auth.AuthModel
 import com.todoapp.mobile.data.auth.AuthTokenManager
 import com.todoapp.mobile.data.model.network.data.AuthResponseData
-import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.repository.SessionPreferences
@@ -61,18 +60,13 @@ constructor(
             is UiAction.OnFullNameChange -> onFullNameChange(uiAction.fullName)
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.password)
             is UiAction.OnUpdateWebViewVisibility -> updateWebViewVisibility(uiAction.isVisible)
-            UiAction.OnFacebookSignInTap -> _uiEffect.trySend(UiEffect.FacebookLogin)
             UiAction.OnLoginTap -> navigateToLogin()
-            UiAction.OnPrivacyPolicyTap -> showPrivacyPolicy()
             UiAction.OnSignUpTap -> onSignUpTap()
-            UiAction.OnTermsOfServiceTap -> showTermsOfService()
             UiAction.OnPasswordVisibilityTap -> togglePasswordVisibility()
             UiAction.OnConfirmPasswordFieldTap -> enableConfirmPasswordField()
             UiAction.OnEmailFieldTap -> enableEmailField()
             UiAction.OnFullNameFieldTap -> enableFullNameField()
             UiAction.OnPasswordFieldTap -> enablePasswordField()
-            is UiAction.OnSuccessfulFacebookLogin -> loginWithFacebook(uiAction.token)
-            is UiAction.OnFacebookLoginFail -> handleFacebookLoginFailure(uiAction.throwable)
             UiAction.OnGoogleSignInTap -> _uiEffect.trySend(UiEffect.LaunchGoogleSignIn)
             is UiAction.OnGoogleSignInResult -> googleLogin(uiAction.token)
             is UiAction.OnGoogleSignInFailed -> {
@@ -89,14 +83,6 @@ constructor(
         _uiState.update { state ->
             state.copy(isWebViewAvailable = isVisible)
         }
-    }
-
-    private fun showPrivacyPolicy() {
-        _navEffect.trySend(NavigationEffect.Navigate(route = Screen.WebView("https://www.google.com")))
-    }
-
-    private fun showTermsOfService() {
-        _navEffect.trySend(NavigationEffect.Navigate(route = Screen.WebView("https://www.google.com")))
     }
 
     private fun updateValidationMode() {
@@ -164,36 +150,6 @@ constructor(
         }
     }
 
-    private fun loginWithFacebook(token: String) {
-        viewModelScope.launch {
-            setRedirecting(true)
-
-            userRepository
-                .facebookLogin(FacebookLoginRequest(token))
-                .onSuccess { handleSuccessfulRegister(it) }
-                .onFailure { throwable ->
-                    Log.d("facebook_login", throwable.message.orEmpty())
-                    handleFacebookLoginFailure(throwable)
-                }
-        }
-    }
-
-    private fun handleFacebookLoginFailure(throwable: Throwable) {
-        setRedirecting(false)
-
-        val message =
-            when (throwable) {
-                is DomainException.NoInternet -> "No internet connection."
-                is DomainException.Unauthorized -> "Facebook session expired. Please try again."
-                is DomainException.Server -> throwable.message ?: "Try again later."
-                else -> throwable.message ?: "Try again later."
-            }
-
-        _uiState.update { state ->
-            state.copy(generalError = RegisterError(message))
-        }
-    }
-
     private fun googleLogin(idToken: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isRedirecting = true) }
@@ -218,10 +174,6 @@ constructor(
                     _uiEffect.trySend(UiEffect.ShowToast(error.message ?: "Google login error"))
                 }
         }
-    }
-
-    private fun setRedirecting(isRedirecting: Boolean) {
-        _uiState.update { state -> state.copy(isRedirecting = isRedirecting) }
     }
 
     private fun handleSuccessfulRegister(registerResponseData: AuthResponseData) {

@@ -25,13 +25,7 @@ object RegisterContract {
     sealed interface UiAction {
         data object OnSignUpTap : UiAction
 
-        data object OnTermsOfServiceTap : UiAction
-
-        data object OnPrivacyPolicyTap : UiAction
-
         data object OnLoginTap : UiAction
-
-        data object OnFacebookSignInTap : UiAction
 
         data object OnGoogleSignInTap : UiAction
 
@@ -72,19 +66,9 @@ object RegisterContract {
         data class OnUpdateWebViewVisibility(
             val isVisible: Boolean,
         ) : UiAction
-
-        data class OnSuccessfulFacebookLogin(
-            val token: String,
-        ) : UiAction
-
-        data class OnFacebookLoginFail(
-            val throwable: Throwable,
-        ) : UiAction
     }
 
     sealed interface UiEffect {
-        data object FacebookLogin : UiEffect
-
         data object LaunchGoogleSignIn : UiEffect
 
         data class ShowToast(

@@ -43,27 +43,11 @@ object LoginContract {
             val message: String,
         ) : UiAction
 
-        data class OnSuccessfulFacebookLogin(
-            val token: String,
-        ) : UiAction
-
-        data class OnFacebookLoginFail(
-            val throwable: Throwable,
-        ) : UiAction
-
-        data object OnFacebookSignInTap : UiAction
-
         data object OnRegisterTap : UiAction
-
-        data object OnTermsOfServiceTap : UiAction
-
-        data object OnPrivacyPolicyTap : UiAction
     }
 
     sealed interface UiEffect {
         data object GoogleLogin : UiEffect
-
-        data object FacebookLogin : UiEffect
 
         data class ShowToast(
             val message: String,

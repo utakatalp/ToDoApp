@@ -12,7 +12,6 @@ import com.todoapp.mobile.common.passwordValidation.ValidationManager
 import com.todoapp.mobile.data.auth.AuthModel
 import com.todoapp.mobile.data.auth.AuthTokenManager
 import com.todoapp.mobile.data.model.network.data.AuthResponseData
-import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.repository.SessionPreferences
@@ -63,51 +62,14 @@ constructor(
             is UiAction.OnEmailChange -> onEmailChange(uiAction.value)
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.value)
             UiAction.OnEmailFieldTap -> enableEmailField()
-            UiAction.OnFacebookSignInTap -> _uiEffect.trySend(UiEffect.FacebookLogin)
             UiAction.OnForgotPasswordTap -> navigateToForgotPassword()
             is UiAction.OnGoogleSignInTap -> _uiEffect.trySend(UiEffect.GoogleLogin)
             is UiAction.OnGoogleSignInFailed -> _uiEffect.trySend(UiEffect.ShowToast(uiAction.message))
             is UiAction.OnSuccessfulGoogleLogin -> googleLogin(uiAction.token)
-            is UiAction.OnSuccessfulFacebookLogin -> loginWithFacebook(uiAction.token)
-            is UiAction.OnFacebookLoginFail -> handleFacebookLoginFailure(uiAction.throwable)
             UiAction.OnLoginTap -> handleLoginClick()
             UiAction.OnPasswordFieldTap -> enablePasswordField()
             UiAction.OnPasswordVisibilityTap -> togglePasswordVisibility()
-            UiAction.OnPrivacyPolicyTap -> showPrivacyPolicy()
             UiAction.OnRegisterTap -> navigateToRegister()
-            UiAction.OnTermsOfServiceTap -> showTermsOfService()
-        }
-    }
-
-    private fun loginWithFacebook(token: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-
-            userRepository
-                .facebookLogin(FacebookLoginRequest(token))
-                .onSuccess { handleSuccessfulLogin(it) }
-                .onFailure { throwable ->
-                    Log.d("facebook_login", throwable.message.orEmpty())
-                    handleFacebookLoginFailure(throwable)
-                }
-        }
-    }
-
-    private fun handleFacebookLoginFailure(throwable: Throwable) {
-        _uiState.update { it.copy(isLoading = false) }
-
-        val message =
-            when (throwable) {
-                is DomainException.NoInternet -> "No internet connection."
-                is DomainException.Unauthorized -> "Facebook session expired. Please try again."
-                is DomainException.Server -> throwable.message ?: "Try again later."
-                else -> throwable.message ?: "Try again later."
-            }
-
-        _uiState.update { state ->
-            state.copy(
-                generalError = LoginContract.LoginError(message),
-            )
         }
     }
 
@@ -317,13 +279,5 @@ constructor(
 
     private fun enablePasswordField() {
         _uiState.update { it.copy(isPasswordFieldEnabled = true) }
-    }
-
-    private fun showPrivacyPolicy() {
-        _navEffect.trySend(NavigationEffect.Navigate(route = Screen.WebView("https://www.google.com")))
-    }
-
-    private fun showTermsOfService() {
-        _navEffect.trySend(NavigationEffect.Navigate(route = Screen.WebView("https://www.google.com")))
     }
 }

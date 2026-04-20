@@ -1,6 +1,5 @@
 package com.todoapp.mobile.ui.login
 
-import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -30,9 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
 import com.todoapp.mobile.R
-import com.todoapp.mobile.common.loginWithFacebook
 import com.todoapp.mobile.data.auth.GoogleSignInManager
 import com.todoapp.mobile.ui.login.LoginContract.UiAction
 import com.todoapp.mobile.ui.login.LoginContract.UiEffect
@@ -52,9 +49,6 @@ fun LoginScreen(
 
     uiEffect.collectWithLifecycle {
         when (it) {
-            UiEffect.FacebookLogin -> {
-                handleFacebookLogin(context = context, onAction = onAction)
-            }
             UiEffect.GoogleLogin -> {
                 GoogleSignInManager
                     .getGoogleIdToken(context)
@@ -164,29 +158,6 @@ private fun LoginLandscapeContent(
             LoginFormPanel(uiState = uiState, onAction = onAction)
         }
     }
-}
-
-suspend fun handleFacebookLogin(
-    context: Context,
-    onAction: (UiAction) -> Unit,
-) {
-    val activity =
-        context as? FragmentActivity
-            ?: run {
-                onAction(
-                    UiAction.OnFacebookLoginFail(
-                        IllegalStateException("Facebook login requires a FragmentActivity context"),
-                    ),
-                )
-                return
-            }
-
-    loginWithFacebook(activity = activity)
-        .onSuccess { token ->
-            onAction(UiAction.OnSuccessfulFacebookLogin(token))
-        }.onFailure { throwable ->
-            onAction(UiAction.OnFacebookLoginFail(throwable))
-        }
 }
 
 @Preview(showBackground = true)

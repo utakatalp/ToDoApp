@@ -105,6 +105,18 @@ fun HomeContent(
             com.todoapp.mobile.R.string.hint_weekly_picker,
             com.todoapp.mobile.R.string.hint_weekly_stats,
             com.todoapp.mobile.R.string.hint_group_reorder,
+            com.todoapp.mobile.R.string.hint_task_photos,
+            com.todoapp.mobile.R.string.hint_group_task_flip,
+            com.todoapp.mobile.R.string.hint_group_task_assign_swipe,
+            com.todoapp.mobile.R.string.hint_group_task_priority,
+            com.todoapp.mobile.R.string.hint_profile_avatar,
+            com.todoapp.mobile.R.string.hint_group_avatar,
+            com.todoapp.mobile.R.string.hint_pomodoro_banner,
+            com.todoapp.mobile.R.string.hint_transfer_ownership,
+            com.todoapp.mobile.R.string.hint_search_across_groups,
+            com.todoapp.mobile.R.string.hint_group_task_edit,
+            com.todoapp.mobile.R.string.hint_undo_delete,
+            com.todoapp.mobile.R.string.hint_language_switch,
         )
     val pullState = rememberPullToRefreshState()
     LaunchedEffect(showHint) {

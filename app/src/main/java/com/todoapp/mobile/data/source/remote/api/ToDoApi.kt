@@ -13,7 +13,6 @@ import com.todoapp.mobile.data.model.network.data.TaskListData
 import com.todoapp.mobile.data.model.network.data.UserData
 import com.todoapp.mobile.data.model.network.request.CreateGroupRequest
 import com.todoapp.mobile.data.model.network.request.FCMTokenRequest
-import com.todoapp.mobile.data.model.network.request.FacebookLoginRequest
 import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
 import com.todoapp.mobile.data.model.network.request.GroupTaskRequest
 import com.todoapp.mobile.data.model.network.request.GroupTaskUpdateRequest
@@ -75,11 +74,6 @@ interface ToDoApi {
     suspend fun deleteTask(
         @Path("id") taskId: Long,
     ): Response<BaseResponse<Unit?>>
-
-    @POST("auth/facebook")
-    suspend fun facebookLogin(
-        @Body request: FacebookLoginRequest,
-    ): Response<BaseResponse<AuthResponseData?>>
 
     @POST("devices/fcm-token")
     suspend fun fcmToken(

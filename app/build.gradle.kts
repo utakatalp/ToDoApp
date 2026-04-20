@@ -152,7 +152,6 @@ dependencies {
     implementation(libs.timber)
     detektPlugins(libs.detekt.formatting)
     implementation(libs.reorderable)
-    implementation(libs.facebook)
 
     implementation(libs.androidx.datastore.preferences)
 

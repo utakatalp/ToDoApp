@@ -41,31 +41,33 @@ import com.todoapp.mobile.ui.banner.BannerOverlay
 import com.todoapp.mobile.ui.banner.BannerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
-import com.todoapp.mobile.ui.createnewgroup.CreateNewGroupScreen
-import com.todoapp.mobile.ui.createnewgroup.CreateNewGroupViewModel
 import com.todoapp.mobile.ui.details.DetailsScreen
 import com.todoapp.mobile.ui.details.DetailsViewModel
 import com.todoapp.mobile.ui.filteredtasks.FilteredTasksScreen
 import com.todoapp.mobile.ui.filteredtasks.FilteredTasksViewModel
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordScreen
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordViewModel
-import com.todoapp.mobile.ui.groupdetail.GroupDetailScreen
-import com.todoapp.mobile.ui.groupdetail.GroupDetailViewModel
 import com.todoapp.mobile.ui.groups.GroupScreen
 import com.todoapp.mobile.ui.groups.GroupsViewModel
-import com.todoapp.mobile.ui.groupsettings.GroupSettingsScreen
-import com.todoapp.mobile.ui.groupsettings.GroupSettingsViewModel
-import com.todoapp.mobile.ui.grouptaskdetail.GroupTaskDetailScreen
+import com.todoapp.mobile.ui.groups.createnewgroup.CreateNewGroupScreen
+import com.todoapp.mobile.ui.groups.createnewgroup.CreateNewGroupViewModel
+import com.todoapp.mobile.ui.groups.groupdetail.GroupDetailScreen
+import com.todoapp.mobile.ui.groups.groupdetail.GroupDetailViewModel
+import com.todoapp.mobile.ui.groups.groupsettings.GroupSettingsScreen
+import com.todoapp.mobile.ui.groups.groupsettings.GroupSettingsViewModel
+import com.todoapp.mobile.ui.groups.grouptaskdetail.GroupTaskDetailScreen
+import com.todoapp.mobile.ui.groups.invitemember.InviteMemberScreen
+import com.todoapp.mobile.ui.groups.invitemember.InviteMemberViewModel
+import com.todoapp.mobile.ui.groups.managemembers.ManageMembersScreen
+import com.todoapp.mobile.ui.groups.managemembers.ManageMembersViewModel
+import com.todoapp.mobile.ui.groups.memberprofile.MemberProfileScreen
+import com.todoapp.mobile.ui.groups.memberprofile.MemberProfileViewModel
+import com.todoapp.mobile.ui.groups.transferownership.TransferOwnershipScreen
+import com.todoapp.mobile.ui.groups.transferownership.TransferOwnershipViewModel
 import com.todoapp.mobile.ui.home.HomeScreen
 import com.todoapp.mobile.ui.home.HomeViewModel
-import com.todoapp.mobile.ui.invitemember.InviteMemberScreen
-import com.todoapp.mobile.ui.invitemember.InviteMemberViewModel
 import com.todoapp.mobile.ui.login.LoginScreen
 import com.todoapp.mobile.ui.login.LoginViewModel
-import com.todoapp.mobile.ui.managemembers.ManageMembersScreen
-import com.todoapp.mobile.ui.managemembers.ManageMembersViewModel
-import com.todoapp.mobile.ui.memberprofile.MemberProfileScreen
-import com.todoapp.mobile.ui.memberprofile.MemberProfileViewModel
 import com.todoapp.mobile.ui.onboarding.OnboardingScreen
 import com.todoapp.mobile.ui.onboarding.OnboardingViewModel
 import com.todoapp.mobile.ui.planyourday.PlanYourDayScreen
@@ -380,10 +382,9 @@ fun NavGraph(
         }
 
         composable<Screen.TransferOwnership> {
-            val viewModel: com.todoapp.mobile.ui.transferownership.TransferOwnershipViewModel = hiltViewModel()
+            val viewModel: TransferOwnershipViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
-            com.todoapp.mobile.ui.transferownership
-                .TransferOwnershipScreen(viewModel = viewModel)
+            TransferOwnershipScreen(viewModel = viewModel)
         }
     }
 }

@@ -36,7 +36,6 @@ datastorePreferencesCore = "1.2.0"
 biometric = "1.4.0-alpha02"
 securityCrypto = "1.1.0-alpha06"
 lifecycleProcess = "2.10.0"
-facebook = "latest.release"
 appcompatVersion = "1.7.1"
 firebaseAuthCommon = "9.8.0"
 workRuntimeKtx = "2.11.1"
@@ -48,7 +47,6 @@ coil = "2.7.0"
 
 [libraries]
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
-facebook = { group = "com.facebook.android", name = "facebook-android-sdk", version.ref = "facebook" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentialsPlayServicesAuth" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }

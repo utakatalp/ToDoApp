@@ -41,6 +41,7 @@ import com.todoapp.mobile.R
 import com.todoapp.mobile.ui.details.DetailsContract.UiAction
 import com.todoapp.mobile.ui.details.DetailsContract.UiEffect
 import com.todoapp.mobile.ui.details.DetailsContract.UiState
+import com.todoapp.mobile.ui.groups.grouptaskdetail.TaskPhotosSection
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
@@ -255,7 +256,7 @@ private fun DetailsSuccessContent(
 
             Spacer(Modifier.height(4.dp))
 
-            com.todoapp.mobile.ui.grouptaskdetail.TaskPhotosSection(
+            TaskPhotosSection(
                 photoUrls = uiState.photoUrls,
                 onPick = { bytes, mime -> onAction(UiAction.OnPhotoPicked(bytes, mime)) },
                 onDelete = { photoId -> onAction(UiAction.OnPhotoDelete(photoId)) },

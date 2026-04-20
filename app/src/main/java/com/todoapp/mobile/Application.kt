@@ -10,8 +10,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Configuration
-import com.facebook.FacebookSdk
-import com.facebook.appevents.AppEventsLogger
 import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.SecretPreferences
@@ -48,10 +46,6 @@ class Application :
 
     override fun onCreate() {
         super<Application>.onCreate()
-
-        FacebookSdk.sdkInitialize(applicationContext)
-        AppEventsLogger.activateApp(this)
-
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         createNotificationChannel()
     }

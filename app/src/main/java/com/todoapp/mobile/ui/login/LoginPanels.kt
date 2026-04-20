@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
 import com.todoapp.mobile.ui.login.LoginContract.UiAction
@@ -221,24 +219,22 @@ internal fun LoginFormPanel(
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         TDButton(
             text = stringResource(R.string.google),
-            fullWidth = false,
+            fullWidth = true,
             type = TDButtonType.OUTLINE,
             icon = painterResource(R.drawable.ic_google_logo),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
         ) { onAction(UiAction.OnGoogleSignInTap) }
-        Spacer(Modifier.width(12.dp))
-        TDButton(
-            text = stringResource(R.string.facebook),
-            fullWidth = false,
-            type = TDButtonType.OUTLINE,
-            icon = painterResource(R.drawable.ic_facebook_logo),
-            modifier = Modifier.weight(1f),
-        ) { onAction(UiAction.OnFacebookSignInTap) }
     }
 
     Spacer(Modifier.height(24.dp))
 
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .imePadding()
+            .navigationBarsPadding(),
+        horizontalArrangement = Arrangement.Center,
+    ) {
         TDText(
             text = stringResource(R.string.dont_have_an_account),
             style = TDTheme.typography.heading6,
@@ -250,43 +246,5 @@ internal fun LoginFormPanel(
             style = TDTheme.typography.heading6.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.clickable { onAction(UiAction.OnRegisterTap) },
         )
-    }
-
-    Spacer(Modifier.height(16.dp))
-
-    Column(
-        modifier =
-        Modifier
-            .fillMaxWidth()
-            .imePadding()
-            .navigationBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Row {
-            TDText(
-                text = stringResource(R.string.by_signing_up_you_agree_to_our),
-                style = TDTheme.typography.subheading4,
-                color = TDTheme.colors.gray,
-            )
-            TDText(
-                text = stringResource(R.string.terms_of_service),
-                style = TDTheme.typography.subheading4.copy(textDecoration = TextDecoration.Underline),
-                color = TDTheme.colors.gray,
-                modifier = Modifier.clickable { onAction(UiAction.OnTermsOfServiceTap) },
-            )
-        }
-        Row {
-            TDText(
-                text = stringResource(R.string.and),
-                style = TDTheme.typography.subheading4,
-                color = TDTheme.colors.gray,
-            )
-            TDText(
-                text = stringResource(R.string.privacy_policy),
-                style = TDTheme.typography.subheading4.copy(textDecoration = TextDecoration.Underline),
-                color = TDTheme.colors.gray,
-                modifier = Modifier.clickable { onAction(UiAction.OnPrivacyPolicyTap) },
-            )
-        }
     }
 }

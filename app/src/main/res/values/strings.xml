@@ -147,10 +147,6 @@
     <string name="logout">Logout</string>
     <string name="logout_dialog_title">Logout</string>
     <string name="logout_dialog_message">Are you sure you want to logout?</string>
-    <string name="by_signing_up_you_agree_to_our">"By signing up, you agree to our "</string>
-    <string name="terms_of_service">Terms of Service</string>
-    <string name="and">"and "</string>
-    <string name="privacy_policy">Privacy Policy</string>
     <string name="login_header">DONEBOT</string>
     <string name="elevate_your_productivity">Elevate your productivity</string>
     <string name="welcome_back">Welcome Back</string>
@@ -159,7 +155,6 @@
     <string name="email_placeholder">name@example.com</string>
     <string name="or_continue_with">OR CONTINUE WITH</string>
     <string name="google">Google</string>
-    <string name="facebook">Facebook</string>
     <string name="dont_have_an_account">Don\'t have an account? </string>
     <string name="register">Register</string>
     <string name="register_password_strength_WEAK">Your password is too weak</string>
@@ -169,9 +164,6 @@
     <string name="error_email_invalid">Invalid email address</string>
     <string name="error_password_blank">Password cannot be blank</string>
     <string name="error_password_min_length">Password must be at least %1$d characters long</string>
-    <string name="facebook_app_id">909034501717310</string>
-    <string name="fb_login_protocol_scheme">fb909034501717310</string>
-    <string name="facebook_client_token">eae8e9d82cc25dfc659ef2cf8892171b</string>
     <string name="forgot_password">Forgot Password</string>
     <string name="recover_access">Recover Access</string>
     <string name="enter_your_email_address_and_we_will_send_you_a_link_to_reset_your_password">Enter your email address and we will send you a link to reset your password.</string>
@@ -229,6 +221,18 @@
     <string name="hint_weekly_picker">Tap any day in the weekly picker to jump to that day\'s tasks</string>
     <string name="hint_weekly_stats">Your weekly completed and pending task counts are always shown at the top</string>
     <string name="hint_group_reorder">Long press and drag groups to reorder them in the Groups tab</string>
+    <string name="hint_task_photos">Attach photos when creating a task — the first one shows on the card</string>
+    <string name="hint_group_task_flip">Tap a group task card to flip it and see who it\'s assigned to</string>
+    <string name="hint_group_task_assign_swipe">Swipe a group task right to take it yourself, or to give it back if it\'s already yours</string>
+    <string name="hint_group_task_priority">Group tasks can be marked HIGH, MEDIUM or LOW — the badge shows in the top-right</string>
+    <string name="hint_profile_avatar">Tap your avatar in the top bar to edit your name and change your photo</string>
+    <string name="hint_group_avatar">Admins can upload a custom avatar for their group in Group Settings</string>
+    <string name="hint_pomodoro_banner">When a Pomodoro session is running, a timer banner stays at the top of every screen</string>
+    <string name="hint_transfer_ownership">Group admins can hand over ownership to another member from Group Settings</string>
+    <string name="hint_search_across_groups">Search looks through your personal tasks and every group you\'re in at once</string>
+    <string name="hint_group_task_edit">Long-press a group task card to open the edit sheet — admins only</string>
+    <string name="hint_undo_delete">Deleted a task by mistake? Hit Undo in the snackbar before it slides away</string>
+    <string name="hint_language_switch">Switch between English and Türkçe in Settings → Language</string>
     <string name="hint_tip_label">Tip</string>
     <string name="hint_pull_indicator">Pull down for a helpful tip</string>
     <string name="hint_release_indicator">Release for your tip</string>
@@ -350,6 +354,7 @@
     <string name="edit_task">Edit Task</string>
     <string name="assignee">Assignee</string>
     <string name="priority">Priority</string>
+    <string name="priority_none">None</string>
     <string name="status">Status</string>
     <string name="you">You</string>
     <string name="assign_to_me_dialog_title">Assign to Me</string>
