@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">UIKit</string>
+    <string name="pick_a_date">Datum auswählen</string>
+    <string name="ok">OK</string>
+    <string name="weekly">Wöchentlich</string>
+    <string name="activity_screen_weekly_progress_text">Wöchentlicher Fortschritt</string>
+    <string name="activity_screen_weekly_progress_legend_complete_text">Abgeschlossen</string>
+    <string name="activity_screen_weekly_progress_legend_in_progress_text">In Bearbeitung</string>
+    <string name="activity_screen_weekly_progress_legend_not_started_text">Nicht begonnen</string>
+    <string name="bar_chart_days_mon">Mo</string>
+    <string name="bar_chart_days_tue">Di</string>
+    <string name="bar_chart_days_wed">Mi</string>
+    <string name="bar_chart_days_thu">Do</string>
+    <string name="bar_chart_days_fri">Fr</string>
+    <string name="bar_chart_days_sat">Sa</string>
+    <string name="bar_chart_days_sun">So</string>
+    <string name="allows_the_app_to_display_content_over_other_applications">Erlaubt der App, Inhalte über anderen Anwendungen anzuzeigen.</string>
+    <string name="grant_permission">Berechtigung erteilen</string>
+    <string name="overlay_permission">Überlagerungsberechtigung</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="create_new_group">Neue Gruppe erstellen</string>
+    <string name="daily_plan_notification_title">Was sind Ihre Pläne für heute?</string>
+    <string name="daily_plan_notification_subtitle">Tippen, um Ihre Aufgaben zu planen</string>
+    <string name="close">Schließen</string>
+    <string name="notification_permission">Benachrichtigungsberechtigung</string>
+    <string name="allows_the_app_to_display_notifications">Erlaubt der App, Benachrichtigungen anzuzeigen</string>
+    <string name="status_completed">Abgeschlossen</string>
+    <string name="status_pending">Ausstehend</string>
+    <string name="notify_me_at">Erinnere mich um %1$s</string>
+    <string name="notify_hint">Ich benachrichtige Sie, wenn die Uhr läutet!</string>
+    <string name="overlay_notification_reminder">Erinnerung</string>
+    <string name="overlay_notification_now">Jetzt</string>
+    <string name="overlay_notification_minutes_ago">vor %1$d Min.</string>
+    <string name="overlay_notification_tap_to_open">Tippen, um Details zu öffnen</string>
+    <string name="overlay_notification_dismiss">Schließen</string>
+</resources>

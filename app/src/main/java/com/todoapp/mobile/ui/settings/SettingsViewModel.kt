@@ -6,17 +6,23 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresPermission
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.data.security.SecretModeEndCondition
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.alarm.buildDailyPlanAlarmItem
 import com.todoapp.mobile.domain.constants.DailyPlanDefaults
+import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.DailyPlanPreferences
+import com.todoapp.mobile.domain.repository.LanguageRepository
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.ThemeRepository
+import com.todoapp.mobile.domain.security.SecretModeConditionFactory
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -49,10 +55,13 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val themeRepository: ThemeRepository,
+    private val languageRepository: LanguageRepository,
     private val secretModePreferences: SecretPreferences,
     private val dailyPlanPreferences: DailyPlanPreferences,
     private val alarmScheduler: AlarmScheduler,
     private val clock: Clock,
+    private val authRepository: AuthRepository,
+    private val dataStoreHelper: DataStoreHelper,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -88,15 +97,20 @@ class SettingsViewModel @Inject constructor(
 
     init {
         observeTheme()
+        observeLanguage()
+        observeAuthState()
         viewModelScope.launch {
             val lastSelectedOptionId = secretModePreferences.getLastSelectedOptionId()
-            val condition = secretModePreferences.getCondition()
-            val isSecretModeActive = condition.isActive(System.currentTimeMillis())
             _uiState.update {
-                it.copy(
-                    selectedSecretMode = SecretModeReopenOptions.byId(lastSelectedOptionId),
-                    isSecretModeActive = isSecretModeActive
-                )
+                it.copy(selectedSecretMode = SecretModeReopenOptions.byId(lastSelectedOptionId))
+            }
+        }
+
+        viewModelScope.launch {
+            secretModePreferences.observeCondition().collect { condition ->
+                _uiState.update {
+                    it.copy(isSecretModeActive = condition.isActive(System.currentTimeMillis()))
+                }
             }
         }
 
@@ -141,6 +155,14 @@ class SettingsViewModel @Inject constructor(
                 ) != PackageManager.PERMISSION_GRANTED
     }
 
+    private fun observeAuthState() {
+        viewModelScope.launch {
+            dataStoreHelper.observeUser().collect { user ->
+                _uiState.update { it.copy(isUserAuthenticated = user != null) }
+            }
+        }
+    }
+
     private fun observeTheme() {
         themeRepository.themeFlow
             .onEach { theme ->
@@ -149,15 +171,43 @@ class SettingsViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    private fun observeLanguage() {
+        languageRepository.languageFlow
+            .onEach { language ->
+                _uiState.update { it.copy(currentLanguage = language) }
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun onAction(action: UiAction) {
         when (action) {
             is UiAction.OnThemeChange -> viewModelScope.launch { themeRepository.saveTheme(action.theme) }
+            is UiAction.OnLanguageChange -> viewModelScope.launch {
+                _uiState.update { it.copy(currentLanguage = action.language) }
+                languageRepository.saveLanguage(action.language)
+                val tag = action.language.toLocale().toLanguageTag()
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
+            }
             is UiAction.OnSelectedSecretModeChange -> updateSelectedSecretMode(action)
             is UiAction.OnSettingsSave -> updateOption()
             is UiAction.OnDisableSecretModeTap -> disableSecretMode()
             is UiAction.OnDailyPlanTimeChange -> updateDailyPlanTime(action.time)
             is UiAction.OnNavigateToSecretModeSettings -> navigateToSecretModeSettings()
+            UiAction.OnNavigateToPlanYourDay -> navigateToDailyPlanSettings()
+            UiAction.OnNavigateToPomodoroSettings -> navigateToPomodoroSettings()
+            UiAction.OnLogoutClick -> _uiState.update { it.copy(showLogoutDialog = true) }
+            UiAction.OnLogoutDismiss -> _uiState.update { it.copy(showLogoutDialog = false) }
+            UiAction.OnLogoutConfirm -> viewModelScope.launch { authRepository.logout() }
+            UiAction.OnLoginOrRegisterClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Login()))
         }
+    }
+
+    private fun navigateToDailyPlanSettings() {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.PlanYourDay))
+    }
+
+    private fun navigateToPomodoroSettings() {
+        _navEffect.trySend(NavigationEffect.Navigate(Screen.AddPomodoroTimer))
     }
 
     private fun navigateToSecretModeSettings() {
@@ -175,9 +225,14 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun updateOption() {
-        val selectedOptionIdAtClick = uiState.value.selectedSecretMode.id
+        val selectedOption = uiState.value.selectedSecretMode
         viewModelScope.launch {
-            secretModePreferences.setLastSelectedOptionId(selectedOptionIdAtClick)
+            secretModePreferences.setLastSelectedOptionId(selectedOption.id)
+            if (uiState.value.isSecretModeActive) {
+                val newCondition = SecretModeConditionFactory(clock).create(selectedOption)
+                secretModePreferences.saveCondition(newCondition)
+            }
+            _uiEffect.send(UiEffect.ShowToast(PREFERENCE_SAVED_MESSAGE))
         }
     }
 
@@ -194,7 +249,7 @@ class SettingsViewModel @Inject constructor(
 
         val item = buildDailyPlanAlarmItem(
             selectedTime = time,
-            now = LocalDateTime.now(clock),
+            now = LocalDateTime.now(),
             message = "",
         )
 
@@ -243,6 +298,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     private companion object {
+        private const val PREFERENCE_SAVED_MESSAGE = "Saved Successfully"
         private const val INTERVAL = 1_000L
         private const val ZERO_MILLIS = 0L
         private const val MILLIS_IN_SECOND = 1_000L
