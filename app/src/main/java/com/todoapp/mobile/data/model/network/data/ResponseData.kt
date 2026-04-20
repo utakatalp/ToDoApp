@@ -56,6 +56,9 @@ data class GroupSummaryData(
     @SerialName("pendingTaskCount")
     val pendingTaskCount: Int,
 
+    @SerialName("avatarUrl")
+    val avatarUrl: String? = null,
+
     @SerialName("createdAt")
     val createdAt: Long
 )
@@ -71,6 +74,9 @@ data class GroupData(
 
     @SerialName("description")
     val description: String,
+
+    @SerialName("avatarUrl")
+    val avatarUrl: String? = null,
 
     @SerialName("createdAt")
     val createdAt: Long,

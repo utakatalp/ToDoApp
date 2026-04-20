@@ -84,6 +84,16 @@ private fun GroupSettingsContent(
 
         val isAdmin = uiState.currentUserRole == "ADMIN"
 
+        GroupAvatar(
+            avatarUrl = uiState.avatarUrl,
+            avatarVersion = uiState.avatarVersion,
+            name = uiState.name,
+            isAdmin = isAdmin,
+            onAvatarPicked = { bytes, mime -> onAction(UiAction.OnAvatarPicked(bytes, mime)) },
+            modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally),
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+
         TDText(
             text = stringResource(com.todoapp.mobile.R.string.group_name_label),
             style = TDTheme.typography.subheading2,

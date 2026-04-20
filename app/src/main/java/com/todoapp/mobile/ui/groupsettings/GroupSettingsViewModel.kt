@@ -49,6 +49,20 @@ class GroupSettingsViewModel @Inject constructor(
             UiAction.OnSaveTap -> saveChanges()
             UiAction.OnManageMembersTap -> _navEffect.trySend(NavigationEffect.Navigate(Screen.ManageMembers(groupId)))
             UiAction.OnTransferOwnershipTap -> _navEffect.trySend(NavigationEffect.Navigate(Screen.TransferOwnership(groupId)))
+            is UiAction.OnAvatarPicked -> uploadAvatar(action.bytes, action.mimeType)
+        }
+    }
+
+    private fun uploadAvatar(bytes: ByteArray, mimeType: String) {
+        viewModelScope.launch {
+            groupRepository.uploadGroupAvatar(groupId, bytes, mimeType)
+                .onSuccess {
+                    _uiState.update { it.copy(avatarVersion = System.currentTimeMillis()) }
+                    loadGroupDetail()
+                }
+                .onFailure {
+                    _uiEffect.trySend(UiEffect.ShowToast(it.message ?: "Failed to upload avatar"))
+                }
         }
     }
 
@@ -64,6 +78,8 @@ class GroupSettingsViewModel @Inject constructor(
                         state.copy(
                             name = detail.name,
                             description = detail.description,
+                            avatarUrl = detail.avatarUrl,
+                            avatarVersion = System.currentTimeMillis(),
                             currentUserRole = role,
                             isLoading = false,
                         )

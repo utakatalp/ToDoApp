@@ -319,6 +319,12 @@ class GroupRepositoryImpl @Inject constructor(
         return com.todoapp.mobile.common.handleRequest { todoApi.deleteTaskPhoto(taskId, photoId) }
     }
 
+    override suspend fun uploadGroupAvatar(groupId: Long, bytes: ByteArray, mimeType: String): Result<Unit> {
+        val body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+        val part = okhttp3.MultipartBody.Part.createFormData("file", "group-avatar.jpg", body)
+        return com.todoapp.mobile.common.handleRequest { todoApi.uploadGroupAvatar(groupId, part) }.map { }
+    }
+
     override suspend fun searchGroupTasksAcrossGroups(query: String): Result<List<Pair<Group, List<GroupTask>>>> =
         withContext(Dispatchers.IO) {
             runCatching {

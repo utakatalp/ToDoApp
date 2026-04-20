@@ -174,6 +174,13 @@ interface ToDoApi {
         @Path("taskId") taskId: Long,
         @Body request: GroupTaskUpdateRequest,
     ): Response<BaseResponse<GroupTaskData?>>
+
+    @retrofit2.http.Multipart
+    @POST("family-groups/{groupId}/avatar")
+    suspend fun uploadGroupAvatar(
+        @Path("groupId") groupId: Long,
+        @retrofit2.http.Part file: okhttp3.MultipartBody.Part,
+    ): Response<BaseResponse<GroupData?>>
 }
 
 interface TodoAuthApi {

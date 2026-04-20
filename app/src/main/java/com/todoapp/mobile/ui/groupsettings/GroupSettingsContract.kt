@@ -7,6 +7,8 @@ object GroupSettingsContract {
         val name: String = "",
         val description: String = "",
         val currentUserRole: String = "",
+        val avatarUrl: String? = null,
+        val avatarVersion: Long = 0L,
         val isSaving: Boolean = false,
         val isLoading: Boolean = true,
         val errorMessage: String? = null,
@@ -18,6 +20,7 @@ object GroupSettingsContract {
         data object OnSaveTap : UiAction
         data object OnManageMembersTap : UiAction
         data object OnTransferOwnershipTap : UiAction
+        data class OnAvatarPicked(val bytes: ByteArray, val mimeType: String) : UiAction
     }
 
     sealed interface UiEffect {

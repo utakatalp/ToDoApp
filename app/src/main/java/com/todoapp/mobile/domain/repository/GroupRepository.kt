@@ -73,4 +73,6 @@ interface GroupRepository {
 
     suspend fun uploadTaskPhoto(taskId: Long, bytes: ByteArray, mimeType: String): Result<String>
     suspend fun deleteTaskPhoto(taskId: Long, photoId: Long): Result<Unit>
+
+    suspend fun uploadGroupAvatar(groupId: Long, bytes: ByteArray, mimeType: String): Result<Unit>
 }
