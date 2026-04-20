@@ -32,7 +32,7 @@ fun <T> Flow<T>.collectWithLifecycle(
 
 @Composable
 fun <T> Flow<T>.CollectWithLaunchedEffect(result: suspend (T) -> Unit) {
-    LaunchedEffect(Unit) {
+    LaunchedEffect(this) {
         collect { effect ->
             result(effect)
         }

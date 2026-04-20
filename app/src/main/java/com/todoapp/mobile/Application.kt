@@ -13,6 +13,7 @@ import androidx.work.Configuration
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.todoapp.mobile.data.notification.NotificationService
+import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.security.SecretModeEndEvent
 import com.todoapp.mobile.domain.usecase.security.OnSecretModeEventUseCase
@@ -21,8 +22,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
-class Application : Application(), DefaultLifecycleObserver, Configuration.Provider, coil.ImageLoaderFactory {
-
+class Application :
+    Application(),
+    DefaultLifecycleObserver,
+    Configuration.Provider,
+    coil.ImageLoaderFactory {
     @Inject
     lateinit var secretPreferences: SecretPreferences
 
@@ -32,10 +36,15 @@ class Application : Application(), DefaultLifecycleObserver, Configuration.Provi
     @Inject
     lateinit var okHttpClient: okhttp3.OkHttpClient
 
+    @Inject
+    lateinit var pomodoroEngine: PomodoroEngine
+
     override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
+        get() =
+            Configuration
+                .Builder()
+                .setWorkerFactory(workerFactory)
+                .build()
 
     override fun onCreate() {
         super<Application>.onCreate()
@@ -50,11 +59,11 @@ class Application : Application(), DefaultLifecycleObserver, Configuration.Provi
     // Coil picks this up automatically as the app-wide ImageLoader; wires the shared OkHttpClient
     // (with the AuthInterceptor) so authenticated endpoints like /users/{id}/avatar and
     // /tasks/{id}/photos/{photoId} send the Bearer token.
-    override fun newImageLoader(): coil.ImageLoader =
-        coil.ImageLoader.Builder(this)
-            .okHttpClient { okHttpClient }
-            .crossfade(true)
-            .build()
+    override fun newImageLoader(): coil.ImageLoader = coil.ImageLoader
+        .Builder(this)
+        .okHttpClient { okHttpClient }
+        .crossfade(true)
+        .build()
 
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
@@ -63,16 +72,22 @@ class Application : Application(), DefaultLifecycleObserver, Configuration.Provi
         }
     }
 
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        pomodoroEngine.shutdown()
+    }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                NotificationService.CHANNEL_ID,
-                "Tasks",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                enableVibration(true)
-                setShowBadge(true)
-            }
+            val channel =
+                NotificationChannel(
+                    NotificationService.CHANNEL_ID,
+                    "Tasks",
+                    NotificationManager.IMPORTANCE_HIGH,
+                ).apply {
+                    enableVibration(true)
+                    setShowBadge(true)
+                }
             channel.description = "Used for the notifications"
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)

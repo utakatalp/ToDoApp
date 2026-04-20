@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -24,18 +25,20 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
-
+class PomodoroEngineImpl
+@Inject
+constructor() : PomodoroEngine {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val _state = MutableStateFlow(PomodoroEngineState())
     override val state = _state.asStateFlow()
 
-    private val _events = MutableSharedFlow<PomodoroEvent>(
-        replay = 0,
-        extraBufferCapacity = 64,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
+    private val _events =
+        MutableSharedFlow<PomodoroEvent>(
+            replay = 0,
+            extraBufferCapacity = 64,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
     override val events = _events.asSharedFlow()
 
     private val sessionQueue: ArrayDeque<Session> = ArrayDeque()
@@ -90,15 +93,21 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
         _state.update { it.copy(isVisible = isVisible) }
     }
 
+    override fun shutdown() {
+        cancelRunningJobs()
+        scope.cancel()
+    }
+
     // ---------------- CORE LOGIC ----------------
 
     private fun startCountdown() {
         if (timerJob?.isActive == true) return
         if (remainingMillis <= ZERO_MILLIS) return
 
-        timerJob = scope.launch {
-            runCountdown()
-        }
+        timerJob =
+            scope.launch {
+                runCountdown()
+            }
     }
 
     private fun startOvertime() {
@@ -117,9 +126,10 @@ class PomodoroEngineImpl @Inject constructor() : PomodoroEngine {
 
         _events.tryEmit(PomodoroEvent.SessionFinished)
 
-        overtimeJob = scope.launch {
-            runOvertime()
-        }
+        overtimeJob =
+            scope.launch {
+                runOvertime()
+            }
     }
 
     private fun startNextSession(autoStart: Boolean) {

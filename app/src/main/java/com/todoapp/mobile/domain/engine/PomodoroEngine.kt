@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface PomodoroEngine {
-
     val state: StateFlow<PomodoroEngineState>
     val events: SharedFlow<PomodoroEvent>
 
@@ -21,6 +20,8 @@ interface PomodoroEngine {
     fun finish()
 
     fun updateBannerVisibility(isVisible: Boolean)
+
+    fun shutdown()
 }
 
 data class PomodoroEngineState(
