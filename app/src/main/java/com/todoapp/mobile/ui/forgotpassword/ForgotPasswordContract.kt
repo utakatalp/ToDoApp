@@ -1,10 +1,14 @@
 package com.todoapp.mobile.ui.forgotpassword
 
+import androidx.annotation.StringRes
+
 object ForgotPasswordContract {
     data class UiState(
         val email: String = "",
         val isEmailFieldEnabled: Boolean = false,
         val error: String? = null,
+        val isSubmitting: Boolean = false,
+        val isSent: Boolean = false,
     )
 
     sealed interface UiAction {
@@ -19,5 +23,7 @@ object ForgotPasswordContract {
         data object OnBackToLoginTap : UiAction
     }
 
-    sealed interface UiEffect
+    sealed interface UiEffect {
+        data class ShowToast(@StringRes val messageRes: Int) : UiEffect
+    }
 }

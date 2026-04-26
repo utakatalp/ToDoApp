@@ -1,6 +1,7 @@
 package com.todoapp.mobile.ui.forgotpassword
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,23 +28,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordContract.UiAction
+import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordContract.UiEffect
 import com.todoapp.mobile.ui.forgotpassword.ForgotPasswordContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDText
+import com.todoapp.uikit.extensions.collectWithLifecycle
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun ForgotPasswordScreen(
     uiState: UiState,
+    uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
 ) {
+    val context = LocalContext.current
+    uiEffect.collectWithLifecycle {
+        when (it) {
+            is UiEffect.ShowToast ->
+                Toast.makeText(context, context.getString(it.messageRes), Toast.LENGTH_SHORT).show()
+        }
+    }
     ForgotPasswordContent(uiState, onAction)
 }
 
@@ -131,10 +145,18 @@ private fun ForgotPasswordFormPanel(
     uiState.error?.let {
         TDText(text = it, color = TDTheme.colors.red)
     }
+    if (uiState.isSent) {
+        Spacer(Modifier.height(12.dp))
+        TDText(
+            text = stringResource(R.string.reset_link_sent),
+            color = TDTheme.colors.darkGreen,
+        )
+    }
     Spacer(Modifier.height(24.dp))
     TDButton(
         text = stringResource(R.string.send_reset_link),
         fullWidth = true,
+        isEnable = !uiState.isSubmitting,
         modifier = Modifier.clip(RoundedCornerShape(12.dp)),
     ) { onAction(UiAction.OnForgotPasswordTap) }
     Spacer(Modifier.height(24.dp))
@@ -201,7 +223,7 @@ private fun ForgotPasswordPortraitContent(
             Modifier
                 .weight(2f)
                 .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
-                .background(color = TDTheme.colors.white)
+                .background(color = TDTheme.colors.background)
                 .padding(start = 32.dp, end = 32.dp, top = 24.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
@@ -243,10 +265,77 @@ private fun ForgotPasswordLandscapeContent(
 @Composable
 private fun ForgotPasswordContentPreview() {
     ForgotPasswordContent(
-        uiState =
-        UiState(
-            email = "",
-        ),
+        uiState = UiState(email = ""),
         onAction = {},
     )
+}
+
+@TDPreview
+@Composable
+private fun ForgotPasswordEmptyPreview() {
+    TDTheme {
+        ForgotPasswordContent(
+            uiState = UiState(email = "", isEmailFieldEnabled = true),
+            onAction = {},
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun ForgotPasswordFilledPreview() {
+    TDTheme {
+        ForgotPasswordContent(
+            uiState = UiState(email = "berat@example.com", isEmailFieldEnabled = true),
+            onAction = {},
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun ForgotPasswordSubmittingPreview() {
+    TDTheme {
+        ForgotPasswordContent(
+            uiState =
+            UiState(
+                email = "berat@example.com",
+                isEmailFieldEnabled = false,
+                isSubmitting = true,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun ForgotPasswordSentPreview() {
+    TDTheme {
+        ForgotPasswordContent(
+            uiState =
+            UiState(
+                email = "berat@example.com",
+                isEmailFieldEnabled = false,
+                isSent = true,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun ForgotPasswordErrorPreview() {
+    TDTheme {
+        ForgotPasswordContent(
+            uiState =
+            UiState(
+                email = "not-an-email",
+                isEmailFieldEnabled = true,
+                error = "Please enter a valid email",
+            ),
+            onAction = {},
+        )
+    }
 }
