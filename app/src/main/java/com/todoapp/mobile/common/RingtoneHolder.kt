@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.media.ToneGenerator
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 
@@ -23,17 +24,24 @@ class RingtoneHolder {
         const val TONE_VOLUME: Int = 100
     }
 
-    fun play(context: Context) {
+    /**
+     * Plays the given ringtone URI for [autoStopMillis] then stops. Pass `null` for [explicitUri]
+     * to fall back to the system default alarm/notification sound (legacy behaviour).
+     */
+    fun play(
+        context: Context,
+        explicitUri: Uri? = null,
+        autoStopMillis: Long = AUTO_STOP_MILLIS,
+    ) {
         stop()
 
         // Cancel any previously scheduled stop.
         stopRunnable?.let(mainHandler::removeCallbacks)
         stopRunnable = null
 
-        // Prefer alarm sound; if not available, fall back to notification.
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
         val notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val uri = alarmUri ?: notificationUri
+        val uri = explicitUri ?: alarmUri ?: notificationUri
 
         if (uri == null) {
             // Last-resort fallback: a short tone.
@@ -55,7 +63,7 @@ class RingtoneHolder {
             play()
             // Auto-stop after a short duration (some devices loop indefinitely).
             stopRunnable = Runnable { stop() }
-            mainHandler.postDelayed(stopRunnable!!, AUTO_STOP_MILLIS)
+            mainHandler.postDelayed(stopRunnable!!, autoStopMillis)
         } ?: run {
             // Fallback tone if ringtone couldn't be created.
             ToneGenerator(AudioManager.STREAM_ALARM, TONE_VOLUME)

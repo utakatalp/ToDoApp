@@ -218,3 +218,39 @@ fun TDPomodoroBannerPreview_OverTime() {
         )
     }
 }
+
+@Preview(showBackground = true, widthDp = 420)
+@Composable
+private fun TDPomodoroBannerPreview_ShortBreak() {
+    TDTheme {
+        TDPomodoroBanner(
+            isBannerActivated = true,
+            minutes = 4,
+            seconds = 15,
+            isOverTime = false,
+            modeLabel = "Short Break",
+            modeIconRes = R.drawable.ic_sand_clock,
+            backgroundColor = TDTheme.colors.lightOrange,
+            contentColor = TDTheme.colors.onBackground,
+            onClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 420)
+@Composable
+private fun TDPomodoroBannerPreview_LongBreak() {
+    TDTheme {
+        TDPomodoroBanner(
+            isBannerActivated = true,
+            minutes = 14,
+            seconds = 30,
+            isOverTime = false,
+            modeLabel = "Long Break",
+            modeIconRes = R.drawable.ic_sand_clock,
+            backgroundColor = TDTheme.colors.bgColorPurple,
+            contentColor = TDTheme.colors.onBackground,
+            onClick = {},
+        )
+    }
+}

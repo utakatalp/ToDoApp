@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,6 +41,7 @@ import com.todoapp.uikit.components.TDButtonType
 import com.todoapp.uikit.components.TDInfoCard
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.extensions.collectWithLifecycle
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -207,6 +209,19 @@ private fun TransferMemberRow(
             onClick = onClick,
             colors = RadioButtonDefaults.colors(selectedColor = TDTheme.colors.pendingGray),
             modifier = Modifier.size(24.dp),
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun TransferOwnershipScreenPreview(
+    @PreviewParameter(TransferOwnershipPreviewProvider::class) state: TransferOwnershipContract.UiState,
+) {
+    TDTheme {
+        TransferOwnershipContent(
+            uiState = state,
+            onAction = {},
         )
     }
 }

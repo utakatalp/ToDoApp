@@ -28,6 +28,12 @@ interface Screen {
     data object Notifications : Screen
 
     @Serializable
+    data object Invitations : Screen
+
+    @Serializable
+    data object AlarmSounds : Screen
+
+    @Serializable
     data object Search : Screen
 
     @Serializable
@@ -61,6 +67,14 @@ interface Screen {
 
     @Serializable
     data object ForgotPassword : Screen
+
+    @Serializable
+    data class ResetPassword(
+        val token: String,
+    ) : Screen
+
+    @Serializable
+    data object ChangePassword : Screen
 
     @Serializable
     data class PomodoroSummary(

@@ -237,3 +237,40 @@ private fun TDStatisticCardPendingPreview() {
         )
     }
 }
+
+@TDPreview
+@Composable
+private fun TDStatisticCardZeroPreview() {
+    TDTheme {
+        TDStatisticCard(
+            text = "Task Complete",
+            taskAmount = 0,
+            isCompleted = true,
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDStatisticCardLargeCountPreview() {
+    TDTheme {
+        TDStatisticCard(
+            text = "Task Complete",
+            taskAmount = 1234,
+            isCompleted = true,
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDStatisticCardClickablePreview() {
+    TDTheme {
+        TDStatisticCard(
+            text = "Pending",
+            taskAmount = 7,
+            isCompleted = false,
+            onClick = {},
+        )
+    }
+}

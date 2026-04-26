@@ -163,6 +163,41 @@ sealed class AppDestination(
         selectedIcon = null,
     )
 
+    data object ChangePassword : AppDestination(
+        title = R.string.change_password,
+        route = Screen.ChangePassword::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object ResetPassword : AppDestination(
+        title = R.string.reset_password,
+        route = Screen.ResetPassword::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object Notifications : AppDestination(
+        title = R.string.notifications_title,
+        route = Screen.Notifications::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object Invitations : AppDestination(
+        title = R.string.invitations_title,
+        route = Screen.Invitations::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
+    data object AlarmSounds : AppDestination(
+        title = R.string.alarm_sounds,
+        route = Screen.AlarmSounds::class.qualifiedName!!,
+        icon = null,
+        selectedIcon = null,
+    )
+
     companion object {
         val bottomBarItems = listOf(Home, Groups, Calendar, Activity)
         val topBarItems =
@@ -189,6 +224,11 @@ sealed class AppDestination(
                 MemberProfile,
                 TransferOwnership,
                 Profile,
+                ChangePassword,
+                ResetPassword,
+                Notifications,
+                Invitations,
+                AlarmSounds,
             )
     }
 }

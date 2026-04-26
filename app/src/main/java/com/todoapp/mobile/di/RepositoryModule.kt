@@ -3,7 +3,9 @@ package com.todoapp.mobile.di
 import com.todoapp.mobile.data.engine.PomodoroEngineImpl
 import com.todoapp.mobile.data.repository.AuthRepositoryImpl
 import com.todoapp.mobile.data.repository.GroupRepositoryImpl
+import com.todoapp.mobile.data.repository.InvitationRepositoryImpl
 import com.todoapp.mobile.data.repository.LanguageRepositoryImpl
+import com.todoapp.mobile.data.repository.NotificationRepositoryImpl
 import com.todoapp.mobile.data.repository.PomodoroRepositoryImpl
 import com.todoapp.mobile.data.repository.SessionPreferencesImpl
 import com.todoapp.mobile.data.repository.TaskRepositoryImpl
@@ -22,12 +24,18 @@ import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSourceImpl
 import com.todoapp.mobile.data.source.remote.datasource.GroupRemoteDataSource
 import com.todoapp.mobile.data.source.remote.datasource.GroupRemoteDataSourceImpl
+import com.todoapp.mobile.data.source.remote.datasource.InvitationRemoteDataSource
+import com.todoapp.mobile.data.source.remote.datasource.InvitationRemoteDataSourceImpl
+import com.todoapp.mobile.data.source.remote.datasource.NotificationRemoteDataSource
+import com.todoapp.mobile.data.source.remote.datasource.NotificationRemoteDataSourceImpl
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSourceImpl
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.GroupRepository
+import com.todoapp.mobile.domain.repository.InvitationRepository
 import com.todoapp.mobile.domain.repository.LanguageRepository
+import com.todoapp.mobile.domain.repository.NotificationRepository
 import com.todoapp.mobile.domain.repository.PomodoroRepository
 import com.todoapp.mobile.domain.repository.SessionPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
@@ -110,4 +118,36 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPomodoroRepository(pomodoroRepositoryImpl: PomodoroRepositoryImpl): PomodoroRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPendingPhotoRepository(
+        impl: com.todoapp.mobile.data.repository.PendingPhotoRepositoryImpl,
+    ): com.todoapp.mobile.domain.repository.PendingPhotoRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRemoteDataSource(
+        impl: NotificationRemoteDataSourceImpl,
+    ): NotificationRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepository(impl: NotificationRepositoryImpl): NotificationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindInvitationRemoteDataSource(
+        impl: InvitationRemoteDataSourceImpl,
+    ): InvitationRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindInvitationRepository(impl: InvitationRepositoryImpl): InvitationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAlarmSoundPreferences(
+        impl: com.todoapp.mobile.data.repository.AlarmSoundPreferencesImpl,
+    ): com.todoapp.mobile.domain.repository.AlarmSoundPreferences
 }

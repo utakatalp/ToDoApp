@@ -8,7 +8,7 @@ import androidx.navigation.toRoute
 import com.todoapp.mobile.data.model.network.data.GroupSummaryData
 import com.todoapp.mobile.domain.model.Group
 import com.todoapp.mobile.domain.repository.GroupRepository
-import com.todoapp.mobile.domain.repository.UserRepository
+import com.todoapp.mobile.domain.repository.SessionPreferences
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.groups.GroupsContract.UiAction
@@ -33,7 +33,7 @@ class GroupsViewModel
 @Inject
 constructor(
     private val groupRepository: GroupRepository,
-    private val userRepository: UserRepository,
+    private val sessionPreferences: SessionPreferences,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val pendingDeleteGroupId = savedStateHandle.toRoute<Screen.Groups>().pendingDeleteGroupId
@@ -72,12 +72,28 @@ constructor(
             }
             is UiAction.OnMoveGroup -> reorderGroups(action)
             UiAction.OnScreenResumed -> fetchRemoteGroups()
+            UiAction.OnPullToRefresh -> refreshFromPull()
+        }
+    }
+
+    private fun refreshFromPull() {
+        updateSuccessState { it.copy(isRefreshing = true) }
+        viewModelScope.launch {
+            groupRepository
+                .getGroups(force = true)
+                .onSuccess { result ->
+                    remoteSummaryCache = result.groups.associateBy { it.id }
+                    result.groups.forEach { group ->
+                        launch { groupRepository.syncGroupTasks(group.id) }
+                    }
+                }
+            updateSuccessState { it.copy(isRefreshing = false) }
         }
     }
 
     private fun createNewGroup() {
         viewModelScope.launch {
-            val isUserAuthenticated = userRepository.getUserInfo().isSuccess
+            val isUserAuthenticated = sessionPreferences.getAccessToken().isNullOrBlank().not()
 
             if (isUserAuthenticated) {
                 _navEffect.trySend(NavigationEffect.Navigate(Screen.CreateNewGroup))
@@ -114,14 +130,15 @@ constructor(
     private fun observeLocalGroups() {
         viewModelScope.launch {
             groupRepository.observeAllGroups().collect { groups ->
+                val isUserAuthenticated = sessionPreferences.getAccessToken().isNullOrBlank().not()
                 _uiState.update {
                     (
                         if (groups.isEmpty()) {
-                            UiState.Empty(isUserAuthenticated = userRepository.getUserInfo().isSuccess)
+                            UiState.Empty(isUserAuthenticated = isUserAuthenticated)
                         } else {
                             UiState.Success(
                                 groups = groups.map { it.toUiItem() },
-                                isUserAuthenticated = userRepository.getUserInfo().isSuccess,
+                                isUserAuthenticated = isUserAuthenticated,
                             )
                         }
                         )

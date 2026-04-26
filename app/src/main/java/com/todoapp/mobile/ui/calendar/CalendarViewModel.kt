@@ -1,25 +1,32 @@
 package com.todoapp.mobile.ui.calendar
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.BuildConfig
+import com.todoapp.mobile.R
+import com.todoapp.mobile.common.maskDescription
 import com.todoapp.mobile.common.maskTitle
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.engine.PomodoroEngine
+import com.todoapp.mobile.domain.model.GroupTask
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.toAlarmItem
+import com.todoapp.mobile.domain.repository.GroupRepository
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.repository.TaskSyncRepository
 import com.todoapp.mobile.domain.security.SecretModeConditionFactory
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
+import com.todoapp.mobile.ui.calendar.CalendarContract.GroupTaskCalendarItem
+import com.todoapp.mobile.ui.calendar.CalendarContract.PersonalTaskCalendarItem
 import com.todoapp.mobile.ui.calendar.CalendarContract.UiAction
 import com.todoapp.mobile.ui.calendar.CalendarContract.UiEffect
 import com.todoapp.mobile.ui.calendar.CalendarContract.UiState
 import com.todoapp.mobile.ui.home.TaskFormState
-import com.todoapp.uikit.components.TaskCardItem
-import com.todoapp.uikit.components.TaskDayItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -28,8 +35,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -37,7 +46,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +56,8 @@ class CalendarViewModel
 @Inject
 constructor(
     private val taskRepository: TaskRepository,
+    private val groupRepository: GroupRepository,
+    private val taskSyncRepository: TaskSyncRepository,
     private val secretModePreferences: SecretPreferences,
     private val alarmScheduler: AlarmScheduler,
     private val pomodoroEngine: PomodoroEngine,
@@ -61,6 +74,7 @@ constructor(
     private var pendingTaskId: Long = -1L
 
     init {
+        taskSyncRepository.fetchTasks(force = true)
         syncTasksWithSelectedDate()
         syncTaskDatesForMonth()
     }
@@ -125,6 +139,12 @@ constructor(
                 }
             is UiAction.OnPomodoroTap -> navigateToPomodoro()
             is UiAction.OnSuccessfulBiometricAuthenticationHandle -> handleSuccessfulBiometricAuthentication()
+            is UiAction.OnGroupTaskPhotoOpen -> updateSuccessState { it.copy(viewerPhotoUrl = uiAction.url) }
+            is UiAction.OnGroupTaskPhotoDismiss -> updateSuccessState { it.copy(viewerPhotoUrl = null) }
+            is UiAction.OnGroupTaskClick ->
+                _navEffect.trySend(
+                    NavigationEffect.Navigate(Screen.GroupTaskDetail(uiAction.groupId, uiAction.taskId)),
+                )
         }
     }
 
@@ -211,19 +231,27 @@ constructor(
         val form = state.taskFormState
         return when {
             form.taskTitle.isBlank() -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTitleError = v)) }
+                showTransientError(R.string.error_task_title_required) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(titleErrorRes = v))
+                }
                 false
             }
             form.dialogSelectedDate == null -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isDateError = v)) }
+                showTransientError(R.string.error_task_date_required) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(dateErrorRes = v))
+                }
                 false
             }
             form.taskTimeStart == null || form.taskTimeEnd == null -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTimeError = v)) }
+                showTransientError(R.string.error_task_time_required) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(timeErrorRes = v))
+                }
                 false
             }
             form.taskTimeStart.isAfter(form.taskTimeEnd) -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTimeError = v)) }
+                showTransientError(R.string.error_task_end_before_start) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(timeErrorRes = v))
+                }
                 false
             }
             else -> true
@@ -243,13 +271,14 @@ constructor(
     }
 
     private fun showTransientError(
+        @StringRes errorRes: Int,
         durationMs: Long = 2000L,
-        setFlag: (UiState.Success, Boolean) -> UiState.Success,
+        setErrorRes: (UiState.Success, Int?) -> UiState.Success,
     ) {
         viewModelScope.launch {
-            updateSuccessState { setFlag(it, true) }
+            updateSuccessState { setErrorRes(it, errorRes) }
             delay(durationMs)
-            updateSuccessState { setFlag(it, false) }
+            updateSuccessState { setErrorRes(it, null) }
         }
     }
 
@@ -274,19 +303,48 @@ constructor(
                 .map { it.selectedDate }
                 .distinctUntilChanged()
                 .collectLatest { date ->
-                    observeTasks(date).collect { tasks ->
-                        updateSuccessState {
-                            it.copy(taskDayItems = mapTasksToTaskDayItems(tasks))
+                    if (date != null) {
+                        launch {
+                            val remoteIds = taskRepository
+                                .observeTasksByDate(date)
+                                .first()
+                                .mapNotNull { it.remoteId }
+                            if (remoteIds.isNotEmpty()) taskRepository.refreshPhotoUrls(remoteIds)
                         }
                     }
+                    observeTasks(date).collect(::applyDayData)
                 }
         }
     }
 
-    private fun observeTasks(date: LocalDate?): Flow<List<Task>> = when {
-        date == null -> flowOf(emptyList())
-        else -> taskRepository.observeTasksByDate(date)
+    private fun applyDayData(data: DayData) {
+        updateSuccessState { it.copy(personalTaskItems = data.personal, groupTaskItems = data.group) }
     }
+
+    private fun observeTasks(date: LocalDate?): Flow<DayData> = when {
+        date == null -> flowOf(DayData(emptyList(), emptyList()))
+        else ->
+            combine(
+                taskRepository.observeTasksByDate(date),
+                groupRepository.observeAllGroupTasks(),
+                taskRepository.observeTaskPhotoUrls(),
+            ) { personalTasks, groupTasks, photoUrlsByRemoteId ->
+                val groupForDate = groupTasks.filter { dueDateToLocalDate(it.dueDate) == date }
+                val personalWithPhotos = personalTasks.map { task ->
+                    val remoteUrls = task.remoteId?.let { photoUrlsByRemoteId[it] }.orEmpty()
+                    if (remoteUrls.isNotEmpty()) task.copy(photoUrls = remoteUrls) else task
+                }
+                DayData(
+                    personal = mapPersonalTasks(personalWithPhotos),
+                    group = groupForDate.map { it.toCalendarItem() },
+                )
+            }
+    }
+
+    private data class DayData(
+        val personal: List<PersonalTaskCalendarItem>,
+        val group: List<GroupTaskCalendarItem>,
+    )
 
     private fun deselectDate() {
         updateSuccessState { it.copy(selectedDate = null) }
@@ -296,24 +354,63 @@ constructor(
         updateSuccessState { it.copy(selectedDate = uiAction.date) }
     }
 
-    private fun mapTasksToTaskDayItems(tasks: List<Task>): List<TaskDayItem> = tasks
-        .groupBy { it.date }
-        .map { (date, tasks) ->
-            TaskDayItem(
-                date = date,
-                tasks =
-                tasks.map { task ->
-                    TaskCardItem(
-                        taskId = task.id,
-                        taskTitle = if (task.isSecret) task.title.maskTitle() else task.title,
-                        taskTimeStart = task.timeStart.toString(),
-                        taskTimeEnd = task.timeEnd.toString(),
-                        isCompleted = task.isCompleted,
-                        description = task.description,
-                    )
-                },
-            )
-        }
+    private fun mapPersonalTasks(personalTasks: List<Task>): List<PersonalTaskCalendarItem> = personalTasks.map { task ->
+        val dueAt = task.date
+            .atTime(task.timeEnd)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+        val maskedDescription = task.description?.let { if (task.isSecret) it.maskDescription() else it }
+        val photoUrl = task.photoUrls
+            .firstOrNull()
+            ?.takeIf { it.isNotBlank() && !task.isSecret }
+            ?.let(::absoluteUrl)
+        PersonalTaskCalendarItem(
+            taskId = task.id,
+            title = if (task.isSecret) task.title.maskTitle() else task.title,
+            description = maskedDescription,
+            dueAtEpochMs = dueAt,
+            isCompleted = task.isCompleted,
+            photoUrl = photoUrl,
+        )
+    }
+
+    private fun GroupTask.toCalendarItem(): GroupTaskCalendarItem {
+        val assignee = this.assignee
+        val assigneeName = assignee?.displayName
+        val assigneeAvatarUrl =
+            assignee?.avatarUrl?.takeIf { it.isNotBlank() }?.let(::absoluteUrl)
+                ?: assignee?.userId?.let { "${BuildConfig.BASE_URL.trimEnd('/')}/users/$it/avatar" }
+        val assigneeInitials = assigneeName
+            ?.split(" ")
+            ?.mapNotNull { it.firstOrNull()?.toString() }
+            ?.take(2)
+            ?.joinToString("")
+            ?.uppercase()
+            ?: "?"
+        val photoUrl = photoUrls.firstOrNull()?.takeIf { it.isNotBlank() }?.let(::absoluteUrl)
+        return GroupTaskCalendarItem(
+            taskId = id,
+            groupId = groupId,
+            title = title,
+            priority = priority,
+            dueAtEpochMs = dueDate ?: 0L,
+            assigneeName = assigneeName,
+            assigneeAvatarUrl = assigneeAvatarUrl,
+            assigneeInitials = assigneeInitials,
+            photoUrl = photoUrl,
+            isCompleted = isCompleted,
+        )
+    }
+
+    private fun absoluteUrl(relative: String): String {
+        val base = BuildConfig.BASE_URL.trimEnd('/')
+        return "$base/${relative.trimStart('/')}"
+    }
+
+    private fun dueDateToLocalDate(epochMillis: Long?): LocalDate? = epochMillis?.let {
+        Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun syncTaskDatesForMonth() {
@@ -326,9 +423,16 @@ constructor(
                     val firstDay = month.atDay(1)
                     val startDate = firstDay.minusDays((firstDay.dayOfWeek.value - 1).toLong())
                     val endDate = startDate.plusDays(34L)
-                    taskRepository
-                        .observeRange(startDate, endDate)
-                        .map { tasks -> tasks.map { it.date }.toSet() }
+                    combine(
+                        taskRepository.observeRange(startDate, endDate),
+                        groupRepository.observeAllGroupTasks(),
+                    ) { personalTasks, groupTasks ->
+                        val personalDates = personalTasks.map { it.date }
+                        val groupDates = groupTasks
+                            .mapNotNull { dueDateToLocalDate(it.dueDate) }
+                            .filter { it in startDate..endDate }
+                        (personalDates + groupDates).toSet()
+                    }
                 }.collect { taskDates ->
                     updateSuccessState { it.copy(taskDatesInMonth = taskDates) }
                 }

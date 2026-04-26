@@ -114,7 +114,7 @@ fun TDOverlayDailyPlanNotificationCard(
                 Box(
                     modifier =
                     Modifier
-                        .size(64.dp)
+                        .size(70.dp)
                         .clip(CircleShape)
                         .background(TDTheme.colors.background.copy(alpha = 0.14f)),
                     contentAlignment = Alignment.Center,
@@ -123,13 +123,13 @@ fun TDOverlayDailyPlanNotificationCard(
                         painter =
                         painterResource(
                             if (TDTheme.isDark) {
-                                R.drawable.ic_daily_overlay_robot_dark
+                                R.drawable.img_donebot_overlay_notification_light
                             } else {
-                                R.drawable.ic_daily_overlay_robot_light
+                                R.drawable.img_donebot_overlay_notification_dark
                             },
                         ),
                         contentDescription = "Logo",
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(70.dp),
                     )
                 }
 

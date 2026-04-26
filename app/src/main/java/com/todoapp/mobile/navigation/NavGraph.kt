@@ -41,6 +41,8 @@ import com.todoapp.mobile.ui.banner.BannerOverlay
 import com.todoapp.mobile.ui.banner.BannerViewModel
 import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
+import com.todoapp.mobile.ui.changepassword.ChangePasswordScreen
+import com.todoapp.mobile.ui.changepassword.ChangePasswordViewModel
 import com.todoapp.mobile.ui.details.DetailsScreen
 import com.todoapp.mobile.ui.details.DetailsViewModel
 import com.todoapp.mobile.ui.filteredtasks.FilteredTasksScreen
@@ -80,6 +82,8 @@ import com.todoapp.mobile.ui.pomodorosummary.PomodoroSummaryScreen
 import com.todoapp.mobile.ui.pomodorosummary.PomodoroSummaryViewModel
 import com.todoapp.mobile.ui.register.RegisterScreen
 import com.todoapp.mobile.ui.register.RegisterViewModel
+import com.todoapp.mobile.ui.resetpassword.ResetPasswordScreen
+import com.todoapp.mobile.ui.resetpassword.ResetPasswordViewModel
 import com.todoapp.mobile.ui.search.SearchScreen
 import com.todoapp.mobile.ui.search.SearchViewModel
 import com.todoapp.mobile.ui.settings.SecretModeSettingsScreen
@@ -291,7 +295,11 @@ fun NavGraph(
             val viewModel: ForgotPasswordViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             NavigationEffectController(viewModel.navEffect)
-            ForgotPasswordScreen(uiState, viewModel::onAction)
+            ForgotPasswordScreen(
+                uiState = uiState,
+                uiEffect = viewModel.effect,
+                onAction = viewModel::onAction,
+            )
         }
 
         composable<Screen.PomodoroSummary> {
@@ -345,6 +353,60 @@ fun NavGraph(
             NavigationEffectController(viewModel.navEffect)
             com.todoapp.mobile.ui.profile
                 .ProfileScreen(viewModel = viewModel)
+        }
+
+        composable<Screen.Notifications> {
+            val viewModel: com.todoapp.mobile.ui.notifications.NotificationsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            com.todoapp.mobile.ui.notifications.NotificationsScreen(
+                uiState = uiState,
+                uiEffect = viewModel.effect,
+                onAction = viewModel::onAction,
+            )
+        }
+
+        composable<Screen.Invitations> {
+            val viewModel: com.todoapp.mobile.ui.invitations.InvitationsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            com.todoapp.mobile.ui.invitations.InvitationsScreen(
+                uiState = uiState,
+                uiEffect = viewModel.effect,
+                onAction = viewModel::onAction,
+            )
+        }
+
+        composable<Screen.AlarmSounds> {
+            val viewModel: com.todoapp.mobile.ui.alarmsounds.AlarmSoundsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            com.todoapp.mobile.ui.alarmsounds.AlarmSoundsScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction,
+            )
+        }
+
+        composable<Screen.ChangePassword> {
+            val viewModel: ChangePasswordViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            ChangePasswordScreen(
+                uiState = uiState,
+                uiEffect = viewModel.effect,
+                onAction = viewModel::onAction,
+            )
+        }
+
+        composable<Screen.ResetPassword> {
+            val viewModel: ResetPasswordViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            ResetPasswordScreen(
+                uiState = uiState,
+                uiEffect = viewModel.effect,
+                onAction = viewModel::onAction,
+            )
         }
 
         composable<Screen.GroupDetail> {

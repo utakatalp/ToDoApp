@@ -15,6 +15,7 @@ import com.todoapp.mobile.data.model.network.data.AuthResponseData
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.repository.SessionPreferences
+import com.todoapp.mobile.domain.repository.TaskSyncRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -39,6 +40,7 @@ constructor(
     private val authTokenManager: AuthTokenManager,
     private val sessionPreferences: SessionPreferences,
     private val dataStoreHelper: DataStoreHelper,
+    private val taskSyncRepository: TaskSyncRepository,
     savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
@@ -177,7 +179,9 @@ constructor(
             sessionPreferences.setRefreshToken(loginResponseData.refreshToken)
             sessionPreferences.setExpiresAt(loginResponseData.expiresIn)
             dataStoreHelper.setUser(userData = loginResponseData.user)
-            dataStoreHelper.setLoggedIn(true)
+            dataStoreHelper.setFirstLoginPermissionPromptPending(true)
+
+            taskSyncRepository.fetchTasks(force = true)
 
             kotlinx.coroutines.yield()
 

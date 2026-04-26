@@ -58,6 +58,7 @@ import com.todoapp.mobile.ui.groups.groupdetail.GroupDetailContract.UiState
 import com.todoapp.mobile.ui.home.SecretOrNormalPhotoBanner
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonType
+import com.todoapp.uikit.components.TDPriorityBadge
 import com.todoapp.uikit.components.TDTaskCardWithCheckbox
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDUndoSnackbar
@@ -579,7 +580,7 @@ private fun GroupTaskCard(
             )
         }
         if (!task.priority.isNullOrBlank()) {
-            PriorityBadge(
+            TDPriorityBadge(
                 priority = task.priority,
                 modifier =
                 Modifier

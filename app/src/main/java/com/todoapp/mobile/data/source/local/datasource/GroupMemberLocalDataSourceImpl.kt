@@ -27,4 +27,6 @@ constructor(
         groupMemberDao.deleteByGroupId(localGroupId)
         groupMemberDao.insertAll(members)
     }
+
+    override suspend fun deleteAll() = groupMemberDao.deleteAll()
 }

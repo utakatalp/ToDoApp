@@ -22,9 +22,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -87,6 +89,7 @@ fun GroupScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GroupsContent(
     uiState: UiState.Success,
@@ -131,94 +134,100 @@ private fun GroupsContent(
         val isAnyDragging = reorderableLazyListState.isAnyItemDragging
 
         Box(modifier = Modifier.weight(1f)) {
-            LazyColumn(
+            PullToRefreshBox(
                 modifier = Modifier.fillMaxSize(),
-                state = lazyListState,
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = { onAction(UiAction.OnPullToRefresh) },
             ) {
-                itemsIndexed(
-                    items = localGroups.filter { it.id != uiState.pendingDeleteGroup?.id },
-                    key = { _, group -> group.id },
-                ) { index, group ->
-                    ReorderableItem(
-                        state = reorderableLazyListState,
-                        key = group.id,
-                    ) { isDragging ->
-                        TDFamilyGroupCard(
-                            name = group.name,
-                            role = group.role,
-                            description = group.description,
-                            memberCount = group.memberCount,
-                            pendingTaskCount = group.pendingTaskCount,
-                            createdDate = group.createdAt,
-                            membersIcon = R.drawable.ic_members,
-                            tasksIcon = R.drawable.ic_sand_clock,
-                            avatarUrl = group.avatarUrl,
-                            onViewDetailsClick = {
-                                group.remoteId?.let {
-                                    onAction(
-                                        UiAction.OnGroupTap(it, group.name),
-                                    )
-                                }
-                            },
-                            onDeleteClick = { onAction(UiAction.OnDeleteGroupTap(group.id)) },
-                            isDragging = isDragging,
-                            isAnyDragging = isAnyDragging,
-                            modifier =
-                            Modifier
-                                .semantics {
-                                    customActions =
-                                        listOf(
-                                            CustomAccessibilityAction(
-                                                label = "Move Up",
-                                                action = {
-                                                    if (index > 0) {
-                                                        onAction(UiAction.OnMoveGroup(index, index - 1))
-                                                        true
-                                                    } else {
-                                                        false
-                                                    }
-                                                },
-                                            ),
-                                            CustomAccessibilityAction(
-                                                label = "Move Down",
-                                                action = {
-                                                    if (index < localGroups.lastIndex) {
-                                                        onAction(UiAction.OnMoveGroup(index, index + 1))
-                                                        true
-                                                    } else {
-                                                        false
-                                                    }
-                                                },
-                                            ),
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    state = lazyListState,
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    itemsIndexed(
+                        items = localGroups.filter { it.id != uiState.pendingDeleteGroup?.id },
+                        key = { _, group -> group.id },
+                    ) { index, group ->
+                        ReorderableItem(
+                            state = reorderableLazyListState,
+                            key = group.id,
+                        ) { isDragging ->
+                            TDFamilyGroupCard(
+                                name = group.name,
+                                role = group.role,
+                                description = group.description,
+                                memberCount = group.memberCount,
+                                pendingTaskCount = group.pendingTaskCount,
+                                createdDate = group.createdAt,
+                                membersIcon = R.drawable.ic_members,
+                                tasksIcon = R.drawable.ic_sand_clock,
+                                avatarUrl = group.avatarUrl,
+                                onViewDetailsClick = {
+                                    group.remoteId?.let {
+                                        onAction(
+                                            UiAction.OnGroupTap(it, group.name),
                                         )
-                                }.longPressDraggableHandle(
-                                    onDragStarted = {
-                                        hapticFeedback.performHapticFeedback(
-                                            HapticFeedbackType.GestureThresholdActivate,
-                                        )
-                                    },
-                                    onDragStopped = {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                        val orig = dragOriginalIndex
-                                        val final = dragFinalIndex
-                                        dragOriginalIndex = -1
-                                        dragFinalIndex = -1
-                                        if (orig != -1 && final != -1 && orig != final) {
-                                            onAction(UiAction.OnMoveGroup(orig, final))
-                                        }
-                                    },
-                                ).clickable(
-                                    onClick = {
-                                        group.remoteId?.let {
-                                            onAction(
-                                                UiAction.OnGroupTap(it, group.name),
+                                    }
+                                },
+                                onDeleteClick = { onAction(UiAction.OnDeleteGroupTap(group.id)) },
+                                isDragging = isDragging,
+                                isAnyDragging = isAnyDragging,
+                                modifier =
+                                Modifier
+                                    .semantics {
+                                        customActions =
+                                            listOf(
+                                                CustomAccessibilityAction(
+                                                    label = "Move Up",
+                                                    action = {
+                                                        if (index > 0) {
+                                                            onAction(UiAction.OnMoveGroup(index, index - 1))
+                                                            true
+                                                        } else {
+                                                            false
+                                                        }
+                                                    },
+                                                ),
+                                                CustomAccessibilityAction(
+                                                    label = "Move Down",
+                                                    action = {
+                                                        if (index < localGroups.lastIndex) {
+                                                            onAction(UiAction.OnMoveGroup(index, index + 1))
+                                                            true
+                                                        } else {
+                                                            false
+                                                        }
+                                                    },
+                                                ),
                                             )
-                                        }
-                                    },
-                                ),
-                        )
+                                    }.longPressDraggableHandle(
+                                        onDragStarted = {
+                                            hapticFeedback.performHapticFeedback(
+                                                HapticFeedbackType.GestureThresholdActivate,
+                                            )
+                                        },
+                                        onDragStopped = {
+                                            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                                            val orig = dragOriginalIndex
+                                            val final = dragFinalIndex
+                                            dragOriginalIndex = -1
+                                            dragFinalIndex = -1
+                                            if (orig != -1 && final != -1 && orig != final) {
+                                                onAction(UiAction.OnMoveGroup(orig, final))
+                                            }
+                                        },
+                                    ).clickable(
+                                        onClick = {
+                                            group.remoteId?.let {
+                                                onAction(
+                                                    UiAction.OnGroupTap(it, group.name),
+                                                )
+                                            }
+                                        },
+                                    ),
+                            )
+                        }
                     }
                 }
             }

@@ -109,3 +109,79 @@ private fun BannerContentPreview() {
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun BannerContentShortBreakPreview() {
+    TDTheme {
+        BannerContent(
+            uiState =
+            UiState(
+                isVisible = true,
+                isBannerActivated = true,
+                minutes = 4,
+                seconds = 12,
+                mode = PomodoroMode.ShortBreak,
+                isOverTime = false,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun BannerContentLongBreakPreview() {
+    TDTheme {
+        BannerContent(
+            uiState =
+            UiState(
+                isVisible = true,
+                isBannerActivated = true,
+                minutes = 14,
+                seconds = 0,
+                mode = PomodoroMode.LongBreak,
+                isOverTime = false,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun BannerContentOverTimePreview() {
+    TDTheme {
+        BannerContent(
+            uiState =
+            UiState(
+                isVisible = true,
+                isBannerActivated = true,
+                minutes = 0,
+                seconds = 30,
+                mode = PomodoroMode.OverTime,
+                isOverTime = true,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun BannerContentHiddenPreview() {
+    TDTheme {
+        BannerContent(
+            uiState =
+            UiState(
+                isVisible = false,
+                isBannerActivated = false,
+                minutes = 0,
+                seconds = 0,
+                mode = PomodoroMode.Focus,
+                isOverTime = false,
+            ),
+            onAction = {},
+        )
+    }
+}

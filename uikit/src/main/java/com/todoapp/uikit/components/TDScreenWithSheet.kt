@@ -104,3 +104,25 @@ private fun TDScreenWithSheetPreview() {
         }
     }
 }
+
+@TDPreview
+@Composable
+private fun TDScreenWithSheetClosedPreview() {
+    TDTheme {
+        TDScreenWithSheet(
+            isSheetOpen = false,
+            sheetContent = {},
+            onDismissSheet = {},
+        ) {
+            Box(
+                modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(TDTheme.colors.background)
+                    .padding(16.dp),
+            ) {
+                TDText(text = "Main Content (sheet closed)")
+            }
+        }
+    }
+}

@@ -215,3 +215,117 @@ private fun RegisterContentDarkPreview() {
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun RegisterContentEmptyPreview() {
+    TDTheme {
+        RegisterContent(uiState = UiState(), onAction = {})
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun RegisterContentWeakPasswordPreview() {
+    TDTheme {
+        RegisterContent(
+            uiState =
+            UiState(
+                fullName = "Natalia",
+                email = "natalia@example.com",
+                password = "abc",
+                confirmPassword = "abc",
+                passwordStrength = com.todoapp.mobile.common.passwordValidation.PasswordStrength.WEAK,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun RegisterContentMediumPasswordPreview() {
+    TDTheme {
+        RegisterContent(
+            uiState =
+            UiState(
+                fullName = "Natalia",
+                email = "natalia@example.com",
+                password = "Pass1234",
+                confirmPassword = "Pass1234",
+                passwordStrength = com.todoapp.mobile.common.passwordValidation.PasswordStrength.MEDIUM,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun RegisterContentStrongPasswordPreview() {
+    TDTheme {
+        RegisterContent(
+            uiState =
+            UiState(
+                fullName = "Natalia Smith",
+                email = "natalia@example.com",
+                password = "Str0ng!Pass#9876",
+                confirmPassword = "Str0ng!Pass#9876",
+                passwordStrength = com.todoapp.mobile.common.passwordValidation.PasswordStrength.STRONG,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun RegisterContentEmailErrorPreview() {
+    TDTheme {
+        RegisterContent(
+            uiState =
+            UiState(
+                fullName = "Natalia",
+                email = "not-email",
+                emailError = RegisterContract.RegisterError("Please enter a valid email"),
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun RegisterContentMismatchPasswordPreview() {
+    TDTheme {
+        RegisterContent(
+            uiState =
+            UiState(
+                fullName = "Natalia",
+                email = "natalia@example.com",
+                password = "password123",
+                confirmPassword = "different",
+                confirmPasswordError = RegisterContract.RegisterError("Passwords do not match"),
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun RegisterContentRedirectingPreview() {
+    TDTheme {
+        RegisterContent(
+            uiState =
+            UiState(
+                fullName = "Natalia Smith",
+                email = "natalia@example.com",
+                password = "Str0ng!Pass#9876",
+                confirmPassword = "Str0ng!Pass#9876",
+                isRedirecting = true,
+            ),
+            onAction = {},
+        )
+    }
+}

@@ -27,6 +27,8 @@ object ProfileContract {
         ) : UiAction
 
         data object OnBack : UiAction
+
+        data object OnChangePasswordTap : UiAction
     }
 
     sealed interface UiEffect {

@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 interface GroupTaskLocalDataSource {
     fun observeByGroupId(localGroupId: Long): Flow<List<GroupTaskEntity>>
 
+    fun observeAll(): Flow<List<GroupTaskEntity>>
+
     fun searchAll(query: String): Flow<List<GroupTaskEntity>>
 
     suspend fun insert(task: GroupTaskEntity)
@@ -19,6 +21,8 @@ interface GroupTaskLocalDataSource {
     suspend fun deleteByGroupId(localGroupId: Long)
 
     suspend fun deleteByRemoteId(remoteId: Long)
+
+    suspend fun deleteAll()
 
     suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity?
 

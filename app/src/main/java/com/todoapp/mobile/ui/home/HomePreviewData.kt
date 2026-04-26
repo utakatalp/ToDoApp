@@ -25,9 +25,9 @@ object HomePreviewData {
         taskDescription: String = "",
         isAdvancedSettingsExpanded: Boolean = false,
         isTaskSecret: Boolean = false,
-        isTitleError: Boolean = false,
-        isTimeError: Boolean = false,
-        isDateError: Boolean = false,
+        titleErrorRes: Int? = null,
+        timeErrorRes: Int? = null,
+        dateErrorRes: Int? = null,
     ) = UiState.Success(
         selectedDate = selectedDate,
         displayedMonth = displayedMonth,
@@ -46,9 +46,9 @@ object HomePreviewData {
             taskDescription = taskDescription,
             isAdvancedSettingsExpanded = isAdvancedSettingsExpanded,
             isTaskSecret = isTaskSecret,
-            isTitleError = isTitleError,
-            isTimeError = isTimeError,
-            isDateError = isDateError,
+            titleErrorRes = titleErrorRes,
+            timeErrorRes = timeErrorRes,
+            dateErrorRes = dateErrorRes,
         ),
     )
 

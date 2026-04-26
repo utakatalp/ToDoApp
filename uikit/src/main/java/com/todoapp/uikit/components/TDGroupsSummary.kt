@@ -348,3 +348,60 @@ private fun FamilyGroupCardDarkPreview() {
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun FamilyGroupCardNoTasksPreview() {
+    TDTheme {
+        TDFamilyGroupCard(
+            name = "Roommates",
+            role = "Admin",
+            description = "Shared chores and groceries for the apartment.",
+            memberCount = 3,
+            pendingTaskCount = 0,
+            createdDate = "Apr 01, 2026",
+            membersIcon = R.drawable.ic_members,
+            tasksIcon = R.drawable.ic_tasks_done,
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FamilyGroupCardDraggingPreview() {
+    TDTheme {
+        TDFamilyGroupCard(
+            name = "Work Squad",
+            role = "Member",
+            description = "Coordinating sprint planning and code reviews.",
+            memberCount = 6,
+            pendingTaskCount = 11,
+            createdDate = "Feb 22, 2026",
+            membersIcon = R.drawable.ic_members,
+            tasksIcon = R.drawable.ic_tasks_done,
+            isDragging = true,
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FamilyGroupCardDimmedPreview() {
+    TDTheme {
+        TDFamilyGroupCard(
+            name = "Book Club",
+            role = "Member",
+            description = "Monthly reading list and discussion notes.",
+            memberCount = 8,
+            pendingTaskCount = 2,
+            createdDate = "Jan 03, 2026",
+            membersIcon = R.drawable.ic_members,
+            tasksIcon = R.drawable.ic_tasks_done,
+            isAnyDragging = true,
+            isDragging = false,
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}

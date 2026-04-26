@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import com.todoapp.mobile.R
 import com.todoapp.mobile.data.auth.GoogleSignInManager
 import com.todoapp.mobile.ui.login.LoginContract.UiAction
@@ -47,7 +48,7 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
 
-    uiEffect.collectWithLifecycle {
+    uiEffect.collectWithLifecycle(minActiveState = Lifecycle.State.CREATED) {
         when (it) {
             UiEffect.GoogleLogin -> {
                 GoogleSignInManager
@@ -186,6 +187,83 @@ private fun LoginContentDarkPreview() {
                 email = "name@example.com",
                 password = "ExamplePassword123",
                 isPasswordVisible = false,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun LoginContentEmptyPreview() {
+    TDTheme {
+        LoginContent(
+            uiState = UiState(),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun LoginContentEmailErrorPreview() {
+    TDTheme {
+        LoginContent(
+            uiState =
+            UiState(
+                email = "not-an-email",
+                emailError = LoginContract.LoginError("Please enter a valid email"),
+                hasSubmittedOnce = true,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun LoginContentPasswordErrorPreview() {
+    TDTheme {
+        LoginContent(
+            uiState =
+            UiState(
+                email = "name@example.com",
+                password = "abc",
+                passwordError = LoginContract.LoginError("Password must be at least 8 characters"),
+                hasSubmittedOnce = true,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun LoginContentGeneralErrorPreview() {
+    TDTheme {
+        LoginContent(
+            uiState =
+            UiState(
+                email = "name@example.com",
+                password = "ExamplePassword123",
+                generalError = LoginContract.LoginError("Invalid email or password"),
+                hasSubmittedOnce = true,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun LoginContentLoadingPreview() {
+    TDTheme {
+        LoginContent(
+            uiState =
+            UiState(
+                email = "name@example.com",
+                password = "ExamplePassword123",
+                isLoading = true,
             ),
             onAction = {},
         )

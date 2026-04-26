@@ -60,9 +60,24 @@ fun TDTopBar(
             }
         },
         actions = {
-            state.actions.forEach {
-                IconButton(onClick = it.onClick) {
-                    Icon(painterResource(it.icon), tint = TDTheme.colors.onBackground, contentDescription = null)
+            state.actions.forEach { action ->
+                IconButton(onClick = action.onClick) {
+                    Box {
+                        Icon(
+                            painterResource(action.icon),
+                            tint = TDTheme.colors.onBackground,
+                            contentDescription = null,
+                        )
+                        if (action.unreadBadgeCount > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(TDTheme.colors.crossRed),
+                            )
+                        }
+                    }
                 }
             }
             state.profileChip?.let { chip ->
@@ -115,6 +130,7 @@ fun ShowTopBar(
                             TDTopBarAction(
                                 icon = R.drawable.ic_notification,
                                 onClick = { onEvent(UiAction.OnNotificationClick) },
+                                unreadBadgeCount = uiState.unreadNotifications,
                             ),
                         )
                     },
@@ -171,6 +187,7 @@ data class TDTopBarState(
 data class TDTopBarAction(
     @DrawableRes val icon: Int,
     val onClick: () -> Unit,
+    val unreadBadgeCount: Int = 0,
 )
 
 data class TDProfileChip(
@@ -277,6 +294,40 @@ private fun TDTopBarPreview_Calendar() {
                 ),
             ),
             isBannerActivated = true,
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun TDTopBarPreview_NoActions() {
+    TDTheme {
+        TDTopBar(
+            state =
+            TDTopBarState(
+                title = "Settings",
+                navigationIcon = R.drawable.ic_arrow_back,
+                onNavigationClick = {},
+                actions = emptyList(),
+            ),
+            isBannerActivated = false,
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun TDTopBarPreview_LongTitle() {
+    TDTheme {
+        TDTopBar(
+            state =
+            TDTopBarState(
+                title = "Manage Members of Smith Family Group",
+                navigationIcon = R.drawable.ic_arrow_back,
+                onNavigationClick = {},
+                actions = emptyList(),
+            ),
+            isBannerActivated = false,
         )
     }
 }

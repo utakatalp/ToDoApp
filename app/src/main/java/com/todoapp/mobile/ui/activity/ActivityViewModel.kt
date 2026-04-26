@@ -1,7 +1,9 @@
 package com.todoapp.mobile.ui.activity
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.engine.PomodoroEngine
@@ -182,19 +184,27 @@ constructor(
         val form = state.taskFormState
         return when {
             form.taskTitle.isBlank() -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTitleError = v)) }
+                showTransientError(R.string.error_task_title_required) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(titleErrorRes = v))
+                }
                 false
             }
             form.dialogSelectedDate == null -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isDateError = v)) }
+                showTransientError(R.string.error_task_date_required) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(dateErrorRes = v))
+                }
                 false
             }
             form.taskTimeStart == null || form.taskTimeEnd == null -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTimeError = v)) }
+                showTransientError(R.string.error_task_time_required) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(timeErrorRes = v))
+                }
                 false
             }
             form.taskTimeStart.isAfter(form.taskTimeEnd) -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTimeError = v)) }
+                showTransientError(R.string.error_task_end_before_start) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(timeErrorRes = v))
+                }
                 false
             }
             else -> true
@@ -214,13 +224,14 @@ constructor(
     }
 
     private fun showTransientError(
+        @StringRes errorRes: Int,
         durationMs: Long = 2000L,
-        setFlag: (UiState.Success, Boolean) -> UiState.Success,
+        setErrorRes: (UiState.Success, Int?) -> UiState.Success,
     ) {
         viewModelScope.launch {
-            updateSuccessState { setFlag(it, true) }
+            updateSuccessState { setErrorRes(it, errorRes) }
             delay(durationMs)
-            updateSuccessState { setFlag(it, false) }
+            updateSuccessState { setErrorRes(it, null) }
         }
     }
 

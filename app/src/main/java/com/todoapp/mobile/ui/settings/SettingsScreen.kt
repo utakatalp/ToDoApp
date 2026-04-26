@@ -1,8 +1,11 @@
 package com.todoapp.mobile.ui.settings
 
-import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,9 +27,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,10 +49,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.model.ThemePreference
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
+import com.todoapp.mobile.ui.permissions.NotificationPermissionPrompt
+import com.todoapp.mobile.ui.permissions.OverlayPermissionPrompt
 import com.todoapp.mobile.ui.settings.SettingsContract.UiAction
 import com.todoapp.mobile.ui.settings.SettingsContract.UiState
-import com.todoapp.uikit.components.TDNotificationPermissionItem
-import com.todoapp.uikit.components.TDOverlayPermissionItem
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
 import java.time.LocalTime
@@ -79,8 +88,6 @@ private fun SettingsContent(
     onAction: (UiAction) -> Unit,
     onDismissPermission: (PermissionType) -> Unit,
 ) {
-    val context = LocalContext.current
-
     if (uiState.showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { onAction(UiAction.OnLogoutDismiss) },
@@ -131,7 +138,6 @@ private fun SettingsContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         PermissionPager(
-            context = context,
             permissions = uiState.visiblePermissions,
             onDismiss = onDismissPermission,
         )
@@ -224,6 +230,61 @@ private fun SettingsContent(
         HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
         Spacer(modifier = Modifier.height(16.dp))
 
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable { onAction(UiAction.OnNavigateToAlarmSounds) },
+        ) {
+            TDText(
+                text = stringResource(R.string.alarm_sounds),
+                style = TDTheme.typography.heading6,
+                color = TDTheme.colors.onBackground,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
+                contentDescription = null,
+                tint = TDTheme.colors.onBackground,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ReliableRemindersRow()
+
+        if (uiState.isUserAuthenticated) {
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TDText(
+                    text = stringResource(R.string.settings_push_notifications),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Switch(
+                    checked = uiState.pushNotificationsEnabled,
+                    onCheckedChange = { onAction(UiAction.OnPushNotificationsToggle(it)) },
+                    enabled = !uiState.isPushTogglePending,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = TDTheme.colors.white,
+                        checkedTrackColor = TDTheme.colors.pendingGray,
+                    ),
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
+        Spacer(modifier = Modifier.height(16.dp))
+
         if (uiState.isUserAuthenticated) {
             Row(
                 Modifier
@@ -268,10 +329,63 @@ private fun SettingsContent(
     }
 }
 
+@Composable
+private fun ReliableRemindersRow() {
+    val context = LocalContext.current
+    val powerManager = remember(context) { context.getSystemService(PowerManager::class.java) }
+    var isExempt by remember {
+        mutableStateOf(powerManager?.isIgnoringBatteryOptimizations(context.packageName) == true)
+    }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            isExempt = powerManager?.isIgnoringBatteryOptimizations(context.packageName) == true
+        }
+    }
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(enabled = !isExempt) {
+                val intent =
+                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                runCatching { context.startActivity(intent) }
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            TDText(
+                text = stringResource(R.string.settings_reliable_reminders_title),
+                style = TDTheme.typography.heading6,
+                color = TDTheme.colors.onBackground,
+            )
+            TDText(
+                text =
+                if (isExempt) {
+                    stringResource(R.string.settings_reliable_reminders_status_enabled)
+                } else {
+                    stringResource(R.string.settings_reliable_reminders_description)
+                },
+                style = TDTheme.typography.subheading3,
+                color = TDTheme.colors.gray,
+            )
+        }
+        if (!isExempt) {
+            Icon(
+                painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
+                contentDescription = null,
+                tint = TDTheme.colors.onBackground,
+            )
+        }
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 private fun PermissionPager(
-    context: Context,
     permissions: List<PermissionType>,
     onDismiss: (PermissionType) -> Unit,
 ) {
@@ -286,13 +400,14 @@ private fun PermissionPager(
         ) { index ->
             when (permissions[index]) {
                 PermissionType.NOTIFICATION ->
-                    TDNotificationPermissionItem(
+                    NotificationPermissionPrompt(
+                        onGranted = { onDismiss(PermissionType.NOTIFICATION) },
                         onDismiss = { onDismiss(PermissionType.NOTIFICATION) },
                     )
 
                 PermissionType.OVERLAY ->
-                    TDOverlayPermissionItem(
-                        context = context,
+                    OverlayPermissionPrompt(
+                        onGranted = { onDismiss(PermissionType.OVERLAY) },
                         onDismiss = { onDismiss(PermissionType.OVERLAY) },
                     )
             }

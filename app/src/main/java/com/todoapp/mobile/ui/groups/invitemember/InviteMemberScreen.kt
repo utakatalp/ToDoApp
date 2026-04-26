@@ -211,3 +211,41 @@ private fun InviteMemberDarkPreview() {
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun InviteMemberEmptyPreview() {
+    TDTheme {
+        InviteMemberContent(uiState = InviteMemberContract.UiState(), onAction = {})
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun InviteMemberSubmittingPreview() {
+    TDTheme {
+        InviteMemberContent(
+            uiState =
+            InviteMemberContract.UiState(
+                email = "user@example.com",
+                isLoading = true,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun InviteMemberSentPreview() {
+    TDTheme {
+        InviteMemberContent(
+            uiState =
+            InviteMemberContract.UiState(
+                email = "user@example.com",
+                isSent = true,
+            ),
+            onAction = {},
+        )
+    }
+}

@@ -25,4 +25,6 @@ constructor(
         groupActivityDao.deleteByGroupId(localGroupId)
         groupActivityDao.insertAll(activities)
     }
+
+    override suspend fun deleteAll() = groupActivityDao.deleteAll()
 }

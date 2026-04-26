@@ -14,6 +14,9 @@ interface GroupTaskDao {
     @Query("SELECT * FROM group_tasks WHERE local_group_id = :localGroupId")
     fun getTasksByGroupId(localGroupId: Long): Flow<List<GroupTaskEntity>>
 
+    @Query("SELECT * FROM group_tasks")
+    fun observeAll(): Flow<List<GroupTaskEntity>>
+
     @Query("SELECT * FROM group_tasks WHERE remote_id = :remoteId LIMIT 1")
     suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity?
 
@@ -43,6 +46,9 @@ interface GroupTaskDao {
 
     @Query("DELETE FROM group_tasks WHERE remote_id = :remoteId")
     suspend fun deleteByRemoteId(remoteId: Long)
+
+    @Query("DELETE FROM group_tasks")
+    suspend fun deleteAll()
 
     @Query("UPDATE group_tasks SET is_completed = :isCompleted WHERE remote_id = :remoteId")
     suspend fun updateCompletion(

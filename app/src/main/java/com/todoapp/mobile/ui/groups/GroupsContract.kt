@@ -25,6 +25,7 @@ object GroupsContract {
             val groups: List<GroupUiItem>,
             val isDeleteDialogOpen: Boolean = false,
             val pendingDeleteGroup: GroupUiItem? = null,
+            val isRefreshing: Boolean = false,
         ) : UiState
 
         data class Error(
@@ -56,5 +57,7 @@ object GroupsContract {
         data object OnUndoDeleteGroup : UiAction
 
         data object OnScreenResumed : UiAction
+
+        data object OnPullToRefresh : UiAction
     }
 }

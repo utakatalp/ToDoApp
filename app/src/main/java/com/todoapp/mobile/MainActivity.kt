@@ -1,5 +1,6 @@
 package com.todoapp.mobile
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -24,9 +25,16 @@ class MainActivity : FragmentActivity() {
         installSplashScreen().setKeepOnScreenCondition { mainViewModel.isLoggedIn == null }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        mainViewModel.onPushIntent(intent)
         setContent {
             MainContent()
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        mainViewModel.onPushIntent(intent)
     }
 
     companion object {

@@ -97,16 +97,16 @@ Semantic color guide:
 |---|---|---|
 | `background` | `#F8F9FC` | Screen backgrounds |
 | `onBackground` | `#090E23` | Primary text |
-| `surface` | `#FFFAF0` | Card/sheet backgrounds |
+| `surface` | `#FFFAF0` | Dialog/sheet/app-bar chrome only — NOT for card backgrounds |
 | `purple` / `primary` | `#4566EC` | Primary actions, active state |
 | `lightPurple` | `#A9BAFF` | Card backgrounds (session/structure) |
 | `darkPurple` | `#1C3082` | Deep accent |
 | `bgColorPurple` | `#EFF2FF` | Subtle purple-tinted surfaces |
-| `lightGreen` | `#E8F5E9` | Card background (focus/productive) |
+| `lightGreen` | `#E8F5E9` | Card background (focus/productive / completed status) |
 | `darkGreen` | `#2E7D32` | Icon/text tint on green cards |
 | `lightOrange` | `#FFE2CD` | Card background (short break / warm) |
 | `orange` | `#EF8829` | Icon/text tint on orange cards |
-| `lightPending` | `#EDF4FF` | Card background (long break / calm) |
+| `lightPending` | `#EDF4FF` | **Default card background** (task cards, calendar cards, calm surfaces) |
 | `darkPending` | `#3D6A9E` | Icon/text tint on blue cards |
 | `pendingGray` | `#7A9CC6` | Secondary icons, muted values |
 | `lightRed` | `#FFE6E7` | Error/destructive card backgrounds |
@@ -116,6 +116,8 @@ Semantic color guide:
 | `white` | `#FFFAF0` | Explicit white (e.g. shadow colors) |
 | `gray` | `#717171` | Disabled/placeholder text |
 | `lightGray` | `#C0C0C0` | Dividers, borders |
+
+**Card backgrounds**: never use `surface` for card backgrounds — use `lightPending` instead. `surface` is reserved for sheet/dialog/app-bar chrome. This keeps cards visually distinct from sheets that appear above them.
 
 ### Icons & Drawables
 
@@ -238,6 +240,7 @@ object XyzContract {
 ## ❌ Anti-Patterns (Avoid!)
 
 - **Don't** use `remember { mutableStateOf() }` for app state (use ViewModel)
+- **Don't** use `TDTheme.colors.surface` as a card background. Use `TDTheme.colors.lightPending` for card / elevated-content backgrounds; `surface` is reserved for sheets / dialogs / app-bar chrome only.
 - **Don't** hardcode colors/text sizes (use TDTheme)
 - **Don't** hardcode user-visible strings — always use `stringResource` / `strings.xml`
 - **Don't** make Composables with side effects in body (use LaunchedEffect)

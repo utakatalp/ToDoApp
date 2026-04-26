@@ -40,7 +40,7 @@ constructor(
             if (token != null) {
                 original
                     .newBuilder()
-                    .addHeader("Authorization", "Bearer $token")
+                    .header("Authorization", "Bearer $token")
                     .build()
             } else {
                 original

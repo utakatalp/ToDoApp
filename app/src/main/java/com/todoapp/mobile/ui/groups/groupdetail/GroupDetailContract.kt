@@ -66,6 +66,7 @@ object GroupDetailContract {
             val pendingDeleteTaskId: Long? = null,
             val undoDeleteTaskId: Long? = null,
             val pendingAssignTaskId: Long? = null,
+            val isRefreshing: Boolean = false,
         ) : UiState
 
         data class Error(
@@ -132,6 +133,8 @@ object GroupDetailContract {
         data object OnDeleteTaskConfirm : UiAction
 
         data object OnDeleteTaskDismiss : UiAction
+
+        data object OnPullToRefresh : UiAction
     }
 
     sealed interface UiEffect {

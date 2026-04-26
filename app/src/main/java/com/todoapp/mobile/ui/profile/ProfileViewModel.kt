@@ -2,8 +2,10 @@ package com.todoapp.mobile.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.profile.ProfileContract.UiAction
 import com.todoapp.mobile.ui.profile.ProfileContract.UiEffect
 import com.todoapp.mobile.ui.profile.ProfileContract.UiState
@@ -11,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,6 +24,7 @@ class ProfileViewModel
 @Inject
 constructor(
     private val userRepository: UserRepository,
+    private val dataStoreHelper: DataStoreHelper,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -44,11 +48,25 @@ constructor(
             UiAction.OnSaveName -> saveName()
             is UiAction.OnAvatarPicked -> uploadAvatar(action.bytes, action.mimeType)
             UiAction.OnBack -> _navEffect.trySend(NavigationEffect.Back)
+            UiAction.OnChangePasswordTap ->
+                _navEffect.trySend(NavigationEffect.Navigate(Screen.ChangePassword))
         }
     }
 
     private fun load() {
         viewModelScope.launch {
+            dataStoreHelper.observeUser().first()?.let { cached ->
+                _uiState.value =
+                    UiState(
+                        isLoading = false,
+                        userId = cached.id,
+                        email = cached.email,
+                        displayName = cached.displayName,
+                        editedDisplayName = cached.displayName,
+                        avatarUrl = cached.avatarUrl,
+                        avatarVersion = System.currentTimeMillis(),
+                    )
+            }
             userRepository
                 .getUserInfo()
                 .onSuccess { user ->
@@ -63,7 +81,7 @@ constructor(
                             avatarVersion = System.currentTimeMillis(),
                         )
                 }.onFailure { t ->
-                    _uiState.update { it.copy(isLoading = false, errorMessage = t.message) }
+                    _uiState.update { it.copy(isLoading = false, errorMessage = it.errorMessage ?: t.message) }
                 }
         }
     }

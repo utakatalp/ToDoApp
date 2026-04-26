@@ -20,6 +20,8 @@ object SettingsContract {
         val visiblePermissions: List<PermissionType> = emptyList(),
         val showLogoutDialog: Boolean = false,
         val isUserAuthenticated: Boolean = false,
+        val pushNotificationsEnabled: Boolean = true,
+        val isPushTogglePending: Boolean = false,
     )
 
     sealed interface UiAction {
@@ -58,6 +60,10 @@ object SettingsContract {
         data object OnLogoutDismiss : UiAction
 
         data object OnLoginOrRegisterClick : UiAction
+
+        data object OnNavigateToAlarmSounds : UiAction
+
+        data class OnPushNotificationsToggle(val enabled: Boolean) : UiAction
     }
 
     sealed interface UiEffect {

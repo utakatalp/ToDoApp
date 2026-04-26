@@ -74,6 +74,16 @@ constructor(
         }
     }
 
+    fun observeFirstLoginPermissionPromptPending(): Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[FIRST_LOGIN_PERMISSION_PROMPT_PENDING] ?: false
+    }
+
+    suspend fun setFirstLoginPermissionPromptPending(value: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[FIRST_LOGIN_PERMISSION_PROMPT_PENDING] = value
+        }
+    }
+
     companion object {
         private val json =
             Json {
@@ -83,5 +93,7 @@ constructor(
             }
         private val USER_KEY = stringPreferencesKey("user")
         private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
+        private val FIRST_LOGIN_PERMISSION_PROMPT_PENDING =
+            booleanPreferencesKey("first_login_permission_prompt_pending")
     }
 }

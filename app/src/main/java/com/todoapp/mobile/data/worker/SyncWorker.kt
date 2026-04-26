@@ -23,10 +23,11 @@ constructor(
         .fold(
             onSuccess = { Result.success() },
             onFailure = { throwable ->
-                Log.e("SyncWorker", "Failed to sync tasks $throwable", throwable)
+                Log.e("SyncWorker", "Failed to sync tasks (attempt=$runAttemptCount) $throwable", throwable)
                 when (throwable) {
                     is DomainException.NoInternet,
                     is DomainException.Server,
+                    is DomainException.Unauthorized,
                     -> {
                         if (runAttemptCount <= MAX_ATTEMPT) {
                             Result.retry()
@@ -34,7 +35,6 @@ constructor(
                             Result.failure()
                         }
                     }
-                    is DomainException.Unauthorized -> Result.failure()
                     else -> Result.failure()
                 }
             },

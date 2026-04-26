@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,42 +40,39 @@ import com.todoapp.uikit.theme.TDTheme
 
 @Composable
 internal fun LoginBrandingPanel(modifier: Modifier = Modifier) {
+    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val gradient = androidx.compose.ui.graphics.Brush.verticalGradient(
+        colors = listOf(
+            TDTheme.colors.bgColorPurple,
+            TDTheme.colors.lightPending,
+        ),
+    )
     Column(
-        modifier =
-        modifier
-            .background(TDTheme.colors.pendingGray)
+        modifier = modifier
+            .background(gradient)
             .statusBarsPadding()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier =
-            Modifier
-                .size(70.dp)
-                .background(
-                    color = TDTheme.colors.background.copy(alpha = 0.25f),
-                    shape = RoundedCornerShape(16.dp),
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painterResource(R.drawable.ic_logo),
-                contentDescription = stringResource(R.string.logo),
-                modifier = Modifier.size(40.dp),
-                tint = TDTheme.colors.white,
-            )
-        }
-        Spacer(Modifier.height(12.dp))
+        androidx.compose.foundation.Image(
+            painter = painterResource(
+                if (isDark) R.drawable.ic_idle_robot_dark else R.drawable.ic_idle_robot_light,
+            ),
+            contentDescription = null,
+            modifier = Modifier.size(160.dp),
+        )
+        Spacer(Modifier.height(16.dp))
         TDText(
             text = stringResource(R.string.login_header),
             style = TDTheme.typography.heading1,
-            color = TDTheme.colors.white,
+            color = TDTheme.colors.darkPurple,
         )
+        Spacer(Modifier.height(4.dp))
         TDText(
             text = stringResource(R.string.elevate_your_productivity),
-            style = TDTheme.typography.heading4,
-            color = TDTheme.colors.white.copy(0.8f),
+            style = TDTheme.typography.heading5,
+            color = TDTheme.colors.darkPurple.copy(0.7f),
         )
     }
 }

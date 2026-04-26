@@ -309,3 +309,74 @@ private fun MemberProfileContentDarkPreview() {
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun MemberProfileLoadingPreview() {
+    TDTheme {
+        MemberProfileContent(uiState = MemberProfileContract.UiState.Loading, onAction = {})
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun MemberProfileErrorPreview() {
+    TDTheme {
+        MemberProfileContent(
+            uiState = MemberProfileContract.UiState.Error("Failed to load member"),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun MemberProfileConfirmRemovePreview() {
+    TDTheme {
+        MemberProfileContent(
+            uiState =
+            MemberProfileContract.UiState.Success(
+                member =
+                MemberUiItem(
+                    userId = 1,
+                    firstName = "John",
+                    lastName = "Doe",
+                    email = "john@example.com",
+                    avatarUrl = null,
+                    role = "MEMBER",
+                    joinedAt = "Jan 12, 2024",
+                    displayName = "John Doe",
+                    initials = "JD",
+                ),
+                showConfirmDialog = true,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun MemberProfilePendingRemovalPreview() {
+    TDTheme {
+        MemberProfileContent(
+            uiState =
+            MemberProfileContract.UiState.Success(
+                member =
+                MemberUiItem(
+                    userId = 1,
+                    firstName = "John",
+                    lastName = "Doe",
+                    email = "john@example.com",
+                    avatarUrl = null,
+                    role = "MEMBER",
+                    joinedAt = "Jan 12, 2024",
+                    displayName = "John Doe",
+                    initials = "JD",
+                ),
+                pendingRemoval = true,
+            ),
+            onAction = {},
+        )
+    }
+}

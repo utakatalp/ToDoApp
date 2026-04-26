@@ -2,14 +2,12 @@ package com.todoapp.mobile.ui.details
 
 import android.content.res.Configuration
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -229,32 +227,6 @@ private fun DetailsSuccessContent(
                     singleLine = false,
                 )
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TDText(
-                    modifier = Modifier.weight(1f),
-                    text = stringResource(R.string.edit_details_hint),
-                    style = TDTheme.typography.subheading3,
-                    color = TDTheme.colors.onBackground.copy(alpha = 0.6f),
-                )
-                Spacer(Modifier.width(12.dp))
-                Image(
-                    painter =
-                    painterResource(
-                        if (TDTheme.isDark) R.drawable.ic_edit_robot_dark else R.drawable.ic_edit_robot_light,
-                    ),
-                    contentDescription = null,
-                    modifier =
-                    Modifier
-                        .fillMaxWidth(0.28f)
-                        .aspectRatio(1f),
-                )
-            }
-
-            Spacer(Modifier.height(4.dp))
 
             TaskPhotosSection(
                 photoUrls = uiState.photoUrls,

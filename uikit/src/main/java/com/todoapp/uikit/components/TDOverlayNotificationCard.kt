@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -24,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -126,7 +126,7 @@ private fun NotificationCardContent(
         onClick = onOpenClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        color = TDTheme.colors.surface,
+        color = TDTheme.colors.background,
         shadowElevation = 12.dp,
         border = BorderStroke(1.dp, TDTheme.colors.onSurface.copy(alpha = 0.05f)),
     ) {
@@ -143,20 +143,18 @@ private fun NotificationCardContent(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top,
                 ) {
-                    Surface(
-                        modifier = Modifier.size(56.dp),
-                        shape = RoundedCornerShape(18.dp),
-                        color = TDTheme.colors.pendingGray.copy(alpha = 0.1f),
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_pomodoro),
-                                contentDescription = null,
-                                tint = TDTheme.colors.pendingGray,
-                                modifier = Modifier.size(32.dp),
-                            )
-                        }
-                    }
+                    Image(
+                        painter =
+                        painterResource(
+                            if (TDTheme.isDark) {
+                                R.drawable.img_donebot_alarm_reminder_light
+                            } else {
+                                R.drawable.img_donebot_alarm_reminder_dark
+                            },
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier.size(100.dp),
+                    )
 
                     Spacer(Modifier.width(16.dp))
 
@@ -282,6 +280,46 @@ fun NotificationCardContentPreview() {
             contentAlignment = Alignment.Center,
         ) {
             NotificationCardContent(message = "Meeting with the team at 2 PM")
+        }
+    }
+}
+
+@TDPreview
+@Composable
+private fun NotificationCardContent5MinPreview() {
+    TDTheme {
+        Box(
+            modifier =
+            Modifier
+                .fillMaxSize()
+                .background(TDTheme.colors.background)
+                .padding(16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            NotificationCardContent(
+                message = "Pick up groceries on the way home",
+                minutesBefore = 5,
+            )
+        }
+    }
+}
+
+@TDPreview
+@Composable
+private fun NotificationCardContentLongMessagePreview() {
+    TDTheme {
+        Box(
+            modifier =
+            Modifier
+                .fillMaxSize()
+                .background(TDTheme.colors.background)
+                .padding(16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            NotificationCardContent(
+                message = "Submit the quarterly financial review and reconcile the expense reports for the Berlin trip",
+                minutesBefore = 15,
+            )
         }
     }
 }

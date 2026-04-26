@@ -10,6 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.json.Json
+import okhttp3.Dispatcher
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -63,11 +64,15 @@ object NetworkModule {
     fun provideOkHttpClient(
         authInterceptor: AuthInterceptor,
         tokenRefreshAuthenticator: TokenRefreshAuthenticator,
-    ): OkHttpClient = OkHttpClient
-        .Builder()
-        .addInterceptor(authInterceptor)
-        .authenticator(tokenRefreshAuthenticator)
-        .build()
+    ): OkHttpClient {
+        val dispatcher = Dispatcher().apply { maxRequestsPerHost = 16 }
+        return OkHttpClient
+            .Builder()
+            .dispatcher(dispatcher)
+            .addInterceptor(authInterceptor)
+            .authenticator(tokenRefreshAuthenticator)
+            .build()
+    }
 
     @Provides
     @Singleton

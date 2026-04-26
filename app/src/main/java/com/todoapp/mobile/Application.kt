@@ -11,12 +11,16 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Configuration
 import com.todoapp.mobile.data.notification.NotificationService
+import com.todoapp.mobile.data.notification.PomodoroNotificationChannels
+import com.todoapp.mobile.domain.alarm.RescheduleAllAlarmsUseCase
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.security.SecretModeEndEvent
 import com.todoapp.mobile.domain.usecase.security.OnSecretModeEventUseCase
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -37,6 +41,9 @@ class Application :
     @Inject
     lateinit var pomodoroEngine: PomodoroEngine
 
+    @Inject
+    lateinit var rescheduleAllAlarmsUseCase: RescheduleAllAlarmsUseCase
+
     override val workManagerConfiguration: Configuration
         get() =
             Configuration
@@ -46,8 +53,16 @@ class Application :
 
     override fun onCreate() {
         super<Application>.onCreate()
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         createNotificationChannel()
+        PomodoroNotificationChannels.ensurePomodoroChannel(this)
+        ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.IO) {
+            runCatching { rescheduleAllAlarmsUseCase() }
+                .onFailure { Timber.tag("RescheduleAllAlarms").w(it, "reschedule on app start failed") }
+        }
     }
 
     // Coil picks this up automatically as the app-wide ImageLoader; wires the shared OkHttpClient
@@ -80,7 +95,9 @@ class Application :
                     NotificationManager.IMPORTANCE_HIGH,
                 ).apply {
                     enableVibration(true)
+                    enableLights(true)
                     setShowBadge(true)
+                    lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
                 }
             channel.description = "Used for the notifications"
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager

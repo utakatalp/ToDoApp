@@ -6,6 +6,7 @@ sealed interface TopBarContract {
         val avatarUrl: String? = null,
         val displayName: String = "",
         val avatarVersion: Long = 0L,
+        val unreadNotifications: Int = 0,
     )
 
     sealed interface UiAction {

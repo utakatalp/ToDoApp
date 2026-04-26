@@ -36,6 +36,7 @@ fun TDDatePickerDialog(
     onDateSelect: (LocalDate) -> Unit,
     onDateDeselect: () -> Unit,
     isError: Boolean = false,
+    supportingText: String? = null,
 ) {
     var selectedMonth by rememberSaveable { mutableStateOf(YearMonth.now()) }
     var isPickerOpen by rememberSaveable { mutableStateOf(false) }
@@ -61,6 +62,7 @@ fun TDDatePickerDialog(
             },
             modifier = Modifier.fillMaxWidth(),
             isError = isError,
+            supportingText = supportingText,
         )
         if (isPickerOpen) {
             Dialog(
@@ -124,6 +126,32 @@ fun TDDatePickerDialogPreview() {
             selectedDate = selectedDate,
             onDateSelect = { selectedDate = it },
             onDateDeselect = { selectedDate = null },
+        )
+    }
+}
+
+@TDPreviewDialog
+@Composable
+private fun TDDatePickerDialogEmptyPreview() {
+    TDTheme {
+        TDDatePickerDialog(
+            selectedDate = null,
+            onDateSelect = {},
+            onDateDeselect = {},
+        )
+    }
+}
+
+@TDPreviewDialog
+@Composable
+private fun TDDatePickerDialogErrorPreview() {
+    TDTheme {
+        TDDatePickerDialog(
+            selectedDate = null,
+            onDateSelect = {},
+            onDateDeselect = {},
+            isError = true,
+            supportingText = "Date is required",
         )
     }
 }

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 interface GroupRepository {
     suspend fun createGroup(request: CreateGroupRequest): Result<GroupData>
 
-    suspend fun getGroups(): Result<GroupSummaryDataList>
+    suspend fun getGroups(force: Boolean = false): Result<GroupSummaryDataList>
 
     suspend fun deleteGroup(id: Long): Result<Unit>
 
@@ -28,7 +28,10 @@ interface GroupRepository {
         toIndex: Int,
     ): Result<Unit>
 
-    suspend fun getGroupDetail(groupId: Long): Result<GroupData>
+    suspend fun getGroupDetail(
+        groupId: Long,
+        force: Boolean = false,
+    ): Result<GroupData>
 
     suspend fun updateGroup(
         groupId: Long,
@@ -53,9 +56,15 @@ interface GroupRepository {
         userId: Long,
     ): Result<Unit>
 
-    suspend fun getGroupActivity(groupId: Long): Result<List<GroupActivity>>
+    suspend fun getGroupActivity(
+        groupId: Long,
+        force: Boolean = false,
+    ): Result<List<GroupActivity>>
 
-    suspend fun getGroupTasks(groupId: Long): Result<List<GroupTask>>
+    suspend fun getGroupTasks(
+        groupId: Long,
+        force: Boolean = false,
+    ): Result<List<GroupTask>>
 
     suspend fun createGroupTask(
         groupId: Long,
@@ -99,11 +108,16 @@ interface GroupRepository {
 
     fun observeGroupTasks(localGroupId: Long): Flow<List<GroupTask>>
 
+    fun observeAllGroupTasks(): Flow<List<GroupTask>>
+
     fun observeGroupMembers(localGroupId: Long): Flow<List<GroupMember>>
 
     fun observeGroupActivity(localGroupId: Long): Flow<List<GroupActivity>>
 
-    suspend fun syncGroupTasks(remoteGroupId: Long): Result<Unit>
+    suspend fun syncGroupTasks(
+        remoteGroupId: Long,
+        force: Boolean = false,
+    ): Result<Unit>
 
     suspend fun searchGroupTasksAcrossGroups(query: String): Result<List<Pair<Group, List<GroupTask>>>>
 

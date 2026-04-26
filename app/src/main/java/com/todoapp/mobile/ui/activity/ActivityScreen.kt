@@ -276,7 +276,7 @@ private fun ActivitySuccessContent(
                         values = uiState.weeklyBarValues,
                         pendingValues = uiState.weeklyPendingBarValues,
                         height = 220.dp,
-                        scrollableHeight = 180.dp,
+                        autoScaleHeightToMaxY = false,
                         onExpandClick = { showFullScreen = true },
                     )
                 }

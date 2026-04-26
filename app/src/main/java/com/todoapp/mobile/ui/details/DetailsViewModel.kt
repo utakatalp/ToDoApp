@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.domain.repository.PendingPhotoRepository
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.ui.details.DetailsContract.UiAction
@@ -29,6 +30,7 @@ class DetailsViewModel
 @Inject
 constructor(
     private val taskRepository: TaskRepository,
+    private val pendingPhotoRepository: PendingPhotoRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -110,7 +112,13 @@ constructor(
         viewModelScope.launch {
             val state = _uiState.value as? UiState.Success ?: return@launch
             if (state.taskId <= 0) {
-                _uiEffect.trySend(UiEffect.ShowToast(R.string.photo_requires_sync))
+                val localId = currentTaskId
+                if (localId == null) {
+                    _uiEffect.trySend(UiEffect.ShowToast(R.string.photo_requires_sync))
+                } else {
+                    pendingPhotoRepository.queue(localId, bytes, mimeType)
+                    _uiEffect.trySend(UiEffect.ShowToast(R.string.photo_queued_for_sync))
+                }
                 return@launch
             }
             taskRepository

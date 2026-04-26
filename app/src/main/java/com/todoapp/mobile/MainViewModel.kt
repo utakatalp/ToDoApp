@@ -1,6 +1,6 @@
 package com.todoapp.mobile
 
-import android.util.Log
+import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,19 +8,29 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.MainContract.UiEffect
 import com.todoapp.mobile.data.repository.DataStoreHelper
+import com.todoapp.mobile.data.source.remote.fcm.TDFireBaseMessagingService
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.AuthEvent
 import com.todoapp.mobile.domain.repository.AuthRepository
 import com.todoapp.mobile.domain.repository.GroupRepository
+import com.todoapp.mobile.domain.repository.PendingPhotoRepository
 import com.todoapp.mobile.domain.repository.SessionPreferences
 import com.todoapp.mobile.domain.repository.TaskRepository
+import com.todoapp.mobile.domain.repository.TaskSyncRepository
 import com.todoapp.mobile.domain.repository.UserRepository
+import com.todoapp.mobile.navigation.CurrentRouteTracker
 import com.todoapp.mobile.navigation.NavigationEffect
+import com.todoapp.mobile.navigation.RouteArgs
 import com.todoapp.mobile.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,6 +45,9 @@ constructor(
     private val dataStoreHelper: DataStoreHelper,
     private val userRepository: UserRepository,
     private val pomodoroEngine: PomodoroEngine,
+    private val taskSyncRepository: TaskSyncRepository,
+    private val currentRouteTracker: CurrentRouteTracker,
+    private val pendingPhotoRepository: PendingPhotoRepository,
 ) : ViewModel() {
     private val _uiEffect = Channel<UiEffect>()
     val uiEffect = _uiEffect.receiveAsFlow()
@@ -45,12 +58,20 @@ constructor(
     var isLoggedIn by mutableStateOf<Boolean?>(null)
         private set
 
+    private val _pendingDeepLink = MutableStateFlow<DeepLink?>(null)
+    val pendingDeepLink = _pendingDeepLink.asStateFlow()
+
     init {
         viewModelScope.launch {
-            dataStoreHelper.isLoggedIn.collect {
-                Log.d("SPLASH_DEBUG", "isLoggedIn: $it, was null: ${isLoggedIn == null}")
-                isLoggedIn = it
-            }
+            sessionPreferences
+                .observeRefreshToken()
+                .map { !it.isNullOrBlank() }
+                .distinctUntilChanged()
+                .collect { loggedIn ->
+                    Timber.tag("AuthLogout").d("observeRefreshToken loggedIn=$loggedIn (transition)")
+                    isLoggedIn = loggedIn
+                    if (loggedIn) userRepository.syncPendingFcmToken()
+                }
         }
 
         viewModelScope.launch {
@@ -89,19 +110,96 @@ constructor(
         }
     }
 
+    fun onPushIntent(intent: Intent?) {
+        intent ?: return
+
+        // Password-reset deep link: todoapp://reset-password?token=...
+        val data = intent.data
+        if (intent.action == Intent.ACTION_VIEW &&
+            data?.scheme == "todoapp" &&
+            data.host == "reset-password"
+        ) {
+            val token = data.getQueryParameter("token")
+            if (!token.isNullOrBlank()) {
+                _pendingDeepLink.value = DeepLink.ResetPassword(token)
+            }
+            intent.data = null
+            return
+        }
+
+        val target = intent.getStringExtra(TDFireBaseMessagingService.EXTRA_PUSH_TARGET)
+        intent.removeExtra(TDFireBaseMessagingService.EXTRA_PUSH_TARGET)
+        when (target) {
+            TDFireBaseMessagingService.PUSH_TARGET_INVITATIONS -> {
+                _pendingDeepLink.value = DeepLink.Invitations
+                return
+            }
+            TDFireBaseMessagingService.PUSH_TARGET_NOTIFICATIONS -> {
+                _pendingDeepLink.value = DeepLink.NotificationsInbox
+                return
+            }
+        }
+
+        val groupId =
+            intent.getLongExtra(TDFireBaseMessagingService.EXTRA_PUSH_GROUP_ID, -1L)
+                .takeIf { it > 0 } ?: return
+        val taskId =
+            intent.getLongExtra(TDFireBaseMessagingService.EXTRA_PUSH_TASK_ID, -1L)
+                .takeIf { it > 0 }
+        intent.removeExtra(TDFireBaseMessagingService.EXTRA_PUSH_GROUP_ID)
+        intent.removeExtra(TDFireBaseMessagingService.EXTRA_PUSH_TASK_ID)
+        _pendingDeepLink.value =
+            if (taskId != null) DeepLink.GroupTask(groupId, taskId) else DeepLink.Group(groupId)
+    }
+
+    fun consumePendingDeepLink() {
+        _pendingDeepLink.value = null
+    }
+
+    fun updateCurrentRoute(route: String?, args: RouteArgs? = null) {
+        currentRouteTracker.update(route = route, args = args)
+    }
+
+    sealed interface DeepLink {
+        data class Group(val groupId: Long) : DeepLink
+
+        data class GroupTask(
+            val groupId: Long,
+            val taskId: Long,
+        ) : DeepLink
+
+        data object Invitations : DeepLink
+
+        data object NotificationsInbox : DeepLink
+
+        data class ResetPassword(val token: String) : DeepLink
+    }
+
     private suspend fun clearLocalSession() {
-        sessionPreferences.clear()
+        Timber.tag("AuthLogout").w("clearLocalSession: start")
+        runCatching { userRepository.deleteFcmToken() }
+            .onFailure { Timber.tag("AuthLogout").w(it, "clearLocalSession: deleteFcmToken failed") }
+        runCatching { sessionPreferences.clear() }
+            .onFailure { Timber.tag("AuthLogout").w(it, "clearLocalSession: sessionPreferences.clear failed") }
         taskRepository.deleteAllTasks()
+            .onFailure { Timber.tag("AuthLogout").w(it, "clearLocalSession: deleteAllTasks failed") }
         groupRepository.deleteAllLocalGroups()
-        pomodoroEngine.finish()
-        dataStoreHelper.clearUser()
-        dataStoreHelper.setLoggedIn(false)
+            .onFailure { Timber.tag("AuthLogout").w(it, "clearLocalSession: deleteAllLocalGroups failed") }
+        runCatching { pomodoroEngine.finish() }
+            .onFailure { Timber.tag("AuthLogout").w(it, "clearLocalSession: pomodoroEngine.finish failed") }
+        runCatching { dataStoreHelper.clearUser() }
+            .onFailure { Timber.tag("AuthLogout").w(it, "clearLocalSession: clearUser failed") }
+        runCatching { taskSyncRepository.resetCooldown() }
+            .onFailure { Timber.tag("AuthLogout").w(it, "clearLocalSession: resetCooldown failed") }
+        runCatching { pendingPhotoRepository.clearAll() }
+            .onFailure { Timber.tag("AuthLogout").w(it, "clearLocalSession: pendingPhoto clearAll failed") }
+        Timber.tag("AuthLogout").w("clearLocalSession: done")
     }
 
     private suspend fun refreshUserCache() {
         userRepository
             .getUserInfo()
             .onSuccess { dataStoreHelper.setUser(it) }
-            .onFailure { dataStoreHelper.clearUser() }
+            .onFailure { Timber.tag("AuthLogout").w(it, "refreshUserCache: getUserInfo failed; keeping cached user") }
     }
 }

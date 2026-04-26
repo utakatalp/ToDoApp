@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -162,6 +164,7 @@ private fun GroupDetailContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GroupDetailSuccessContent(
     uiState: GroupDetailContract.UiState.Success,
@@ -202,10 +205,16 @@ private fun GroupDetailSuccessContent(
             }
         }
 
-        when (uiState.selectedTab) {
-            0 -> GroupDetailOverviewTab(uiState = uiState, onAction = onAction)
-            1 -> GroupDetailMembersTab(uiState = uiState, onAction = onAction)
-            2 -> GroupDetailActivityTab(uiState = uiState)
+        PullToRefreshBox(
+            modifier = Modifier.fillMaxSize(),
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { onAction(UiAction.OnPullToRefresh) },
+        ) {
+            when (uiState.selectedTab) {
+                0 -> GroupDetailOverviewTab(uiState = uiState, onAction = onAction)
+                1 -> GroupDetailMembersTab(uiState = uiState, onAction = onAction)
+                2 -> GroupDetailActivityTab(uiState = uiState)
+            }
         }
     }
 }

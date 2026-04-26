@@ -86,9 +86,9 @@ fun PlanYourDayScreen(
                 painter =
                 painterResource(
                     if (TDTheme.isDark) {
-                        R.drawable.ic_plan_day_robot_dark
+                        com.example.uikit.R.drawable.img_donebot_plan_your_day_light
                     } else {
-                        R.drawable.ic_plan_day_robot_light
+                        com.example.uikit.R.drawable.img_donebot_plan_your_day_dark
                     },
                 ),
                 contentDescription = null,
@@ -154,6 +154,40 @@ private fun PlanYourDayScreenNoChangePreview() {
             UiState(
                 selectedTime = LocalTime.of(9, 0),
                 savedTime = LocalTime.of(9, 0),
+            ),
+            uiEffect = kotlinx.coroutines.flow.emptyFlow(),
+            onAction = {},
+            onNavigateBack = {},
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun PlanYourDayScreenEveningPreview() {
+    TDTheme {
+        PlanYourDayScreen(
+            uiState =
+            UiState(
+                selectedTime = LocalTime.of(20, 30),
+                savedTime = LocalTime.of(9, 0),
+            ),
+            uiEffect = kotlinx.coroutines.flow.emptyFlow(),
+            onAction = {},
+            onNavigateBack = {},
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun PlanYourDayScreenFirstTimePreview() {
+    TDTheme {
+        PlanYourDayScreen(
+            uiState =
+            UiState(
+                selectedTime = LocalTime.of(7, 15),
+                savedTime = null,
             ),
             uiEffect = kotlinx.coroutines.flow.emptyFlow(),
             onAction = {},

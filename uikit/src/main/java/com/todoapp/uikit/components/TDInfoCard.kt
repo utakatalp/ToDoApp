@@ -49,3 +49,26 @@ private fun TDInfoCardPreview() {
         modifier = Modifier,
     )
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun TDInfoCardShortPreview() {
+    TDTheme {
+        TDInfoCard(text = "Tap a task to edit it.", modifier = Modifier.padding(16.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TDInfoCardLongPreview() {
+    TDTheme {
+        TDInfoCard(
+            text =
+            "Once a group is created, you can invite up to fifteen members. " +
+                "Each member receives a notification and must accept the invitation " +
+                "before they can see the group's shared tasks. Admins can revoke " +
+                "access at any time from the group settings screen.",
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}

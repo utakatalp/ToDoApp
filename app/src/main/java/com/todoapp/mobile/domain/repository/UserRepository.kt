@@ -15,6 +15,8 @@ interface UserRepository {
 
     suspend fun syncPendingFcmToken(): Result<Unit>
 
+    suspend fun deleteFcmToken(): Result<Unit>
+
     suspend fun register(request: RegisterRequest): Result<AuthResponseData>
 
     suspend fun login(request: LoginRequest): Result<AuthResponseData>
@@ -29,6 +31,16 @@ interface UserRepository {
         bytes: ByteArray,
         mimeType: String,
     ): Result<UserData>
+
+    suspend fun forgotPassword(email: String): Result<Unit>
+
+    suspend fun resetPassword(token: String, newPassword: String): Result<Unit>
+
+    suspend fun changePassword(currentPassword: String, newPassword: String): Result<Unit>
+
+    suspend fun getPushEnabled(): Result<Boolean>
+
+    suspend fun setPushEnabled(enabled: Boolean): Result<Boolean>
 }
 
 interface AuthRepository {

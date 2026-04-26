@@ -2,52 +2,124 @@ package com.todoapp.mobile.data.repository
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.todoapp.mobile.domain.repository.SessionPreferences
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 class SessionPreferencesImpl
 @Inject
 constructor(
-    private val sharedPreferences: SharedPreferences,
+    private val dataStore: DataStore<Preferences>,
+    private val legacyPreferences: SharedPreferences,
 ) : SessionPreferences {
-    override suspend fun setAccessToken(token: String) = withContext(Dispatchers.IO) {
-        sharedPreferences.edit(commit = true) { putString(KEY_ACCESS_TOKEN, token) }
+    private val migrationMutex = Mutex()
+
+    @Volatile
+    private var migrated = false
+
+    override suspend fun setAccessToken(token: String) {
+        ensureMigrated()
+        dataStore.edit { it[ACCESS_TOKEN_KEY] = token }
     }
 
-    override suspend fun getAccessToken(): String? = withContext(Dispatchers.IO) {
-        sharedPreferences.getString(KEY_ACCESS_TOKEN, null)
+    override suspend fun getAccessToken(): String? {
+        ensureMigrated()
+        return dataStore.data.map { it[ACCESS_TOKEN_KEY] }.first()
     }
 
-    override suspend fun setRefreshToken(token: String) = withContext(Dispatchers.IO) {
-        sharedPreferences.edit(commit = true) { putString(KEY_REFRESH_TOKEN, token) }
+    override suspend fun setRefreshToken(token: String) {
+        ensureMigrated()
+        dataStore.edit { it[REFRESH_TOKEN_KEY] = token }
     }
 
-    override suspend fun getRefreshToken(): String? = withContext(Dispatchers.IO) {
-        sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
+    override suspend fun getRefreshToken(): String? {
+        ensureMigrated()
+        return dataStore.data.map { it[REFRESH_TOKEN_KEY] }.first()
     }
 
-    override suspend fun setExpiresAt(expiresIn: Long) = withContext(Dispatchers.IO) {
+    override fun observeRefreshToken(): Flow<String?> = flow {
+        ensureMigrated()
+        emitAll(dataStore.data.map { it[REFRESH_TOKEN_KEY] })
+    }
+
+    override suspend fun setExpiresAt(expiresIn: Long) {
+        ensureMigrated()
         val expiresAtMillis = System.currentTimeMillis() + (expiresIn * MILLIS_IN_SECOND)
-        sharedPreferences.edit(commit = true) {
-            putLong(KEY_EXPIRES_AT, expiresAtMillis)
+        dataStore.edit { it[EXPIRES_AT_KEY] = expiresAtMillis }
+    }
+
+    override suspend fun getExpiresAt(): Long {
+        ensureMigrated()
+        return dataStore.data.map { it[EXPIRES_AT_KEY] ?: 0L }.first()
+    }
+
+    override suspend fun clear(): Boolean {
+        ensureMigrated()
+        dataStore.edit {
+            it.remove(ACCESS_TOKEN_KEY)
+            it.remove(REFRESH_TOKEN_KEY)
+            it.remove(EXPIRES_AT_KEY)
+        }
+        return true
+    }
+
+    private suspend fun ensureMigrated() {
+        if (migrated) return
+        migrationMutex.withLock {
+            if (migrated) return
+            val alreadyDone = dataStore.data.map { it[MIGRATED_KEY] ?: false }.first()
+            if (alreadyDone) {
+                migrated = true
+                return
+            }
+            val legacyAccess = readLegacy(LEGACY_KEY_ACCESS_TOKEN)
+            val legacyRefresh = readLegacy(LEGACY_KEY_REFRESH_TOKEN)
+            val legacyExpires = readLegacyLong(LEGACY_KEY_EXPIRES_AT)
+            dataStore.edit { prefs ->
+                if (!legacyAccess.isNullOrBlank()) prefs[ACCESS_TOKEN_KEY] = legacyAccess
+                if (!legacyRefresh.isNullOrBlank()) prefs[REFRESH_TOKEN_KEY] = legacyRefresh
+                if (legacyExpires != 0L) prefs[EXPIRES_AT_KEY] = legacyExpires
+                prefs[MIGRATED_KEY] = true
+            }
+            runCatching {
+                legacyPreferences.edit {
+                    remove(LEGACY_KEY_ACCESS_TOKEN)
+                    remove(LEGACY_KEY_REFRESH_TOKEN)
+                    remove(LEGACY_KEY_EXPIRES_AT)
+                }
+            }
+            migrated = true
         }
     }
 
-    override suspend fun getExpiresAt(): Long = withContext(Dispatchers.IO) {
-        sharedPreferences.getLong(KEY_EXPIRES_AT, 0)
-    }
+    private fun readLegacy(key: String): String? = runCatching {
+        legacyPreferences.getString(key, null)
+    }.getOrNull()
 
-    override suspend fun clear(): Boolean = withContext(Dispatchers.IO) {
-        sharedPreferences.edit(commit = true) { clear() }
-        true
-    }
+    private fun readLegacyLong(key: String): Long = runCatching {
+        legacyPreferences.getLong(key, 0L)
+    }.getOrDefault(0L)
 
     companion object {
         const val MILLIS_IN_SECOND = 1000L
-        const val KEY_ACCESS_TOKEN = "access_token"
-        const val KEY_REFRESH_TOKEN = "refresh_token"
-        const val KEY_EXPIRES_AT = "expires_at"
+        private const val LEGACY_KEY_ACCESS_TOKEN = "access_token"
+        private const val LEGACY_KEY_REFRESH_TOKEN = "refresh_token"
+        private const val LEGACY_KEY_EXPIRES_AT = "expires_at"
+        private val ACCESS_TOKEN_KEY = stringPreferencesKey("session_access_token")
+        private val REFRESH_TOKEN_KEY = stringPreferencesKey("session_refresh_token")
+        private val EXPIRES_AT_KEY = longPreferencesKey("session_expires_at")
+        private val MIGRATED_KEY = booleanPreferencesKey("session_migrated_to_datastore_v1")
     }
 }

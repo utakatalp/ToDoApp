@@ -20,4 +20,7 @@ interface GroupMemberDao {
 
     @Query("DELETE FROM group_members WHERE local_group_id = :localGroupId")
     suspend fun deleteByGroupId(localGroupId: Long)
+
+    @Query("DELETE FROM group_members")
+    suspend fun deleteAll()
 }

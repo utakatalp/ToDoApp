@@ -3,6 +3,7 @@ package com.todoapp.mobile.ui.topbar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.data.repository.DataStoreHelper
+import com.todoapp.mobile.domain.repository.NotificationRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -11,6 +12,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -22,6 +25,7 @@ class TopBarViewModel
 constructor(
     private val userRepository: UserRepository,
     private val dataStoreHelper: DataStoreHelper,
+    private val notificationRepository: NotificationRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TopBarContract.UiState(isUserAuthenticated = false))
     val uiState = _uiState.asStateFlow()
@@ -31,6 +35,15 @@ constructor(
 
     init {
         startObservingUserAuthState()
+        observeUnreadCount()
+    }
+
+    private fun observeUnreadCount() {
+        viewModelScope.launch {
+            notificationRepository.unreadCount.collect { count ->
+                _uiState.update { it.copy(unreadNotifications = count) }
+            }
+        }
     }
 
     fun onAction(action: UiAction) {
@@ -66,11 +79,34 @@ constructor(
     }
 
     private fun startObservingUserAuthState() {
+        // Hydrate UI on every user emission (cheap, no network), but only fire network
+        // side-effects (refreshUserProfile, fetchUnreadCount) when the user IDENTITY changes.
+        // Token rotations re-emit the same user — we don't want to API-storm on those.
         viewModelScope.launch {
             dataStoreHelper.observeUser().collect { user ->
                 updateAuthenticationState(isAuthenticated = user != null)
-                if (user != null) refreshUserProfile()
+                if (user != null) {
+                    _uiState.update {
+                        it.copy(
+                            avatarUrl = user.avatarUrl,
+                            displayName = user.displayName,
+                            avatarVersion = System.currentTimeMillis(),
+                        )
+                    }
+                }
             }
+        }
+        viewModelScope.launch {
+            dataStoreHelper
+                .observeUser()
+                .map { it?.id }
+                .distinctUntilChanged()
+                .collect { userId ->
+                    if (userId != null) {
+                        refreshUserProfile()
+                        notificationRepository.fetchUnreadCount()
+                    }
+                }
         }
     }
 
@@ -89,7 +125,10 @@ constructor(
     }
 
     private fun handleNotificationClick() {
-        // will be added
+        viewModelScope.launch {
+            notificationRepository.fetchUnreadCount()
+        }
+        sendNavEffect(NavigationEffect.Navigate(Screen.Notifications))
     }
 
     private fun refreshAuthenticationState() {

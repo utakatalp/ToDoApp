@@ -12,4 +12,6 @@ interface GroupMemberLocalDataSource {
         localGroupId: Long,
         members: List<GroupMemberEntity>,
     )
+
+    suspend fun deleteAll()
 }

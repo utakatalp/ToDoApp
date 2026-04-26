@@ -2,13 +2,11 @@ package com.todoapp.mobile.ui.settings
 
 import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import android.provider.Settings
 import androidx.annotation.RequiresPermission
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.common.needsOverlayPermission
+import com.todoapp.mobile.common.needsPostNotificationsPermission
 import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.data.security.SecretModeEndCondition
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
@@ -20,6 +18,7 @@ import com.todoapp.mobile.domain.repository.DailyPlanPreferences
 import com.todoapp.mobile.domain.repository.LanguageRepository
 import com.todoapp.mobile.domain.repository.SecretPreferences
 import com.todoapp.mobile.domain.repository.ThemeRepository
+import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.domain.security.SecretModeConditionFactory
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
 import com.todoapp.mobile.navigation.NavigationEffect
@@ -62,6 +61,7 @@ constructor(
     private val clock: Clock,
     private val authRepository: AuthRepository,
     private val dataStoreHelper: DataStoreHelper,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -99,6 +99,7 @@ constructor(
         observeTheme()
         observeLanguage()
         observeAuthState()
+        loadPushPreferences()
         viewModelScope.launch {
             val lastSelectedOptionId = secretModePreferences.getLastSelectedOptionId()
             _uiState.update {
@@ -136,8 +137,8 @@ constructor(
     fun checkPermission(context: Context) {
         val list =
             buildList {
-                if (!Settings.canDrawOverlays(context)) add(PermissionType.OVERLAY)
-                if (needsNotificationPermission(context)) add(PermissionType.NOTIFICATION)
+                if (context.needsOverlayPermission()) add(PermissionType.OVERLAY)
+                if (context.needsPostNotificationsPermission()) add(PermissionType.NOTIFICATION)
             }
         _uiState.update { it.copy(visiblePermissions = list) }
     }
@@ -147,12 +148,6 @@ constructor(
             current.copy(visiblePermissions = current.visiblePermissions - type)
         }
     }
-
-    private fun needsNotificationPermission(context: Context): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) != PackageManager.PERMISSION_GRANTED
 
     private fun observeAuthState() {
         viewModelScope.launch {
@@ -198,6 +193,35 @@ constructor(
             UiAction.OnLogoutDismiss -> _uiState.update { it.copy(showLogoutDialog = false) }
             UiAction.OnLogoutConfirm -> viewModelScope.launch { authRepository.logout() }
             UiAction.OnLoginOrRegisterClick -> _navEffect.trySend(NavigationEffect.Navigate(Screen.Login()))
+            UiAction.OnNavigateToAlarmSounds ->
+                _navEffect.trySend(NavigationEffect.Navigate(Screen.AlarmSounds))
+            is UiAction.OnPushNotificationsToggle -> togglePushNotifications(action.enabled)
+        }
+    }
+
+    private fun loadPushPreferences() {
+        viewModelScope.launch {
+            userRepository.getPushEnabled().onSuccess { enabled ->
+                _uiState.update { it.copy(pushNotificationsEnabled = enabled) }
+            }
+        }
+    }
+
+    private fun togglePushNotifications(enabled: Boolean) {
+        val previous = _uiState.value.pushNotificationsEnabled
+        _uiState.update { it.copy(pushNotificationsEnabled = enabled, isPushTogglePending = true) }
+        viewModelScope.launch {
+            userRepository.setPushEnabled(enabled)
+                .onSuccess { effective ->
+                    _uiState.update {
+                        it.copy(pushNotificationsEnabled = effective, isPushTogglePending = false)
+                    }
+                }
+                .onFailure {
+                    _uiState.update {
+                        it.copy(pushNotificationsEnabled = previous, isPushTogglePending = false)
+                    }
+                }
         }
     }
 

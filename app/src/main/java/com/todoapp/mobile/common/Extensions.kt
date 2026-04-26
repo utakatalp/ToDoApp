@@ -49,7 +49,10 @@ suspend fun <T> handleRequest(request: suspend () -> Response<BaseResponse<T?>>)
                     ?: response.message()
                     ?: "Something went wrong"
             Log.d("error", message)
-            return Result.failure(DomainException.Server(message))
+            return when (response.code()) {
+                401, 403 -> Result.failure(DomainException.Unauthorized())
+                else -> Result.failure(DomainException.Server(message))
+            }
         }
 
         val body =

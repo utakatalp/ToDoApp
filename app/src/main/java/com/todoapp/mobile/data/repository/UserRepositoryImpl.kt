@@ -7,11 +7,15 @@ import com.todoapp.mobile.data.model.network.data.AuthResponseData
 import com.todoapp.mobile.data.model.network.data.FCMTokenResponseData
 import com.todoapp.mobile.data.model.network.data.RefreshTokenData
 import com.todoapp.mobile.data.model.network.data.UserData
+import com.todoapp.mobile.data.model.network.request.ChangePasswordRequest
 import com.todoapp.mobile.data.model.network.request.FCMTokenRequest
+import com.todoapp.mobile.data.model.network.request.FcmTokenDeleteRequest
+import com.todoapp.mobile.data.model.network.request.ForgotPasswordRequest
 import com.todoapp.mobile.data.model.network.request.GoogleLoginRequest
 import com.todoapp.mobile.data.model.network.request.LoginRequest
 import com.todoapp.mobile.data.model.network.request.RefreshTokenRequest
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
+import com.todoapp.mobile.data.model.network.request.ResetPasswordRequest
 import com.todoapp.mobile.data.model.network.request.UpdateUserRequest
 import com.todoapp.mobile.data.source.remote.api.ToDoApi
 import com.todoapp.mobile.data.source.remote.api.TodoAuthApi
@@ -27,6 +31,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
+import timber.log.Timber
 import javax.inject.Inject
 
 class UserRepositoryImpl
@@ -36,6 +41,10 @@ constructor(
     private val fcmTokenPreferences: FCMTokenPreferences,
     private val dataStoreHelper: DataStoreHelper,
 ) : UserRepository {
+    @Volatile private var cachedUser: UserData? = null
+
+    @Volatile private var userCachedAt: Long = 0L
+
     override suspend fun fcmToken(request: FCMTokenRequest): Result<FCMTokenResponseData> = handleRequest {
         todoApi.fcmToken(request)
     }
@@ -84,6 +93,24 @@ constructor(
         return apiResult.map {}
     }
 
+    override suspend fun deleteFcmToken(): Result<Unit> {
+        val tokenToDelete = fcmTokenPreferences.getLastSentToken()
+        val backendResult: Result<Unit> =
+            if (!tokenToDelete.isNullOrBlank()) {
+                handleRequest { todoApi.deleteFcmToken(FcmTokenDeleteRequest(token = tokenToDelete)) }
+                    .map {}
+                    .onFailure { Log.w("FCM_CLEANUP", "Backend DELETE failed", it) }
+            } else {
+                Result.success(Unit)
+            }
+
+        runCatching { FirebaseMessaging.getInstance().deleteToken().await() }
+            .onFailure { Log.w("FCM_CLEANUP", "FirebaseMessaging.deleteToken failed", it) }
+
+        fcmTokenPreferences.clearAll()
+        return backendResult
+    }
+
     override suspend fun register(request: RegisterRequest): Result<AuthResponseData> = handleRequest {
         todoApi.register(request)
     }
@@ -98,11 +125,22 @@ constructor(
         todoApi.googleLogin(GoogleLoginRequest(token = token))
     }
 
-    override suspend fun getUserInfo(): Result<UserData> = handleRequest { todoApi.getUserInfo() }
+    override suspend fun getUserInfo(): Result<UserData> {
+        cachedUser?.let {
+            if (System.currentTimeMillis() - userCachedAt < USER_CACHE_TTL_MS) {
+                return Result.success(it)
+            }
+        }
+        return handleRequest { todoApi.getUserInfo() }
+            .onSuccess { rememberUser(it) }
+    }
 
     override suspend fun updateDisplayName(displayName: String): Result<UserData> {
         return handleRequest { todoApi.updateUser(UpdateUserRequest(displayName = displayName)) }
-            .onSuccess { dataStoreHelper.setUser(it) }
+            .onSuccess {
+                dataStoreHelper.setUser(it)
+                rememberUser(it)
+            }
     }
 
     override suspend fun uploadAvatar(
@@ -112,7 +150,43 @@ constructor(
         val body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
         val part = MultipartBody.Part.createFormData("file", "avatar.jpg", body)
         return handleRequest { todoApi.uploadAvatar(part) }
-            .onSuccess { dataStoreHelper.setUser(it) }
+            .onSuccess {
+                dataStoreHelper.setUser(it)
+                rememberUser(it)
+            }
+    }
+
+    override suspend fun forgotPassword(email: String): Result<Unit> = handleRequest {
+        todoApi.forgotPassword(ForgotPasswordRequest(email = email))
+    }
+
+    override suspend fun resetPassword(token: String, newPassword: String): Result<Unit> = handleRequest {
+        todoApi.resetPassword(ResetPasswordRequest(token = token, newPassword = newPassword))
+    }
+
+    override suspend fun changePassword(currentPassword: String, newPassword: String): Result<Unit> = handleRequest {
+        todoApi.changePassword(
+            ChangePasswordRequest(currentPassword = currentPassword, newPassword = newPassword),
+        )
+    }
+
+    override suspend fun getPushEnabled(): Result<Boolean> = handleRequest { todoApi.getUserPreferences() }.map { it.pushEnabled }
+
+    override suspend fun setPushEnabled(enabled: Boolean): Result<Boolean> = handleRequest {
+        todoApi.updateUserPreferences(
+            com.todoapp.mobile.data.model.network.request.UpdateUserPreferencesRequest(
+                pushEnabled = enabled,
+            ),
+        )
+    }.map { it.pushEnabled }
+
+    private fun rememberUser(user: UserData) {
+        cachedUser = user
+        userCachedAt = System.currentTimeMillis()
+    }
+
+    private companion object {
+        const val USER_CACHE_TTL_MS = 60_000L
     }
 }
 
@@ -130,6 +204,7 @@ constructor(
     }
 
     override suspend fun forceLogout(): Result<Unit> {
+        Timber.tag("AuthLogout").w("forceLogout emitted from AuthRepository")
         _events.emit(AuthEvent.ForceLogout)
         return Result.success(Unit)
     }

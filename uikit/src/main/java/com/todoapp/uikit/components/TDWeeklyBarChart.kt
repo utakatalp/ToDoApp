@@ -344,3 +344,50 @@ fun TDWeeklyBarChartPreview() {
         }
     }
 }
+
+@TDPreviewWide
+@Composable
+private fun TDWeeklyBarChartCompletedOnlyPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDWeeklyBarChart(
+                modifier = Modifier,
+                title = "Completed Tasks",
+                values = listOf(5, 3, 7, 2, 6, 4, 8),
+                height = 200.dp,
+            )
+        }
+    }
+}
+
+@TDPreviewWide
+@Composable
+private fun TDWeeklyBarChartEmptyPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDWeeklyBarChart(
+                modifier = Modifier,
+                title = "This Week",
+                values = listOf(0, 0, 0, 0, 0, 0, 0),
+                height = 180.dp,
+            )
+        }
+    }
+}
+
+@TDPreviewWide
+@Composable
+private fun TDWeeklyBarChartWithExpandPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDWeeklyBarChart(
+                modifier = Modifier,
+                title = "Tasks",
+                values = listOf(2, 4, 1, 3, 5, 2, 1),
+                pendingValues = listOf(1, 1, 2, 1, 0, 1, 2),
+                height = 200.dp,
+                onExpandClick = {},
+            )
+        }
+    }
+}

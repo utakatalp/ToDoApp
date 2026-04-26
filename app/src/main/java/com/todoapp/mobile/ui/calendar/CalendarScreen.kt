@@ -1,27 +1,39 @@
 package com.todoapp.mobile.ui.calendar
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
+import com.todoapp.mobile.common.DeadlineStatus
+import com.todoapp.mobile.common.rememberDeadlineDisplay
+import com.todoapp.mobile.ui.calendar.CalendarContract.GroupTaskCalendarItem
+import com.todoapp.mobile.ui.calendar.CalendarContract.PersonalTaskCalendarItem
 import com.todoapp.mobile.ui.calendar.CalendarContract.UiAction
 import com.todoapp.mobile.ui.calendar.CalendarContract.UiEffect
 import com.todoapp.mobile.ui.calendar.CalendarContract.UiState
@@ -32,12 +44,13 @@ import com.todoapp.mobile.ui.security.biometric.BiometricAuthenticator
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDDatePicker
+import com.todoapp.uikit.components.TDFullscreenImageViewer
+import com.todoapp.uikit.components.TDGroupTaskCard
 import com.todoapp.uikit.components.TDLoadingBar
 import com.todoapp.uikit.components.TDScreenWithSheet
-import com.todoapp.uikit.components.TDTaskCardListByDay
+import com.todoapp.uikit.components.TDStatusChipTone
+import com.todoapp.uikit.components.TDTaskCard
 import com.todoapp.uikit.components.TDText
-import com.todoapp.uikit.components.TaskCardItem
-import com.todoapp.uikit.components.TaskDayItem
 import com.todoapp.uikit.extensions.collectWithLifecycle
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
@@ -159,23 +172,202 @@ private fun CalendarSuccessContent(
                         onDayDeselect = { onAction(UiAction.OnDateDeselect) },
                     )
                 }
-                items(
-                    items = uiState.taskDayItems,
-                    key = { it.date },
-                ) { item ->
-                    TDTaskCardListByDay(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        date = item.date,
-                        tasks = item.tasks,
-                        onTaskClick = { onAction(UiAction.OnTaskClick(it)) },
-                    )
+                val hasPersonal = uiState.personalTaskItems.isNotEmpty()
+                val hasGroup = uiState.groupTaskItems.isNotEmpty()
+                if (uiState.selectedDate != null && !hasPersonal && !hasGroup) {
+                    item { CalendarEmptyState() }
+                } else {
+                    if (hasPersonal) {
+                        item(key = "header-personal") {
+                            SectionHeader(
+                                text = stringResource(com.todoapp.mobile.R.string.calendar_section_my_tasks),
+                            )
+                        }
+                        items(
+                            items = uiState.personalTaskItems,
+                            key = { "personal-${it.taskId}" },
+                        ) { personalItem ->
+                            PersonalTaskEntry(
+                                item = personalItem,
+                                onClick = { onAction(UiAction.OnTaskClick(it)) },
+                                onPhotoClick = { onAction(UiAction.OnGroupTaskPhotoOpen(it)) },
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                            )
+                        }
+                    }
+                    if (hasGroup) {
+                        item(key = "header-group") {
+                            SectionHeader(
+                                text = stringResource(com.todoapp.mobile.R.string.calendar_section_group_deadlines),
+                            )
+                        }
+                        items(
+                            items = uiState.groupTaskItems,
+                            key = { "group-${it.taskId}" },
+                        ) { groupItem ->
+                            GroupTaskEntry(
+                                item = groupItem,
+                                onPhotoClick = { onAction(UiAction.OnGroupTaskPhotoOpen(it)) },
+                                onCardClick = { groupId, taskId ->
+                                    onAction(UiAction.OnGroupTaskClick(groupId, taskId))
+                                },
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                            )
+                        }
+                    }
                 }
             }
             HomeFabMenu(
                 onAddTask = { onAction(UiAction.OnShowBottomSheet) },
                 onPomodoro = { onAction(UiAction.OnPomodoroTap) },
             )
+            val viewerUrl = uiState.viewerPhotoUrl
+            if (!viewerUrl.isNullOrBlank()) {
+                TDFullscreenImageViewer(
+                    imageUrl = viewerUrl,
+                    onDismiss = { onAction(UiAction.OnGroupTaskPhotoDismiss) },
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun GroupTaskEntry(
+    item: GroupTaskCalendarItem,
+    onPhotoClick: (String) -> Unit,
+    onCardClick: (Long, Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val deadline = rememberDeadlineDisplay(
+        dueAtEpochMs = item.dueAtEpochMs,
+        isCompleted = item.isCompleted,
+    )
+    val unassignedLabel = stringResource(com.todoapp.mobile.R.string.deadline_unassigned)
+    TDGroupTaskCard(
+        modifier = modifier,
+        title = item.title,
+        priority = item.priority,
+        deadlinePrimary = deadline.primary,
+        deadlineSecondary = deadline.secondary,
+        deadlineColor = deadlineColorFor(deadline.status),
+        statusTone = statusToneFor(deadline.status),
+        statusLabel = stringResource(statusLabelResFor(deadline.status)),
+        assigneeName = item.assigneeName,
+        assigneeAvatarUrl = item.assigneeAvatarUrl,
+        assigneeInitials = item.assigneeInitials,
+        unassignedLabel = unassignedLabel,
+        photoUrl = item.photoUrl,
+        isCompleted = item.isCompleted,
+        onClick = item.groupId?.let { gid -> { onCardClick(gid, item.taskId) } },
+        onPhotoClick = item.photoUrl?.let { url -> { onPhotoClick(url) } },
+    )
+}
+
+@Composable
+private fun PersonalTaskEntry(
+    item: PersonalTaskCalendarItem,
+    onClick: (Long) -> Unit,
+    onPhotoClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val deadline = rememberDeadlineDisplay(
+        dueAtEpochMs = item.dueAtEpochMs,
+        isCompleted = item.isCompleted,
+    )
+    TDTaskCard(
+        modifier = modifier,
+        taskTitle = item.title,
+        description = item.description,
+        deadlinePrimary = deadline.primary,
+        deadlineSecondary = deadline.secondary,
+        deadlineColor = deadlineColorFor(deadline.status),
+        statusTone = statusToneFor(deadline.status),
+        statusLabel = stringResource(statusLabelResFor(deadline.status)),
+        isCompleted = item.isCompleted,
+        photoUrl = item.photoUrl,
+        onClick = { onClick(item.taskId) },
+        onPhotoClick = item.photoUrl?.let { url -> { onPhotoClick(url) } },
+    )
+}
+
+@Composable
+private fun SectionHeader(text: String) {
+    TDText(
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 4.dp),
+        text = text,
+        style = TDTheme.typography.heading5,
+        color = TDTheme.colors.onBackground,
+    )
+}
+
+@Composable
+private fun deadlineColorFor(status: DeadlineStatus) = when (status) {
+    DeadlineStatus.Future -> TDTheme.colors.onBackground
+    DeadlineStatus.Done -> TDTheme.colors.darkGreen
+    DeadlineStatus.StillPending -> TDTheme.colors.crossRed
+}
+
+private fun statusToneFor(status: DeadlineStatus): TDStatusChipTone = when (status) {
+    DeadlineStatus.Future -> TDStatusChipTone.Neutral
+    DeadlineStatus.Done -> TDStatusChipTone.Success
+    DeadlineStatus.StillPending -> TDStatusChipTone.Danger
+}
+
+private fun statusLabelResFor(status: DeadlineStatus): Int = when (status) {
+    DeadlineStatus.Future -> com.todoapp.mobile.R.string.status_pending
+    DeadlineStatus.Done -> com.todoapp.mobile.R.string.status_done
+    DeadlineStatus.StillPending -> com.todoapp.mobile.R.string.status_overdue
+}
+
+@Composable
+private fun CalendarEmptyState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp, bottom = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Image(
+            painter = painterResource(
+                if (TDTheme.isDark) {
+                    com.todoapp.mobile.R.drawable.ic_idle_robot_dark
+                } else {
+                    com.todoapp.mobile.R.drawable.ic_idle_robot_light
+                },
+            ),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(160.dp)
+                .shadow(
+                    elevation = 8.dp,
+                    shape = CircleShape,
+                    ambientColor = TDTheme.colors.purple.copy(alpha = 0.3f),
+                    spotColor = TDTheme.colors.purple.copy(alpha = 0.3f),
+                )
+                .clip(CircleShape)
+                .border(
+                    width = 2.dp,
+                    color = TDTheme.colors.lightPurple.copy(alpha = 0.6f),
+                    shape = CircleShape,
+                ),
+        )
+        Spacer(Modifier.height(12.dp))
+        TDText(
+            text = stringResource(com.todoapp.mobile.R.string.calendar_no_tasks_for_day),
+            style = TDTheme.typography.heading3,
+            color = TDTheme.colors.onBackground,
+        )
+        Spacer(Modifier.height(8.dp))
+        TDText(
+            text = stringResource(com.todoapp.mobile.R.string.calendar_no_tasks_for_day_description),
+            modifier = Modifier.padding(horizontal = 48.dp),
+            style = TDTheme.typography.heading6,
+            color = TDTheme.colors.onBackground.copy(alpha = 0.6f),
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
@@ -206,43 +398,23 @@ private fun CalendarSuccessPreview() {
             uiState =
             UiState.Success(
                 selectedDate = LocalDate.of(2025, 1, 12),
-                taskDayItems =
+                personalTaskItems =
                 listOf(
-                    TaskDayItem(
-                        date = LocalDate.of(2025, 1, 12),
-                        tasks =
-                        listOf(
-                            TaskCardItem(
-                                1L,
-                                "Read Book",
-                                "09:30",
-                                "10:15",
-                                isCompleted = true,
-                                description = "Chapter 5 of Clean Code",
-                            ),
-                            TaskCardItem(2L, "Gym", "18:00", "19:00", isCompleted = false),
-                        ),
+                    PersonalTaskCalendarItem(
+                        taskId = 1L,
+                        title = "Read Book",
+                        description = "Chapter 5 of Clean Code",
+                        dueAtEpochMs = System.currentTimeMillis() + 3_600_000L,
+                        isCompleted = false,
+                        photoUrl = null,
                     ),
-                    TaskDayItem(
-                        date = LocalDate.of(2025, 1, 13),
-                        tasks =
-                        listOf(
-                            TaskCardItem(
-                                3L,
-                                "Study Kotlin",
-                                "10:00",
-                                "12:00",
-                                isCompleted = false,
-                                description = "Coroutines deep dive",
-                            ),
-                        ),
-                    ),
-                    TaskDayItem(
-                        date = LocalDate.of(2025, 1, 14),
-                        tasks =
-                        listOf(
-                            TaskCardItem(4L, "Project Review", "16:30", "17:30", isCompleted = true),
-                        ),
+                    PersonalTaskCalendarItem(
+                        taskId = 2L,
+                        title = "Gym",
+                        description = null,
+                        dueAtEpochMs = System.currentTimeMillis() - 3_600_000L,
+                        isCompleted = true,
+                        photoUrl = null,
                     ),
                 ),
             ),

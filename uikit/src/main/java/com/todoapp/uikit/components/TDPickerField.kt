@@ -23,6 +23,7 @@ fun TDPickerField(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
+    supportingText: String? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) {
@@ -53,8 +54,47 @@ fun TDPickerField(
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
                 isError = isError,
+                supportingText = supportingText,
             )
         }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDPickerFieldEmptyPreview() {
+    TDTheme {
+        TDPickerField(
+            title = "Pick a date",
+            value = null,
+            onClick = {},
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_calendar2),
+                    contentDescription = null,
+                )
+            },
+        )
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDPickerFieldFilledPreview() {
+    TDTheme {
+        TDPickerField(
+            title = "Deadline",
+            value = "21.02.2002",
+            onClick = {},
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_calendar2),
+                    contentDescription = null,
+                )
+            },
+        )
     }
 }
 
@@ -67,6 +107,7 @@ fun TDPickerFieldErrorPreview() {
             value = "21.02.2002",
             onClick = {},
             isError = true,
+            supportingText = "End time must be after start time",
             modifier = Modifier.fillMaxWidth(),
             leadingIcon = {
                 Icon(

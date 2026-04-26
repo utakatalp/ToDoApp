@@ -93,7 +93,6 @@ private fun MonthNavigationHeader(
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
 ) {
-    val isCurrentMonth = displayedMonth >= YearMonth.now()
     // Use Locale.getDefault() as a fallback to avoid rendering issues in Previews where locales might be empty
     val configuration = LocalConfiguration.current
     val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else Locale.getDefault()
@@ -120,14 +119,11 @@ private fun MonthNavigationHeader(
             style = TDTheme.typography.heading4,
             color = TDTheme.colors.onBackground,
         )
-        IconButton(
-            onClick = onNextMonth,
-            enabled = !isCurrentMonth,
-        ) {
+        IconButton(onClick = onNextMonth) {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_forward),
                 contentDescription = "Next month",
-                tint = if (isCurrentMonth) TDTheme.colors.lightGray else TDTheme.colors.onBackground,
+                tint = TDTheme.colors.onBackground,
             )
         }
     }

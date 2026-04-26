@@ -98,3 +98,47 @@ fun TDGeneralProgressBarPreviewLight() {
         }
     }
 }
+
+@TDPreview
+@Composable
+private fun TDGeneralProgressBarZeroPreview() {
+    TDTheme {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            TDGeneralProgressBar(progress = 0f)
+        }
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDGeneralProgressBarHalfPreview() {
+    TDTheme {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            TDGeneralProgressBar(progress = 0.5f)
+        }
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDGeneralProgressBarFullPreview() {
+    TDTheme {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            TDGeneralProgressBar(progress = 1f)
+        }
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDGeneralProgressBarWithCountsPreview() {
+    TDTheme {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            TDGeneralProgressBar(
+                progress = 0.6f,
+                completedCount = 6,
+                totalCount = 10,
+            )
+        }
+    }
+}

@@ -14,6 +14,8 @@ constructor(
         localGroupId,
     )
 
+    override fun observeAll(): Flow<List<GroupTaskEntity>> = groupTaskDao.observeAll()
+
     override fun searchAll(query: String): Flow<List<GroupTaskEntity>> = groupTaskDao.searchTasks(query)
 
     override suspend fun insert(task: GroupTaskEntity) = groupTaskDao.insert(task)
@@ -27,6 +29,8 @@ constructor(
     override suspend fun deleteByGroupId(localGroupId: Long) = groupTaskDao.deleteByGroupId(localGroupId)
 
     override suspend fun deleteByRemoteId(remoteId: Long) = groupTaskDao.deleteByRemoteId(remoteId)
+
+    override suspend fun deleteAll() = groupTaskDao.deleteAll()
 
     override suspend fun getByRemoteId(remoteId: Long): GroupTaskEntity? = groupTaskDao.getByRemoteId(remoteId)
 

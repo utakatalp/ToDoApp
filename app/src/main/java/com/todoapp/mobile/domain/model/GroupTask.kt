@@ -9,4 +9,5 @@ data class GroupTask(
     val dueDate: Long?,
     val assignee: GroupMember?,
     val photoUrls: List<String> = emptyList(),
+    val groupId: Long? = null,
 )

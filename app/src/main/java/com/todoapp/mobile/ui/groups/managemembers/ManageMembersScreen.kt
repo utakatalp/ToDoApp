@@ -254,3 +254,33 @@ private fun ManageMembersContentDarkPreview() {
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun ManageMembersLoadingPreview() {
+    TDTheme {
+        ManageMembersContent(uiState = ManageMembersContract.UiState.Loading, onAction = {})
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun ManageMembersErrorPreview() {
+    TDTheme {
+        ManageMembersContent(
+            uiState = ManageMembersContract.UiState.Error("Could not load members"),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun ManageMembersEmptyPreview() {
+    TDTheme {
+        ManageMembersContent(
+            uiState = ManageMembersContract.UiState.Success(members = emptyList()),
+            onAction = {},
+        )
+    }
+}

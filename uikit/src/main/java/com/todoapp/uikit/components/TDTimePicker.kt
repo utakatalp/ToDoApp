@@ -146,6 +146,41 @@ fun TDTimePickerPreview() {
     }
 }
 
+@TDPreview
+@Composable
+private fun TDTimePickerEmptyPreview() {
+    TDTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            TDTimePickerDialog(
+                title = "Set Time",
+                placeholder = "HH:MM",
+                selectedTime = null,
+                onTimeChange = {},
+            )
+        }
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDTimePickerErrorPreview() {
+    TDTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            TDTimePickerDialog(
+                title = "End Time",
+                placeholder = "HH:MM",
+                selectedTime = LocalTime.of(8, 0),
+                onTimeChange = {},
+                isError = true,
+            )
+        }
+    }
+}
+
 @TDPreviewDialog
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

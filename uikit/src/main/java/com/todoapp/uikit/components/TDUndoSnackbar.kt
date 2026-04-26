@@ -119,3 +119,14 @@ private fun TDUndoSnackbarPreview() {
         )
     }
 }
+
+@TDPreview
+@Composable
+private fun TDUndoSnackbarLongMessagePreview() {
+    TDTheme {
+        TDUndoSnackbar(
+            message = "Quarterly financial review task moved to archive",
+            onUndo = {},
+        )
+    }
+}

@@ -14,6 +14,7 @@ import com.todoapp.mobile.data.model.network.data.AuthResponseData
 import com.todoapp.mobile.data.model.network.request.RegisterRequest
 import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.repository.SessionPreferences
+import com.todoapp.mobile.domain.repository.TaskSyncRepository
 import com.todoapp.mobile.domain.repository.UserRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
@@ -38,6 +39,7 @@ constructor(
     private val sessionPreferences: SessionPreferences,
     private val authTokenManager: AuthTokenManager,
     private val dataStoreHelper: DataStoreHelper,
+    private val taskSyncRepository: TaskSyncRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val redirectAfterRegister: String? = savedStateHandle.toRoute<Screen.Register>().redirectAfterRegister
@@ -182,10 +184,13 @@ constructor(
             sessionPreferences.setExpiresAt(registerResponseData.expiresIn)
             sessionPreferences.setRefreshToken(registerResponseData.refreshToken)
             dataStoreHelper.setUser(registerResponseData.user)
+            dataStoreHelper.setFirstLoginPermissionPromptPending(true)
 
             userRepository
                 .syncPendingFcmToken()
                 .onFailure { Log.d("FCM_SYNC", "syncPendingFcmToken failed: ${it.message}") }
+
+            taskSyncRepository.fetchTasks(force = true)
 
             val destination = resolveRedirectDestination()
             if (redirectAfterRegister != null) {
@@ -199,7 +204,6 @@ constructor(
             } else {
                 _navEffect.send(NavigationEffect.Navigate(Screen.Home))
             }
-            dataStoreHelper.setLoggedIn(true)
         }
     }
 

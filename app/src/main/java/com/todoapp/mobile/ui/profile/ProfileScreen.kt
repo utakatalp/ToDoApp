@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,9 +37,11 @@ import coil.compose.AsyncImage
 import com.todoapp.mobile.BuildConfig
 import com.todoapp.mobile.R
 import com.todoapp.mobile.ui.profile.ProfileContract.UiAction
+import com.todoapp.mobile.ui.profile.ProfileContract.UiState
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.extensions.collectWithLifecycle
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -66,6 +69,23 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             viewModel.onAction(UiAction.OnAvatarPicked(bytes, mime))
         }
 
+    ProfileContent(
+        uiState = uiState,
+        onAction = viewModel::onAction,
+        onPickAvatar = {
+            picker.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+            )
+        },
+    )
+}
+
+@Composable
+private fun ProfileContent(
+    uiState: UiState,
+    onAction: (UiAction) -> Unit,
+    onPickAvatar: () -> Unit,
+) {
     Column(
         modifier =
         Modifier
@@ -85,11 +105,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             url = uiState.avatarUrl?.let { absoluteAvatarUrl(it, uiState.avatarVersion) },
             initials = initialsFrom(uiState.displayName),
             isUploading = uiState.isUploading,
-            onClick = {
-                picker.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                )
-            },
+            onClick = onPickAvatar,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -98,12 +114,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             text = stringResource(R.string.change_photo),
             style = TDTheme.typography.subheading2,
             color = TDTheme.colors.pendingGray,
-            modifier =
-            Modifier.clickable {
-                picker.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                )
-            },
+            modifier = Modifier.clickable(onClick = onPickAvatar),
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -117,7 +128,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = uiState.editedDisplayName,
-            onValueChange = { viewModel.onAction(UiAction.OnDisplayNameChange(it)) },
+            onValueChange = { onAction(UiAction.OnDisplayNameChange(it)) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors =
@@ -152,6 +163,32 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        Box(
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(TDTheme.colors.lightPending)
+                .clickable { onAction(UiAction.OnChangePasswordTap) }
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+        ) {
+            Column {
+                TDText(
+                    text = stringResource(R.string.change_password),
+                    style = TDTheme.typography.subheading2,
+                    color = TDTheme.colors.onBackground,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                TDText(
+                    text = stringResource(R.string.change_password_hint),
+                    style = TDTheme.typography.regularTextStyle,
+                    color = TDTheme.colors.gray,
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         TDButton(
             text = stringResource(R.string.save_changes),
             isEnable =
@@ -159,7 +196,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                 uiState.editedDisplayName.isNotBlank() &&
                 uiState.editedDisplayName.trim() != uiState.displayName,
             modifier = Modifier.fillMaxWidth(),
-            onClick = { viewModel.onAction(UiAction.OnSaveName) },
+            onClick = { onAction(UiAction.OnSaveName) },
         )
     }
 }
@@ -223,3 +260,17 @@ private fun initialsFrom(name: String): String = name
     .take(2)
     .joinToString("")
     .uppercase()
+
+@TDPreview
+@Composable
+private fun ProfileScreenPreview(
+    @PreviewParameter(ProfilePreviewProvider::class) state: UiState,
+) {
+    TDTheme {
+        ProfileContent(
+            uiState = state,
+            onAction = {},
+            onPickAvatar = {},
+        )
+    }
+}

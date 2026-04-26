@@ -109,14 +109,16 @@ fun GroupAddTaskSheet(
             label = stringResource(com.todoapp.mobile.R.string.task_title),
             value = formState.taskTitle,
             onValueChange = { onAction(TaskFormUiAction.TitleChange(it)) },
-            isError = formState.isTitleError,
+            isError = formState.titleErrorRes != null,
+            supportingText = formState.titleErrorRes?.let { stringResource(it) },
         )
         Spacer(Modifier.height(12.dp))
         TDDatePickerDialog(
             selectedDate = formState.dialogSelectedDate,
             onDateSelect = { onAction(TaskFormUiAction.DateSelect(it)) },
             onDateDeselect = { onAction(TaskFormUiAction.DateDeselect) },
-            isError = formState.isDateError,
+            isError = formState.dateErrorRes != null,
+            supportingText = formState.dateErrorRes?.let { stringResource(it) },
         )
         Spacer(Modifier.height(12.dp))
         TDPickerField(
@@ -125,7 +127,8 @@ fun GroupAddTaskSheet(
             formState.taskTimeStart?.format(timeFormatter)
                 ?: stringResource(com.todoapp.mobile.R.string.starts),
             onClick = { showStartTimePicker = true },
-            isError = formState.isTimeError,
+            isError = formState.timeErrorRes != null,
+            supportingText = formState.timeErrorRes?.let { stringResource(it) },
             leadingIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_clock),
@@ -394,15 +397,15 @@ private fun PriorityChip(
     val contentColor = if (isSelected) fg else fg.copy(alpha = 0.6f)
     Box(
         modifier =
-            Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(containerBg)
-                .then(
-                    if (isSelected) Modifier.border(2.dp, TDTheme.colors.pendingGray, RoundedCornerShape(8.dp))
-                    else Modifier,
-                )
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp, vertical = 6.dp),
+        Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(containerBg)
+            .then(
+                if (isSelected) Modifier.border(2.dp, TDTheme.colors.pendingGray, RoundedCornerShape(8.dp))
+                else Modifier,
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
         TDText(
             text = label,

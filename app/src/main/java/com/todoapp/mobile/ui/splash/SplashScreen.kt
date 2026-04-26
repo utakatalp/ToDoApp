@@ -50,7 +50,7 @@ fun TDSplashScreen() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(R.drawable.ic_logo),
+                painter = painterResource(com.example.uikit.R.drawable.img_donebot_overlay_notification_light),
                 contentDescription = null,
                 modifier =
                 Modifier

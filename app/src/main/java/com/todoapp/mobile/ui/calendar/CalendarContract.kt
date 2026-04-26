@@ -1,7 +1,6 @@
 package com.todoapp.mobile.ui.calendar
 
 import com.todoapp.mobile.ui.home.TaskFormState
-import com.todoapp.uikit.components.TaskDayItem
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -14,7 +13,9 @@ object CalendarContract {
             val selectedDate: LocalDate? = null,
             val selectedMonth: YearMonth = YearMonth.now(),
             val taskDatesInMonth: Set<LocalDate> = emptySet(),
-            val taskDayItems: List<TaskDayItem> = emptyList(),
+            val personalTaskItems: List<PersonalTaskCalendarItem> = emptyList(),
+            val groupTaskItems: List<GroupTaskCalendarItem> = emptyList(),
+            val viewerPhotoUrl: String? = null,
             val isSheetOpen: Boolean = false,
             val taskFormState: TaskFormState = TaskFormState(),
         ) : UiState
@@ -79,7 +80,40 @@ object CalendarContract {
         data object OnPomodoroTap : UiAction
 
         data object OnSuccessfulBiometricAuthenticationHandle : UiAction
+
+        data class OnGroupTaskPhotoOpen(
+            val url: String,
+        ) : UiAction
+
+        data object OnGroupTaskPhotoDismiss : UiAction
+
+        data class OnGroupTaskClick(
+            val groupId: Long,
+            val taskId: Long,
+        ) : UiAction
     }
+
+    data class PersonalTaskCalendarItem(
+        val taskId: Long,
+        val title: String,
+        val description: String?,
+        val dueAtEpochMs: Long,
+        val isCompleted: Boolean,
+        val photoUrl: String?,
+    )
+
+    data class GroupTaskCalendarItem(
+        val taskId: Long,
+        val groupId: Long?,
+        val title: String,
+        val priority: String?,
+        val dueAtEpochMs: Long,
+        val assigneeName: String?,
+        val assigneeAvatarUrl: String?,
+        val assigneeInitials: String,
+        val photoUrl: String?,
+        val isCompleted: Boolean,
+    )
 
     sealed interface UiEffect {
         data object ShowBiometricAuthenticator : UiEffect

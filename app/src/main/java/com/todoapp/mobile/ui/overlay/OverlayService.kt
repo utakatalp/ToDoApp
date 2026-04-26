@@ -1,8 +1,11 @@
 package com.todoapp.mobile.ui.overlay
 
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.IBinder
 import android.view.Gravity
 import android.view.View
@@ -15,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -24,6 +28,7 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.todoapp.mobile.MainActivity
+import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.alarm.buildDailyPlanAlarmItem
@@ -44,6 +49,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import javax.inject.Inject
+import com.example.uikit.R as UikitR
 
 @AndroidEntryPoint
 class OverlayService :
@@ -58,7 +64,15 @@ class OverlayService :
 
     @Inject
     lateinit var themeRepository: ThemeRepository
+
+    @Inject
+    lateinit var alarmSoundPreferences: com.todoapp.mobile.domain.repository.AlarmSoundPreferences
+
     private lateinit var windowManager: WindowManager
+    private val ringtone = com.todoapp.mobile.common.RingtoneHolder()
+    private val ringtoneScope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO,
+    )
 
     @Suppress("ktlint:standard:backing-property-naming")
     private val _lifecycleRegistry = LifecycleRegistry(this)
@@ -78,6 +92,7 @@ class OverlayService :
         _savedStateRegistryController.performAttach()
         _savedStateRegistryController.performRestore(null)
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        OverlayServiceChannel.ensure(this)
     }
 
     override fun onStartCommand(
@@ -86,13 +101,21 @@ class OverlayService :
         startId: Int,
     ): Int {
         android.util.Log.d("OverlayService", "onStartCommand called, extras: ${intent.extras}")
+        promoteToForeground()
         if (intent.hasExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)) {
             val message = intent.getStringExtra(INTENT_EXTRA_COMMAND_SHOW_OVERLAY)
             val minutesBefore = intent.getLongExtra(INTENT_EXTRA_LONG, 0)
             val overlayType = intent.getStringExtra(INTENT_EXTRA_OVERLAY_TYPE) ?: OVERLAY_TYPE_TASK
             showOverlay(message.orEmpty(), minutesBefore, overlayType)
+            // Honor user-selected alarm sound preference. Channel sounds are immutable post-creation
+            // so we play the ringtone manually here.
+            ringtoneScope.launch {
+                val uri = runCatching { alarmSoundPreferences.currentAlarmSoundUri() }.getOrNull()
+                ringtone.play(context = this@OverlayService, explicitUri = uri)
+            }
         } else if (intent.hasExtra(INTENT_EXTRA_COMMAND_HIDE_OVERLAY)) {
             hideOverlay()
+            ringtone.stop()
         }
         return START_NOT_STICKY
     }
@@ -230,6 +253,42 @@ class OverlayService :
             dailyPlanOverlayView = null
         }
         _lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
+        startedAsForeground = false
+        stopSelf()
+    }
+
+    private var startedAsForeground: Boolean = false
+
+    private fun promoteToForeground() {
+        if (startedAsForeground) return
+        val notification: Notification = NotificationCompat
+            .Builder(this, OverlayServiceChannel.CHANNEL_ID)
+            .setSmallIcon(UikitR.drawable.ic_sand_clock)
+            .setContentTitle(getString(R.string.alarm_overlay_running))
+            .setOngoing(true)
+            .setSilent(true)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .build()
+        runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(
+                    OverlayServiceChannel.FOREGROUND_NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+                )
+            } else {
+                startForeground(OverlayServiceChannel.FOREGROUND_NOTIFICATION_ID, notification)
+            }
+            startedAsForeground = true
+        }
     }
 
     private fun getLayoutParams(overlayType: String): WindowManager.LayoutParams = WindowManager

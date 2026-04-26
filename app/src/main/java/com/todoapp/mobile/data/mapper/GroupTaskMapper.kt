@@ -77,6 +77,8 @@ fun GroupTaskEntity.toDomain(): GroupTask = GroupTask(
     } else {
         null
     },
+    photoUrls = photoUrls.split(',').filter { it.isNotBlank() },
+    groupId = remoteGroupId,
 )
 
 fun GroupTask.toEntity(
@@ -94,4 +96,5 @@ fun GroupTask.toEntity(
     assigneeUserId = assignee?.userId,
     assigneeDisplayName = assignee?.displayName,
     assigneeAvatarUrl = assignee?.avatarUrl,
+    photoUrls = photoUrls.joinToString(","),
 )

@@ -408,3 +408,59 @@ fun TDDatePickerPreview() {
         }
     }
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
+@TDPreviewWide
+@Composable
+private fun TDDatePickerNoSelectionPreview() {
+    TDTheme {
+        Column {
+            TDDatePicker(
+                selectedDate = null,
+                selectedMonth = YearMonth.of(2025, 3),
+                onDaySelect = {},
+                onDayDeselect = {},
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@TDPreviewWide
+@Composable
+private fun TDDatePickerWithTaskDatesPreview() {
+    TDTheme {
+        Column {
+            TDDatePicker(
+                selectedDate = LocalDate.of(2025, 3, 12),
+                selectedMonth = YearMonth.of(2025, 3),
+                taskDates =
+                setOf(
+                    LocalDate.of(2025, 3, 5),
+                    LocalDate.of(2025, 3, 8),
+                    LocalDate.of(2025, 3, 14),
+                    LocalDate.of(2025, 3, 21),
+                    LocalDate.of(2025, 3, 28),
+                ),
+                onDaySelect = {},
+                onDayDeselect = {},
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@TDPreviewWide
+@Composable
+private fun TDDatePickerSingleInputPreview() {
+    TDTheme {
+        Column {
+            TDDatePickerSingleInput(
+                selectedMonth = YearMonth.of(2025, 3),
+                selectedDate = LocalDate.of(2025, 3, 5),
+                onDaySelect = {},
+                onDayDeselect = {},
+            )
+        }
+    }
+}
