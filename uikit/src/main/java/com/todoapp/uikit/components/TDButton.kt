@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package com.todoapp.uikit.components
 
 import androidx.compose.foundation.BorderStroke
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -26,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.previews.TDPreviewNoBg
 import com.todoapp.uikit.theme.TDTheme
 
@@ -343,5 +347,82 @@ fun TDButtonPreview() {
             size = TDButtonSize.MEDIUM,
             fullWidth = true,
         )
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDButtonPrimaryPreview() {
+    TDTheme {
+        TDButton(text = "Save", onClick = {}, type = TDButtonType.PRIMARY)
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDButtonSecondaryPreview() {
+    TDTheme {
+        TDButton(text = "Cancel", onClick = {}, type = TDButtonType.SECONDARY)
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDButtonOutlinePreview() {
+    TDTheme {
+        TDButton(text = "Skip", onClick = {}, type = TDButtonType.OUTLINE)
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDButtonCancelPreview() {
+    TDTheme {
+        TDButton(text = "Delete", onClick = {}, type = TDButtonType.CANCEL)
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDButtonPendingPreview() {
+    TDTheme {
+        TDButton(text = "Saving...", onClick = {}, type = TDButtonType.PENDING)
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDButtonDisabledPreview() {
+    TDTheme {
+        TDButton(text = "Save", onClick = {}, type = TDButtonType.PRIMARY, isEnable = false)
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDButtonWithIconPreview() {
+    TDTheme {
+        TDButton(
+            text = "Add",
+            onClick = {},
+            type = TDButtonType.PRIMARY,
+            icon = painterResource(id = R.drawable.ic_plus),
+        )
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDButtonFullWidthPreview() {
+    TDTheme {
+        TDButton(text = "Continue", onClick = {}, type = TDButtonType.PRIMARY, fullWidth = true)
+    }
+}
+
+@TDPreview
+@Composable
+private fun TDButtonSmallPreview() {
+    TDTheme {
+        TDButton(text = "OK", onClick = {}, type = TDButtonType.PRIMARY, size = TDButtonSize.SMALL)
     }
 }

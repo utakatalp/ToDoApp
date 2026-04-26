@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package com.todoapp.uikit.components
 
 import android.content.res.Configuration
@@ -49,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
+import com.todoapp.uikit.previews.TDPreviewForm
 import com.todoapp.uikit.theme.TDTheme
 import com.todoapp.uikit.theme.textFieldColors
 import kotlinx.coroutines.delay
@@ -451,6 +454,155 @@ private fun TextFieldPreview() {
                 placeholder = "Task Title",
                 label = "Quick Add",
                 supportingText = "Required field",
+            )
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDTextFieldEmptyPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDTextField(value = "", onValueChange = {}, label = "Email")
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDTextFieldFilledPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDTextField(value = "user@example.com", onValueChange = {}, label = "Email")
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDTextFieldErrorPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDTextField(
+                value = "invalid-email",
+                onValueChange = {},
+                label = "Email",
+                isError = true,
+                supportingText = "Please enter a valid email",
+            )
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDTextFieldDisabledPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDTextField(
+                value = "Read only value",
+                onValueChange = {},
+                label = "Username",
+                enabled = false,
+            )
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDTextFieldPasswordHiddenPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDTextField(
+                value = "secret123",
+                onValueChange = {},
+                label = "Password",
+                passwordVisible = false,
+                onTogglePasswordVisible = {},
+            )
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDTextFieldPasswordVisiblePreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDTextField(
+                value = "secret123",
+                onValueChange = {},
+                label = "Password",
+                passwordVisible = true,
+                onTogglePasswordVisible = {},
+            )
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDLabeledTextFieldPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDLabeledTextField(
+                title = "Description",
+                value = "Buy groceries on the way home.",
+                onValueChange = {},
+                placeholder = "Enter description",
+                singleLine = false,
+                minLines = 3,
+            )
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDLabeledTextFieldEmptyPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDLabeledTextField(
+                title = "Description",
+                value = "",
+                onValueChange = {},
+                placeholder = "Enter description",
+                singleLine = false,
+                minLines = 3,
+            )
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDCompactOutlinedTextFieldPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDCompactOutlinedTextField(
+                value = "",
+                onValueChange = {},
+                placeholder = "Task Title",
+                label = "Quick Add",
+            )
+        }
+    }
+}
+
+@TDPreviewForm
+@Composable
+private fun TDCompactOutlinedTextFieldErrorPreview() {
+    TDTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TDCompactOutlinedTextField(
+                value = "",
+                onValueChange = {},
+                placeholder = "Task Title",
+                label = "Quick Add",
+                isError = true,
+                supportingText = "Title is required",
             )
         }
     }

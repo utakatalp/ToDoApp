@@ -36,6 +36,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
+@Suppress("LargeClass")
 class GroupRepositoryImpl
 @Inject
 constructor(
@@ -48,30 +49,71 @@ constructor(
     private val taskLocalDataSource: TaskLocalDataSource,
     private val todoApi: com.todoapp.mobile.data.source.remote.api.ToDoApi,
 ) : GroupRepository {
+    @Volatile private var cachedGroups: GroupSummaryDataList? = null
+
+    @Volatile private var groupsCachedAt: Long = 0L
+    private val groupTasksSyncedAt = java.util.concurrent.ConcurrentHashMap<Long, Long>()
+    private val cachedGroupDetail = java.util.concurrent.ConcurrentHashMap<Long, GroupData>()
+    private val groupDetailCachedAt = java.util.concurrent.ConcurrentHashMap<Long, Long>()
+    private val cachedGroupActivity = java.util.concurrent.ConcurrentHashMap<Long, List<GroupActivity>>()
+    private val groupActivityCachedAt = java.util.concurrent.ConcurrentHashMap<Long, Long>()
+    private val cachedGroupTasks = java.util.concurrent.ConcurrentHashMap<Long, List<GroupTask>>()
+    private val groupTasksCachedAt = java.util.concurrent.ConcurrentHashMap<Long, Long>()
+
     override suspend fun createGroup(request: CreateGroupRequest): Result<GroupData> = groupRemoteDataSource
         .createGroup(request)
         .onSuccess { remote ->
             val entity = remote.toEntity()
             groupLocalDataSource.insert(withInitializedOrder(entity))
+            invalidateGroupsCache()
         }
 
-    override suspend fun getGroups(): Result<GroupSummaryDataList> = groupRemoteDataSource
-        .getGroups()
-        .onSuccess { result ->
-            val entities =
-                result.groups.map { summary ->
-                    summary.toEntity()
+    override suspend fun getGroups(force: Boolean): Result<GroupSummaryDataList> {
+        if (!force) {
+            cachedGroups?.let {
+                if (System.currentTimeMillis() - groupsCachedAt < GROUPS_CACHE_TTL_MS) {
+                    return Result.success(it)
                 }
-            syncRemoteGroupsWithLocal(entities)
+            }
         }
+        return groupRemoteDataSource
+            .getGroups()
+            .onSuccess { result ->
+                val entities =
+                    result.groups.map { summary ->
+                        summary.toEntity()
+                    }
+                syncRemoteGroupsWithLocal(entities)
+                cachedGroups = result
+                groupsCachedAt = System.currentTimeMillis()
+            }
+    }
+
+    private fun invalidateGroupsCache() {
+        cachedGroups = null
+        groupsCachedAt = 0L
+    }
+
+    private fun invalidateGroupCache(groupId: Long) {
+        cachedGroupDetail.remove(groupId)
+        groupDetailCachedAt.remove(groupId)
+        cachedGroupActivity.remove(groupId)
+        groupActivityCachedAt.remove(groupId)
+        cachedGroupTasks.remove(groupId)
+        groupTasksCachedAt.remove(groupId)
+        groupTasksSyncedAt.remove(groupId)
+    }
 
     override suspend fun deleteGroup(id: Long): Result<Unit> {
         val localEntity =
             groupLocalDataSource.getGroupById(id) ?: return Result.failure(Exception("Group not found"))
+        val remoteId = localEntity.remoteId!!
         return groupRemoteDataSource
-            .deleteGroup(localEntity.remoteId!!)
+            .deleteGroup(remoteId)
             .onSuccess {
                 groupLocalDataSource.delete(localEntity)
+                invalidateGroupCache(remoteId)
+                invalidateGroupsCache()
             }
     }
 
@@ -83,12 +125,18 @@ constructor(
             if (localEntity != null) {
                 groupLocalDataSource.delete(localEntity)
             }
+            invalidateGroupCache(remoteId)
+            invalidateGroupsCache()
         }
 
     override suspend fun deleteAllLocalGroups(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
+            groupTaskLocalDataSource.deleteAll()
+            groupMemberLocalDataSource.deleteAll()
+            groupActivityLocalDataSource.deleteAll()
             val all = groupLocalDataSource.getAllGroupsOrdered().first()
             all.forEach { groupLocalDataSource.delete(it) }
+            invalidateGroupsCache()
         }
     }
 
@@ -159,7 +207,17 @@ constructor(
         entity.copy(orderIndex = nextIndex)
     }
 
-    override suspend fun getGroupDetail(groupId: Long): Result<GroupData> {
+    override suspend fun getGroupDetail(
+        groupId: Long,
+        force: Boolean,
+    ): Result<GroupData> {
+        if (!force) {
+            val cached = cachedGroupDetail[groupId]
+            val cachedAt = groupDetailCachedAt[groupId] ?: 0L
+            if (cached != null && System.currentTimeMillis() - cachedAt < GROUP_DETAIL_TTL_MS) {
+                return Result.success(cached)
+            }
+        }
         val remote = groupRemoteDataSource.getGroupDetail(groupId)
         if (remote.isSuccess) {
             remote.onSuccess { data ->
@@ -171,6 +229,8 @@ constructor(
                 if (localGroup != null) {
                     persistMembersLocally(localGroup.id, data.members)
                 }
+                cachedGroupDetail[groupId] = data
+                groupDetailCachedAt[groupId] = System.currentTimeMillis()
             }
             return remote
         }
@@ -214,10 +274,14 @@ constructor(
         groupId: Long,
         name: String,
         description: String,
-    ): Result<Unit> = groupRemoteDataSource.updateGroup(
-        groupId,
-        UpdateGroupRequest(id = groupId, name = name, description = description),
-    )
+    ): Result<Unit> = groupRemoteDataSource
+        .updateGroup(
+            groupId,
+            UpdateGroupRequest(id = groupId, name = name, description = description),
+        ).onSuccess {
+            invalidateGroupCache(groupId)
+            invalidateGroupsCache()
+        }
 
     override suspend fun createGroupTask(
         groupId: Long,
@@ -231,14 +295,20 @@ constructor(
             assignedToUserId = assignedToUserId,
             priority = priority,
         ).map { it.id }
-        .onSuccess { syncGroupTasks(groupId) }
+        .onSuccess {
+            invalidateGroupCache(groupId)
+            syncGroupTasks(groupId)
+        }
 
     override suspend fun deleteGroupTask(
         groupId: Long,
         taskId: Long,
     ): Result<Unit> = groupRemoteDataSource
         .deleteGroupTask(groupId, taskId)
-        .onSuccess { groupTaskLocalDataSource.deleteByRemoteId(taskId) }
+        .onSuccess {
+            groupTaskLocalDataSource.deleteByRemoteId(taskId)
+            invalidateGroupCache(groupId)
+        }
 
     override suspend fun updateGroupTaskStatus(
         groupId: Long,
@@ -253,6 +323,7 @@ constructor(
         ).map { }
         .onSuccess {
             groupTaskLocalDataSource.updateCompletion(remoteId = taskId, isCompleted = isCompleted)
+            invalidateGroupCache(groupId)
         }
 
     override suspend fun updateGroupTask(
@@ -296,6 +367,7 @@ constructor(
                     assigneeDisplayName = assigneeMember?.displayName,
                     assigneeAvatarUrl = assigneeMember?.avatarUrl,
                 )
+                invalidateGroupCache(groupId)
             }
     }
 
@@ -309,7 +381,10 @@ constructor(
             taskId = taskId,
             request = GroupTaskUpdateRequest(assigneeId = userId),
         ).map { }
-        .onSuccess { syncGroupTasks(groupId) }
+        .onSuccess {
+            invalidateGroupCache(groupId)
+            syncGroupTasks(groupId)
+        }
 
     override suspend fun unassignGroupTask(
         groupId: Long,
@@ -335,6 +410,7 @@ constructor(
                         assigneeAvatarUrl = null,
                     )
                 }
+                invalidateGroupCache(groupId)
                 syncGroupTasks(groupId)
             }
     }
@@ -368,6 +444,10 @@ constructor(
         return com.todoapp.mobile.common
             .handleRequest { todoApi.uploadGroupAvatar(groupId, part) }
             .map { }
+            .onSuccess {
+                invalidateGroupCache(groupId)
+                invalidateGroupsCache()
+            }
     }
 
     override suspend fun searchGroupTasksAcrossGroups(query: String): Result<List<Pair<Group, List<GroupTask>>>> = withContext(
@@ -432,19 +512,38 @@ constructor(
     override suspend fun inviteMember(
         groupId: Long,
         email: String,
-    ): Result<Unit> = groupRemoteDataSource.inviteMember(InviteMemberRequest(groupId = groupId, email = email))
+    ): Result<Unit> = groupRemoteDataSource
+        .inviteMember(InviteMemberRequest(groupId = groupId, email = email))
+        .onSuccess { invalidateGroupCache(groupId) }
 
     override suspend fun removeMember(
         groupId: Long,
         userId: Long,
-    ): Result<Unit> = groupRemoteDataSource.removeMember(groupId, userId)
+    ): Result<Unit> = groupRemoteDataSource
+        .removeMember(groupId, userId)
+        .onSuccess { invalidateGroupCache(groupId) }
 
     override suspend fun transferOwnership(
         groupId: Long,
         userId: Long,
-    ): Result<Unit> = groupRemoteDataSource.transferOwnership(groupId, TransferOwnershipRequest(userId))
+    ): Result<Unit> = groupRemoteDataSource
+        .transferOwnership(groupId, TransferOwnershipRequest(userId))
+        .onSuccess {
+            invalidateGroupCache(groupId)
+            invalidateGroupsCache()
+        }
 
-    override suspend fun getGroupActivity(groupId: Long): Result<List<GroupActivity>> {
+    override suspend fun getGroupActivity(
+        groupId: Long,
+        force: Boolean,
+    ): Result<List<GroupActivity>> {
+        if (!force) {
+            val cached = cachedGroupActivity[groupId]
+            val cachedAt = groupActivityCachedAt[groupId] ?: 0L
+            if (cached != null && System.currentTimeMillis() - cachedAt < GROUP_DETAIL_TTL_MS) {
+                return Result.success(cached)
+            }
+        }
         val remote = groupRemoteDataSource.getGroupActivity(groupId)
         if (remote.isSuccess) {
             remote.onSuccess { data ->
@@ -458,7 +557,12 @@ constructor(
                     groupActivityLocalDataSource.replaceAll(localGroup.id, entities)
                 }
             }
-            return remote.map { data -> data.activities.map { it.toGroupActivity() } }
+            return remote
+                .map { data -> data.activities.map { it.toGroupActivity() } }
+                .onSuccess { mapped ->
+                    cachedGroupActivity[groupId] = mapped
+                    groupActivityCachedAt[groupId] = System.currentTimeMillis()
+                }
         }
         val localGroup =
             groupLocalDataSource
@@ -470,13 +574,27 @@ constructor(
         }
     }
 
-    override suspend fun getGroupTasks(groupId: Long): Result<List<GroupTask>> {
+    override suspend fun getGroupTasks(
+        groupId: Long,
+        force: Boolean,
+    ): Result<List<GroupTask>> {
+        if (!force) {
+            val cached = cachedGroupTasks[groupId]
+            val cachedAt = groupTasksCachedAt[groupId] ?: 0L
+            if (cached != null && System.currentTimeMillis() - cachedAt < GROUP_DETAIL_TTL_MS) {
+                return Result.success(cached)
+            }
+        }
         val remote =
             taskRemoteDataSource.getTasks(familyGroupId = groupId).map { data ->
                 data.tasks.map { it.toGroupTask() }
             }
         if (remote.isSuccess) {
-            remote.onSuccess { tasks -> persistGroupTasksLocally(remoteGroupId = groupId, tasks = tasks) }
+            remote.onSuccess { tasks ->
+                persistGroupTasksLocally(remoteGroupId = groupId, tasks = tasks)
+                cachedGroupTasks[groupId] = tasks
+                groupTasksCachedAt[groupId] = System.currentTimeMillis()
+            }
             return remote
         }
         // Fallback to locally cached tasks
@@ -496,7 +614,18 @@ constructor(
         entities.map { it.toDomain() }
     }
 
-    override suspend fun syncGroupTasks(remoteGroupId: Long): Result<Unit> = withContext(Dispatchers.IO) {
+    override fun observeAllGroupTasks(): Flow<List<GroupTask>> = groupTaskLocalDataSource.observeAll().map { entities ->
+        entities.map { it.toDomain() }
+    }
+
+    override suspend fun syncGroupTasks(
+        remoteGroupId: Long,
+        force: Boolean,
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        val lastSync = groupTasksSyncedAt[remoteGroupId] ?: 0L
+        if (!force && System.currentTimeMillis() - lastSync < GROUP_TASKS_TTL_MS) {
+            return@withContext Result.success(Unit)
+        }
         runCatching {
             val tasks =
                 taskRemoteDataSource
@@ -505,6 +634,7 @@ constructor(
                     .tasks
                     .map { it.toGroupTask() }
             persistGroupTasksLocally(remoteGroupId = remoteGroupId, tasks = tasks)
+            groupTasksSyncedAt[remoteGroupId] = System.currentTimeMillis()
         }
     }
 
@@ -559,4 +689,10 @@ constructor(
         timestamp = timestamp,
         taskTitle = taskTitle,
     )
+
+    private companion object {
+        const val GROUPS_CACHE_TTL_MS = 60_000L
+        const val GROUP_TASKS_TTL_MS = 60_000L
+        const val GROUP_DETAIL_TTL_MS = 15_000L
+    }
 }

@@ -47,6 +47,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
+@Suppress("LargeClass", "TooManyFunctions")
 class GroupDetailViewModel
 @Inject
 constructor(
@@ -117,14 +118,18 @@ constructor(
             UiAction.OnAssignToMeDismiss -> updateSuccessState { it.copy(pendingAssignTaskId = null) }
             UiAction.OnDeleteTaskConfirm -> confirmDeleteTask()
             UiAction.OnDeleteTaskDismiss -> updateSuccessState { it.copy(pendingDeleteTaskId = null) }
+            UiAction.OnPullToRefresh -> {
+                updateSuccessState { it.copy(isRefreshing = true) }
+                loadGroupData(force = true)
+            }
         }
     }
 
-    private fun loadGroupData() {
+    private fun loadGroupData(force: Boolean = false) {
         viewModelScope.launch {
-            val detailDeferred = async { groupRepository.getGroupDetail(groupId) }
-            val tasksDeferred = async { groupRepository.getGroupTasks(groupId) }
-            val activityDeferred = async { groupRepository.getGroupActivity(groupId) }
+            val detailDeferred = async { groupRepository.getGroupDetail(groupId, force = force) }
+            val tasksDeferred = async { groupRepository.getGroupTasks(groupId, force = force) }
+            val activityDeferred = async { groupRepository.getGroupActivity(groupId, force = force) }
 
             val userResult = userRepository.getUserInfo()
             userResult.getOrNull()?.let { user ->
@@ -184,6 +189,7 @@ constructor(
                     editingTaskId = previousState?.editingTaskId,
                     pendingDeleteTaskId = previousState?.pendingDeleteTaskId,
                     pendingAssignTaskId = previousState?.pendingAssignTaskId,
+                    isRefreshing = false,
                 )
         }
     }
@@ -256,6 +262,7 @@ constructor(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun handleTaskFormAction(action: TaskFormUiAction) {
         updateSuccessState { s ->
             val f = s.taskFormState
@@ -272,6 +279,7 @@ constructor(
                             isAdvancedSettingsExpanded = !f.isAdvancedSettingsExpanded,
                         )
                     is TaskFormUiAction.SecretChange -> f.copy(isTaskSecret = action.isSecret)
+                    is TaskFormUiAction.ReminderOffsetChange -> f.copy(reminderOffsetMinutes = action.minutes)
                     is TaskFormUiAction.PriorityChange -> f.copy(selectedPriority = action.priority)
                     is TaskFormUiAction.AssigneeChange -> f.copy(selectedAssigneeId = action.userId)
                     TaskFormUiAction.Dismiss -> return@updateSuccessState s.copy(
@@ -300,6 +308,9 @@ constructor(
                                 f.photoIdsToDelete + action.photoId
                             },
                         )
+                    is TaskFormUiAction.CategoryChange -> f.copy(selectedCategory = action.category)
+                    is TaskFormUiAction.CustomCategoryNameChange -> f.copy(customCategoryName = action.name)
+                    is TaskFormUiAction.RecurrenceChange -> f.copy(selectedRecurrence = action.recurrence)
                 }
             s.copy(taskFormState = updated)
         }

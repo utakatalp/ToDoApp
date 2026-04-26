@@ -21,6 +21,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.example.uikit.R
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
@@ -42,6 +44,10 @@ fun HomeScreen(
     onAction: (UiAction) -> Unit,
 ) {
     val context = LocalContext.current
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        onAction(UiAction.RefreshPermissions)
+    }
 
     uiEffect.collectWithLifecycle {
         when (it) {
@@ -113,6 +119,7 @@ private fun HomeErrorContent(
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun HomeSuccessContent(
     uiState: UiState.Success,
@@ -139,6 +146,8 @@ private fun HomeSuccessContent(
                             )
                         is TaskFormUiAction.ToggleAdvancedSettings -> onAction(UiAction.OnToggleAdvancedSettings)
                         is TaskFormUiAction.SecretChange -> onAction(UiAction.OnTaskSecretChange(action.isSecret))
+                        is TaskFormUiAction.ReminderOffsetChange ->
+                            onAction(UiAction.OnReminderOffsetChange(action.minutes))
                         is TaskFormUiAction.GroupSelectionChanged ->
                             onAction(
                                 UiAction.OnGroupSelectionChanged(action.groupId),
@@ -154,6 +163,12 @@ private fun HomeSuccessContent(
                                 UiAction.OnPendingPhotoRemove(action.index),
                             )
                         is TaskFormUiAction.ExistingPhotoToggleDelete -> Unit
+                        is TaskFormUiAction.CategoryChange ->
+                            onAction(UiAction.OnCategoryChange(action.category))
+                        is TaskFormUiAction.CustomCategoryNameChange ->
+                            onAction(UiAction.OnCustomCategoryNameChange(action.name))
+                        is TaskFormUiAction.RecurrenceChange ->
+                            onAction(UiAction.OnRecurrenceChange(action.recurrence))
                     }
                 },
             )
