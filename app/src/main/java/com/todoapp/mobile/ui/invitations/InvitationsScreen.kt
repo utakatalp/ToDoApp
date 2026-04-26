@@ -265,13 +265,13 @@ private fun InvitationCard(
     }
 }
 
+@Suppress("DestructuringDeclarationWithTooManyEntries")
 @Composable
 private fun ConfirmDialog(
     pending: PendingAction,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    @Suppress("DestructuringDeclarationWithTooManyEntries")
     val (title, message, confirmLabel, dismissLabel, isDestructive) = when (pending) {
         is PendingAction.Accept -> ConfirmCopy(
             title = stringResource(R.string.invitation_accept_dialog_title),
