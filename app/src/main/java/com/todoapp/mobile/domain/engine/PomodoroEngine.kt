@@ -26,6 +26,7 @@ interface PomodoroEngine {
 
 data class PomodoroEngineState(
     val remainingSeconds: Long = DEFAULT_REMAINING_SECONDS,
+    val currentSessionTotalSeconds: Long = DEFAULT_REMAINING_SECONDS,
     val mode: PomodoroMode = PomodoroMode.Focus,
     val isRunning: Boolean = false,
     val isOvertime: Boolean = false,

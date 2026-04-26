@@ -86,3 +86,63 @@ private fun PomodoroTimerRingPreview() {
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun PomodoroTimerRingEmptyPreview() {
+    ToDoAppTheme {
+        val palette = PomodoroModeTheme.resolve(ModeColorKey.Focus, isSystemInDarkTheme())
+        Box(modifier = Modifier.padding(16.dp)) {
+            PomodoroTimerRing(
+                progress = 0f,
+                progressColor = palette.content,
+                trackColor = palette.track,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PomodoroTimerRingFullPreview() {
+    ToDoAppTheme {
+        val palette = PomodoroModeTheme.resolve(ModeColorKey.Focus, isSystemInDarkTheme())
+        Box(modifier = Modifier.padding(16.dp)) {
+            PomodoroTimerRing(
+                progress = 1f,
+                progressColor = palette.content,
+                trackColor = palette.track,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PomodoroTimerRingShortBreakPreview() {
+    ToDoAppTheme {
+        val palette = PomodoroModeTheme.resolve(ModeColorKey.ShortBreak, isSystemInDarkTheme())
+        Box(modifier = Modifier.padding(16.dp)) {
+            PomodoroTimerRing(
+                progress = 0.4f,
+                progressColor = palette.content,
+                trackColor = palette.track,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PomodoroTimerRingOverTimePreview() {
+    ToDoAppTheme {
+        val palette = PomodoroModeTheme.resolve(ModeColorKey.OverTime, isSystemInDarkTheme())
+        Box(modifier = Modifier.padding(16.dp)) {
+            PomodoroTimerRing(
+                progress = 0.5f,
+                progressColor = palette.content,
+                trackColor = palette.track,
+            )
+        }
+    }
+}

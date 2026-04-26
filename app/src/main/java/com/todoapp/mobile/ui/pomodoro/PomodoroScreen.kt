@@ -592,3 +592,65 @@ private fun Preview_LongBreak() {
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun Preview_OverTime() {
+    TDTheme {
+        PomodoroContent(
+            uiState =
+            UiState(
+                min = 0,
+                second = 42,
+                mode = PomodoroMode.OverTime.toUiMode(),
+                totalSessionSeconds = 25L * 60L,
+                totalSessions = 15,
+                currentSessionIndex = 2,
+                isRunning = true,
+                isOvertime = true,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun Preview_Paused() {
+    TDTheme {
+        PomodoroContent(
+            uiState =
+            UiState(
+                min = 12,
+                second = 30,
+                mode = PomodoroMode.Focus.toUiMode(),
+                totalSessionSeconds = 25L * 60L,
+                totalSessions = 15,
+                currentSessionIndex = 2,
+                isRunning = false,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun Preview_FinishEarlyDialog() {
+    TDTheme {
+        PomodoroContent(
+            uiState =
+            UiState(
+                min = 8,
+                second = 15,
+                mode = PomodoroMode.Focus.toUiMode(),
+                totalSessionSeconds = 25L * 60L,
+                totalSessions = 15,
+                currentSessionIndex = 2,
+                isRunning = true,
+                showFinishEarlyDialog = true,
+            ),
+            onAction = {},
+        )
+    }
+}

@@ -1,6 +1,8 @@
 package com.todoapp.mobile.data.engine
 
 import com.todoapp.mobile.common.pollFirst
+import com.todoapp.mobile.data.notification.PomodoroServiceController
+import com.todoapp.mobile.data.notification.PomodoroSessionAlarmScheduler
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.engine.PomodoroEngineState
 import com.todoapp.mobile.domain.engine.PomodoroEvent
@@ -27,7 +29,10 @@ import javax.inject.Singleton
 @Singleton
 class PomodoroEngineImpl
 @Inject
-constructor() : PomodoroEngine {
+constructor(
+    private val serviceController: PomodoroServiceController,
+    private val alarmScheduler: PomodoroSessionAlarmScheduler,
+) : PomodoroEngine {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val _state = MutableStateFlow(PomodoroEngineState())
@@ -72,20 +77,26 @@ constructor() : PomodoroEngine {
         if (_state.value.isOvertime) return
         startCountdown()
         _state.update { it.copy(isRunning = true) }
+        serviceController.start()
+        scheduleEndAlarm(remainingMillis)
     }
 
     override fun pause() {
         cancelRunningJobs()
         _state.update { it.copy(isRunning = false) }
+        alarmScheduler.cancel()
     }
 
     override fun skip(autoStart: Boolean) {
+        alarmScheduler.cancel()
         startNextSession(autoStart)
     }
 
     override fun finish() {
         cancelRunningJobs()
         _state.update { it.copy(isRunning = false) }
+        alarmScheduler.cancel()
+        serviceController.stop()
         _events.tryEmit(PomodoroEvent.PomodoroFinished)
     }
 
@@ -95,7 +106,14 @@ constructor() : PomodoroEngine {
 
     override fun shutdown() {
         cancelRunningJobs()
+        alarmScheduler.cancel()
+        serviceController.stop()
         scope.cancel()
+    }
+
+    private fun scheduleEndAlarm(remainingMs: Long) {
+        if (remainingMs <= ZERO_MILLIS) return
+        alarmScheduler.scheduleAt(System.currentTimeMillis() + remainingMs)
     }
 
     // ---------------- CORE LOGIC ----------------
@@ -112,6 +130,7 @@ constructor() : PomodoroEngine {
 
     private fun startOvertime() {
         overtimeJob?.cancel()
+        alarmScheduler.cancel()
         overtimeMillis = ZERO_MILLIS
         sessionIndexCounter++
 
@@ -141,6 +160,8 @@ constructor() : PomodoroEngine {
 
         val next = sessionQueue.pollFirst()
         if (next == null) {
+            alarmScheduler.cancel()
+            serviceController.stop()
             _events.tryEmit(PomodoroEvent.PomodoroFinished)
             updateBannerVisibility(false)
             return
@@ -157,6 +178,7 @@ constructor() : PomodoroEngine {
             it.copy(
                 mode = next.mode,
                 currentSessionIndex = sessionIndexCounter.coerceAtLeast(0),
+                currentSessionTotalSeconds = next.durationSeconds,
             )
         }
         publishRemaining(remainingMillis)

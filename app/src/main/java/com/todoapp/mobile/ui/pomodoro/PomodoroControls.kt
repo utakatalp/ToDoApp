@@ -116,3 +116,57 @@ private fun PomodoroControlsPreview() {
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun PomodoroControlsRunningPreview() {
+    val palette = PomodoroModeTheme.resolve(ModeColorKey.Focus, isDark = false)
+    TDTheme {
+        PomodoroControls(
+            isRunning = true,
+            isOvertime = false,
+            surfaceColor = palette.surface,
+            contentColor = palette.content,
+            lightShadow = palette.lightShadow,
+            darkShadow = palette.darkShadow,
+            onAction = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun PomodoroControlsOvertimePreview() {
+    val palette = PomodoroModeTheme.resolve(ModeColorKey.OverTime, isDark = false)
+    TDTheme {
+        PomodoroControls(
+            isRunning = true,
+            isOvertime = true,
+            surfaceColor = palette.surface,
+            contentColor = palette.content,
+            lightShadow = palette.lightShadow,
+            darkShadow = palette.darkShadow,
+            onAction = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun PomodoroControlsShortBreakPreview() {
+    val palette = PomodoroModeTheme.resolve(ModeColorKey.ShortBreak, isDark = false)
+    TDTheme {
+        PomodoroControls(
+            isRunning = true,
+            isOvertime = false,
+            surfaceColor = palette.surface,
+            contentColor = palette.content,
+            lightShadow = palette.lightShadow,
+            darkShadow = palette.darkShadow,
+            onAction = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
