@@ -1,9 +1,15 @@
 package com.todoapp.mobile.ui.home
 
+import android.content.Context
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.R
 import com.todoapp.mobile.common.move
+import com.todoapp.mobile.common.needsOverlayPermission
+import com.todoapp.mobile.common.needsPostNotificationsPermission
+import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.engine.PomodoroEngine
@@ -20,7 +26,9 @@ import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiEffect
 import com.todoapp.mobile.ui.home.HomeContract.UiState
+import com.todoapp.mobile.ui.settings.PermissionType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -29,6 +37,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,6 +57,8 @@ constructor(
     private val alarmScheduler: AlarmScheduler,
     private val pomodoroEngine: PomodoroEngine,
     private val groupRepository: GroupRepository,
+    private val dataStoreHelper: DataStoreHelper,
+    @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
     private data class DailyData(
         val tasks: List<Task>,
@@ -89,6 +100,11 @@ constructor(
             is UiAction.OnTaskTimeStartChange -> changeTaskTimeStart(uiAction)
             is UiAction.OnTaskTimeEndChange -> changeTaskTimeEnd(uiAction)
             is UiAction.OnTaskSecretChange -> toggleTaskSecret(uiAction)
+            is UiAction.OnReminderOffsetChange -> changeReminderOffset(uiAction.minutes)
+            is UiAction.OnCategoryChange -> changeCategory(uiAction.category)
+            is UiAction.OnCustomCategoryNameChange -> changeCustomCategoryName(uiAction.name)
+            is UiAction.OnRecurrenceChange -> changeRecurrence(uiAction.recurrence)
+            is UiAction.OnFilterChange -> changeFilter(uiAction.filter)
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnDialogDateDeselect -> deselectDialogDate()
             is UiAction.OnShowBottomSheet -> showBottomSheet()
@@ -126,6 +142,40 @@ constructor(
                         ),
                     )
                 }
+            is UiAction.DismissPermission -> dismissPermission(uiAction.type)
+            is UiAction.PermissionGranted -> dismissPermission(uiAction.type)
+            is UiAction.RefreshPermissions -> refreshPermissions()
+        }
+    }
+
+    private fun refreshPermissions() {
+        viewModelScope.launch {
+            val pending = dataStoreHelper.observeFirstLoginPermissionPromptPending().first()
+            val list =
+                if (!pending) {
+                    emptyList()
+                } else {
+                    buildList {
+                        if (appContext.needsOverlayPermission()) add(PermissionType.OVERLAY)
+                        if (appContext.needsPostNotificationsPermission()) add(PermissionType.NOTIFICATION)
+                    }
+                }
+            updateSuccessState { it.copy(pendingPermissions = list) }
+            if (pending && list.isEmpty()) {
+                dataStoreHelper.setFirstLoginPermissionPromptPending(false)
+            }
+        }
+    }
+
+    private fun dismissPermission(type: PermissionType) {
+        viewModelScope.launch {
+            updateSuccessState { state ->
+                state.copy(pendingPermissions = state.pendingPermissions - type)
+            }
+            val remaining = (_uiState.value as? UiState.Success)?.pendingPermissions.orEmpty()
+            if (remaining.isEmpty()) {
+                dataStoreHelper.setFirstLoginPermissionPromptPending(false)
+            }
         }
     }
 
@@ -187,8 +237,13 @@ constructor(
                             val urls = t.remoteId?.let { photoUrls[it] } ?: emptyList()
                             if (urls.isNotEmpty()) t.copy(photoUrls = urls) else t
                         }
+                    timber.log.Timber.tag("TaskFetch").d(
+                        "Home tasks=${withPhotos.size}, with photos=${withPhotos.count { it.photoUrls.isNotEmpty() }}, " +
+                            "in-mem map size=${photoUrls.size}",
+                    )
                     DailyData(withPhotos, pendingTaskCount, completedTaskCount)
                 }.collect { data ->
+                    var becameSuccess = false
                     _uiState.update { current ->
                         when (current) {
                             is UiState.Success ->
@@ -198,9 +253,13 @@ constructor(
                                     completedTaskCountThisWeek = data.completedTaskCountThisWeek,
                                 )
 
-                            else -> createInitialState(date, data)
+                            else -> {
+                                becameSuccess = true
+                                createInitialState(date, data)
+                            }
                         }
                     }
+                    if (becameSuccess) refreshPermissions()
                 }
             }
     }
@@ -240,10 +299,8 @@ constructor(
 
     private fun navigateToNextMonth() {
         val current = _uiState.value as? UiState.Success ?: return
-        val thisMonth = YearMonth.now()
-        if (current.displayedMonth >= thisMonth) return
         val newMonth = current.displayedMonth.plusMonths(1)
-        val newDate = if (newMonth == thisMonth) LocalDate.now() else newMonth.atDay(1)
+        val newDate = if (newMonth == YearMonth.now()) LocalDate.now() else newMonth.atDay(1)
         updateSuccessState { it.copy(displayedMonth = newMonth, selectedDate = newDate) }
         fetchDailyTask(newDate)
     }
@@ -264,6 +321,13 @@ constructor(
                     timeEnd = form.taskTimeEnd!!,
                     isCompleted = false,
                     isSecret = form.isTaskSecret,
+                    reminderOffsetMinutes = form.reminderOffsetMinutes,
+                    category = form.selectedCategory,
+                    customCategoryName = form.customCategoryName.takeIf {
+                        form.selectedCategory == com.todoapp.mobile.domain.model.TaskCategory.OTHER &&
+                            it.isNotBlank()
+                    },
+                    recurrence = form.selectedRecurrence,
                 )
             if (form.selectedGroupId != null) {
                 groupRepository.createGroupTask(form.selectedGroupId, task)
@@ -284,10 +348,21 @@ constructor(
 
     private fun checkTask(uiAction: UiAction.OnTaskCheck) {
         viewModelScope.launch(Dispatchers.IO) {
-            taskRepository.updateTaskCompletion(
-                uiAction.task.id,
-                isCompleted = !uiAction.task.isCompleted,
-            )
+            val task = uiAction.task
+            if (task.recurrence != com.todoapp.mobile.domain.model.Recurrence.NONE) {
+                val state = _uiState.value as? UiState.Success
+                val date = state?.selectedDate ?: LocalDate.now()
+                taskRepository.setInstanceCompletion(
+                    taskId = task.id,
+                    date = date,
+                    completed = !task.isCompleted,
+                )
+            } else {
+                taskRepository.updateTaskCompletion(
+                    task.id,
+                    isCompleted = !task.isCompleted,
+                )
+            }
         }
     }
 
@@ -368,6 +443,87 @@ constructor(
         updateSuccessState { it.copy(taskFormState = it.taskFormState.copy(isTaskSecret = uiAction.isSecret)) }
     }
 
+    private fun changeReminderOffset(minutes: Long?) {
+        updateSuccessState {
+            it.copy(taskFormState = it.taskFormState.copy(reminderOffsetMinutes = minutes))
+        }
+    }
+
+    private fun changeCategory(category: com.todoapp.mobile.domain.model.TaskCategory) {
+        updateSuccessState { state ->
+            val form = state.taskFormState
+            // BIRTHDAY auto-defaults to YEARLY recurrence when the user hasn't picked one.
+            val nextRecurrence = if (
+                category == com.todoapp.mobile.domain.model.TaskCategory.BIRTHDAY &&
+                form.selectedRecurrence == com.todoapp.mobile.domain.model.Recurrence.NONE
+            ) {
+                com.todoapp.mobile.domain.model.Recurrence.YEARLY
+            } else {
+                form.selectedRecurrence
+            }
+            state.copy(
+                taskFormState = form.copy(
+                    selectedCategory = category,
+                    selectedRecurrence = nextRecurrence,
+                    customCategoryName = if (category == com.todoapp.mobile.domain.model.TaskCategory.OTHER) {
+                        form.customCategoryName
+                    } else {
+                        ""
+                    },
+                ),
+            )
+        }
+    }
+
+    private fun changeCustomCategoryName(name: String) {
+        updateSuccessState {
+            it.copy(taskFormState = it.taskFormState.copy(customCategoryName = name))
+        }
+    }
+
+    private fun changeRecurrence(recurrence: com.todoapp.mobile.domain.model.Recurrence) {
+        updateSuccessState { state ->
+            val form = state.taskFormState
+            // Recurring tasks anchor on a date (start date). Default to today if none set.
+            val anchor = form.dialogSelectedDate
+                ?: if (recurrence != com.todoapp.mobile.domain.model.Recurrence.NONE) LocalDate.now() else null
+            state.copy(
+                taskFormState = form.copy(
+                    selectedRecurrence = recurrence,
+                    dialogSelectedDate = anchor,
+                ),
+            )
+        }
+    }
+
+    private fun changeFilter(filter: HomeContract.HomeFilter) {
+        val state = _uiState.value as? UiState.Success ?: return
+        if (state.selectedFilter == filter) return
+        updateSuccessState { it.copy(selectedFilter = filter) }
+        // Restart the data flow with the new filter source.
+        when (filter) {
+            HomeContract.HomeFilter.TODAY -> fetchDailyTask(state.selectedDate)
+            else -> fetchByRecurrence(filterToRecurrence(filter))
+        }
+    }
+
+    private fun filterToRecurrence(filter: HomeContract.HomeFilter): com.todoapp.mobile.domain.model.Recurrence = when (filter) {
+        HomeContract.HomeFilter.TODAY -> com.todoapp.mobile.domain.model.Recurrence.NONE
+        HomeContract.HomeFilter.DAILY -> com.todoapp.mobile.domain.model.Recurrence.DAILY
+        HomeContract.HomeFilter.WEEKLY -> com.todoapp.mobile.domain.model.Recurrence.WEEKLY
+        HomeContract.HomeFilter.MONTHLY -> com.todoapp.mobile.domain.model.Recurrence.MONTHLY
+        HomeContract.HomeFilter.YEARLY -> com.todoapp.mobile.domain.model.Recurrence.YEARLY
+    }
+
+    private fun fetchByRecurrence(recurrence: com.todoapp.mobile.domain.model.Recurrence) {
+        fetchJob?.cancel()
+        fetchJob = viewModelScope.launch {
+            taskRepository.observeRecurringByType(recurrence).collect { tasks ->
+                updateSuccessState { it.copy(tasks = tasks) }
+            }
+        }
+    }
+
     private fun toggleExistingTaskSecret(action: UiAction.OnToggleTaskSecret) {
         _uiEffect.trySend(UiEffect.ShowBiometricForSecretToggle(action.task))
     }
@@ -394,22 +550,30 @@ constructor(
         val form = state.taskFormState
         return when {
             form.taskTitle.isBlank() -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTitleError = v)) }
+                showTransientError(R.string.error_task_title_required) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(titleErrorRes = v))
+                }
                 false
             }
 
             form.dialogSelectedDate == null -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isDateError = v)) }
+                showTransientError(R.string.error_task_date_required) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(dateErrorRes = v))
+                }
                 false
             }
 
             form.taskTimeStart == null || form.taskTimeEnd == null -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTimeError = v)) }
+                showTransientError(R.string.error_task_time_required) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(timeErrorRes = v))
+                }
                 false
             }
 
             form.taskTimeStart.isAfter(form.taskTimeEnd) -> {
-                showTransientError { s, v -> s.copy(taskFormState = s.taskFormState.copy(isTimeError = v)) }
+                showTransientError(R.string.error_task_end_before_start) { s, v ->
+                    s.copy(taskFormState = s.taskFormState.copy(timeErrorRes = v))
+                }
                 false
             }
 
@@ -417,28 +581,28 @@ constructor(
         }
     }
 
-    private fun scheduleTaskReminders(
-        task: Task,
-        remindBeforeMinutes: List<Long> = DEFAULT_REMINDER_MINUTES,
-    ) {
+    private fun scheduleTaskReminders(task: Task) {
+        // Recurring tasks are scheduled by TaskRepositoryImpl via AlarmScheduler.scheduleRecurring
+        // and self-rescheduled in AlarmFireReceiver — skip the one-shot path here.
+        if (task.recurrence != com.todoapp.mobile.domain.model.Recurrence.NONE) return
+        val offset = task.reminderOffsetMinutes ?: return // null = user opted out
         viewModelScope.launch(Dispatchers.IO) {
-            remindBeforeMinutes.forEach { minutes ->
-                alarmScheduler.schedule(
-                    task.toAlarmItem(remindBeforeMinutes = minutes),
-                    type = AlarmType.TASK,
-                )
-            }
+            alarmScheduler.schedule(
+                task.toAlarmItem(remindBeforeMinutes = offset),
+                type = AlarmType.TASK,
+            )
         }
     }
 
     private fun showTransientError(
+        @StringRes errorRes: Int,
         durationMs: Long = 2000L,
-        setFlag: (UiState.Success, Boolean) -> UiState.Success,
+        setErrorRes: (UiState.Success, Int?) -> UiState.Success,
     ) {
         viewModelScope.launch {
-            updateSuccessState { setFlag(it, true) }
+            updateSuccessState { setErrorRes(it, errorRes) }
             delay(durationMs)
-            updateSuccessState { setFlag(it, false) }
+            updateSuccessState { setErrorRes(it, null) }
         }
     }
 
@@ -529,7 +693,6 @@ constructor(
     }
 
     companion object {
-        private val DEFAULT_REMINDER_MINUTES = listOf(0L, 1L, 2L, 5L, 10L)
         private const val LOADING_DELAY = 200L
         private const val UNDO_DELAY_MS = 5000L
     }

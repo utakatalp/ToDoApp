@@ -5,17 +5,22 @@ import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.data.mapper.toDomain
 import com.todoapp.mobile.data.mapper.toEntity
 import com.todoapp.mobile.data.model.entity.SyncStatus
+import com.todoapp.mobile.data.model.entity.TaskDailyCompletionEntity
 import com.todoapp.mobile.data.model.entity.TaskEntity
-import com.todoapp.mobile.data.source.local.DayCount
+import com.todoapp.mobile.data.source.local.TaskDailyCompletionDao
 import com.todoapp.mobile.data.source.local.datasource.GroupTaskLocalDataSource
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
+import com.todoapp.mobile.domain.alarm.AlarmScheduler
+import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.domain.model.firesOn
 import com.todoapp.mobile.domain.model.toDomain
 import com.todoapp.mobile.domain.repository.CompletedCountByDay
 import com.todoapp.mobile.domain.repository.TaskRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -32,6 +37,9 @@ constructor(
     private val localDataSource: TaskLocalDataSource,
     private val groupTaskLocalDataSource: GroupTaskLocalDataSource,
     private val todoApi: com.todoapp.mobile.data.source.remote.api.ToDoApi,
+    private val pendingPhotoRepository: com.todoapp.mobile.domain.repository.PendingPhotoRepository,
+    private val dailyCompletionDao: TaskDailyCompletionDao,
+    private val alarmScheduler: AlarmScheduler,
 ) : TaskRepository {
     private val taskPhotoUrls = kotlinx.coroutines.flow.MutableStateFlow<Map<Long, List<String>>>(emptyMap())
 
@@ -54,37 +62,64 @@ constructor(
             list.map { it.toDomain() }
         }
 
-    override fun observeTasksByDate(date: LocalDate): Flow<List<Task>> = localDataSource.observeByDate(
-        date = date.toEpochDay()
-    ).map { list ->
-        list.map { it.toDomain() }
-    }
-
-    override fun countCompletedTasksInAWeek(date: LocalDate): Flow<Int> {
-        val weekStart = date.with(DayOfWeek.MONDAY)
-        val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
-        return localDataSource.countInRange(
-            startDate = weekStart.toEpochDay(),
-            endDate = weekEnd.toEpochDay(),
-            isCompleted = true,
-        )
-    }
-
-    override fun countCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<CompletedCountByDay>> {
-        val weekStart = date.with(DayOfWeek.MONDAY)
-        val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
-        return localDataSource
-            .observeCompletedCountsByDay(
-                startDate = weekStart.toEpochDay(),
-                endDate = weekEnd.toEpochDay(),
-            ).map { rows: List<DayCount> ->
-                rows.map { row ->
-                    CompletedCountByDay(
-                        date = LocalDate.ofEpochDay(row.date),
-                        count = row.count,
-                    )
+    override fun observeTasksByDate(date: LocalDate): Flow<List<Task>> {
+        val epochDay = date.toEpochDay()
+        return localDataSource.observeByDate(date = epochDay)
+            .combine(dailyCompletionDao.observeForDate(epochDay)) { entities, completions ->
+                val completedTaskIds = completions.map { it.taskId }.toSet()
+                entities.map { entity ->
+                    val domain = entity.toDomain()
+                    if (domain.recurrence != Recurrence.NONE) {
+                        domain.copy(isCompleted = entity.id in completedTaskIds)
+                    } else {
+                        domain
+                    }
                 }
             }
+    }
+
+    override fun observeRecurringByType(recurrence: Recurrence): Flow<List<Task>> {
+        if (recurrence == Recurrence.NONE) return kotlinx.coroutines.flow.flowOf(emptyList())
+        return localDataSource.observeByRecurrence(recurrence.name).map { list ->
+            list.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun setInstanceCompletion(
+        taskId: Long,
+        date: LocalDate,
+        completed: Boolean,
+    ) = withContext(Dispatchers.IO) {
+        val epochDay = date.toEpochDay()
+        if (completed) {
+            dailyCompletionDao.upsert(
+                TaskDailyCompletionEntity(
+                    taskId = taskId,
+                    date = epochDay,
+                    completedAt = System.currentTimeMillis(),
+                ),
+            )
+        } else {
+            dailyCompletionDao.delete(taskId, epochDay)
+        }
+        runCatching {
+            val task = localDataSource.getTaskById(taskId) ?: return@runCatching
+            val remoteId = task.remoteId ?: return@runCatching
+            todoApi.setTaskDailyCompletion(
+                remoteId,
+                com.todoapp.mobile.data.model.network.request.TaskDailyCompletionRequest(
+                    date = epochDay,
+                    completed = completed,
+                ),
+            )
+        }.onFailure { Log.w("setDailyCompletion", "remote sync failed: ${it.message}") }
+        Unit
+    }
+
+    override fun countCompletedTasksInAWeek(date: LocalDate): Flow<Int> = observeWeeklyCounts(date).map { (completed, _) -> completed.values.sum() }
+
+    override fun countCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<CompletedCountByDay>> = observeWeeklyCounts(date).map { (completed, _) ->
+        completed.toSortedMap().map { (day, count) -> CompletedCountByDay(day, count) }
     }
 
     override fun countCompletedTasksYearToDate(date: LocalDate): Flow<Int> {
@@ -105,15 +140,7 @@ constructor(
         )
     }
 
-    override fun observePendingTasksInAWeek(date: LocalDate): Flow<Int> {
-        val weekStart = date.with(DayOfWeek.MONDAY)
-        val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
-        return localDataSource.countInRange(
-            startDate = weekStart.toEpochDay(),
-            endDate = weekEnd.toEpochDay(),
-            isCompleted = false,
-        )
-    }
+    override fun observePendingTasksInAWeek(date: LocalDate): Flow<Int> = observeWeeklyCounts(date).map { (_, pending) -> pending.values.sum() }
 
     override fun observeCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<Int>> {
         val weekStart = date.with(DayOfWeek.MONDAY)
@@ -127,15 +154,57 @@ constructor(
 
     override fun observePendingCountsByDayInAWeek(date: LocalDate): Flow<List<Int>> {
         val weekStart = date.with(DayOfWeek.MONDAY)
-        val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
-        return localDataSource
-            .observePendingCountsByDay(
-                startDate = weekStart.toEpochDay(),
-                endDate = weekEnd.toEpochDay(),
-            ).map { rows ->
-                val map = rows.associate { LocalDate.ofEpochDay(it.date) to it.count }
-                (0 until DAYS_IN_WEEK).map { offset -> map[weekStart.plusDays(offset.toLong())] ?: 0 }
+        return observeWeeklyCounts(date).map { (_, pending) ->
+            (0 until DAYS_IN_WEEK).map { offset ->
+                pending[weekStart.plusDays(offset.toLong())] ?: 0
             }
+        }
+    }
+
+    /**
+     * Single source of truth for weekly count aggregations: returns (completedByDay, pendingByDay)
+     * with recurring tasks expanded to per-day instances. Non-recurring tasks contribute on their
+     * own date based on `is_completed`. Recurring tasks contribute on every day they fire per
+     * `Recurrence.firesOn`, with completion looked up in `task_daily_completions`.
+     */
+    private fun observeWeeklyCounts(
+        date: LocalDate,
+    ): Flow<Pair<Map<LocalDate, Int>, Map<LocalDate, Int>>> {
+        val weekStart = date.with(DayOfWeek.MONDAY)
+        val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
+        return kotlinx.coroutines.flow.combine(
+            localDataSource.observeRange(weekStart.toEpochDay(), weekEnd.toEpochDay()),
+            localDataSource.observeAllRecurringTasks(),
+            dailyCompletionDao.observeRange(weekStart.toEpochDay(), weekEnd.toEpochDay()),
+        ) { dateBased, recurring, completions ->
+            val completed = mutableMapOf<LocalDate, Int>()
+            val pending = mutableMapOf<LocalDate, Int>()
+            // Non-recurring rows in the visible range — exclude recurring (they're handled below
+            // and would otherwise double-count the anchor day).
+            dateBased.filter { it.recurrence == Recurrence.NONE.name }.forEach { entity ->
+                val day = LocalDate.ofEpochDay(entity.date)
+                if (entity.isCompleted) completed.merge(day, 1, Int::plus)
+                else pending.merge(day, 1, Int::plus)
+            }
+            // Recurring tasks: expand to one instance per firing day in [weekStart, weekEnd].
+            // Completion comes from task_daily_completions, not from is_completed.
+            val completionKeys = completions.map { it.taskId to it.date }.toSet()
+            recurring.forEach { entity ->
+                val recurrence = Recurrence.fromStorage(entity.recurrence)
+                val anchor = LocalDate.ofEpochDay(entity.date)
+                for (offset in 0 until DAYS_IN_WEEK) {
+                    val day = weekStart.plusDays(offset.toLong())
+                    if (recurrence.firesOn(anchor, day)) {
+                        if (entity.id to day.toEpochDay() in completionKeys) {
+                            completed.merge(day, 1, Int::plus)
+                        } else {
+                            pending.merge(day, 1, Int::plus)
+                        }
+                    }
+                }
+            }
+            completed to pending
+        }
     }
 
     override suspend fun insert(task: Task) {
@@ -143,10 +212,12 @@ constructor(
             .addTask(task)
             .onSuccess { remoteTask ->
                 val entity = remoteTask.toDomain().toEntity().copy(id = 0L)
-                localDataSource.insert(withInitializedOrder(entity))
+                val localId = localDataSource.insert(withInitializedOrder(entity))
+                scheduleRecurringAlarmIfNeeded(localId, task)
             }.onFailure {
                 val entity = task.toEntity(SyncStatus.PENDING_CREATE)
-                localDataSource.insert(withInitializedOrder(entity))
+                val localId = localDataSource.insert(withInitializedOrder(entity))
+                scheduleRecurringAlarmIfNeeded(localId, task)
             }
     }
 
@@ -172,10 +243,12 @@ constructor(
             onFailure = {
                 runCatching {
                     val entity = task.toEntity(SyncStatus.PENDING_CREATE)
-                    localDataSource.insert(withInitializedOrder(entity))
-                    // Photos can't be uploaded until the task has a remote id. The worker-driven
-                    // sync will eventually create it on the server; photos picked now are lost.
-                    // Acceptable trade-off vs. failing the whole create.
+                    val localId = localDataSource.insert(withInitializedOrder(entity))
+                    // Buffer photos in PendingPhotoRepository keyed by the local row id; they
+                    // will be drained and uploaded once syncCreatedTask succeeds and we have a remoteId.
+                    for ((bytes, mime) in photos) {
+                        pendingPhotoRepository.queue(localId, bytes, mime)
+                    }
                 }
             },
         )
@@ -184,6 +257,7 @@ constructor(
     override suspend fun delete(task: Task) {
         val taskEntity = localDataSource.getTaskById(task.id)
         taskEntity?.let { taskEntity ->
+            cancelRecurringAlarmIfNeeded(taskEntity.id, taskEntity.toDomain())
             if (taskEntity.syncStatus != SyncStatus.SYNCED) {
                 localDataSource.delete(taskEntity)
                 return
@@ -233,6 +307,10 @@ constructor(
         .handleRequest { todoApi.deleteTaskPhoto(taskId, photoId) }
         .onSuccess { refreshPhotoUrlsForTask(taskId) }
 
+    override suspend fun refreshPhotoUrls(taskRemoteIds: List<Long>) {
+        taskRemoteIds.forEach { refreshPhotoUrlsForTask(it) }
+    }
+
     /** Pull the current photo URL list for a single task and patch the in-memory map. */
     private suspend fun refreshPhotoUrlsForTask(taskId: Long) {
         com.todoapp.mobile.common
@@ -246,6 +324,11 @@ constructor(
 
     override suspend fun update(task: Task) = withContext(Dispatchers.IO) {
         val taskEntity = localDataSource.getTaskById(task.id)
+
+        // Re-arm or cancel the recurring alarm based on the new recurrence. Always cancel first
+        // (no-op if there was no alarm) so a change to NONE clears it.
+        runCatching { alarmScheduler.cancelRecurring(task.id) }
+        scheduleRecurringAlarmIfNeeded(task.id, task)
 
         if (taskEntity?.syncStatus != SyncStatus.SYNCED) {
             // no need to update remote because its not synced
@@ -268,6 +351,47 @@ constructor(
             }
     }
 
+    private suspend fun syncDailyCompletionsWindow() {
+        val today = LocalDate.now()
+        val from = today.minusDays(DAILY_COMPLETION_PAST_DAYS).toEpochDay()
+        val to = today.plusDays(DAILY_COMPLETION_FUTURE_DAYS).toEpochDay()
+        runCatching {
+            val response = todoApi.getTaskDailyCompletions(from, to)
+            val items = response.body()?.data?.items ?: return
+            // Map remoteId → localId once
+            val all = localDataSource.observeAll().first()
+            val remoteToLocal = all.mapNotNull { e -> e.remoteId?.let { it to e.id } }.toMap()
+            val entities = items.mapNotNull { item ->
+                val localId = remoteToLocal[item.taskId] ?: return@mapNotNull null
+                TaskDailyCompletionEntity(
+                    taskId = localId,
+                    date = item.date,
+                    completedAt = item.completedAt,
+                )
+            }
+            if (entities.isNotEmpty()) dailyCompletionDao.upsertAll(entities)
+        }.onFailure { Log.w("syncDailyCompletions", "failed: ${it.message}") }
+    }
+
+    private fun scheduleRecurringAlarmIfNeeded(taskId: Long, task: Task) {
+        if (task.recurrence == Recurrence.NONE) return
+        runCatching {
+            alarmScheduler.scheduleRecurring(
+                taskId = taskId,
+                recurrence = task.recurrence,
+                anchorDate = task.date,
+                hour = task.timeStart.hour,
+                minute = task.timeStart.minute,
+                message = task.title,
+            )
+        }.onFailure { Log.w("scheduleRecurring", "failed: ${it.message}") }
+    }
+
+    private fun cancelRecurringAlarmIfNeeded(taskId: Long, task: Task) {
+        if (task.recurrence == Recurrence.NONE) return
+        runCatching { alarmScheduler.cancelRecurring(taskId) }
+    }
+
     override suspend fun syncRemoteTasksWithLocal(): Result<Unit> {
         val remoteTasks =
             remoteDataSource.getTasks().fold(
@@ -276,6 +400,11 @@ constructor(
             )
 
         // Refresh the in-memory photo-url map so Home/Calendar can show thumbnails.
+        timber.log.Timber.tag("TaskFetch").d(
+            "syncRemoteTasksWithLocal: ${remoteTasks.tasks.size} tasks, " +
+                "${remoteTasks.tasks.count { it.photoUrls.isNotEmpty() }} with photos, " +
+                "total ${remoteTasks.tasks.sumOf { it.photoUrls.size }} URLs",
+        )
         taskPhotoUrls.value =
             remoteTasks.tasks
                 .filter { it.photoUrls.isNotEmpty() }
@@ -326,6 +455,9 @@ constructor(
             // group task (from stale data on earlier builds). Keeps Home free of dups.
             val groupRemoteIds = groupTaskLocalDataSource.getAllRemoteIds()
             if (groupRemoteIds.isNotEmpty()) localDataSource.deleteByRemoteIds(groupRemoteIds)
+            // Pull per-day completions for daily tasks so the home toggle stays consistent
+            // across devices. Window is small enough to fetch eagerly.
+            syncDailyCompletionsWindow()
         }.fold(
             onSuccess = { Result.success(Unit) },
             onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) },
@@ -448,6 +580,10 @@ constructor(
 
                 runCatching {
                     localDataSource.update(updated)
+                    pendingPhotoRepository.drain(taskEntity.id, remoteTask.id) { bytes, mime ->
+                        uploadTaskPhoto(remoteTask.id, bytes, mime).map {}
+                    }
+                    refreshPhotoUrlsForTask(remoteTask.id)
                 }
             },
             onFailure = {
@@ -542,5 +678,7 @@ constructor(
     companion object {
         private const val DAYS_TO_ADD = 6
         private const val DAYS_IN_WEEK = 7
+        private const val DAILY_COMPLETION_PAST_DAYS = 30L
+        private const val DAILY_COMPLETION_FUTURE_DAYS = 7L
     }
 }

@@ -3,7 +3,8 @@ package com.todoapp.mobile.ui.home
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,11 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,13 +29,14 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -85,13 +88,27 @@ fun HomeTaskList(
                         painter =
                         painterResource(
                             if (TDTheme.isDark) {
-                                com.todoapp.mobile.R.drawable.ic_home_idle_img_dark
+                                com.todoapp.mobile.R.drawable.ic_idle_robot_dark
                             } else {
-                                com.todoapp.mobile.R.drawable.ic_home_idle_img_light
+                                com.todoapp.mobile.R.drawable.ic_idle_robot_light
                             },
                         ),
                         contentDescription = null,
-                        modifier = Modifier.sizeIn(maxHeight = 200.dp),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(180.dp)
+                            .shadow(
+                                elevation = 8.dp,
+                                shape = CircleShape,
+                                ambientColor = TDTheme.colors.purple.copy(alpha = 0.3f),
+                                spotColor = TDTheme.colors.purple.copy(alpha = 0.3f),
+                            )
+                            .clip(CircleShape)
+                            .border(
+                                width = 2.dp,
+                                color = TDTheme.colors.lightPurple.copy(alpha = 0.6f),
+                                shape = CircleShape,
+                            ),
                     )
                     Spacer(Modifier.height(12.dp))
                     TDText(
@@ -118,7 +135,6 @@ fun HomeTaskList(
                     state = reorderableLazyListState,
                     key = task.id,
                 ) { isDragging ->
-                    val interactionSource = remember { MutableInteractionSource() }
                     val dismissState = rememberSwipeToDismissBoxState()
 
                     LaunchedEffect(dismissState.currentValue) {
@@ -141,37 +157,53 @@ fun HomeTaskList(
                             HomeSwipeDismissBackground(direction = dismissState.dismissDirection)
                         },
                     ) {
+                        // Card without onClick — using a plain Card and applying our own
+                        // gesture chain (long-press-drag first, then tap). Material3's
+                        // Card(onClick=...) installs its own internal long-press handler
+                        // that fights longPressDraggableHandle and crashes when the
+                        // reorderable lib mutates the list during the gesture.
                         Card(
-                            onClick = { onTaskClick(task) },
                             modifier =
-                            Modifier.semantics {
-                                customActions =
-                                    listOf(
-                                        CustomAccessibilityAction(
-                                            label = "Move Up",
-                                            action = {
-                                                if (index > 0) {
-                                                    onMoveTask(index, index - 1)
-                                                    true
-                                                } else {
-                                                    false
-                                                }
-                                            },
-                                        ),
-                                        CustomAccessibilityAction(
-                                            label = "Move Down",
-                                            action = {
-                                                if (index < tasks.lastIndex) {
-                                                    onMoveTask(index, index + 1)
-                                                    true
-                                                } else {
-                                                    false
-                                                }
-                                            },
-                                        ),
-                                    )
-                            },
-                            interactionSource = interactionSource,
+                            Modifier
+                                .longPressDraggableHandle(
+                                    onDragStarted = {
+                                        hapticFeedback.performHapticFeedback(
+                                            HapticFeedbackType.GestureThresholdActivate,
+                                        )
+                                    },
+                                    onDragStopped = {
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                                        onReorderFinished()
+                                    },
+                                )
+                                .clickable { onTaskClick(task) }
+                                .semantics {
+                                    customActions =
+                                        listOf(
+                                            CustomAccessibilityAction(
+                                                label = "Move Up",
+                                                action = {
+                                                    if (index > 0) {
+                                                        onMoveTask(index, index - 1)
+                                                        true
+                                                    } else {
+                                                        false
+                                                    }
+                                                },
+                                            ),
+                                            CustomAccessibilityAction(
+                                                label = "Move Down",
+                                                action = {
+                                                    if (index < tasks.lastIndex) {
+                                                        onMoveTask(index, index + 1)
+                                                        true
+                                                    } else {
+                                                        false
+                                                    }
+                                                },
+                                            ),
+                                        )
+                                },
                         ) {
                             val firstPhoto = task.photoUrls.firstOrNull()
                             if (firstPhoto != null) {
@@ -208,18 +240,7 @@ fun HomeTaskList(
                                             bottomStart = 12.dp,
                                             bottomEnd = 12.dp,
                                         ),
-                                        modifier =
-                                        Modifier.longPressDraggableHandle(
-                                            onDragStarted = {
-                                                hapticFeedback.performHapticFeedback(
-                                                    HapticFeedbackType.GestureThresholdActivate,
-                                                )
-                                            },
-                                            onDragStopped = {
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                                onReorderFinished()
-                                            },
-                                        ),
+                                        categoryLabel = categoryLabelFor(task),
                                     )
                                 }
                             } else {
@@ -230,18 +251,7 @@ fun HomeTaskList(
                                     onCheckBoxClick = { onTaskCheck(task) },
                                     isDragging = isDragging,
                                     isAnyDragging = isAnyDragging,
-                                    modifier =
-                                    Modifier.longPressDraggableHandle(
-                                        onDragStarted = {
-                                            hapticFeedback.performHapticFeedback(
-                                                HapticFeedbackType.GestureThresholdActivate,
-                                            )
-                                        },
-                                        onDragStopped = {
-                                            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                            onReorderFinished()
-                                        },
-                                    ),
+                                    categoryLabel = categoryLabelFor(task),
                                 )
                             }
                         }
@@ -293,4 +303,26 @@ internal fun HomeSwipeDismissBackground(direction: SwipeToDismissBoxValue) {
             else -> {}
         }
     }
+}
+
+@androidx.compose.runtime.Composable
+private fun categoryLabelFor(task: com.todoapp.mobile.domain.model.Task): String? {
+    val category = task.category
+    if (category == com.todoapp.mobile.domain.model.TaskCategory.PERSONAL) return null
+    if (category == com.todoapp.mobile.domain.model.TaskCategory.OTHER) {
+        return task.customCategoryName?.takeIf { it.isNotBlank() }
+            ?: stringResource(com.todoapp.mobile.R.string.category_other)
+    }
+    val res = when (category) {
+        com.todoapp.mobile.domain.model.TaskCategory.SHOPPING -> com.todoapp.mobile.R.string.category_shopping
+        com.todoapp.mobile.domain.model.TaskCategory.MEDICINE -> com.todoapp.mobile.R.string.category_medicine
+        com.todoapp.mobile.domain.model.TaskCategory.HEALTH -> com.todoapp.mobile.R.string.category_health
+        com.todoapp.mobile.domain.model.TaskCategory.WORK -> com.todoapp.mobile.R.string.category_work
+        com.todoapp.mobile.domain.model.TaskCategory.STUDY -> com.todoapp.mobile.R.string.category_study
+        com.todoapp.mobile.domain.model.TaskCategory.BIRTHDAY -> com.todoapp.mobile.R.string.category_birthday
+        com.todoapp.mobile.domain.model.TaskCategory.PERSONAL,
+        com.todoapp.mobile.domain.model.TaskCategory.OTHER,
+        -> return null
+    }
+    return stringResource(res)
 }

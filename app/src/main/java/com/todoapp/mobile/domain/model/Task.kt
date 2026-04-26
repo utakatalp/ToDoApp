@@ -17,6 +17,15 @@ data class Task(
     val isCompleted: Boolean,
     val isSecret: Boolean,
     val photoUrls: List<String> = emptyList(),
+    /**
+     * Minutes before timeStart at which to fire the reminder. 0 = on time,
+     * positive = N minutes before, null = no reminder. Stored locally; not synced
+     * to the backend (alarms are device-local).
+     */
+    val reminderOffsetMinutes: Long? = 0L,
+    val category: TaskCategory = TaskCategory.PERSONAL,
+    val customCategoryName: String? = null,
+    val recurrence: Recurrence = Recurrence.NONE,
 )
 
 fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem = AlarmItem(
@@ -41,6 +50,9 @@ fun Task.toCreateTaskRequestDto(
     familyGroupId = familyGroupId,
     assignedToUserId = assignedToUserId,
     priority = priority,
+    category = category.name,
+    customCategoryName = customCategoryName,
+    recurrence = recurrence.name,
 )
 
 fun TaskData.toDomain(): Task = Task(
@@ -53,4 +65,7 @@ fun TaskData.toDomain(): Task = Task(
     isCompleted = isCompleted,
     isSecret = isSecret,
     photoUrls = photoUrls,
+    category = TaskCategory.fromStorage(category),
+    customCategoryName = customCategoryName,
+    recurrence = Recurrence.fromStorage(recurrence),
 )

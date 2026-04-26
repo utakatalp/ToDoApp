@@ -2,7 +2,9 @@ package com.todoapp.mobile.data.mapper
 
 import com.todoapp.mobile.data.model.entity.SyncStatus
 import com.todoapp.mobile.data.model.entity.TaskEntity
+import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.domain.model.TaskCategory
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -29,6 +31,11 @@ fun TaskEntity.toDomain(): Task = Task(
     timeEnd = timeEnd.toLocalTimeFromMinuteOfDay(),
     isCompleted = isCompleted,
     isSecret = isSecret,
+    photoUrls = photoUrls.split(',').filter { it.isNotBlank() },
+    reminderOffsetMinutes = reminderOffsetMinutes,
+    category = TaskCategory.fromStorage(category),
+    customCategoryName = customCategoryName,
+    recurrence = Recurrence.fromStorage(recurrence),
 )
 
 fun Task.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TaskEntity {
@@ -45,5 +52,10 @@ fun Task.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TaskEntity {
         isSecret = isSecret,
         remoteId = remoteIdOrNull,
         syncStatus = syncStatus,
+        photoUrls = photoUrls.joinToString(","),
+        reminderOffsetMinutes = reminderOffsetMinutes ?: 0L,
+        category = category.name,
+        customCategoryName = if (category == TaskCategory.OTHER) customCategoryName?.takeIf { it.isNotBlank() } else null,
+        recurrence = recurrence.name,
     )
 }

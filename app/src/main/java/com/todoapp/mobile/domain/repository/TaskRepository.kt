@@ -1,6 +1,7 @@
 package com.todoapp.mobile.domain.repository
 
 import com.todoapp.mobile.data.model.entity.TaskEntity
+import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.Task
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -49,9 +50,21 @@ interface TaskRepository {
         isCompleted: Boolean,
     )
 
+    /** Per-instance completion for any recurring task (recurrence != NONE). */
+    suspend fun setInstanceCompletion(
+        taskId: Long,
+        date: LocalDate,
+        completed: Boolean,
+    )
+
+    /** All tasks of a given recurrence type, ordered by anchor date then start time. */
+    fun observeRecurringByType(recurrence: Recurrence): Flow<List<Task>>
+
     suspend fun getTaskById(id: Long): Task?
 
     suspend fun fetchRemoteTask(id: Long): Result<Task>
+
+    suspend fun refreshPhotoUrls(taskRemoteIds: List<Long>)
 
     suspend fun uploadTaskPhoto(
         taskId: Long,

@@ -30,7 +30,7 @@ interface TaskLocalDataSource {
         endDate: Long,
     ): Flow<List<DayCount>>
 
-    suspend fun insert(task: TaskEntity)
+    suspend fun insert(task: TaskEntity): Long
 
     suspend fun delete(task: TaskEntity)
 
@@ -63,4 +63,8 @@ interface TaskLocalDataSource {
     fun search(query: String): Flow<List<TaskEntity>>
 
     suspend fun deleteByRemoteIds(remoteIds: List<Long>)
+
+    fun observeByRecurrence(recurrence: String): Flow<List<TaskEntity>>
+
+    fun observeAllRecurringTasks(): Flow<List<TaskEntity>>
 }

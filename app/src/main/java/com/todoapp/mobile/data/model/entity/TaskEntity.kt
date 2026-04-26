@@ -22,6 +22,16 @@ data class TaskEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Long = 0L,
     @ColumnInfo(name = "order_index", defaultValue = "0") val orderIndex: Int = 0,
+    @ColumnInfo(name = "photo_urls", defaultValue = "") val photoUrls: String = "",
+    /**
+     * Minutes before timeStart at which to fire the reminder. -1 sentinel = no reminder.
+     * Stored as Long (not nullable) because the Room auto-migration generator handles defaults
+     * cleaner for primitive columns.
+     */
+    @ColumnInfo(name = "reminder_offset_minutes", defaultValue = "0") val reminderOffsetMinutes: Long = 0L,
+    @ColumnInfo(name = "category", defaultValue = "PERSONAL") val category: String = "PERSONAL",
+    @ColumnInfo(name = "custom_category_name") val customCategoryName: String? = null,
+    @ColumnInfo(name = "recurrence", defaultValue = "NONE") val recurrence: String = "NONE",
 )
 
 enum class SyncStatus {

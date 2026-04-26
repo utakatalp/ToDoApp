@@ -73,16 +73,31 @@ fun HomeContent(
 
     val reorderableLazyListState =
         rememberReorderableLazyListState(lazyListState) { from, to ->
-            if (dragOriginalIndex == -1) dragOriginalIndex = from.index
-            dragFinalIndex = to.index
+            // `from.index` / `to.index` are *absolute* LazyColumn item positions and include
+            // every item produced by `headerContent` — they are NOT indices into `localTasks`.
+            // Resolve via key (task.id) instead. Without this translation the move() call
+            // crashes with IndexOutOfBoundsException as soon as a header is present.
+            val fromIndex = localTasks.indexOfFirst { it.id == from.key }
+            val toIndex = localTasks.indexOfFirst { it.id == to.key }
+            if (fromIndex < 0 || toIndex < 0) return@rememberReorderableLazyListState
+            if (dragOriginalIndex == -1) dragOriginalIndex = fromIndex
+            dragFinalIndex = toIndex
             val list = localTasks.toMutableList()
-            list.move(from.index, to.index)
+            list.move(fromIndex, toIndex)
             localTasks = list
             hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
         }
 
+    // Only re-sync localTasks from upstream when no drag is in flight. Adopt the new list when
+    // the IDs differ (real insert/delete from server) OR when same IDs but content differs
+    // (completion flip etc.). The naive overwrite during a gesture's transition window
+    // crashes the reorderable library because its internal key map references items the
+    // overwrite removed.
     LaunchedEffect(uiState.tasks) {
-        if (!reorderableLazyListState.isAnyItemDragging) {
+        if (reorderableLazyListState.isAnyItemDragging) return@LaunchedEffect
+        val sameIds = uiState.tasks.size == localTasks.size &&
+            uiState.tasks.zip(localTasks).all { (a, b) -> a.id == b.id }
+        if (!sameIds || uiState.tasks != localTasks) {
             localTasks = uiState.tasks
         }
     }
@@ -202,44 +217,69 @@ fun HomeContent(
                 },
                 modifier = Modifier.fillMaxSize(),
                 headerContent = {
-                    item { HomeHintCard(showHint = showHint, hintRes = currentHintRes) }
-                    item {
-                        TDWeeklyDatePicker(
-                            modifier = Modifier,
-                            displayedMonth = uiState.displayedMonth,
-                            selectedDate = uiState.selectedDate,
-                            onDateSelect = { onAction(UiAction.OnDateSelect(it)) },
-                            onPreviousMonth = { onAction(UiAction.OnPreviousMonth) },
-                            onNextMonth = { onAction(UiAction.OnNextMonth) },
-                        )
-                    }
-                    item { Spacer(Modifier.height(24.dp)) }
-                    item {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            TDStatisticCard(
-                                text = stringResource(com.todoapp.mobile.R.string.task_complete),
-                                taskAmount = uiState.completedTaskCountThisWeek,
-                                modifier = Modifier.weight(1f),
-                                isCompleted = true,
-                                onClick = { onAction(UiAction.OnCompletedStatCardTap) },
-                            )
-                            Spacer(modifier = Modifier.size(20.dp))
-                            TDStatisticCard(
-                                text = stringResource(com.todoapp.mobile.R.string.task_pending),
-                                taskAmount = uiState.pendingTaskCountThisWeek,
-                                modifier = Modifier.weight(1f),
-                                isCompleted = false,
-                                onClick = { onAction(UiAction.OnPendingStatCardTap) },
+                    if (uiState.pendingPermissions.isNotEmpty()) {
+                        item {
+                            HomePermissionPrompts(
+                                permissions = uiState.pendingPermissions,
+                                onAction = onAction,
                             )
                         }
                     }
-                    item { Spacer(Modifier.height(24.dp)) }
+                    item { HomeHintCard(showHint = showHint, hintRes = currentHintRes) }
                     item {
-                        TDText(
-                            text = stringResource(com.todoapp.mobile.R.string.tasks_today),
-                            color = TDTheme.colors.onBackground,
-                            style = TDTheme.typography.heading3,
+                        HomeFilterRow(
+                            selected = uiState.selectedFilter,
+                            onSelected = { onAction(UiAction.OnFilterChange(it)) },
                         )
+                    }
+                    item { Spacer(Modifier.height(12.dp)) }
+                    if (uiState.selectedFilter == HomeContract.HomeFilter.TODAY) {
+                        item {
+                            TDWeeklyDatePicker(
+                                modifier = Modifier,
+                                displayedMonth = uiState.displayedMonth,
+                                selectedDate = uiState.selectedDate,
+                                onDateSelect = { onAction(UiAction.OnDateSelect(it)) },
+                                onPreviousMonth = { onAction(UiAction.OnPreviousMonth) },
+                                onNextMonth = { onAction(UiAction.OnNextMonth) },
+                            )
+                        }
+                        item { Spacer(Modifier.height(24.dp)) }
+                        item {
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                TDStatisticCard(
+                                    text = stringResource(com.todoapp.mobile.R.string.task_complete),
+                                    taskAmount = uiState.completedTaskCountThisWeek,
+                                    modifier = Modifier.weight(1f),
+                                    isCompleted = true,
+                                    onClick = { onAction(UiAction.OnCompletedStatCardTap) },
+                                )
+                                Spacer(modifier = Modifier.size(20.dp))
+                                TDStatisticCard(
+                                    text = stringResource(com.todoapp.mobile.R.string.task_pending),
+                                    taskAmount = uiState.pendingTaskCountThisWeek,
+                                    modifier = Modifier.weight(1f),
+                                    isCompleted = false,
+                                    onClick = { onAction(UiAction.OnPendingStatCardTap) },
+                                )
+                            }
+                        }
+                        item { Spacer(Modifier.height(24.dp)) }
+                        item {
+                            TDText(
+                                text = stringResource(com.todoapp.mobile.R.string.tasks_today),
+                                color = TDTheme.colors.onBackground,
+                                style = TDTheme.typography.heading3,
+                            )
+                        }
+                    } else {
+                        item {
+                            TDText(
+                                text = stringResource(sectionHeaderRes(uiState.selectedFilter)),
+                                color = TDTheme.colors.onBackground,
+                                style = TDTheme.typography.heading3,
+                            )
+                        }
                     }
                     item { Spacer(Modifier.height(8.dp)) }
                 },
@@ -293,6 +333,14 @@ fun HomeContent(
             )
         }
     }
+}
+
+private fun sectionHeaderRes(filter: HomeContract.HomeFilter): Int = when (filter) {
+    HomeContract.HomeFilter.TODAY -> com.todoapp.mobile.R.string.tasks_today
+    HomeContract.HomeFilter.DAILY -> com.todoapp.mobile.R.string.section_daily_tasks
+    HomeContract.HomeFilter.WEEKLY -> com.todoapp.mobile.R.string.section_weekly_tasks
+    HomeContract.HomeFilter.MONTHLY -> com.todoapp.mobile.R.string.section_monthly_tasks
+    HomeContract.HomeFilter.YEARLY -> com.todoapp.mobile.R.string.section_yearly_tasks
 }
 
 @Composable
@@ -402,6 +450,79 @@ private fun HomeContentPreview_Dark() {
                 tasks = HomePreviewData.sampleTasks,
                 completedTaskCountThisWeek = 5,
                 pendingTaskCountThisWeek = 8,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentSheetOpenPreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+                isSheetOpen = true,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentDeleteDialogPreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+                isDeleteDialogOpen = true,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentSecretModeOffPreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+                isSecretModeEnabled = false,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentValidationErrorPreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+                isSheetOpen = true,
+                titleErrorRes = com.todoapp.mobile.R.string.error_task_title_required,
             ),
             onAction = {},
             modifier = Modifier.padding(horizontal = 24.dp),

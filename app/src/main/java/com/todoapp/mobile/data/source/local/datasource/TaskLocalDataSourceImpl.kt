@@ -4,7 +4,6 @@ import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.data.source.local.DayCount
 import com.todoapp.mobile.data.source.local.TaskDao
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class TaskLocalDataSourceImpl
@@ -41,9 +40,7 @@ constructor(
         endDate: Long,
     ): Flow<List<DayCount>> = taskDao.observePendingCountsByDay(startDate, endDate)
 
-    override suspend fun insert(task: TaskEntity) {
-        taskDao.insert(task)
-    }
+    override suspend fun insert(task: TaskEntity): Long = taskDao.insert(task)
 
     override suspend fun delete(task: TaskEntity) {
         taskDao.delete(task)
@@ -63,8 +60,7 @@ constructor(
     override suspend fun getTaskById(id: Long): TaskEntity? = taskDao.getTaskById(id)
 
     override suspend fun deleteAll() {
-        val tasks = taskDao.getAllTasks().first()
-        taskDao.deleteAll(tasks)
+        taskDao.deleteAllTasks()
     }
 
     override suspend fun insertAll(tasks: List<TaskEntity>) {
@@ -95,4 +91,8 @@ constructor(
     override suspend fun deleteByRemoteIds(remoteIds: List<Long>) {
         taskDao.deleteByRemoteIds(remoteIds)
     }
+
+    override fun observeByRecurrence(recurrence: String): Flow<List<TaskEntity>> = taskDao.observeByRecurrence(recurrence)
+
+    override fun observeAllRecurringTasks(): Flow<List<TaskEntity>> = taskDao.observeAllRecurringTasks()
 }

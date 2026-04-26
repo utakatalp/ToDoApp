@@ -1,6 +1,7 @@
 package com.todoapp.mobile.ui.home
 
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.ui.settings.PermissionType
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -26,6 +27,8 @@ object HomeContract {
             val taskFormState: TaskFormState = TaskFormState(),
             val pendingDeleteTask: Task? = null,
             val availableGroups: List<GroupSelectionItem> = emptyList(),
+            val pendingPermissions: List<PermissionType> = emptyList(),
+            val selectedFilter: HomeFilter = HomeFilter.TODAY,
         ) : UiState
 
         data class Error(
@@ -98,6 +101,10 @@ object HomeContract {
             val isSecret: Boolean,
         ) : UiAction
 
+        data class OnReminderOffsetChange(
+            val minutes: Long?,
+        ) : UiAction
+
         data class OnTaskClick(
             val task: Task,
         ) : UiAction
@@ -134,6 +141,40 @@ object HomeContract {
         data class OnPendingPhotoRemove(
             val index: Int,
         ) : UiAction
+
+        data class DismissPermission(
+            val type: PermissionType,
+        ) : UiAction
+
+        data class PermissionGranted(
+            val type: PermissionType,
+        ) : UiAction
+
+        data object RefreshPermissions : UiAction
+
+        data class OnCategoryChange(
+            val category: com.todoapp.mobile.domain.model.TaskCategory,
+        ) : UiAction
+
+        data class OnCustomCategoryNameChange(
+            val name: String,
+        ) : UiAction
+
+        data class OnRecurrenceChange(
+            val recurrence: com.todoapp.mobile.domain.model.Recurrence,
+        ) : UiAction
+
+        data class OnFilterChange(
+            val filter: HomeFilter,
+        ) : UiAction
+    }
+
+    enum class HomeFilter {
+        TODAY,
+        DAILY,
+        WEEKLY,
+        MONTHLY,
+        YEARLY,
     }
 
     sealed interface UiEffect {

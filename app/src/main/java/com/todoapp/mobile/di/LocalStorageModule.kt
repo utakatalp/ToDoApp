@@ -29,7 +29,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import timber.log.Timber
 import java.io.File
+import java.security.GeneralSecurityException
 import java.time.Clock
 import javax.inject.Singleton
 
@@ -49,7 +51,20 @@ object LocalStorageModule {
             context,
             AppDatabase::class.java,
             DB_NAME,
-        ).build()
+        )
+        .addMigrations(MIGRATION_12_13)
+        .build()
+
+    /**
+     * Splits the implicit category=DAILY recurrence (V1) into a separate `recurrence` column.
+     * Done as a manual migration (not auto) because the schema add comes with a data UPDATE.
+     */
+    private val MIGRATION_12_13 = object : androidx.room.migration.Migration(12, 13) {
+        override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE tasks ADD COLUMN recurrence TEXT NOT NULL DEFAULT 'NONE'")
+            db.execSQL("UPDATE tasks SET recurrence = 'DAILY', category = 'PERSONAL' WHERE category = 'DAILY'")
+        }
+    }
 
     @Provides
     @Singleton
@@ -57,10 +72,12 @@ object LocalStorageModule {
         @ApplicationContext context: Context,
     ): SharedPreferences = try {
         createEncryptedSharedPreferences(context, PREFS_NAME, buildMasterKey(context))
-    } catch (e: Exception) {
+    } catch (e: GeneralSecurityException) {
         // Keystore master key got out of sync with Tink keyset (common after
         // device-level keystore rotation, biometric re-enroll, or the OS
-        // killing our process while AFK). Nuke both sides and rebuild.
+        // killing our process while AFK). Auth tokens live in DataStore, not
+        // here, so this wipe no longer logs the user out.
+        Timber.tag("PrefsWipe").w(e, "Rebuilding encrypted prefs after keystore/Tink mismatch")
         deleteSharedPreferencesFile(context, PREFS_NAME)
         deleteMasterKeyEntry()
         createEncryptedSharedPreferences(context, PREFS_NAME, buildMasterKey(context))
@@ -140,6 +157,16 @@ object LocalStorageModule {
     @Provides
     @Singleton
     fun providePomodoro(database: AppDatabase): PomodoroDao = database.pomodoroDao()
+
+    @Provides
+    @Singleton
+    fun providePendingPhotoDao(database: AppDatabase): com.todoapp.mobile.data.source.local.PendingPhotoDao = database.pendingPhotoDao()
+
+    @Provides
+    @Singleton
+    fun provideTaskDailyCompletionDao(
+        database: AppDatabase,
+    ): com.todoapp.mobile.data.source.local.TaskDailyCompletionDao = database.taskDailyCompletionDao()
 
     @Provides
     @Singleton

@@ -54,6 +54,7 @@ fun TDTaskCardWithCheckbox(
     isDragging: Boolean = false,
     isAnyDragging: Boolean = false,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(12.dp),
+    categoryLabel: String? = null,
 ) {
     var showConfetti by remember { mutableStateOf(false) }
     var prevChecked by remember { mutableStateOf(isChecked) }
@@ -147,6 +148,23 @@ fun TDTaskCardWithCheckbox(
                             textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None,
                         ),
                     )
+                }
+                if (!categoryLabel.isNullOrBlank()) {
+                    Spacer(Modifier.height(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = TDTheme.colors.purple,
+                                shape = RoundedCornerShape(8.dp),
+                            )
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                    ) {
+                        TDText(
+                            text = categoryLabel,
+                            color = TDTheme.colors.white,
+                            style = TDTheme.typography.subheading2,
+                        )
+                    }
                 }
             }
         }

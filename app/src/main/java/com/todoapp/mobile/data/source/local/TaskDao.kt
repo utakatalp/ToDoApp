@@ -18,11 +18,23 @@ interface TaskDao {
     @Query("SELECT * FROM tasks")
     fun getAllTasks(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE date = :date ORDER BY order_index ASC")
+    @Query(
+        """
+        SELECT * FROM tasks
+        WHERE date = :date OR (recurrence != 'NONE' AND date <= :date)
+        ORDER BY order_index ASC
+        """,
+    )
     fun getTasksByDate(date: Long): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks WHERE recurrence != 'NONE'")
+    fun observeAllRecurringTasks(): Flow<List<TaskEntity>>
+
+    @Query("SELECT * FROM tasks WHERE recurrence = :recurrence ORDER BY date ASC, time_start ASC")
+    fun observeByRecurrence(recurrence: String): Flow<List<TaskEntity>>
+
     @Insert
-    suspend fun insert(task: TaskEntity)
+    suspend fun insert(task: TaskEntity): Long
 
     @Insert
     suspend fun insertAll(task: List<TaskEntity>)
@@ -113,4 +125,7 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks WHERE remote_id IN (:remoteIds)")
     suspend fun deleteByRemoteIds(remoteIds: List<Long>)
+
+    @Query("DELETE FROM tasks")
+    suspend fun deleteAllTasks()
 }

@@ -15,4 +15,13 @@ data class TaskRequest(
     val familyGroupId: Long? = null,
     val assignedToUserId: Long? = null,
     val priority: String? = null,
+    val category: String? = null,
+    val customCategoryName: String? = null,
+    val recurrence: String? = null,
+)
+
+@Serializable
+data class TaskDailyCompletionRequest(
+    val date: Long,
+    val completed: Boolean,
 )
