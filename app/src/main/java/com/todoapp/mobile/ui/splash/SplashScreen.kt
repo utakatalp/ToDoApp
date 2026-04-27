@@ -99,7 +99,7 @@ fun TDSplashScreen(onAnimationComplete: () -> Unit = {}) {
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(R.drawable.ic_idle_robot_light),
+                painter = painterResource(R.drawable.img_splash),
                 contentDescription = null,
                 modifier =
                 Modifier
