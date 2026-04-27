@@ -314,7 +314,7 @@ private fun IncludeRecurringRow(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = TDTheme.colors.white,
-                checkedTrackColor = TDTheme.colors.purple,
+                checkedTrackColor = TDTheme.colors.pendingGray,
             ),
         )
     }
@@ -539,13 +539,13 @@ private fun ActivityScreenSuccessRichPreview() {
                 yearlyTotal = 420,
                 weeklyPendingBarValues = listOf(1, 0, 1, 1, 2, 1, 0),
                 includeRecurring = true,
-                weekTrend = ActivityContract.WeekTrend(ActivityContract.TrendDirection.UP, 20),
+                weekTrend = WeekTrend(TrendDirection.UP, 20),
                 streakDays = 5,
-                bestDay = ActivityContract.BestDay(java.time.DayOfWeek.TUESDAY, 8),
+                bestDay = BestDay(DayOfWeek.TUESDAY, 8),
                 categoryBreakdown = listOf(
-                    ActivityContract.CategoryStat(com.todoapp.mobile.domain.model.TaskCategory.WORK, null, 8),
-                    ActivityContract.CategoryStat(com.todoapp.mobile.domain.model.TaskCategory.HEALTH, null, 5),
-                    ActivityContract.CategoryStat(com.todoapp.mobile.domain.model.TaskCategory.STUDY, null, 3),
+                    CategoryStat(TaskCategory.WORK, null, 8),
+                    CategoryStat(TaskCategory.HEALTH, null, 5),
+                    CategoryStat(TaskCategory.STUDY, null, 3),
                 ),
             ),
         )
