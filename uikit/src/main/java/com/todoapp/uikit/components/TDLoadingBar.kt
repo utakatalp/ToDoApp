@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.tooling.preview.Preview
+import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 
 @Composable
@@ -28,15 +28,15 @@ fun TDLoadingBar() {
         contentAlignment = Alignment.Center,
     ) {
         CircularProgressIndicator(
-            color = TDTheme.colors.purple,
+            color = TDTheme.colors.pendingGray,
             strokeCap = StrokeCap.Round,
         )
     }
 }
 
-@Preview(showBackground = true)
+@TDPreview
 @Composable
-fun LoadingBarPreview() {
+private fun TDLoadingBarPreview() {
     TDTheme {
         TDLoadingBar()
     }

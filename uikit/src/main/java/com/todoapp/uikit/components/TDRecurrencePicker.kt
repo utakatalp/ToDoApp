@@ -91,3 +91,37 @@ private fun RecurrenceChip(
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun TDRecurrencePickerPreview() {
+    TDTheme {
+        TDRecurrencePicker(
+            selectedKey = "DAILY",
+            options = listOf(
+                TDRecurrenceOption("NONE", "Once"),
+                TDRecurrenceOption("DAILY", "Every day"),
+                TDRecurrenceOption("WEEKLY", "Every week"),
+                TDRecurrenceOption("MONTHLY", "Every month"),
+                TDRecurrenceOption("YEARLY", "Every year"),
+            ),
+            onSelected = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun TDRecurrencePickerNoneSelectedPreview() {
+    TDTheme {
+        TDRecurrencePicker(
+            selectedKey = "NONE",
+            options = listOf(
+                TDRecurrenceOption("NONE", "Once"),
+                TDRecurrenceOption("DAILY", "Every day"),
+                TDRecurrenceOption("WEEKLY", "Every week"),
+            ),
+            onSelected = {},
+        )
+    }
+}

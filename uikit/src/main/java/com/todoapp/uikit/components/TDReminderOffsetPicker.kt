@@ -113,3 +113,37 @@ private fun ReminderChip(
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun TDReminderOffsetPickerPreview() {
+    TDTheme {
+        TDReminderOffsetPicker(
+            selectedMinutes = 10L,
+            options = listOf(
+                TDReminderOption("None", null),
+                TDReminderOption("On time", 0L),
+                TDReminderOption("5 min", 5L),
+                TDReminderOption("10 min", 10L),
+                TDReminderOption("30 min", 30L),
+            ),
+            onSelected = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun TDReminderOffsetPickerNoneSelectedPreview() {
+    TDTheme {
+        TDReminderOffsetPicker(
+            selectedMinutes = null,
+            options = listOf(
+                TDReminderOption("None", null),
+                TDReminderOption("On time", 0L),
+                TDReminderOption("5 min", 5L),
+            ),
+            onSelected = {},
+        )
+    }
+}

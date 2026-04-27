@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.repository.AlarmSoundOption
 import com.todoapp.mobile.ui.alarmsounds.AlarmSoundsContract.UiAction
@@ -73,7 +74,7 @@ fun AlarmSoundsScreen(
 @Composable
 private fun Loading() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = TDTheme.colors.purple)
+        CircularProgressIndicator(color = TDTheme.colors.pendingGray)
     }
 }
 
@@ -161,5 +162,71 @@ private fun AlarmSoundRow(
                     .background(TDTheme.colors.purple),
             )
         }
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun AlarmSoundsLoadingPreview() {
+    TDTheme {
+        AlarmSoundsScreen(uiState = UiState.Loading, onAction = {})
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun AlarmSoundsErrorPreview() {
+    TDTheme {
+        AlarmSoundsScreen(
+            uiState = UiState.Error("Couldn't load system sounds"),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun AlarmSoundsEmptyPreview() {
+    TDTheme {
+        AlarmSoundsScreen(
+            uiState = UiState.Success(
+                items = emptyList(),
+                selectedUri = android.net.Uri.EMPTY,
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun AlarmSoundsSuccessPreview() {
+    val sample = listOf(
+        AlarmSoundOption(title = "Default", uri = "content://settings/system/alarm_sound".toUri()),
+        AlarmSoundOption(title = "Argon", uri = "content://media/internal/audio/media/1".toUri()),
+        AlarmSoundOption(title = "Beacon", uri = "content://media/internal/audio/media/2".toUri()),
+        AlarmSoundOption(title = "Bright Morning", uri = "content://media/internal/audio/media/3".toUri()),
+        AlarmSoundOption(title = "Chime", uri = "content://media/internal/audio/media/4".toUri()),
+    )
+    TDTheme {
+        AlarmSoundsScreen(
+            uiState = UiState.Success(items = sample, selectedUri = sample[1].uri),
+            onAction = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun AlarmSoundsSuccessNoneSelectedPreview() {
+    val sample = listOf(
+        AlarmSoundOption(title = "Default", uri = "content://settings/system/alarm_sound".toUri()),
+        AlarmSoundOption(title = "Argon", uri = "content://media/internal/audio/media/1".toUri()),
+    )
+    TDTheme {
+        AlarmSoundsScreen(
+            uiState = UiState.Success(items = sample, selectedUri = android.net.Uri.EMPTY),
+            onAction = {},
+        )
     }
 }

@@ -113,3 +113,49 @@ private fun CategoryChip(
         )
     }
 }
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun TDCategoryPickerPreview() {
+    TDTheme {
+        TDCategoryPicker(
+            selectedKey = "WORK",
+            options = listOf(
+                TDCategoryOption(key = "PERSONAL", label = "Personal"),
+                TDCategoryOption(key = "WORK", label = "Work"),
+                TDCategoryOption(key = "STUDY", label = "Study"),
+                TDCategoryOption(key = "HEALTH", label = "Health"),
+                TDCategoryOption(key = "OTHER", label = "Other"),
+            ),
+            onSelected = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun TDCategoryPickerNoSelectionPreview() {
+    TDTheme {
+        TDCategoryPicker(
+            selectedKey = "",
+            options = listOf(
+                TDCategoryOption(key = "PERSONAL", label = "Personal"),
+                TDCategoryOption(key = "WORK", label = "Work"),
+                TDCategoryOption(key = "BIRTHDAY", label = "Birthday"),
+            ),
+            onSelected = {},
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun TDCategoryPickerSinglePreview() {
+    TDTheme {
+        TDCategoryPicker(
+            selectedKey = "WORK",
+            options = listOf(TDCategoryOption(key = "WORK", label = "Work")),
+            onSelected = {},
+        )
+    }
+}

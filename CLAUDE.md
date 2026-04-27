@@ -272,3 +272,14 @@ object XyzContract {
 - **ViewModel Tests**: Mock repositories, test `onAction()` → state changes
 - **Composable Tests**: Use `ComposeTestRule`, test interactions not styling
 - **Test Location**: `app/src/test/` (unit) vs `app/src/androidTest/` (instrumented)
+
+## Compose Previews (mandatory for new components & screens)
+
+Every new uikit component (`uikit/.../components/TD*`) and every new screen (`app/.../ui/<feature>/*Screen.kt`) MUST land with `@Composable @Preview` functions covering all reachable states. Without previews the change is incomplete.
+
+- **Annotation to use**: import `com.todoapp.uikit.previews.TDPreview` (or `TDPreviewDialog` for dialogs / `TDPreviewWide` for full-bleed screens / `TDPreviewForm` for form-heavy screens). These already render Light + Dark in one decoration — never use raw `@Preview(uiMode = ...)` pairs anymore. The existing `androidx.compose.ui.tooling.preview.Preview` import is a smell in new code.
+- **Required state coverage for screens** (sealed `UiState` with `Loading` / `Error` / `Success` / `Empty`): one `@TDPreview` per state branch. For `Success` add at least two: a populated/rich variant (with sample data) and an empty variant (zero items).
+- **Required state coverage for components**: one preview per visually distinct branch — selected vs unselected, with-icon vs without, completed vs pending, single-line vs multi-line, etc. If the component has many flags, it's fine to compose them together in one preview (`Column { TDFoo(...) ; TDFoo(...) ; TDFoo(...) }`).
+- **Always wrap previews in `TDTheme { ... }`** — without it the colors/typography won't resolve and the preview renders broken.
+- **Sample data**: prefer reusing helpers like `HomePreviewData.sampleTasks` / `HomePreviewData.successState(...)`; create new `*PreviewData` objects when adding screens with non-trivial UiState. Mocks must compile against the *current* model fields — no copy-pasting stale data classes.
+- **Naming**: `Td<Component><Variant>Preview` (component) or `<Screen><State>Preview` (screen). Keep them `private fun` — never expose as part of the public API.
