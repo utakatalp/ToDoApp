@@ -62,20 +62,31 @@ constructor(
             list.map { it.toDomain() }
         }
 
-    override fun observeTasksByDate(date: LocalDate): Flow<List<Task>> {
+    override fun observeTasksByDate(date: LocalDate, includeRecurringInstances: Boolean): Flow<List<Task>> {
         val epochDay = date.toEpochDay()
-        return localDataSource.observeByDate(date = epochDay)
-            .combine(dailyCompletionDao.observeForDate(epochDay)) { entities, completions ->
-                val completedTaskIds = completions.map { it.taskId }.toSet()
-                entities.map { entity ->
-                    val domain = entity.toDomain()
-                    if (domain.recurrence != Recurrence.NONE) {
-                        domain.copy(isCompleted = entity.id in completedTaskIds)
-                    } else {
-                        domain
-                    }
-                }
+        return combine(
+            localDataSource.observeByDate(date = epochDay),
+            localDataSource.observeAllRecurringTasks(),
+            dailyCompletionDao.observeForDate(epochDay),
+        ) { dateAnchored, recurring, completions ->
+            val completedTaskIds = completions.map { it.taskId }.toSet()
+            val nonRecurring = dateAnchored
+                .filter { it.recurrence == Recurrence.NONE.name }
+                .map { it.toDomain() }
+            if (!includeRecurringInstances) return@combine nonRecurring
+            // Recurring rows are intentionally excluded from the anchor-day list above so this
+            // firesOn() expansion is the single source for recurring instances on the day.
+            val recurringInstances = recurring.mapNotNull { entity ->
+                val rule = Recurrence.fromStorage(entity.recurrence)
+                val anchor = LocalDate.ofEpochDay(entity.date)
+                if (!rule.firesOn(anchor, date)) return@mapNotNull null
+                entity.toDomain().copy(
+                    date = date,
+                    isCompleted = entity.id in completedTaskIds,
+                )
             }
+            nonRecurring + recurringInstances
+        }
     }
 
     override fun observeRecurringByType(recurrence: Recurrence): Flow<List<Task>> {
@@ -116,9 +127,9 @@ constructor(
         Unit
     }
 
-    override fun countCompletedTasksInAWeek(date: LocalDate): Flow<Int> = observeWeeklyCounts(date).map { (completed, _) -> completed.values.sum() }
+    override fun countCompletedTasksInAWeek(date: LocalDate, includeRecurring: Boolean): Flow<Int> = observeWeeklyCounts(date, includeRecurring).map { (completed, _) -> completed.values.sum() }
 
-    override fun countCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<CompletedCountByDay>> = observeWeeklyCounts(date).map { (completed, _) ->
+    override fun countCompletedCountsByDayInAWeek(date: LocalDate, includeRecurring: Boolean): Flow<List<CompletedCountByDay>> = observeWeeklyCounts(date, includeRecurring).map { (completed, _) ->
         completed.toSortedMap().map { (day, count) -> CompletedCountByDay(day, count) }
     }
 
@@ -140,11 +151,11 @@ constructor(
         )
     }
 
-    override fun observePendingTasksInAWeek(date: LocalDate): Flow<Int> = observeWeeklyCounts(date).map { (_, pending) -> pending.values.sum() }
+    override fun observePendingTasksInAWeek(date: LocalDate, includeRecurring: Boolean): Flow<Int> = observeWeeklyCounts(date, includeRecurring).map { (_, pending) -> pending.values.sum() }
 
-    override fun observeCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<Int>> {
+    override fun observeCompletedCountsByDayInAWeek(date: LocalDate, includeRecurring: Boolean): Flow<List<Int>> {
         val weekStart = date.with(DayOfWeek.MONDAY)
-        return countCompletedCountsByDayInAWeek(date).map { dayCounts ->
+        return countCompletedCountsByDayInAWeek(date, includeRecurring).map { dayCounts ->
             val map = dayCounts.associate { it.date to it.count }
             (0 until DAYS_IN_WEEK).map { dayOffset ->
                 map[weekStart.plusDays(dayOffset.toLong())] ?: 0
@@ -152,9 +163,9 @@ constructor(
         }
     }
 
-    override fun observePendingCountsByDayInAWeek(date: LocalDate): Flow<List<Int>> {
+    override fun observePendingCountsByDayInAWeek(date: LocalDate, includeRecurring: Boolean): Flow<List<Int>> {
         val weekStart = date.with(DayOfWeek.MONDAY)
-        return observeWeeklyCounts(date).map { (_, pending) ->
+        return observeWeeklyCounts(date, includeRecurring).map { (_, pending) ->
             (0 until DAYS_IN_WEEK).map { offset ->
                 pending[weekStart.plusDays(offset.toLong())] ?: 0
             }
@@ -169,6 +180,7 @@ constructor(
      */
     private fun observeWeeklyCounts(
         date: LocalDate,
+        includeRecurring: Boolean = true,
     ): Flow<Pair<Map<LocalDate, Int>, Map<LocalDate, Int>>> {
         val weekStart = date.with(DayOfWeek.MONDAY)
         val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
@@ -186,19 +198,21 @@ constructor(
                 if (entity.isCompleted) completed.merge(day, 1, Int::plus)
                 else pending.merge(day, 1, Int::plus)
             }
-            // Recurring tasks: expand to one instance per firing day in [weekStart, weekEnd].
-            // Completion comes from task_daily_completions, not from is_completed.
-            val completionKeys = completions.map { it.taskId to it.date }.toSet()
-            recurring.forEach { entity ->
-                val recurrence = Recurrence.fromStorage(entity.recurrence)
-                val anchor = LocalDate.ofEpochDay(entity.date)
-                for (offset in 0 until DAYS_IN_WEEK) {
-                    val day = weekStart.plusDays(offset.toLong())
-                    if (recurrence.firesOn(anchor, day)) {
-                        if (entity.id to day.toEpochDay() in completionKeys) {
-                            completed.merge(day, 1, Int::plus)
-                        } else {
-                            pending.merge(day, 1, Int::plus)
+            if (includeRecurring) {
+                // Recurring tasks: expand to one instance per firing day in [weekStart, weekEnd].
+                // Completion comes from task_daily_completions, not from is_completed.
+                val completionKeys = completions.map { it.taskId to it.date }.toSet()
+                recurring.forEach { entity ->
+                    val recurrence = Recurrence.fromStorage(entity.recurrence)
+                    val anchor = LocalDate.ofEpochDay(entity.date)
+                    for (offset in 0 until DAYS_IN_WEEK) {
+                        val day = weekStart.plusDays(offset.toLong())
+                        if (recurrence.firesOn(anchor, day)) {
+                            if (entity.id to day.toEpochDay() in completionKeys) {
+                                completed.merge(day, 1, Int::plus)
+                            } else {
+                                pending.merge(day, 1, Int::plus)
+                            }
                         }
                     }
                 }
@@ -304,7 +318,7 @@ constructor(
         taskId: Long,
         photoId: Long,
     ): Result<Unit> = com.todoapp.mobile.common
-        .handleRequest { todoApi.deleteTaskPhoto(taskId, photoId) }
+        .handleEmptyRequest { todoApi.deleteTaskPhoto(taskId, photoId) }
         .onSuccess { refreshPhotoUrlsForTask(taskId) }
 
     override suspend fun refreshPhotoUrls(taskRemoteIds: List<Long>) {

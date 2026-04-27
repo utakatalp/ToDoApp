@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -49,7 +47,6 @@ import com.todoapp.mobile.R
 import com.todoapp.mobile.common.maskDescription
 import com.todoapp.mobile.common.maskTitle
 import com.todoapp.mobile.domain.model.Task
-import com.todoapp.mobile.ui.search.SearchContract.SearchFilter
 import com.todoapp.mobile.ui.search.SearchContract.SearchResultItem
 import com.todoapp.mobile.ui.search.SearchContract.UiAction
 import com.todoapp.mobile.ui.search.SearchContract.UiEffect
@@ -166,8 +163,19 @@ private fun SearchResults(
     uiState: UiState.Success,
     onAction: (UiAction) -> Unit,
 ) {
+    if (uiState.isFilterDialogOpen) {
+        SearchFiltersDialog(
+            initialFilters = uiState.filters,
+            onApply = { onAction(UiAction.OnApplyFilters(it)) },
+            onDismiss = { onAction(UiAction.OnDismissFilterDialog) },
+            onClearAll = { onAction(UiAction.OnClearFilters) },
+        )
+    }
     Column {
-        SearchFilterRow(activeFilter = uiState.activeFilter, onAction = onAction)
+        SearchFilterTrigger(
+            activeCount = uiState.filters.activeCount,
+            onClick = { onAction(UiAction.OnOpenFilterDialog) },
+        )
         Spacer(Modifier.height(8.dp))
         if (uiState.results.isEmpty()) {
             SearchNoResults(uiState.query)
@@ -226,56 +234,34 @@ private fun SearchResults(
 }
 
 @Composable
-private fun SearchFilterRow(
-    activeFilter: SearchFilter,
-    onAction: (UiAction) -> Unit,
-) {
-    Row(
-        modifier =
-        Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        SearchFilterChip(
-            label = stringResource(R.string.search_filter_all),
-            selected = activeFilter == SearchFilter.ALL,
-            onClick = { onAction(UiAction.OnFilterChange(SearchFilter.ALL)) },
-        )
-        SearchFilterChip(
-            label = stringResource(R.string.search_filter_tasks),
-            selected = activeFilter == SearchFilter.TASKS,
-            onClick = { onAction(UiAction.OnFilterChange(SearchFilter.TASKS)) },
-        )
-        SearchFilterChip(
-            label = stringResource(R.string.search_filter_groups),
-            selected = activeFilter == SearchFilter.GROUPS,
-            onClick = { onAction(UiAction.OnFilterChange(SearchFilter.GROUPS)) },
-        )
-        SearchFilterChip(
-            label = stringResource(R.string.search_filter_group_tasks),
-            selected = activeFilter == SearchFilter.GROUP_TASKS,
-            onClick = { onAction(UiAction.OnFilterChange(SearchFilter.GROUP_TASKS)) },
-        )
-    }
-}
-
-@Composable
-private fun SearchFilterChip(
-    label: String,
-    selected: Boolean,
+private fun SearchFilterTrigger(
+    activeCount: Int,
     onClick: () -> Unit,
 ) {
-    val bgColor = if (selected) TDTheme.colors.darkPending else TDTheme.colors.lightPending
-    val textColor = if (selected) TDTheme.colors.background else TDTheme.colors.pendingGray
-    Box(
+    val hasActive = activeCount > 0
+    val bgColor = if (hasActive) TDTheme.colors.purple else TDTheme.colors.lightPending
+    val textColor = if (hasActive) TDTheme.colors.background else TDTheme.colors.darkPending
+    val label =
+        if (hasActive) {
+            stringResource(R.string.search_filter_chip_label_with_count, activeCount)
+        } else {
+            stringResource(R.string.search_filter_chip_label)
+        }
+    Row(
         modifier =
         Modifier
             .background(color = bgColor, shape = RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 7.dp),
-        contentAlignment = Alignment.Center,
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        Icon(
+            painter = painterResource(UikitR.drawable.ic_filter),
+            contentDescription = null,
+            tint = textColor,
+            modifier = Modifier.size(16.dp),
+        )
+        Spacer(Modifier.width(6.dp))
         TDText(
             text = label,
             style = TDTheme.typography.subheading1,
@@ -405,7 +391,7 @@ private fun SearchScreenSuccessPreview() {
                         ),
                     ),
                 ),
-                activeFilter = SearchFilter.ALL,
+                filters = com.todoapp.mobile.ui.search.SearchContract.SearchFilters(),
             ),
             uiEffect = emptyFlow(),
             onAction = {},
@@ -436,7 +422,7 @@ private fun SearchScreenSuccessDarkPreview() {
                         ),
                     ),
                 ),
-                activeFilter = SearchFilter.ALL,
+                filters = com.todoapp.mobile.ui.search.SearchContract.SearchFilters(),
             ),
             uiEffect = emptyFlow(),
             onAction = {},

@@ -2,6 +2,7 @@ package com.todoapp.mobile.data.repository
 
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
+import com.todoapp.mobile.common.handleEmptyRequest
 import com.todoapp.mobile.common.handleRequest
 import com.todoapp.mobile.data.model.network.data.AuthResponseData
 import com.todoapp.mobile.data.model.network.data.FCMTokenResponseData
@@ -97,8 +98,7 @@ constructor(
         val tokenToDelete = fcmTokenPreferences.getLastSentToken()
         val backendResult: Result<Unit> =
             if (!tokenToDelete.isNullOrBlank()) {
-                handleRequest { todoApi.deleteFcmToken(FcmTokenDeleteRequest(token = tokenToDelete)) }
-                    .map {}
+                handleEmptyRequest { todoApi.deleteFcmToken(FcmTokenDeleteRequest(token = tokenToDelete)) }
                     .onFailure { Log.w("FCM_CLEANUP", "Backend DELETE failed", it) }
             } else {
                 Result.success(Unit)
@@ -156,15 +156,15 @@ constructor(
             }
     }
 
-    override suspend fun forgotPassword(email: String): Result<Unit> = handleRequest {
+    override suspend fun forgotPassword(email: String): Result<Unit> = handleEmptyRequest {
         todoApi.forgotPassword(ForgotPasswordRequest(email = email))
     }
 
-    override suspend fun resetPassword(token: String, newPassword: String): Result<Unit> = handleRequest {
+    override suspend fun resetPassword(token: String, newPassword: String): Result<Unit> = handleEmptyRequest {
         todoApi.resetPassword(ResetPasswordRequest(token = token, newPassword = newPassword))
     }
 
-    override suspend fun changePassword(currentPassword: String, newPassword: String): Result<Unit> = handleRequest {
+    override suspend fun changePassword(currentPassword: String, newPassword: String): Result<Unit> = handleEmptyRequest {
         todoApi.changePassword(
             ChangePasswordRequest(currentPassword = currentPassword, newPassword = newPassword),
         )

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ToDoApp</string>
+    <string name="app_name">DoneBot</string>
     <string name="back">Back</string>
     <string name="pomodoro_summary">Summary</string>
     <string name="pomodoro_great_work">Great work!</string>
@@ -50,6 +50,7 @@
         <item quantity="other">%1$d days ago</item>
     </plurals>
     <string name="calendar_section_my_tasks">My Tasks</string>
+    <string name="calendar_section_recurring_tasks">Recurring Tasks</string>
     <string name="calendar_section_group_deadlines">Group Tasks</string>
     <string name="status_done">Done</string>
     <string name="status_pending">Pending</string>
@@ -125,6 +126,23 @@
     <string name="activity_screen_statistic_text">Statistics</string>
     <string name="activity_screen_activity_text">Activity</string>
     <string name="activity_screen_progress_text">Yearly Progress</string>
+    <string name="activity_week_summary">%1$d done · %2$d pending this week</string>
+    <string name="activity_year_summary">Year so far: %1$d done ✅</string>
+    <string name="activity_include_recurring">Include recurring tasks</string>
+    <string name="activity_trend_up">↑ %1$d%% vs last week</string>
+    <string name="activity_trend_down">↓ %1$d%% vs last week</string>
+    <string name="activity_trend_flat">Same as last week</string>
+    <string name="activity_streak_label">%1$d-day streak 🔥</string>
+    <string name="activity_streak_none">No streak yet — complete a task today</string>
+    <string name="activity_best_day">Most productive: %1$s · %2$d tasks</string>
+    <string name="activity_category_breakdown_title">Where you focused this week</string>
+    <string name="day_monday">Monday</string>
+    <string name="day_tuesday">Tuesday</string>
+    <string name="day_wednesday">Wednesday</string>
+    <string name="day_thursday">Thursday</string>
+    <string name="day_friday">Friday</string>
+    <string name="day_saturday">Saturday</string>
+    <string name="day_sunday">Sunday</string>
     <string name="bar_chart_days_mon">Mo</string>
     <string name="bar_chart_days_tue">Tu</string>
     <string name="bar_chart_days_wed">We</string>
@@ -297,6 +315,24 @@
     <string name="search_filter_tasks">Tasks</string>
     <string name="search_filter_groups">Groups</string>
     <string name="search_filter_group_tasks">Group Tasks</string>
+    <string name="search_filter_chip_label">Filter</string>
+    <string name="search_filter_chip_label_with_count">Filters (%1$d)</string>
+    <string name="search_filter_dialog_title">Filters</string>
+    <string name="search_filter_section_show">Show</string>
+    <string name="search_filter_section_category">Category</string>
+    <string name="search_filter_section_recurrence">Recurrence</string>
+    <string name="search_filter_section_status">Status</string>
+    <string name="search_filter_section_date">Date</string>
+    <string name="search_filter_status_all">Any</string>
+    <string name="search_filter_status_pending">Pending</string>
+    <string name="search_filter_status_completed">Completed</string>
+    <string name="search_filter_recurrence_none">One-off</string>
+    <string name="search_filter_date_all">Any time</string>
+    <string name="search_filter_date_today">Today</string>
+    <string name="search_filter_date_week">This week</string>
+    <string name="search_filter_date_month">This month</string>
+    <string name="search_filter_clear_all">Clear all</string>
+    <string name="search_filter_apply">Apply</string>
     <string name="pomodoro_launch_title">Pomodoro Timer</string>
     <string name="pomodoro_launch_subtitle">Your current settings</string>
     <string name="pomodoro_sessions_label">Sessions</string>
@@ -422,10 +458,15 @@
     <string name="invitation_accepted_toast">Joined the group</string>
     <string name="invitation_declined_toast">Invitation declined</string>
     <string name="invitation_action_failed">Couldn\'t complete that action</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_reminders">Reminders</string>
+    <string name="settings_section_productivity">Productivity</string>
+    <string name="settings_section_privacy">Privacy</string>
+    <string name="settings_section_account">Account</string>
     <string name="settings_push_notifications">Push notifications</string>
-    <string name="settings_reliable_reminders_title">Reliable reminders</string>
-    <string name="settings_reliable_reminders_description">Disable battery optimization so reminders fire on time, even after the app is closed.</string>
-    <string name="settings_reliable_reminders_status_enabled">Battery optimization is disabled for this app.</string>
+    <string name="settings_exact_alarms_title">Exact reminders</string>
+    <string name="settings_exact_alarms_description">Allow this app to fire reminders at the precise time you set.</string>
+    <string name="settings_exact_alarms_status_enabled">Exact reminders are enabled.</string>
     <string name="notifications_section_today">Today</string>
     <string name="notifications_section_earlier">Earlier</string>
     <string name="notifications_mark_all_succeeded">All notifications marked as read</string>
@@ -497,10 +538,10 @@
     <string name="recurrence_weekly">Every week</string>
     <string name="recurrence_monthly">Every month</string>
     <string name="recurrence_yearly">Every year</string>
-    <string name="recurrence_explainer_daily">Reminds every day at the chosen time</string>
-    <string name="recurrence_explainer_weekly">Reminds on the same weekday at the chosen time</string>
-    <string name="recurrence_explainer_monthly">Reminds on the same day of the month</string>
-    <string name="recurrence_explainer_yearly">Reminds on the same date every year</string>
+    <string name="recurrence_explainer_daily">Reminds every day at the chosen time !</string>
+    <string name="recurrence_explainer_weekly">Reminds on the same weekday at the chosen time !</string>
+    <string name="recurrence_explainer_monthly">Reminds on the same day of the month !</string>
+    <string name="recurrence_explainer_yearly">Reminds on the same date every year !</string>
 
     <string name="filter_today">Today</string>
     <string name="filter_daily">Daily</string>

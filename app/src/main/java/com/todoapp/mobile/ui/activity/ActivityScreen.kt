@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +18,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,17 +33,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.AndroidUiModes
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.uikit.R
+import com.todoapp.mobile.domain.model.TaskCategory
+import com.todoapp.mobile.ui.activity.ActivityContract.BestDay
+import com.todoapp.mobile.ui.activity.ActivityContract.CategoryStat
+import com.todoapp.mobile.ui.activity.ActivityContract.TrendDirection
 import com.todoapp.mobile.ui.activity.ActivityContract.UiAction
 import com.todoapp.mobile.ui.activity.ActivityContract.UiState
+import com.todoapp.mobile.ui.activity.ActivityContract.WeekTrend
 import com.todoapp.mobile.ui.home.AddTaskSheet
 import com.todoapp.mobile.ui.home.HomeFabMenu
 import com.todoapp.mobile.ui.home.TaskFormUiAction
@@ -48,12 +54,11 @@ import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDGeneralProgressBar
 import com.todoapp.uikit.components.TDLoadingBar
 import com.todoapp.uikit.components.TDScreenWithSheet
-import com.todoapp.uikit.components.TDStatisticCard
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDWeekNavigator
 import com.todoapp.uikit.components.TDWeeklyBarChart
-import com.todoapp.uikit.components.TDWeeklyCircularProgressIndicator
 import com.todoapp.uikit.theme.TDTheme
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 @Composable
@@ -173,6 +178,7 @@ private fun ActivitySuccessContent(
                             onAction(
                                 UiAction.OnTaskDescriptionChange(action.description),
                             )
+
                         is TaskFormUiAction.ToggleAdvancedSettings -> onAction(UiAction.OnToggleAdvancedSettings)
                         is TaskFormUiAction.SecretChange -> onAction(UiAction.OnTaskSecretChange(action.isSecret))
                         else -> Unit
@@ -204,78 +210,28 @@ private fun ActivitySuccessContent(
                     onNextWeek = { onAction(UiAction.OnWeekSelected(uiState.selectedDate.plusWeeks(1))) },
                 )
 
-                Column(
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TDText(
-                        text = stringResource(id = com.todoapp.mobile.R.string.activity_screen_statistic_text),
-                        style = TDTheme.typography.heading2,
-                        color = TDTheme.colors.onBackground,
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    TDWeeklyCircularProgressIndicator(
-                        modifier = Modifier.fillMaxWidth(),
-                        strokeWidth = 16.dp,
-                        strokeCap = Butt,
-                        progress = uiState.weeklyProgress,
-                        inProgress = uiState.weeklyPendingProgress,
-                    )
-                }
+                IncludeRecurringRow(
+                    checked = uiState.includeRecurring,
+                    onCheckedChange = { onAction(UiAction.OnToggleIncludeRecurring(it)) },
+                )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Row(
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    TDStatisticCard(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(com.todoapp.mobile.R.string.home_screen_task_completed_text),
-                        taskAmount = uiState.weeklyCompleted,
-                        isCompleted = true,
-                        onClick = { onAction(UiAction.OnCompletedStatCardTap) },
+                ActivityCard {
+                    WeekSummaryHeader(
+                        weeklyCompleted = uiState.weeklyCompleted,
+                        weeklyPending = uiState.weeklyPending,
+                        weekTrend = uiState.weekTrend,
                     )
-                    TDStatisticCard(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(com.todoapp.mobile.R.string.home_screen_task_pending_text),
-                        taskAmount = uiState.weeklyPending,
-                        isCompleted = false,
-                        onClick = { onAction(UiAction.OnPendingStatCardTap) },
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Column(
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TDText(
-                        text = stringResource(id = com.todoapp.mobile.R.string.activity_screen_activity_text),
-                        style = TDTheme.typography.heading2,
-                        color = TDTheme.colors.onBackground,
-                    )
+                    Spacer(modifier = Modifier.height(12.dp))
                     TDWeeklyBarChart(
                         modifier = Modifier.fillMaxWidth(),
-                        title =
-                        stringResource(
+                        title = stringResource(
                             id = com.todoapp.mobile.R.string.activity_screen_bar_chart_component_title_text,
                         ),
                         values = uiState.weeklyBarValues,
                         pendingValues = uiState.weeklyPendingBarValues,
-                        height = 220.dp,
+                        height = 160.dp,
                         autoScaleHeightToMaxY = false,
                         onExpandClick = { showFullScreen = true },
                     )
@@ -283,25 +239,31 @@ private fun ActivitySuccessContent(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Column(
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 80.dp, end = 16.dp, start = 16.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TDText(
-                        text = stringResource(com.todoapp.mobile.R.string.activity_screen_progress_text),
-                        style = TDTheme.typography.heading2,
-                        color = TDTheme.colors.onBackground,
-                    )
-                    TDGeneralProgressBar(
-                        progress = uiState.yearlyProgress,
-                        completedCount = uiState.yearlyCompleted,
-                        totalCount = uiState.yearlyTotal,
+                ActivityCard {
+                    StreakAndBestDay(
+                        streakDays = uiState.streakDays,
+                        bestDay = uiState.bestDay,
                     )
                 }
+
+                if (uiState.categoryBreakdown.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ActivityCard {
+                        CategoryBreakdownSection(stats = uiState.categoryBreakdown)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ActivityCard {
+                    YearlyProgressSection(
+                        yearlyCompleted = uiState.yearlyCompleted,
+                        yearlyTotal = uiState.yearlyTotal,
+                        yearlyProgress = uiState.yearlyProgress,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(80.dp))
             }
             HomeFabMenu(
                 onAddTask = { onAction(UiAction.OnShowBottomSheet) },
@@ -311,7 +273,7 @@ private fun ActivitySuccessContent(
     }
 }
 
-@Preview(showBackground = true)
+@com.todoapp.uikit.previews.TDPreview
 @Composable
 private fun ActivityLoadingPreview() {
     TDTheme {
@@ -319,7 +281,7 @@ private fun ActivityLoadingPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@com.todoapp.uikit.previews.TDPreview
 @Composable
 private fun ActivityErrorPreview() {
     TDTheme {
@@ -330,14 +292,218 @@ private fun ActivityErrorPreview() {
     }
 }
 
-@Preview("Light", uiMode = AndroidUiModes.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
-private fun ActivityScreenPreview_Light() {
+private fun IncludeRecurringRow(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TDText(
+            modifier = Modifier.weight(1f),
+            text = stringResource(com.todoapp.mobile.R.string.activity_include_recurring),
+            style = TDTheme.typography.subheading1,
+            color = TDTheme.colors.onBackground,
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = TDTheme.colors.white,
+                checkedTrackColor = TDTheme.colors.purple,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun ActivityCard(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .background(
+                color = TDTheme.colors.lightPending,
+                shape = RoundedCornerShape(16.dp),
+            )
+            .padding(16.dp),
+        content = content,
+    )
+}
+
+@Composable
+private fun YearlyProgressSection(
+    yearlyCompleted: Int,
+    yearlyTotal: Int,
+    yearlyProgress: Float,
+) {
+    TDText(
+        text = stringResource(com.todoapp.mobile.R.string.activity_screen_progress_text),
+        style = TDTheme.typography.heading5,
+        color = TDTheme.colors.onBackground,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    TDGeneralProgressBar(
+        progress = yearlyProgress,
+        completedCount = yearlyCompleted,
+        totalCount = yearlyTotal,
+    )
+}
+
+@Composable
+private fun WeekSummaryHeader(
+    weeklyCompleted: Int,
+    weeklyPending: Int,
+    weekTrend: WeekTrend?,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        TDText(
+            text = stringResource(
+                com.todoapp.mobile.R.string.activity_week_summary,
+                weeklyCompleted,
+                weeklyPending,
+            ),
+            style = TDTheme.typography.heading5,
+            color = TDTheme.colors.onBackground,
+        )
+        if (weekTrend != null) {
+            Spacer(modifier = Modifier.height(2.dp))
+            val (textRes, color) = when (weekTrend.direction) {
+                TrendDirection.UP -> com.todoapp.mobile.R.string.activity_trend_up to TDTheme.colors.darkGreen
+                TrendDirection.DOWN -> com.todoapp.mobile.R.string.activity_trend_down to TDTheme.colors.crossRed
+                TrendDirection.FLAT -> com.todoapp.mobile.R.string.activity_trend_flat to TDTheme.colors.gray
+            }
+            val text = if (weekTrend.direction == TrendDirection.FLAT) {
+                stringResource(textRes)
+            } else {
+                stringResource(textRes, weekTrend.percentDelta)
+            }
+            TDText(
+                text = text,
+                style = TDTheme.typography.subheading1,
+                color = color,
+            )
+        }
+    }
+}
+
+@Composable
+private fun StreakAndBestDay(
+    streakDays: Int,
+    bestDay: BestDay?,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        TDText(
+            text = if (streakDays > 0) {
+                stringResource(com.todoapp.mobile.R.string.activity_streak_label, streakDays)
+            } else {
+                stringResource(com.todoapp.mobile.R.string.activity_streak_none)
+            },
+            style = TDTheme.typography.heading4,
+            color = if (streakDays > 0) TDTheme.colors.orange else TDTheme.colors.gray,
+        )
+        if (bestDay != null) {
+            TDText(
+                text = stringResource(
+                    com.todoapp.mobile.R.string.activity_best_day,
+                    stringResource(dayOfWeekRes(bestDay.day)),
+                    bestDay.count,
+                ),
+                style = TDTheme.typography.subheading1,
+                color = TDTheme.colors.onBackground,
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryBreakdownSection(stats: List<CategoryStat>) {
+    val maxCount = stats.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        TDText(
+            text = stringResource(com.todoapp.mobile.R.string.activity_category_breakdown_title),
+            style = TDTheme.typography.heading5,
+            color = TDTheme.colors.onBackground,
+        )
+        stats.forEach { stat ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TDText(
+                    modifier = Modifier.width(96.dp),
+                    text = stat.customLabel ?: stringResource(categoryLabelRes(stat.category)),
+                    style = TDTheme.typography.subheading2,
+                    color = TDTheme.colors.onBackground,
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(8.dp)
+                        .background(
+                            color = TDTheme.colors.lightPending,
+                            shape = RoundedCornerShape(4.dp),
+                        ),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(stat.count.toFloat() / maxCount)
+                            .height(8.dp)
+                            .background(
+                                color = TDTheme.colors.purple,
+                                shape = RoundedCornerShape(4.dp),
+                            ),
+                    )
+                }
+                Spacer(modifier = Modifier.size(8.dp))
+                TDText(
+                    text = stat.count.toString(),
+                    style = TDTheme.typography.subheading1,
+                    color = TDTheme.colors.onBackground,
+                )
+            }
+        }
+    }
+}
+
+private fun dayOfWeekRes(day: DayOfWeek): Int = when (day) {
+    DayOfWeek.MONDAY -> com.todoapp.mobile.R.string.day_monday
+    DayOfWeek.TUESDAY -> com.todoapp.mobile.R.string.day_tuesday
+    DayOfWeek.WEDNESDAY -> com.todoapp.mobile.R.string.day_wednesday
+    DayOfWeek.THURSDAY -> com.todoapp.mobile.R.string.day_thursday
+    DayOfWeek.FRIDAY -> com.todoapp.mobile.R.string.day_friday
+    DayOfWeek.SATURDAY -> com.todoapp.mobile.R.string.day_saturday
+    DayOfWeek.SUNDAY -> com.todoapp.mobile.R.string.day_sunday
+}
+
+private fun categoryLabelRes(category: TaskCategory): Int = when (category) {
+    TaskCategory.PERSONAL -> com.todoapp.mobile.R.string.category_personal
+    TaskCategory.SHOPPING -> com.todoapp.mobile.R.string.category_shopping
+    TaskCategory.MEDICINE -> com.todoapp.mobile.R.string.category_medicine
+    TaskCategory.HEALTH -> com.todoapp.mobile.R.string.category_health
+    TaskCategory.WORK -> com.todoapp.mobile.R.string.category_work
+    TaskCategory.STUDY -> com.todoapp.mobile.R.string.category_study
+    TaskCategory.BIRTHDAY -> com.todoapp.mobile.R.string.category_birthday
+    TaskCategory.OTHER -> com.todoapp.mobile.R.string.category_other
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun ActivityScreenSuccessPreview() {
     TDTheme {
         ActivitySuccessContent(
             onAction = {},
-            uiState =
-            UiState.Success(
+            uiState = UiState.Success(
                 weeklyCompleted = 24,
                 weeklyPending = 10,
                 weeklyProgress = 0.65f,
@@ -354,25 +520,56 @@ private fun ActivityScreenPreview_Light() {
     }
 }
 
-@Preview("Night", uiMode = AndroidUiModes.UI_MODE_NIGHT_YES, showBackground = true)
+@com.todoapp.uikit.previews.TDPreview
 @Composable
-private fun ActivityScreenPreview_Dark() {
+private fun ActivityScreenSuccessRichPreview() {
     TDTheme {
         ActivitySuccessContent(
             onAction = {},
-            uiState =
-            UiState.Success(
-                weeklyCompleted = 24,
-                weeklyPending = 10,
-                weeklyProgress = 0.65f,
-                weeklyPendingProgress = 0.35f,
-                weeklyBarValues = listOf(7, 2, 3, 2, 2, 1, 4),
-                yearlyProgress = 0.5f,
+            uiState = UiState.Success(
+                weeklyCompleted = 18,
+                weeklyPending = 6,
+                weeklyProgress = 0.75f,
+                weeklyPendingProgress = 0.25f,
+                weeklyBarValues = listOf(3, 2, 4, 2, 5, 1, 1),
+                yearlyProgress = 0.42f,
                 selectedDate = LocalDate.now(),
                 yearlyPendingProgress = 0f,
-                yearlyCompleted = 42,
-                yearlyTotal = 100,
-                weeklyPendingBarValues = listOf(1, 1, 3, 1, 5, 2, 4),
+                yearlyCompleted = 178,
+                yearlyTotal = 420,
+                weeklyPendingBarValues = listOf(1, 0, 1, 1, 2, 1, 0),
+                includeRecurring = true,
+                weekTrend = ActivityContract.WeekTrend(ActivityContract.TrendDirection.UP, 20),
+                streakDays = 5,
+                bestDay = ActivityContract.BestDay(java.time.DayOfWeek.TUESDAY, 8),
+                categoryBreakdown = listOf(
+                    ActivityContract.CategoryStat(com.todoapp.mobile.domain.model.TaskCategory.WORK, null, 8),
+                    ActivityContract.CategoryStat(com.todoapp.mobile.domain.model.TaskCategory.HEALTH, null, 5),
+                    ActivityContract.CategoryStat(com.todoapp.mobile.domain.model.TaskCategory.STUDY, null, 3),
+                ),
+            ),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun ActivityScreenEmptyWeekPreview() {
+    TDTheme {
+        ActivitySuccessContent(
+            onAction = {},
+            uiState = UiState.Success(
+                weeklyCompleted = 0,
+                weeklyPending = 0,
+                weeklyProgress = 0f,
+                weeklyPendingProgress = 0f,
+                weeklyBarValues = listOf(0, 0, 0, 0, 0, 0, 0),
+                yearlyProgress = 0f,
+                selectedDate = LocalDate.now(),
+                yearlyPendingProgress = 0f,
+                yearlyCompleted = 0,
+                yearlyTotal = 0,
+                weeklyPendingBarValues = listOf(0, 0, 0, 0, 0, 0, 0),
             ),
         )
     }

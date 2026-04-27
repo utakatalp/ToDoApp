@@ -20,7 +20,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -319,7 +322,16 @@ fun NavGraph(
         composable<Screen.Groups> {
             val viewModel: GroupsViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val context = androidx.compose.ui.platform.LocalContext.current
             NavigationEffectController(viewModel.navEffect)
+            androidx.compose.runtime.LaunchedEffect(viewModel) {
+                viewModel.uiEffect.collect { effect ->
+                    when (effect) {
+                        is com.todoapp.mobile.ui.groups.GroupsContract.UiEffect.ShowToast ->
+                            android.widget.Toast.makeText(context, effect.message, android.widget.Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
             GroupScreen(uiState, viewModel::onAction)
         }
         composable<Screen.FilteredTasks> {
@@ -460,9 +472,10 @@ fun ToDoApp() {
     val topBarState by topBarViewModel.uiState.collectAsStateWithLifecycle()
     val mainViewModel: MainViewModel = hiltViewModel()
     val isLoggedIn = mainViewModel.isLoggedIn
+    var splashDone by rememberSaveable { mutableStateOf(false) }
 
-    if (isLoggedIn == null) {
-        TDSplashScreen()
+    if (isLoggedIn == null || !splashDone) {
+        TDSplashScreen(onAnimationComplete = { splashDone = true })
         return
     }
 

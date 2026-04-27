@@ -20,17 +20,17 @@ interface TaskRepository {
         endDate: LocalDate,
     ): Flow<List<Task>>
 
-    fun observeTasksByDate(date: LocalDate): Flow<List<Task>>
+    fun observeTasksByDate(date: LocalDate, includeRecurringInstances: Boolean = true): Flow<List<Task>>
 
-    fun countCompletedTasksInAWeek(date: LocalDate): Flow<Int>
+    fun countCompletedTasksInAWeek(date: LocalDate, includeRecurring: Boolean = true): Flow<Int>
 
-    fun countCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<CompletedCountByDay>>
+    fun countCompletedCountsByDayInAWeek(date: LocalDate, includeRecurring: Boolean = true): Flow<List<CompletedCountByDay>>
 
-    fun observeCompletedCountsByDayInAWeek(date: LocalDate): Flow<List<Int>>
+    fun observeCompletedCountsByDayInAWeek(date: LocalDate, includeRecurring: Boolean = true): Flow<List<Int>>
 
-    fun observePendingCountsByDayInAWeek(date: LocalDate): Flow<List<Int>>
+    fun observePendingCountsByDayInAWeek(date: LocalDate, includeRecurring: Boolean = true): Flow<List<Int>>
 
-    fun observePendingTasksInAWeek(date: LocalDate): Flow<Int>
+    fun observePendingTasksInAWeek(date: LocalDate, includeRecurring: Boolean = true): Flow<Int>
 
     fun countCompletedTasksYearToDate(date: LocalDate): Flow<Int>
 

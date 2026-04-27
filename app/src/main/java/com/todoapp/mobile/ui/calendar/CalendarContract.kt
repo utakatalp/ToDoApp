@@ -100,6 +100,7 @@ object CalendarContract {
         val dueAtEpochMs: Long,
         val isCompleted: Boolean,
         val photoUrl: String?,
+        val isRecurringInstance: Boolean = false,
     )
 
     data class GroupTaskCalendarItem(

@@ -2,10 +2,32 @@ package com.todoapp.mobile.ui.search
 
 import com.todoapp.mobile.domain.model.Group
 import com.todoapp.mobile.domain.model.GroupTask
+import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.domain.model.TaskCategory
 
 object SearchContract {
     enum class SearchFilter { ALL, TASKS, GROUPS, GROUP_TASKS }
+
+    enum class StatusFilter { ALL, PENDING, COMPLETED }
+
+    enum class DateRangeFilter { ALL_TIME, TODAY, THIS_WEEK, THIS_MONTH }
+
+    data class SearchFilters(
+        val resultType: SearchFilter = SearchFilter.ALL,
+        val categories: Set<TaskCategory> = emptySet(),
+        val recurrences: Set<Recurrence> = emptySet(),
+        val status: StatusFilter = StatusFilter.ALL,
+        val dateRange: DateRangeFilter = DateRangeFilter.ALL_TIME,
+    ) {
+        val activeCount: Int = listOf(
+            resultType != SearchFilter.ALL,
+            categories.isNotEmpty(),
+            recurrences.isNotEmpty(),
+            status != StatusFilter.ALL,
+            dateRange != DateRangeFilter.ALL_TIME,
+        ).count { it }
+    }
 
     sealed interface SearchResultItem {
         data class PersonalTask(
@@ -30,7 +52,8 @@ object SearchContract {
         data class Success(
             val results: List<SearchResultItem>,
             val query: String,
-            val activeFilter: SearchFilter = SearchFilter.ALL,
+            val filters: SearchFilters = SearchFilters(),
+            val isFilterDialogOpen: Boolean = false,
         ) : UiState
 
         data class Error(
@@ -43,9 +66,15 @@ object SearchContract {
             val query: String,
         ) : UiAction
 
-        data class OnFilterChange(
-            val filter: SearchFilter,
+        data object OnOpenFilterDialog : UiAction
+
+        data object OnDismissFilterDialog : UiAction
+
+        data class OnApplyFilters(
+            val filters: SearchFilters,
         ) : UiAction
+
+        data object OnClearFilters : UiAction
 
         data class OnTaskClick(
             val task: Task,

@@ -271,7 +271,7 @@ private fun TDWeeklyBarChartContent(
                                         Modifier
                                             .fillMaxWidth()
                                             .fillMaxHeight(totalAnim)
-                                            .clip(RoundedCornerShape(2.dp))
+                                            .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
                                             .background(pendingBarColor),
                                     )
                                 }

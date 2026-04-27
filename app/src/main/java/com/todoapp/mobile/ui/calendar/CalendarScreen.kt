@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.example.uikit.R
@@ -52,6 +51,8 @@ import com.todoapp.uikit.components.TDStatusChipTone
 import com.todoapp.uikit.components.TDTaskCard
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.extensions.collectWithLifecycle
+import com.todoapp.uikit.previews.TDPreview
+import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -121,6 +122,7 @@ private fun CalendarErrorContent(
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun CalendarSuccessContent(
     uiState: UiState.Success,
@@ -172,23 +174,45 @@ private fun CalendarSuccessContent(
                         onDayDeselect = { onAction(UiAction.OnDateDeselect) },
                     )
                 }
-                val hasPersonal = uiState.personalTaskItems.isNotEmpty()
+                val (recurringItems, oneOffPersonalItems) = uiState.personalTaskItems
+                    .partition { it.isRecurringInstance }
+                val hasOneOffPersonal = oneOffPersonalItems.isNotEmpty()
+                val hasRecurring = recurringItems.isNotEmpty()
                 val hasGroup = uiState.groupTaskItems.isNotEmpty()
-                if (uiState.selectedDate != null && !hasPersonal && !hasGroup) {
+                val noResults = !hasOneOffPersonal && !hasRecurring && !hasGroup
+                if (uiState.selectedDate != null && noResults) {
                     item { CalendarEmptyState() }
                 } else {
-                    if (hasPersonal) {
+                    if (hasOneOffPersonal) {
                         item(key = "header-personal") {
                             SectionHeader(
                                 text = stringResource(com.todoapp.mobile.R.string.calendar_section_my_tasks),
                             )
                         }
                         items(
-                            items = uiState.personalTaskItems,
+                            items = oneOffPersonalItems,
                             key = { "personal-${it.taskId}" },
                         ) { personalItem ->
                             PersonalTaskEntry(
                                 item = personalItem,
+                                onClick = { onAction(UiAction.OnTaskClick(it)) },
+                                onPhotoClick = { onAction(UiAction.OnGroupTaskPhotoOpen(it)) },
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                            )
+                        }
+                    }
+                    if (hasRecurring) {
+                        item(key = "header-recurring") {
+                            SectionHeader(
+                                text = stringResource(com.todoapp.mobile.R.string.calendar_section_recurring_tasks),
+                            )
+                        }
+                        items(
+                            items = recurringItems,
+                            key = { "recurring-${it.taskId}" },
+                        ) { recurringItem ->
+                            PersonalTaskEntry(
+                                item = recurringItem,
                                 onClick = { onAction(UiAction.OnTaskClick(it)) },
                                 onPhotoClick = { onAction(UiAction.OnGroupTaskPhotoOpen(it)) },
                                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -274,6 +298,7 @@ private fun PersonalTaskEntry(
     val deadline = rememberDeadlineDisplay(
         dueAtEpochMs = item.dueAtEpochMs,
         isCompleted = item.isCompleted,
+        isRecurringInstance = item.isRecurringInstance,
     )
     TDTaskCard(
         modifier = modifier,
@@ -371,7 +396,7 @@ private fun CalendarEmptyState() {
     }
 }
 
-@Preview(showBackground = true)
+@TDPreview
 @Composable
 private fun CalendarLoadingPreview() {
     TDTheme {
@@ -379,7 +404,7 @@ private fun CalendarLoadingPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@TDPreview
 @Composable
 private fun CalendarErrorPreview() {
     TDTheme {
@@ -390,7 +415,7 @@ private fun CalendarErrorPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
+@TDPreviewWide
 @Composable
 private fun CalendarSuccessPreview() {
     TDTheme {
@@ -417,6 +442,64 @@ private fun CalendarSuccessPreview() {
                         photoUrl = null,
                     ),
                 ),
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@TDPreviewWide
+@Composable
+private fun CalendarSuccessEmptyPreview() {
+    TDTheme {
+        CalendarSuccessContent(
+            uiState = UiState.Success(
+                selectedDate = LocalDate.of(2025, 1, 12),
+                personalTaskItems = emptyList(),
+                groupTaskItems = emptyList(),
+            ),
+            onAction = {},
+        )
+    }
+}
+
+@TDPreviewWide
+@Composable
+private fun CalendarSuccessWithRecurringPreview() {
+    TDTheme {
+        CalendarSuccessContent(
+            uiState = UiState.Success(
+                selectedDate = LocalDate.of(2025, 1, 12),
+                personalTaskItems = listOf(
+                    PersonalTaskCalendarItem(
+                        taskId = 100L,
+                        title = "Daily medicine",
+                        description = "8am — vitamin D",
+                        dueAtEpochMs = System.currentTimeMillis() + 86_400_000L * 3,
+                        isCompleted = false,
+                        photoUrl = null,
+                        isRecurringInstance = true,
+                    ),
+                    PersonalTaskCalendarItem(
+                        taskId = 101L,
+                        title = "Weekly review",
+                        description = null,
+                        dueAtEpochMs = System.currentTimeMillis() + 86_400_000L * 4,
+                        isCompleted = false,
+                        photoUrl = null,
+                        isRecurringInstance = true,
+                    ),
+                    PersonalTaskCalendarItem(
+                        taskId = 200L,
+                        title = "Submit report",
+                        description = "Quarterly status",
+                        dueAtEpochMs = System.currentTimeMillis() + 7_200_000L,
+                        isCompleted = false,
+                        photoUrl = null,
+                        isRecurringInstance = false,
+                    ),
+                ),
+                groupTaskItems = emptyList(),
             ),
             onAction = {},
         )

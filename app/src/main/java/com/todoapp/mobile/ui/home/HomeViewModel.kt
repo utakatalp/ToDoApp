@@ -29,8 +29,10 @@ import com.todoapp.mobile.ui.home.HomeContract.UiState
 import com.todoapp.mobile.ui.settings.PermissionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -82,6 +84,14 @@ constructor(
     init {
         taskSyncRepository.fetchTasks()
         loadInitialData()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        val previous = (_uiState.value as? UiState.Success)?.pendingDeleteTask ?: return
+        if (pendingDeleteJob?.isActive != true) return
+        pendingDeleteJob?.cancel()
+        CoroutineScope(SupervisorJob()).launch { taskRepository.delete(previous) }
     }
 
     fun onAction(uiAction: UiAction) {
@@ -227,7 +237,7 @@ constructor(
             viewModelScope.launch {
                 delay(LOADING_DELAY)
                 combine(
-                    taskRepository.observeTasksByDate(date),
+                    taskRepository.observeTasksByDate(date, includeRecurringInstances = false),
                     taskRepository.observePendingTasksInAWeek(date),
                     taskRepository.countCompletedTasksInAWeek(date),
                     taskRepository.observeTaskPhotoUrls(),
@@ -367,14 +377,23 @@ constructor(
     }
 
     private fun deleteTask(task: Task) {
+        flushPendingDelete()
         updateSuccessState { it.copy(pendingDeleteTask = task) }
-        pendingDeleteJob?.cancel()
         pendingDeleteJob =
             viewModelScope.launch {
                 delay(UNDO_DELAY_MS)
                 taskRepository.delete(task)
                 updateSuccessState { it.copy(pendingDeleteTask = null) }
             }
+    }
+
+    private fun flushPendingDelete() {
+        val previous = (_uiState.value as? UiState.Success)?.pendingDeleteTask ?: return
+        if (pendingDeleteJob?.isActive != true) return
+        pendingDeleteJob?.cancel()
+        pendingDeleteJob = null
+        updateSuccessState { it.copy(pendingDeleteTask = null) }
+        viewModelScope.launch { taskRepository.delete(previous) }
     }
 
     private fun undoDelete() {
@@ -452,14 +471,19 @@ constructor(
     private fun changeCategory(category: com.todoapp.mobile.domain.model.TaskCategory) {
         updateSuccessState { state ->
             val form = state.taskFormState
-            // BIRTHDAY auto-defaults to YEARLY recurrence when the user hasn't picked one.
-            val nextRecurrence = if (
+            // BIRTHDAY auto-defaults to YEARLY when the user hasn't picked one;
+            // moving off BIRTHDAY reverts that auto-set so the explainer doesn't linger.
+            val nextRecurrence = when {
                 category == com.todoapp.mobile.domain.model.TaskCategory.BIRTHDAY &&
-                form.selectedRecurrence == com.todoapp.mobile.domain.model.Recurrence.NONE
-            ) {
-                com.todoapp.mobile.domain.model.Recurrence.YEARLY
-            } else {
-                form.selectedRecurrence
+                    form.selectedRecurrence == com.todoapp.mobile.domain.model.Recurrence.NONE ->
+                    com.todoapp.mobile.domain.model.Recurrence.YEARLY
+
+                form.selectedCategory == com.todoapp.mobile.domain.model.TaskCategory.BIRTHDAY &&
+                    category != com.todoapp.mobile.domain.model.TaskCategory.BIRTHDAY &&
+                    form.selectedRecurrence == com.todoapp.mobile.domain.model.Recurrence.YEARLY ->
+                    com.todoapp.mobile.domain.model.Recurrence.NONE
+
+                else -> form.selectedRecurrence
             }
             state.copy(
                 taskFormState = form.copy(

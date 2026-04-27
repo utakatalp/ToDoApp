@@ -33,6 +33,10 @@ object GroupsContract {
         ) : UiState
     }
 
+    sealed interface UiEffect {
+        data class ShowToast(val message: String) : UiEffect
+    }
+
     sealed interface UiAction {
         data object OnCreateNewGroupTap : UiAction
 

@@ -372,6 +372,7 @@ constructor(
             dueAtEpochMs = dueAt,
             isCompleted = task.isCompleted,
             photoUrl = photoUrl,
+            isRecurringInstance = task.recurrence != com.todoapp.mobile.domain.model.Recurrence.NONE,
         )
     }
 

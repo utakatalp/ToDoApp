@@ -1,5 +1,6 @@
 package com.todoapp.mobile.data.source.remote.datasource
 
+import com.todoapp.mobile.common.handleEmptyRequest
 import com.todoapp.mobile.common.handleRequest
 import com.todoapp.mobile.data.model.network.data.TaskData
 import com.todoapp.mobile.data.model.network.data.TaskListData
@@ -35,7 +36,7 @@ constructor(
         )
     }
 
-    override suspend fun deleteTask(id: Long): Result<Unit> = handleRequest { todoApi.deleteTask(id) }
+    override suspend fun deleteTask(id: Long): Result<Unit> = handleEmptyRequest { todoApi.deleteTask(id) }
 
     override suspend fun getTasks(familyGroupId: Long?): Result<TaskListData> = handleRequest {
         todoApi.getTasks(

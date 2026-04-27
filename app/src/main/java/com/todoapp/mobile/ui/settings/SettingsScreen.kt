@@ -1,12 +1,13 @@
 package com.todoapp.mobile.ui.settings
 
+import android.app.AlarmManager
 import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.net.Uri
 import android.os.Build
-import android.os.PowerManager
 import android.provider.Settings
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -142,7 +143,7 @@ private fun SettingsContent(
             onDismiss = onDismissPermission,
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        SectionHeader(R.string.settings_section_appearance)
 
         ThemeSelector(
             currentTheme = uiState.currentTheme,
@@ -160,9 +161,60 @@ private fun SettingsContent(
             },
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
-        Spacer(modifier = Modifier.height(16.dp))
+        SectionHeader(R.string.settings_section_reminders)
+
+        if (uiState.isUserAuthenticated) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TDText(
+                    text = stringResource(R.string.settings_push_notifications),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Switch(
+                    checked = uiState.pushNotificationsEnabled,
+                    onCheckedChange = { onAction(UiAction.OnPushNotificationsToggle(it)) },
+                    enabled = !uiState.isPushTogglePending,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = TDTheme.colors.white,
+                        checkedTrackColor = TDTheme.colors.pendingGray,
+                    ),
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ExactAlarmsRow()
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable { onAction(UiAction.OnNavigateToAlarmSounds) },
+        ) {
+            TDText(
+                text = stringResource(R.string.alarm_sounds),
+                style = TDTheme.typography.heading6,
+                color = TDTheme.colors.onBackground,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
+                contentDescription = null,
+                tint = TDTheme.colors.onBackground,
+            )
+        }
+
+        SectionHeader(R.string.settings_section_productivity)
 
         Row(
             Modifier
@@ -204,9 +256,7 @@ private fun SettingsContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
-        Spacer(modifier = Modifier.height(16.dp))
+        SectionHeader(R.string.settings_section_privacy)
 
         Row(
             Modifier
@@ -226,64 +276,7 @@ private fun SettingsContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .clickable { onAction(UiAction.OnNavigateToAlarmSounds) },
-        ) {
-            TDText(
-                text = stringResource(R.string.alarm_sounds),
-                style = TDTheme.typography.heading6,
-                color = TDTheme.colors.onBackground,
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
-                contentDescription = null,
-                tint = TDTheme.colors.onBackground,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ReliableRemindersRow()
-
-        if (uiState.isUserAuthenticated) {
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TDText(
-                    text = stringResource(R.string.settings_push_notifications),
-                    style = TDTheme.typography.heading6,
-                    color = TDTheme.colors.onBackground,
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Switch(
-                    checked = uiState.pushNotificationsEnabled,
-                    onCheckedChange = { onAction(UiAction.OnPushNotificationsToggle(it)) },
-                    enabled = !uiState.isPushTogglePending,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = TDTheme.colors.white,
-                        checkedTrackColor = TDTheme.colors.pendingGray,
-                    ),
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
-        Spacer(modifier = Modifier.height(16.dp))
+        SectionHeader(R.string.settings_section_account)
 
         if (uiState.isUserAuthenticated) {
             Row(
@@ -325,30 +318,42 @@ private fun SettingsContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
 @Composable
-private fun ReliableRemindersRow() {
+private fun SectionHeader(@StringRes titleRes: Int) {
+    Spacer(modifier = Modifier.height(20.dp))
+    TDText(
+        text = stringResource(titleRes),
+        style = TDTheme.typography.heading7,
+        color = TDTheme.colors.gray,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@RequiresApi(Build.VERSION_CODES.S)
+@Composable
+private fun ExactAlarmsRow() {
     val context = LocalContext.current
-    val powerManager = remember(context) { context.getSystemService(PowerManager::class.java) }
-    var isExempt by remember {
-        mutableStateOf(powerManager?.isIgnoringBatteryOptimizations(context.packageName) == true)
+    val alarmManager = remember(context) { context.getSystemService(AlarmManager::class.java) }
+    var canScheduleExact by remember {
+        mutableStateOf(alarmManager?.canScheduleExactAlarms() == true)
     }
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            isExempt = powerManager?.isIgnoringBatteryOptimizations(context.packageName) == true
+            canScheduleExact = alarmManager?.canScheduleExactAlarms() == true
         }
     }
 
     Row(
         Modifier
             .fillMaxWidth()
-            .clickable(enabled = !isExempt) {
+            .clickable(enabled = !canScheduleExact) {
                 val intent =
-                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
                         data = Uri.parse("package:${context.packageName}")
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
@@ -358,22 +363,22 @@ private fun ReliableRemindersRow() {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             TDText(
-                text = stringResource(R.string.settings_reliable_reminders_title),
+                text = stringResource(R.string.settings_exact_alarms_title),
                 style = TDTheme.typography.heading6,
                 color = TDTheme.colors.onBackground,
             )
             TDText(
                 text =
-                if (isExempt) {
-                    stringResource(R.string.settings_reliable_reminders_status_enabled)
+                if (canScheduleExact) {
+                    stringResource(R.string.settings_exact_alarms_status_enabled)
                 } else {
-                    stringResource(R.string.settings_reliable_reminders_description)
+                    stringResource(R.string.settings_exact_alarms_description)
                 },
                 style = TDTheme.typography.subheading3,
                 color = TDTheme.colors.gray,
             )
         }
-        if (!isExempt) {
+        if (!canScheduleExact) {
             Icon(
                 painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
                 contentDescription = null,

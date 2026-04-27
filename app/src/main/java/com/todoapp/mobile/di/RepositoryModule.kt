@@ -150,4 +150,10 @@ abstract class RepositoryModule {
     abstract fun bindAlarmSoundPreferences(
         impl: com.todoapp.mobile.data.repository.AlarmSoundPreferencesImpl,
     ): com.todoapp.mobile.domain.repository.AlarmSoundPreferences
+
+    @Binds
+    @Singleton
+    abstract fun bindActivityPreferences(
+        impl: com.todoapp.mobile.data.repository.ActivityPreferencesImpl,
+    ): com.todoapp.mobile.domain.repository.ActivityPreferences
 }

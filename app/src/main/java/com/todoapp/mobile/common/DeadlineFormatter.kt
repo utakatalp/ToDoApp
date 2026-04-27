@@ -21,18 +21,21 @@ data class DeadlineDisplay(
 
 private val dateFormatter = DateTimeFormatter.ofPattern("MMM d")
 private val dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d · HH:mm")
+private val timeOnlyFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 @Composable
 fun rememberDeadlineDisplay(
     dueAtEpochMs: Long,
     isCompleted: Boolean,
     nowEpochMs: Long = System.currentTimeMillis(),
+    isRecurringInstance: Boolean = false,
 ): DeadlineDisplay {
     val zone = ZoneId.systemDefault()
     val due = LocalDateTime.ofInstant(Instant.ofEpochMilli(dueAtEpochMs), zone)
     val now = LocalDateTime.ofInstant(Instant.ofEpochMilli(nowEpochMs), zone)
     val absoluteWithTime = due.format(dateTimeFormatter)
     val absoluteDateOnly = due.format(dateFormatter)
+    val timeOnly = due.format(timeOnlyFormatter)
 
     val minutesBetween = ChronoUnit.MINUTES.between(now, due)
     val hoursBetween = ChronoUnit.HOURS.between(now, due)
@@ -60,6 +63,12 @@ fun rememberDeadlineDisplay(
                 status = DeadlineStatus.Future,
             )
         }
+        // Recurring instances >24h away show their fixed daily time, not a misleading countdown.
+        isRecurringInstance -> DeadlineDisplay(
+            primary = timeOnly,
+            secondary = absoluteDateOnly,
+            status = DeadlineStatus.Future,
+        )
         daysBetween <= 7L -> {
             val days = daysBetween.toInt().coerceAtLeast(1)
             DeadlineDisplay(

@@ -14,8 +14,10 @@ import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.groups.GroupsContract.UiAction
 import com.todoapp.mobile.ui.groups.GroupsContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +47,9 @@ constructor(
     private val _navEffect = Channel<NavigationEffect>()
     val navEffect = _navEffect.receiveAsFlow()
 
+    private val _uiEffect = Channel<GroupsContract.UiEffect>()
+    val uiEffect = _uiEffect.receiveAsFlow()
+
     private var remoteSummaryCache = mapOf<Long, GroupSummaryData>()
     private var selectedGroup: GroupsContract.GroupUiItem? = null
     private var pendingDeleteJob: Job? = null
@@ -52,6 +57,18 @@ constructor(
     init {
         fetchRemoteGroups()
         observeLocalGroups()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        val previous = (_uiState.value as? UiState.Success)?.pendingDeleteGroup ?: return
+        if (pendingDeleteJob?.isActive != true) return
+        pendingDeleteJob?.cancel()
+        CoroutineScope(SupervisorJob()).launch {
+            groupRepository
+                .deleteGroup(previous.id)
+                .onFailure { t -> Log.e("GroupsViewModel", "Failed to flush pending group delete", t) }
+        }
     }
 
     fun onAction(action: UiAction) {
@@ -131,6 +148,13 @@ constructor(
         viewModelScope.launch {
             groupRepository.observeAllGroups().collect { groups ->
                 val isUserAuthenticated = sessionPreferences.getAccessToken().isNullOrBlank().not()
+                // Stale rows can linger after a previous logout if cleanup failed. Without a token
+                // we can't delete them on the server (returns 401), and they're not "the user's"
+                // groups anymore — purge locally and force the empty state.
+                if (!isUserAuthenticated && groups.isNotEmpty()) {
+                    groupRepository.deleteAllLocalGroups()
+                    return@collect
+                }
                 _uiState.update {
                     (
                         if (groups.isEmpty()) {
@@ -170,16 +194,39 @@ constructor(
     }
 
     private fun startPendingDelete(group: GroupsContract.GroupUiItem) {
+        flushPendingDelete()
         updateSuccessState { it.copy(pendingDeleteGroup = group) }
-        pendingDeleteJob?.cancel()
         pendingDeleteJob =
             viewModelScope.launch {
                 delay(UNDO_DELAY_MS)
                 groupRepository
                     .deleteGroup(group.id)
-                    .onFailure { t -> Log.e("GroupsViewModel", "Failed to delete group", t) }
+                    .onFailure { t ->
+                        Log.e("GroupsViewModel", "Failed to delete group", t)
+                        _uiEffect.trySend(
+                            GroupsContract.UiEffect.ShowToast(t.message ?: "Failed to delete group"),
+                        )
+                    }
                 updateSuccessState { it.copy(pendingDeleteGroup = null) }
             }
+    }
+
+    private fun flushPendingDelete() {
+        val previous = (_uiState.value as? UiState.Success)?.pendingDeleteGroup ?: return
+        if (pendingDeleteJob?.isActive != true) return
+        pendingDeleteJob?.cancel()
+        pendingDeleteJob = null
+        updateSuccessState { it.copy(pendingDeleteGroup = null) }
+        viewModelScope.launch {
+            groupRepository
+                .deleteGroup(previous.id)
+                .onFailure { t ->
+                    Log.e("GroupsViewModel", "Failed to flush pending group delete", t)
+                    _uiEffect.trySend(
+                        GroupsContract.UiEffect.ShowToast(t.message ?: "Failed to delete group"),
+                    )
+                }
+        }
     }
 
     private fun undoDeleteGroup() {

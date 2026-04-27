@@ -1,12 +1,11 @@
 package com.todoapp.mobile.data.alarm
 
-import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
-import androidx.annotation.RequiresPermission
 import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
 import com.todoapp.mobile.domain.alarm.AlarmType
@@ -14,6 +13,7 @@ import com.todoapp.mobile.domain.model.AlarmItem
 import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.clampedDayOfMonth
 import com.todoapp.mobile.ui.overlay.OverlayService
+import timber.log.Timber
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -24,18 +24,16 @@ class AlarmSchedulerImpl(
 ) : AlarmScheduler {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
-    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     override fun schedule(
         item: AlarmItem,
         type: AlarmType,
     ) {
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            item.time
+        scheduleAt(
+            triggerAtMillis = item.time
                 .atZone(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli(),
-            buildFirePendingIntent(type.getRequestCode(item), type.buildBroadcastIntent(item)),
+            pendingIntent = buildFirePendingIntent(type.getRequestCode(item), type.buildBroadcastIntent(item)),
         )
     }
 
@@ -110,7 +108,6 @@ class AlarmSchedulerImpl(
         putExtra(NotificationService.INTENT_EXTRA_LONG, item.minutesBefore)
     }
 
-    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     override fun scheduleRecurring(
         taskId: Long,
         recurrence: Recurrence,
@@ -129,11 +126,21 @@ class AlarmSchedulerImpl(
             minute = minute,
             message = message,
         )
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            nextFire.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-            buildFirePendingIntent(recurringRequestCode(taskId), intent),
+        scheduleAt(
+            triggerAtMillis = nextFire.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            pendingIntent = buildFirePendingIntent(recurringRequestCode(taskId), intent),
         )
+    }
+
+    // Falls back to inexact when SCHEDULE_EXACT_ALARM isn't granted (Android 13+ user-controlled).
+    private fun scheduleAt(triggerAtMillis: Long, pendingIntent: PendingIntent) {
+        runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            } else {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            }
+        }.onFailure { Timber.tag(TAG).w(it, "scheduleAt failed") }
     }
 
     override fun cancelRecurring(taskId: Long) {
@@ -237,5 +244,7 @@ class AlarmSchedulerImpl(
 
         const val MAX_MONTH_LOOKAHEAD = 13
         const val MAX_YEAR_LOOKAHEAD = 5
+
+        const val TAG = "AlarmScheduler"
     }
 }

@@ -2,6 +2,7 @@ package com.todoapp.mobile.ui.home
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -128,11 +130,26 @@ internal fun AddTaskSheet(
         )
         if (formState.selectedRecurrence != Recurrence.NONE) {
             Spacer(Modifier.height(8.dp))
-            TDText(
-                text = recurrenceExplainer(formState.selectedRecurrence),
-                style = TDTheme.typography.subheading2,
-                color = TDTheme.colors.gray,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(TDTheme.colors.background, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_warning),
+                    contentDescription = null,
+                    tint = TDTheme.colors.orange,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                TDText(
+                    text = recurrenceExplainer(formState.selectedRecurrence),
+                    style = TDTheme.typography.subheading1,
+                    color = TDTheme.colors.orange,
+                )
+            }
         }
         Spacer(Modifier.height(12.dp))
         TDDatePickerDialog(
@@ -418,7 +435,11 @@ private fun categoryOptions(): List<TDCategoryOption> = listOf(
         label = stringResource(com.todoapp.mobile.R.string.category_birthday),
         iconRes = R.drawable.ic_birthday_label,
     ),
-    TDCategoryOption(TaskCategory.PERSONAL.name, stringResource(com.todoapp.mobile.R.string.category_personal)),
+    TDCategoryOption(
+        key = TaskCategory.PERSONAL.name,
+        label = stringResource(com.todoapp.mobile.R.string.category_personal),
+        iconRes = R.drawable.ic_personal_label,
+    ),
     TDCategoryOption(
         key = TaskCategory.OTHER.name,
         label = stringResource(com.todoapp.mobile.R.string.category_other),

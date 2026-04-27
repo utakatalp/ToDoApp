@@ -307,6 +307,18 @@ internal fun HomeSwipeDismissBackground(direction: SwipeToDismissBoxValue) {
 
 @androidx.compose.runtime.Composable
 private fun categoryLabelFor(task: com.todoapp.mobile.domain.model.Task): String? {
+    val categoryText = categoryDisplayText(task)
+    val recurrenceText = recurrenceDisplayText(task.recurrence)
+    return when {
+        categoryText != null && recurrenceText != null -> "$categoryText · $recurrenceText"
+        categoryText != null -> categoryText
+        recurrenceText != null -> recurrenceText
+        else -> null
+    }
+}
+
+@androidx.compose.runtime.Composable
+private fun categoryDisplayText(task: com.todoapp.mobile.domain.model.Task): String? {
     val category = task.category
     if (category == com.todoapp.mobile.domain.model.TaskCategory.PERSONAL) return null
     if (category == com.todoapp.mobile.domain.model.TaskCategory.OTHER) {
@@ -325,4 +337,13 @@ private fun categoryLabelFor(task: com.todoapp.mobile.domain.model.Task): String
         -> return null
     }
     return stringResource(res)
+}
+
+@androidx.compose.runtime.Composable
+private fun recurrenceDisplayText(recurrence: com.todoapp.mobile.domain.model.Recurrence): String? = when (recurrence) {
+    com.todoapp.mobile.domain.model.Recurrence.NONE -> null
+    com.todoapp.mobile.domain.model.Recurrence.DAILY -> stringResource(com.todoapp.mobile.R.string.recurrence_daily)
+    com.todoapp.mobile.domain.model.Recurrence.WEEKLY -> stringResource(com.todoapp.mobile.R.string.recurrence_weekly)
+    com.todoapp.mobile.domain.model.Recurrence.MONTHLY -> stringResource(com.todoapp.mobile.R.string.recurrence_monthly)
+    com.todoapp.mobile.domain.model.Recurrence.YEARLY -> stringResource(com.todoapp.mobile.R.string.recurrence_yearly)
 }

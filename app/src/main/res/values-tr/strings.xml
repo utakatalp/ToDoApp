@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ToDoApp</string>
+    <string name="app_name">DoneBot</string>
     <string name="back">Geri</string>
     <string name="pomodoro_summary">Özet</string>
     <string name="pomodoro_great_work">Harika iş!</string>
@@ -31,7 +31,7 @@
     <string name="calendar_no_tasks_for_day_description">Bu güne ait kişisel görev veya grup son tarihi yok</string>
     <string name="deadline_in_hours_minutes">%1$dsa %2$ddk kaldı</string>
     <string name="deadline_unassigned">Atanmamış</string>
-    <string name="deadline_still_pending_suffix"> · hâlâ bekliyor</string>
+    <string name="deadline_still_pending_suffix"> · hala bekliyor</string>
     <string name="deadline_completed_primary">Tamamlandı</string>
     <plurals name="deadline_days_left">
         <item quantity="one">%1$d gün kaldı</item>
@@ -50,6 +50,7 @@
         <item quantity="other">%1$d gün önce</item>
     </plurals>
     <string name="calendar_section_my_tasks">Görevlerim</string>
+    <string name="calendar_section_recurring_tasks">Tekrarlı Görevler</string>
     <string name="calendar_section_group_deadlines">Grup Görevleri</string>
     <string name="status_done">Tamamlandı</string>
     <string name="status_pending">Bekliyor</string>
@@ -130,6 +131,23 @@
     <string name="activity_screen_statistic_text">İstatistikler</string>
     <string name="activity_screen_activity_text">Aktivite</string>
     <string name="activity_screen_progress_text">Yıllık İlerleme</string>
+    <string name="activity_week_summary">Bu hafta %1$d tamamlandı · %2$d bekliyor</string>
+    <string name="activity_year_summary">Bu yıl: %1$d tamamlandı ✅</string>
+    <string name="activity_include_recurring">Tekrarlı görevleri dahil et</string>
+    <string name="activity_trend_up">↑ Geçen haftaya göre %%%1$d</string>
+    <string name="activity_trend_down">↓ Geçen haftaya göre %%%1$d</string>
+    <string name="activity_trend_flat">Geçen haftayla aynı</string>
+    <string name="activity_streak_label">%1$d günlük seri 🔥</string>
+    <string name="activity_streak_none">Henüz seri yok — bugün bir görev tamamla</string>
+    <string name="activity_best_day">En verimli gün: %1$s · %2$d görev</string>
+    <string name="activity_category_breakdown_title">Bu hafta nereye odaklandın</string>
+    <string name="day_monday">Pazartesi</string>
+    <string name="day_tuesday">Salı</string>
+    <string name="day_wednesday">Çarşamba</string>
+    <string name="day_thursday">Perşembe</string>
+    <string name="day_friday">Cuma</string>
+    <string name="day_saturday">Cumartesi</string>
+    <string name="day_sunday">Pazar</string>
     <string name="bar_chart_days_mon">Pt</string>
     <string name="bar_chart_days_tue">Sa</string>
     <string name="bar_chart_days_wed">Ça</string>
@@ -250,7 +268,7 @@
     <string name="create_account">Hesap Oluştur</string>
     <string name="notify_me_at">%1$s\'de bildir</string>
     <string name="plan_time_saved">Plan saati kaydedildi</string>
-    <string name="notify_hint">\"Zamanı geldiğinde seni bilgilendireceğim!\"</string>
+    <string name="notify_hint">\"Seçtiğin saatte seni bilgilendireceğim!\"</string>
     <string name="edit_details_hint">\"Görev detaylarınızı her zaman düzenleyebilirsiniz.\"</string>
     <string name="hint_swipe_left_delete">Silmek için bir görevi sola kaydırın</string>
     <string name="hint_swipe_right_secret">Gizli olarak işaretlemek için sağa kaydırın — parmak izi gerekli</string>
@@ -301,6 +319,24 @@
     <string name="search_filter_tasks">Görevler</string>
     <string name="search_filter_groups">Gruplar</string>
     <string name="search_filter_group_tasks">Grup Görevleri</string>
+    <string name="search_filter_chip_label">Filtreler</string>
+    <string name="search_filter_chip_label_with_count">Filtreler (%1$d)</string>
+    <string name="search_filter_dialog_title">Filtreler</string>
+    <string name="search_filter_section_show">Göster</string>
+    <string name="search_filter_section_category">Kategori</string>
+    <string name="search_filter_section_recurrence">Tekrar</string>
+    <string name="search_filter_section_status">Durum</string>
+    <string name="search_filter_section_date">Tarih</string>
+    <string name="search_filter_status_all">Hepsi</string>
+    <string name="search_filter_status_pending">Bekleyen</string>
+    <string name="search_filter_status_completed">Tamamlanan</string>
+    <string name="search_filter_recurrence_none">Tek seferlik</string>
+    <string name="search_filter_date_all">Tüm zamanlar</string>
+    <string name="search_filter_date_today">Bugün</string>
+    <string name="search_filter_date_week">Bu hafta</string>
+    <string name="search_filter_date_month">Bu ay</string>
+    <string name="search_filter_clear_all">Tümünü temizle</string>
+    <string name="search_filter_apply">Uygula</string>
     <string name="pomodoro_launch_title">Pomodoro Zamanlayıcı</string>
     <string name="pomodoro_launch_subtitle">Mevcut ayarlarınız</string>
     <string name="pomodoro_sessions_label">Seans</string>
@@ -423,10 +459,15 @@
     <string name="invitation_accepted_toast">Gruba katıldın</string>
     <string name="invitation_declined_toast">Davet reddedildi</string>
     <string name="invitation_action_failed">İşlem tamamlanamadı</string>
+    <string name="settings_section_appearance">Görünüm</string>
+    <string name="settings_section_reminders">Hatırlatıcılar</string>
+    <string name="settings_section_productivity">Üretkenlik</string>
+    <string name="settings_section_privacy">Gizlilik</string>
+    <string name="settings_section_account">Hesap</string>
     <string name="settings_push_notifications">Push bildirimleri</string>
-    <string name="settings_reliable_reminders_title">Güvenilir hatırlatıcılar</string>
-    <string name="settings_reliable_reminders_description">Pil optimizasyonunu kapat ki uygulama kapalıyken bile hatırlatmalar zamanında gelsin.</string>
-    <string name="settings_reliable_reminders_status_enabled">Bu uygulama için pil optimizasyonu kapalı.</string>
+    <string name="settings_exact_alarms_title">Tam zamanlı hatırlatıcılar</string>
+    <string name="settings_exact_alarms_description">Hatırlatmaların belirlediğin zamanda tam olarak çalışmasına izin ver.</string>
+    <string name="settings_exact_alarms_status_enabled">Tam zamanlı hatırlatıcılar etkin.</string>
     <string name="notifications_section_today">Bugün</string>
     <string name="notifications_section_earlier">Daha önce</string>
     <string name="notifications_mark_all_succeeded">Tüm bildirimler okundu olarak işaretlendi</string>
@@ -498,10 +539,10 @@
     <string name="recurrence_weekly">Her hafta</string>
     <string name="recurrence_monthly">Her ay</string>
     <string name="recurrence_yearly">Her yıl</string>
-    <string name="recurrence_explainer_daily">Seçilen saatte her gün hatırlatır</string>
-    <string name="recurrence_explainer_weekly">Aynı hafta gününde, seçilen saatte hatırlatır</string>
-    <string name="recurrence_explainer_monthly">Her ayın aynı gününde hatırlatır</string>
-    <string name="recurrence_explainer_yearly">Her yıl aynı tarihte hatırlatır</string>
+    <string name="recurrence_explainer_daily">Seçilen saatte her gün hatırlatır !</string>
+    <string name="recurrence_explainer_weekly">Aynı hafta gününde, seçilen saatte hatırlatır !</string>
+    <string name="recurrence_explainer_monthly">Her ayın aynı gününde hatırlatır !</string>
+    <string name="recurrence_explainer_yearly">Her yıl aynı tarihte hatırlatır !</string>
 
     <string name="filter_today">Bugün</string>
     <string name="filter_daily">Günlük</string>

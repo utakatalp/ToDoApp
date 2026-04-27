@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -36,11 +38,13 @@ fun TDGeneralProgressBar(
         label = "progressBar",
     )
 
+    val shape = RoundedCornerShape(percent = 50)
     Column {
         Box(
             modifier =
             Modifier
                 .fillMaxWidth()
+                .clip(shape)
                 .background(barColor)
                 .height(height),
             contentAlignment = Alignment.Center,
@@ -51,6 +55,7 @@ fun TDGeneralProgressBar(
                     .align(Alignment.CenterStart)
                     .fillMaxHeight()
                     .fillMaxWidth(animatedP)
+                    .clip(shape)
                     .background(progressColor),
             )
             TDText(

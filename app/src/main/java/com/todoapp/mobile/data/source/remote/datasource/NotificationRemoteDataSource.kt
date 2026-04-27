@@ -1,5 +1,6 @@
 package com.todoapp.mobile.data.source.remote.datasource
 
+import com.todoapp.mobile.common.handleEmptyRequest
 import com.todoapp.mobile.common.handleRequest
 import com.todoapp.mobile.data.model.network.data.NotificationListData
 import com.todoapp.mobile.data.model.network.data.UnreadCountData
@@ -18,9 +19,9 @@ class NotificationRemoteDataSourceImpl @Inject constructor(
 ) : NotificationRemoteDataSource {
     override suspend fun list(limit: Int, before: Long?): Result<NotificationListData> = handleRequest { api.listNotifications(limit = limit, before = before) }
 
-    override suspend fun markRead(id: Long): Result<Unit> = handleRequest { api.markNotificationRead(id) }
+    override suspend fun markRead(id: Long): Result<Unit> = handleEmptyRequest { api.markNotificationRead(id) }
 
-    override suspend fun markAllRead(): Result<Unit> = handleRequest { api.markAllNotificationsRead() }
+    override suspend fun markAllRead(): Result<Unit> = handleEmptyRequest { api.markAllNotificationsRead() }
 
     override suspend fun unreadCount(): Result<UnreadCountData> = handleRequest { api.getUnreadNotificationCount() }
 }

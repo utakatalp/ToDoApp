@@ -1,8 +1,6 @@
 package com.todoapp.mobile.ui.settings
 
-import android.Manifest
 import android.content.Context
-import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.common.needsOverlayPermission
@@ -266,7 +264,6 @@ constructor(
         }
     }
 
-    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     private fun rescheduleDailyPlanAlarm(time: LocalTime) {
         alarmScheduler.cancelScheduledAlarm(AlarmType.DAILY_PLAN)
 

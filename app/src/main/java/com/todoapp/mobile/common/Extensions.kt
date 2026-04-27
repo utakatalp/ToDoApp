@@ -71,6 +71,32 @@ suspend fun <T> handleRequest(request: suspend () -> Response<BaseResponse<T?>>)
     }
 }
 
+// For endpoints whose successful response carries no payload (DELETE, mark-read, etc.).
+// `handleRequest` treats a null `data` as failure, which breaks these — the server returns
+// 2xx with `data: null`, the call surfaces as Result.failure, and the local entity never
+// gets removed. Use this helper instead so any 2xx is success regardless of body.
+suspend fun handleEmptyRequest(request: suspend () -> Response<BaseResponse<Unit?>>): Result<Unit> {
+    return try {
+        val response = request()
+        if (response.isSuccessful) return Result.success(Unit)
+        val errorBody = response.errorBody()?.string()
+        Log.d("error", errorBody.toString())
+        val message = errorBody
+            ?.let { runCatching { Json.decodeFromString<ErrorResponse>(it).message }.getOrNull() }
+            ?: response.message()
+            ?: "Something went wrong"
+        Log.d("error", message)
+        when (response.code()) {
+            401, 403 -> Result.failure(DomainException.Unauthorized())
+            else -> Result.failure(DomainException.Server(message))
+        }
+    } catch (t: Throwable) {
+        if (t is CancellationException) throw t
+        Log.e("HANDLE_REQUEST", "Original exception: ${t.javaClass.simpleName}: ${t.message}", t)
+        Result.failure(DomainException.fromThrowable(t))
+    }
+}
+
 sealed class DomainException(
     message: String,
 ) : Exception(message) {

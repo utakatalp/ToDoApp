@@ -1,6 +1,7 @@
 package com.todoapp.mobile.data.source.remote.datasource
 
 import com.todoapp.mobile.common.DomainException
+import com.todoapp.mobile.common.handleEmptyRequest
 import com.todoapp.mobile.common.handleRequest
 import com.todoapp.mobile.data.model.network.data.GroupActivityDataList
 import com.todoapp.mobile.data.model.network.data.GroupData
@@ -31,7 +32,7 @@ constructor(
 
     override suspend fun getGroups(): Result<GroupSummaryDataList> = handleRequest { todoApi.getGroups() }
 
-    override suspend fun deleteGroup(id: Long): Result<Unit> = handleRequest { todoApi.deleteGroup(id) }
+    override suspend fun deleteGroup(id: Long): Result<Unit> = handleEmptyRequest { todoApi.deleteGroup(id) }
 
     override suspend fun getGroupDetail(id: Long): Result<GroupData> = handleRequest { todoApi.getGroupDetail(id) }
 
@@ -58,19 +59,19 @@ constructor(
         todoApi.createGroupTask(groupId, request)
     }
 
-    override suspend fun inviteMember(request: InviteMemberRequest): Result<Unit> = handleRequest {
+    override suspend fun inviteMember(request: InviteMemberRequest): Result<Unit> = handleEmptyRequest {
         todoApi.inviteMember(request)
     }
 
     override suspend fun removeMember(
         id: Long,
         userId: Long,
-    ): Result<Unit> = handleRequest { todoApi.removeMember(id, userId) }
+    ): Result<Unit> = handleEmptyRequest { todoApi.removeMember(id, userId) }
 
     override suspend fun transferOwnership(
         id: Long,
         request: TransferOwnershipRequest,
-    ): Result<Unit> = handleRequest {
+    ): Result<Unit> = handleEmptyRequest {
         todoApi.transferOwnership(id, request)
     }
 
@@ -87,7 +88,7 @@ constructor(
     override suspend fun deleteGroupTask(
         groupId: Long,
         taskId: Long,
-    ): Result<Unit> = handleRequest { todoApi.deleteGroupTask(groupId, taskId) }
+    ): Result<Unit> = handleEmptyRequest { todoApi.deleteGroupTask(groupId, taskId) }
 
     override suspend fun updateGroupTask(
         groupId: Long,

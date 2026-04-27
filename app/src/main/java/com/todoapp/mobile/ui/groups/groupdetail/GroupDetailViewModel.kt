@@ -28,7 +28,9 @@ import com.todoapp.mobile.ui.home.TaskFormState
 import com.todoapp.mobile.ui.home.TaskFormUiAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -78,6 +80,20 @@ constructor(
     init {
         viewModelScope.launch { appLocale = languageRepository.getCurrentLanguage().toLocale() }
         loadGroupData()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        val previousId = (_uiState.value as? UiState.Success)?.undoDeleteTaskId ?: return
+        if (pendingDeleteJob?.isActive != true) return
+        pendingDeleteJob?.cancel()
+        CoroutineScope(SupervisorJob()).launch {
+            groupRepository
+                .deleteGroupTask(groupId, previousId)
+                .onFailure {
+                    android.util.Log.e("GroupDetailViewModel", "Failed to flush pending task delete", it)
+                }
+        }
     }
 
     fun onAction(action: UiAction) {
@@ -452,6 +468,8 @@ constructor(
         val task = state.tasks.find { it.id == taskId } ?: return
         val wasCompleted = task.isCompleted
 
+        flushPendingDelete()
+
         updateSuccessState { s ->
             s.copy(
                 pendingDeleteTaskId = null,
@@ -461,7 +479,6 @@ constructor(
             )
         }
 
-        pendingDeleteJob?.cancel()
         pendingDeleteJob =
             viewModelScope.launch {
                 delay(UNDO_DELAY_MS)
@@ -473,6 +490,22 @@ constructor(
                         loadGroupData()
                     }
             }
+    }
+
+    private fun flushPendingDelete() {
+        val previousId = (_uiState.value as? UiState.Success)?.undoDeleteTaskId ?: return
+        if (pendingDeleteJob?.isActive != true) return
+        pendingDeleteJob?.cancel()
+        pendingDeleteJob = null
+        updateSuccessState { it.copy(undoDeleteTaskId = null) }
+        viewModelScope.launch {
+            groupRepository
+                .deleteGroupTask(groupId, previousId)
+                .onFailure {
+                    _uiEffect.trySend(UiEffect.ShowToast(context.getString(R.string.failed_to_delete_task)))
+                    loadGroupData()
+                }
+        }
     }
 
     private fun undoDeleteTask() {
