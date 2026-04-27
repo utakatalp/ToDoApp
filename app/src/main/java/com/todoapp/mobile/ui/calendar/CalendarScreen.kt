@@ -369,13 +369,13 @@ private fun CalendarEmptyState() {
                 .shadow(
                     elevation = 8.dp,
                     shape = CircleShape,
-                    ambientColor = TDTheme.colors.purple.copy(alpha = 0.3f),
-                    spotColor = TDTheme.colors.purple.copy(alpha = 0.3f),
+                    ambientColor = TDTheme.colors.pendingGray.copy(alpha = 0.3f),
+                    spotColor = TDTheme.colors.pendingGray.copy(alpha = 0.3f),
                 )
                 .clip(CircleShape)
                 .border(
                     width = 2.dp,
-                    color = TDTheme.colors.lightPurple.copy(alpha = 0.6f),
+                    color = TDTheme.colors.darkPending.copy(alpha = 0.6f),
                     shape = CircleShape,
                 ),
         )
