@@ -161,7 +161,7 @@ private fun WheelColumn(
                         },
                         color =
                         if (isCentered) {
-                            TDTheme.colors.purple
+                            TDTheme.colors.pendingGray
                         } else {
                             TDTheme.colors.onBackground.copy(alpha = 0.3f)
                         },

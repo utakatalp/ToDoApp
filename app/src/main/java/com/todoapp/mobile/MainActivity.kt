@@ -22,7 +22,7 @@ class MainActivity : FragmentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen().setKeepOnScreenCondition { mainViewModel.isLoggedIn == null }
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         mainViewModel.onPushIntent(intent)

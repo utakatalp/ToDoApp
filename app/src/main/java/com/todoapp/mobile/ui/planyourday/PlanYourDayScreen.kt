@@ -97,8 +97,8 @@ fun PlanYourDayScreen(
             Spacer(Modifier.width(12.dp))
             TDText(
                 text = stringResource(R.string.notify_hint),
-                style = TDTheme.typography.heading5,
-                color = TDTheme.colors.onBackground.copy(alpha = 0.5f),
+                style = TDTheme.typography.heading7,
+                color = TDTheme.colors.onBackground,
             )
         }
 

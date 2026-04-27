@@ -17,8 +17,10 @@ import com.todoapp.mobile.ui.filteredtasks.FilteredTasksContract.UiAction
 import com.todoapp.mobile.ui.filteredtasks.FilteredTasksContract.UiEffect
 import com.todoapp.mobile.ui.filteredtasks.FilteredTasksContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -58,6 +60,14 @@ constructor(
 
     init {
         fetchTasks(initialDate, initialTab)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        val previous = (_uiState.value as? UiState.Success)?.pendingDeleteTask ?: return
+        if (pendingDeleteJob?.isActive != true) return
+        pendingDeleteJob?.cancel()
+        CoroutineScope(SupervisorJob()).launch { taskRepository.delete(previous) }
     }
 
     fun onAction(action: UiAction) {
@@ -140,14 +150,23 @@ constructor(
     }
 
     private fun deleteTask(task: Task) {
+        flushPendingDelete()
         updateSuccessState { it.copy(pendingDeleteTask = task) }
-        pendingDeleteJob?.cancel()
         pendingDeleteJob =
             viewModelScope.launch {
                 delay(UNDO_DELAY_MS)
                 taskRepository.delete(task)
                 updateSuccessState { it.copy(pendingDeleteTask = null) }
             }
+    }
+
+    private fun flushPendingDelete() {
+        val previous = (_uiState.value as? UiState.Success)?.pendingDeleteTask ?: return
+        if (pendingDeleteJob?.isActive != true) return
+        pendingDeleteJob?.cancel()
+        pendingDeleteJob = null
+        updateSuccessState { it.copy(pendingDeleteTask = null) }
+        viewModelScope.launch { taskRepository.delete(previous) }
     }
 
     private fun undoDelete() {
