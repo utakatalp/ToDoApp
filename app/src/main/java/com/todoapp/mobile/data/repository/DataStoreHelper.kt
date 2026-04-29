@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.todoapp.mobile.data.model.network.data.UserData
 import kotlinx.coroutines.flow.Flow
@@ -84,6 +85,50 @@ constructor(
         }
     }
 
+    /**
+     * Last reminder offset (minutes) the user picked when creating a task.
+     * Used as a smart default for the next AddTaskSheet open. Negative
+     * sentinel (-1) means "no reminder"; null means never set.
+     */
+    fun observeLastUsedReminderOffset(): Flow<Long?> = dataStore.data.map { preferences ->
+        preferences[LAST_USED_REMINDER_OFFSET]
+    }
+
+    suspend fun setLastUsedReminderOffset(value: Long?) {
+        dataStore.edit { preferences ->
+            if (value == null) preferences.remove(LAST_USED_REMINDER_OFFSET)
+            else preferences[LAST_USED_REMINDER_OFFSET] = value
+        }
+    }
+
+    /**
+     * Epoch day on which the user last dismissed the home suggest card.
+     * Card is hidden for that day only; reappears the next day.
+     */
+    fun observeSuggestCardDismissedDay(): Flow<Long?> = dataStore.data.map { preferences ->
+        preferences[SUGGEST_CARD_DISMISSED_DAY]
+    }
+
+    suspend fun setSuggestCardDismissedDay(epochDay: Long) {
+        dataStore.edit { preferences ->
+            preferences[SUGGEST_CARD_DISMISSED_DAY] = epochDay
+        }
+    }
+
+    fun observeChatDraft(): Flow<String> = dataStore.data.map { preferences ->
+        preferences[CHAT_DRAFT] ?: ""
+    }
+
+    suspend fun setChatDraft(value: String) {
+        dataStore.edit { preferences ->
+            if (value.isEmpty()) {
+                preferences.remove(CHAT_DRAFT)
+            } else {
+                preferences[CHAT_DRAFT] = value
+            }
+        }
+    }
+
     companion object {
         private val json =
             Json {
@@ -95,5 +140,8 @@ constructor(
         private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
         private val FIRST_LOGIN_PERMISSION_PROMPT_PENDING =
             booleanPreferencesKey("first_login_permission_prompt_pending")
+        private val LAST_USED_REMINDER_OFFSET = longPreferencesKey("last_used_reminder_offset")
+        private val SUGGEST_CARD_DISMISSED_DAY = longPreferencesKey("suggest_card_dismissed_day")
+        private val CHAT_DRAFT = stringPreferencesKey("chat_draft")
     }
 }

@@ -11,6 +11,20 @@ data class CompletedCountByDay(
     val count: Int,
 )
 
+data class MonthlyWeekBucket(
+    val weekIndex: Int,
+    val rangeStart: LocalDate,
+    val rangeEnd: LocalDate,
+    val completed: Int,
+    val pending: Int,
+)
+
+data class DailyBucket(
+    val date: LocalDate,
+    val completed: Int,
+    val pending: Int,
+)
+
 interface TaskRepository {
     /** Map of remote task id -> list of photo URLs. Populated on every remote sync. */
     fun observeTaskPhotoUrls(): Flow<Map<Long, List<String>>>
@@ -29,6 +43,28 @@ interface TaskRepository {
     fun observeCompletedCountsByDayInAWeek(date: LocalDate, includeRecurring: Boolean = true): Flow<List<Int>>
 
     fun observePendingCountsByDayInAWeek(date: LocalDate, includeRecurring: Boolean = true): Flow<List<Int>>
+
+    fun observeCompletedCountsByDateRange(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        includeRecurring: Boolean = true,
+    ): Flow<Map<LocalDate, Int>>
+
+    fun observeMonthlyWeekBuckets(
+        monthStart: LocalDate,
+        includeRecurring: Boolean = true,
+    ): Flow<List<MonthlyWeekBucket>>
+
+    fun countCompletedTasksInAMonth(
+        monthStart: LocalDate,
+        includeRecurring: Boolean = true,
+    ): Flow<Int>
+
+    fun observeDailyBucketsByDateRange(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        includeRecurring: Boolean = true,
+    ): Flow<List<DailyBucket>>
 
     fun observePendingTasksInAWeek(date: LocalDate, includeRecurring: Boolean = true): Flow<Int>
 
@@ -59,6 +95,12 @@ interface TaskRepository {
 
     /** All tasks of a given recurrence type, ordered by anchor date then start time. */
     fun observeRecurringByType(recurrence: Recurrence): Flow<List<Task>>
+
+    /** One-shot tasks dated before [today] that are still incomplete. */
+    fun observeOverdueTasks(today: LocalDate): Flow<List<Task>>
+
+    /** Bulk-shifts the dates of [taskIds] forward by one day. */
+    suspend fun deferTasksToTomorrow(taskIds: List<Long>)
 
     suspend fun getTaskById(id: Long): Task?
 

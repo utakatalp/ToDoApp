@@ -8,6 +8,7 @@ sealed class AppDestination(
     val route: String,
     val icon: Int?,
     val selectedIcon: Int?,
+    val hasInfoDialog: Boolean = false,
 ) {
     data object Home : AppDestination(
         title = R.string.navbar_home_screen_page_name,
@@ -21,6 +22,7 @@ sealed class AppDestination(
         route = Screen.Calendar::class.qualifiedName!!,
         icon = R.drawable.ic_calendar,
         selectedIcon = R.drawable.ic_selected_calendar,
+        hasInfoDialog = true,
     )
 
     data object Activity : AppDestination(
@@ -28,6 +30,15 @@ sealed class AppDestination(
         route = Screen.Activity::class.qualifiedName!!,
         icon = R.drawable.ic_statistic,
         selectedIcon = R.drawable.ic_selected_statistic,
+        hasInfoDialog = true,
+    )
+
+    data object Chat : AppDestination(
+        title = R.string.navbar_chat_screen_page_name,
+        route = Screen.Chat::class.qualifiedName!!,
+        icon = R.drawable.ic_chat,
+        selectedIcon = R.drawable.ic_selected_chat,
+        hasInfoDialog = true,
     )
 
     data object Settings : AppDestination(
@@ -35,6 +46,7 @@ sealed class AppDestination(
         route = Screen.Settings::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object PomodoroAddTimer : AppDestination(
@@ -42,6 +54,7 @@ sealed class AppDestination(
         route = Screen.AddPomodoroTimer::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object Task : AppDestination(
@@ -49,6 +62,7 @@ sealed class AppDestination(
         route = Screen.Task::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object SecretMode : AppDestination(
@@ -56,6 +70,7 @@ sealed class AppDestination(
         route = Screen.SecretMode::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object PlanYourDay : AppDestination(
@@ -63,6 +78,7 @@ sealed class AppDestination(
         route = Screen.PlanYourDay::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object Groups : AppDestination(
@@ -70,6 +86,7 @@ sealed class AppDestination(
         route = Screen.Groups::class.qualifiedName!!,
         icon = R.drawable.ic_groups,
         selectedIcon = R.drawable.ic_selected_groups,
+        hasInfoDialog = true,
     )
 
     data object CreateNewGroup : AppDestination(
@@ -77,6 +94,7 @@ sealed class AppDestination(
         route = Screen.CreateNewGroup::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object FilteredTasks : AppDestination(
@@ -84,6 +102,7 @@ sealed class AppDestination(
         route = Screen.FilteredTasks::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object Search : AppDestination(
@@ -91,6 +110,7 @@ sealed class AppDestination(
         route = Screen.Search::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object PomodoroLaunch : AppDestination(
@@ -98,6 +118,7 @@ sealed class AppDestination(
         route = Screen.PomodoroLaunch::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object PomodoroSummary : AppDestination(
@@ -105,6 +126,7 @@ sealed class AppDestination(
         route = Screen.PomodoroSummary::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object GroupDetail : AppDestination(
@@ -112,6 +134,7 @@ sealed class AppDestination(
         route = Screen.GroupDetail::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object GroupSettings : AppDestination(
@@ -119,6 +142,7 @@ sealed class AppDestination(
         route = Screen.GroupSettings::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object InviteMember : AppDestination(
@@ -126,6 +150,7 @@ sealed class AppDestination(
         route = Screen.InviteMember::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object ManageMembers : AppDestination(
@@ -133,6 +158,7 @@ sealed class AppDestination(
         route = Screen.ManageMembers::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object GroupTaskDetail : AppDestination(
@@ -140,6 +166,7 @@ sealed class AppDestination(
         route = Screen.GroupTaskDetail::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object MemberProfile : AppDestination(
@@ -147,6 +174,7 @@ sealed class AppDestination(
         route = Screen.MemberProfile::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object TransferOwnership : AppDestination(
@@ -154,6 +182,7 @@ sealed class AppDestination(
         route = Screen.TransferOwnership::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object Profile : AppDestination(
@@ -161,6 +190,7 @@ sealed class AppDestination(
         route = Screen.Profile::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object ChangePassword : AppDestination(
@@ -182,6 +212,7 @@ sealed class AppDestination(
         route = Screen.Notifications::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object Invitations : AppDestination(
@@ -189,6 +220,7 @@ sealed class AppDestination(
         route = Screen.Invitations::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     data object AlarmSounds : AppDestination(
@@ -196,15 +228,17 @@ sealed class AppDestination(
         route = Screen.AlarmSounds::class.qualifiedName!!,
         icon = null,
         selectedIcon = null,
+        hasInfoDialog = true,
     )
 
     companion object {
-        val bottomBarItems = listOf(Home, Groups, Calendar, Activity)
+        val bottomBarItems = listOf(Home, Groups, Chat, Calendar, Activity)
         val topBarItems =
             listOf(
                 Home,
                 Calendar,
                 Activity,
+                Chat,
                 PomodoroAddTimer,
                 Settings,
                 Task,

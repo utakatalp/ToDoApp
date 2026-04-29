@@ -68,6 +68,8 @@ fun HomeTaskList(
     onMoveTask: (Int, Int) -> Unit,
     onReorderFinished: () -> Unit,
     modifier: Modifier = Modifier,
+    emptyTitleRes: Int = com.todoapp.mobile.R.string.no_tasks_today,
+    emptyDescriptionRes: Int = com.todoapp.mobile.R.string.no_tasks_today_description,
     headerContent: LazyListScope.() -> Unit = {},
 ) {
     val isAnyDragging = reorderableLazyListState.isAnyItemDragging
@@ -112,13 +114,13 @@ fun HomeTaskList(
                     )
                     Spacer(Modifier.height(12.dp))
                     TDText(
-                        text = stringResource(com.todoapp.mobile.R.string.no_tasks_today),
+                        text = stringResource(emptyTitleRes),
                         style = TDTheme.typography.heading3,
                         color = TDTheme.colors.onBackground,
                     )
                     Spacer(Modifier.height(8.dp))
                     TDText(
-                        text = stringResource(com.todoapp.mobile.R.string.no_tasks_today_description),
+                        text = stringResource(emptyDescriptionRes),
                         modifier = Modifier.padding(horizontal = 48.dp),
                         style = TDTheme.typography.heading6,
                         color = TDTheme.colors.onBackground.copy(alpha = 0.6f),

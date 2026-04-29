@@ -30,6 +30,20 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE recurrence != 'NONE'")
     fun observeAllRecurringTasks(): Flow<List<TaskEntity>>
 
+    @Query(
+        """
+        SELECT * FROM tasks
+        WHERE date < :today
+          AND is_completed = 0
+          AND recurrence = 'NONE'
+        ORDER BY date DESC, time_start ASC
+        """,
+    )
+    fun observeOverdueTasks(today: Long): Flow<List<TaskEntity>>
+
+    @Query("UPDATE tasks SET date = date + 1 WHERE id IN (:taskIds)")
+    suspend fun shiftDatesByOneDay(taskIds: List<Long>)
+
     @Query("SELECT * FROM tasks WHERE recurrence = :recurrence ORDER BY date ASC, time_start ASC")
     fun observeByRecurrence(recurrence: String): Flow<List<TaskEntity>>
 

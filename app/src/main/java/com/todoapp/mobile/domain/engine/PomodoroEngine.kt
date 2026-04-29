@@ -22,6 +22,13 @@ interface PomodoroEngine {
     fun updateBannerVisibility(isVisible: Boolean)
 
     fun shutdown()
+
+    /**
+     * Silently clears all engine state (queue, counters, jobs, alarms, service)
+     * without emitting any events. Called from PomodoroViewModel.init to make
+     * sure no leftover state from a previous session sticks around.
+     */
+    fun resetState()
 }
 
 data class PomodoroEngineState(

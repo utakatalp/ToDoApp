@@ -95,4 +95,8 @@ constructor(
     override fun observeByRecurrence(recurrence: String): Flow<List<TaskEntity>> = taskDao.observeByRecurrence(recurrence)
 
     override fun observeAllRecurringTasks(): Flow<List<TaskEntity>> = taskDao.observeAllRecurringTasks()
+
+    override fun observeOverdueTasks(today: Long): Flow<List<TaskEntity>> = taskDao.observeOverdueTasks(today)
+
+    override suspend fun shiftDatesByOneDay(taskIds: List<Long>) = taskDao.shiftDatesByOneDay(taskIds)
 }

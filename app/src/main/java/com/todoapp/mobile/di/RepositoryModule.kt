@@ -2,6 +2,7 @@ package com.todoapp.mobile.di
 
 import com.todoapp.mobile.data.engine.PomodoroEngineImpl
 import com.todoapp.mobile.data.repository.AuthRepositoryImpl
+import com.todoapp.mobile.data.repository.ChatRepositoryImpl
 import com.todoapp.mobile.data.repository.GroupRepositoryImpl
 import com.todoapp.mobile.data.repository.InvitationRepositoryImpl
 import com.todoapp.mobile.data.repository.LanguageRepositoryImpl
@@ -32,6 +33,7 @@ import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSourceImpl
 import com.todoapp.mobile.domain.engine.PomodoroEngine
 import com.todoapp.mobile.domain.repository.AuthRepository
+import com.todoapp.mobile.domain.repository.ChatRepository
 import com.todoapp.mobile.domain.repository.GroupRepository
 import com.todoapp.mobile.domain.repository.InvitationRepository
 import com.todoapp.mobile.domain.repository.LanguageRepository
@@ -156,4 +158,8 @@ abstract class RepositoryModule {
     abstract fun bindActivityPreferences(
         impl: com.todoapp.mobile.data.repository.ActivityPreferencesImpl,
     ): com.todoapp.mobile.domain.repository.ActivityPreferences
+
+    @Binds
+    @Singleton
+    abstract fun bindChatRepository(impl: ChatRepositoryImpl): ChatRepository
 }

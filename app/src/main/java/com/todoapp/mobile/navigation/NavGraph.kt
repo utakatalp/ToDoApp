@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -46,6 +47,9 @@ import com.todoapp.mobile.ui.calendar.CalendarScreen
 import com.todoapp.mobile.ui.calendar.CalendarViewModel
 import com.todoapp.mobile.ui.changepassword.ChangePasswordScreen
 import com.todoapp.mobile.ui.changepassword.ChangePasswordViewModel
+import com.todoapp.mobile.ui.chat.ChatScreen
+import com.todoapp.mobile.ui.chat.ChatViewModel
+import com.todoapp.mobile.ui.common.ScreenInfoDialog
 import com.todoapp.mobile.ui.details.DetailsScreen
 import com.todoapp.mobile.ui.details.DetailsViewModel
 import com.todoapp.mobile.ui.filteredtasks.FilteredTasksScreen
@@ -108,6 +112,7 @@ fun NavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     startDestination: Screen,
+    topBarViewModel: TopBarViewModel,
 ) {
     NavHost(
         navController = navController,
@@ -149,6 +154,16 @@ fun NavGraph(
                 uiEffect = viewModel.effect,
                 onAction = viewModel::onAction,
             )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.calendar_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.calendar_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.calendar_info_bullet_1,
+                    com.todoapp.mobile.R.string.calendar_info_bullet_2,
+                    com.todoapp.mobile.R.string.calendar_info_bullet_3,
+                ),
+            )
         }
         composable<Screen.Activity> {
             val viewModel: ActivityViewModel = hiltViewModel()
@@ -157,6 +172,38 @@ fun NavGraph(
             ActivityScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
+            )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.activity_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.activity_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.activity_info_bullet_1,
+                    com.todoapp.mobile.R.string.activity_info_bullet_2,
+                    com.todoapp.mobile.R.string.activity_info_bullet_3,
+                ),
+            )
+        }
+
+        composable<Screen.Chat> {
+            val viewModel: ChatViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            NavigationEffectController(viewModel.navEffect)
+            ChatScreen(
+                uiState = uiState,
+                uiEffect = viewModel.uiEffect,
+                onAction = viewModel::onAction,
+            )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.chat_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.chat_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.chat_info_bullet_1,
+                    com.todoapp.mobile.R.string.chat_info_bullet_2,
+                    com.todoapp.mobile.R.string.chat_info_bullet_3,
+                    com.todoapp.mobile.R.string.chat_info_bullet_4,
+                ),
             )
         }
 
@@ -197,6 +244,16 @@ fun NavGraph(
                 onCheckPermissions = { viewModel.checkPermission(context) },
                 onDismissPermission = viewModel::dismissPermission,
             )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.settings_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.settings_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.settings_info_bullet_1,
+                    com.todoapp.mobile.R.string.settings_info_bullet_2,
+                    com.todoapp.mobile.R.string.settings_info_bullet_3,
+                ),
+            )
         }
 
         composable<Screen.SecretMode> {
@@ -207,6 +264,16 @@ fun NavGraph(
                 uiState = uiState,
                 onAction = viewModel::onAction,
                 uiEffect = viewModel.uiEffect,
+            )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.secret_mode_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.secret_mode_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.secret_mode_info_bullet_1,
+                    com.todoapp.mobile.R.string.secret_mode_info_bullet_2,
+                    com.todoapp.mobile.R.string.secret_mode_info_bullet_3,
+                ),
             )
         }
 
@@ -219,13 +286,31 @@ fun NavGraph(
                 onAction = viewModel::onAction,
                 onNavigateBack = { navController.popBackStack() },
             )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.plan_your_day_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.plan_your_day_info_description,
+            )
         }
 
         composable<Screen.PomodoroLaunch> {
             val viewModel: PomodoroLaunchViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             NavigationEffectController(viewModel.navEffect)
-            PomodoroLaunchScreen(uiState = uiState, onAction = viewModel::onAction)
+            PomodoroLaunchScreen(
+                uiState = uiState,
+                onAction = viewModel::onAction,
+            )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.pomodoro_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.pomodoro_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.pomodoro_info_bullet_1,
+                    com.todoapp.mobile.R.string.pomodoro_info_bullet_2,
+                    com.todoapp.mobile.R.string.pomodoro_info_bullet_3,
+                ),
+            )
         }
 
         composable<Screen.AddPomodoroTimer> {
@@ -235,6 +320,16 @@ fun NavGraph(
             AddPomodoroTimerScreen(
                 uiState,
                 viewModel::onAction,
+            )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.add_timer_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.add_timer_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.add_timer_info_bullet_1,
+                    com.todoapp.mobile.R.string.add_timer_info_bullet_2,
+                    com.todoapp.mobile.R.string.add_timer_info_bullet_3,
+                ),
             )
         }
         composable<Screen.Pomodoro> {
@@ -258,6 +353,16 @@ fun NavGraph(
                 uiState,
                 uiEffect,
                 viewModel::onAction,
+            )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.task_detail_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.task_detail_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.task_detail_info_bullet_1,
+                    com.todoapp.mobile.R.string.task_detail_info_bullet_2,
+                    com.todoapp.mobile.R.string.task_detail_info_bullet_3,
+                ),
             )
         }
         composable<Screen.Register> {
@@ -310,6 +415,15 @@ fun NavGraph(
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             NavigationEffectController(viewModel.navEffect)
             PomodoroSummaryScreen(uiState = uiState, onAction = viewModel::onAction)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.pomodoro_summary_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.pomodoro_summary_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.pomodoro_summary_info_bullet_1,
+                    com.todoapp.mobile.R.string.pomodoro_summary_info_bullet_2,
+                ),
+            )
         }
 
         composable<Screen.CreateNewGroup> {
@@ -317,6 +431,16 @@ fun NavGraph(
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             NavigationEffectController(viewModel.navEffect)
             CreateNewGroupScreen(uiState, viewModel::onAction)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.create_group_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.create_group_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.create_group_info_bullet_1,
+                    com.todoapp.mobile.R.string.create_group_info_bullet_2,
+                    com.todoapp.mobile.R.string.create_group_info_bullet_3,
+                ),
+            )
         }
 
         composable<Screen.Groups> {
@@ -333,6 +457,16 @@ fun NavGraph(
                 }
             }
             GroupScreen(uiState, viewModel::onAction)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.groups_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.groups_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.groups_info_bullet_1,
+                    com.todoapp.mobile.R.string.groups_info_bullet_2,
+                    com.todoapp.mobile.R.string.groups_info_bullet_3,
+                ),
+            )
         }
         composable<Screen.FilteredTasks> {
             val viewModel: FilteredTasksViewModel = hiltViewModel()
@@ -342,6 +476,15 @@ fun NavGraph(
                 uiState = uiState,
                 uiEffect = viewModel.uiEffect,
                 onAction = viewModel::onAction,
+            )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.filtered_tasks_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.filtered_tasks_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.filtered_tasks_info_bullet_1,
+                    com.todoapp.mobile.R.string.filtered_tasks_info_bullet_2,
+                ),
             )
         }
 
@@ -359,12 +502,31 @@ fun NavGraph(
                 uiEffect = viewModel.uiEffect,
                 onAction = viewModel::onAction,
             )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.search_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.search_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.search_info_bullet_1,
+                    com.todoapp.mobile.R.string.search_info_bullet_2,
+                    com.todoapp.mobile.R.string.search_info_bullet_3,
+                ),
+            )
         }
         composable<Screen.Profile> {
             val viewModel: com.todoapp.mobile.ui.profile.ProfileViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
             com.todoapp.mobile.ui.profile
                 .ProfileScreen(viewModel = viewModel)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.profile_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.profile_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.profile_info_bullet_1,
+                    com.todoapp.mobile.R.string.profile_info_bullet_2,
+                ),
+            )
         }
 
         composable<Screen.Notifications> {
@@ -375,6 +537,15 @@ fun NavGraph(
                 uiState = uiState,
                 uiEffect = viewModel.effect,
                 onAction = viewModel::onAction,
+            )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.notifications_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.notifications_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.notifications_info_bullet_1,
+                    com.todoapp.mobile.R.string.notifications_info_bullet_2,
+                ),
             )
         }
 
@@ -387,6 +558,15 @@ fun NavGraph(
                 uiEffect = viewModel.effect,
                 onAction = viewModel::onAction,
             )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.invitations_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.invitations_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.invitations_info_bullet_1,
+                    com.todoapp.mobile.R.string.invitations_info_bullet_2,
+                ),
+            )
         }
 
         composable<Screen.AlarmSounds> {
@@ -396,6 +576,15 @@ fun NavGraph(
             com.todoapp.mobile.ui.alarmsounds.AlarmSoundsScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction,
+            )
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.alarm_sounds_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.alarm_sounds_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.alarm_sounds_info_bullet_1,
+                    com.todoapp.mobile.R.string.alarm_sounds_info_bullet_2,
+                ),
             )
         }
 
@@ -425,40 +614,105 @@ fun NavGraph(
             val viewModel: GroupDetailViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
             GroupDetailScreen(viewModel = viewModel)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.group_detail_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.group_detail_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.group_detail_info_bullet_1,
+                    com.todoapp.mobile.R.string.group_detail_info_bullet_2,
+                    com.todoapp.mobile.R.string.group_detail_info_bullet_3,
+                ),
+            )
         }
 
         composable<Screen.GroupSettings> {
             val viewModel: GroupSettingsViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
             GroupSettingsScreen(viewModel = viewModel)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.group_settings_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.group_settings_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.group_settings_info_bullet_1,
+                    com.todoapp.mobile.R.string.group_settings_info_bullet_2,
+                    com.todoapp.mobile.R.string.group_settings_info_bullet_3,
+                ),
+            )
         }
 
         composable<Screen.InviteMember> {
             val viewModel: InviteMemberViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
             InviteMemberScreen(viewModel = viewModel)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.invite_member_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.invite_member_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.invite_member_info_bullet_1,
+                    com.todoapp.mobile.R.string.invite_member_info_bullet_2,
+                ),
+            )
         }
 
         composable<Screen.ManageMembers> {
             val viewModel: ManageMembersViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
             ManageMembersScreen(viewModel = viewModel)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.manage_members_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.manage_members_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.manage_members_info_bullet_1,
+                    com.todoapp.mobile.R.string.manage_members_info_bullet_2,
+                ),
+            )
         }
 
         composable<Screen.MemberProfile> {
             val viewModel: MemberProfileViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
             MemberProfileScreen(viewModel = viewModel)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.member_profile_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.member_profile_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.member_profile_info_bullet_1,
+                    com.todoapp.mobile.R.string.member_profile_info_bullet_2,
+                ),
+            )
         }
 
         composable<Screen.GroupTaskDetail> {
             GroupTaskDetailScreen()
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.group_task_detail_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.group_task_detail_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.group_task_detail_info_bullet_1,
+                    com.todoapp.mobile.R.string.group_task_detail_info_bullet_2,
+                ),
+            )
         }
 
         composable<Screen.TransferOwnership> {
             val viewModel: TransferOwnershipViewModel = hiltViewModel()
             NavigationEffectController(viewModel.navEffect)
             TransferOwnershipScreen(viewModel = viewModel)
+            ScreenInfoDialog(
+                infoClicks = topBarViewModel.infoClicks,
+                titleRes = com.todoapp.mobile.R.string.transfer_ownership_info_title,
+                descriptionRes = com.todoapp.mobile.R.string.transfer_ownership_info_description,
+                bulletPointRes = listOf(
+                    com.todoapp.mobile.R.string.transfer_ownership_info_bullet_1,
+                    com.todoapp.mobile.R.string.transfer_ownership_info_bullet_2,
+                ),
+            )
         }
     }
 }
@@ -486,7 +740,8 @@ fun ToDoApp() {
         modifier =
         Modifier
             .fillMaxSize()
-            .background(TDTheme.colors.background),
+            .background(TDTheme.colors.background)
+            .imePadding(),
         bottomBar = { if (isPortrait) TDBottomBar() },
         topBar = {
             Column {
@@ -515,6 +770,7 @@ fun ToDoApp() {
                     .fillMaxSize()
                     .weight(1f),
                 startDestination = startDestination,
+                topBarViewModel = topBarViewModel,
             )
         }
     }

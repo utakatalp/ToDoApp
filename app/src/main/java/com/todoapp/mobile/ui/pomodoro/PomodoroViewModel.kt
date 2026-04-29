@@ -63,6 +63,11 @@ constructor(
     }
 
     init {
+        // Force a clean engine on every Pomodoro screen mount. Without this,
+        // any leftover state from a prior session (queue, counters, even a
+        // pending Navigate(Summary)) can leak into the new run via the
+        // singleton engine, sending the user straight to Summary.
+        engine.resetState()
         initializeEngineIfNeeded()
         observeEngineEvents()
         observeEngineState()
@@ -113,6 +118,7 @@ constructor(
                 currentSessionIndex = 0
                 engine.setSessionQueue(queue)
                 engine.prepare()
+                engine.start()
                 _uiState.update {
                     it.copy(
                         totalSessions = sessionQueue.size,

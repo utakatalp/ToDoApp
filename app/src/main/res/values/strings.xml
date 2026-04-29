@@ -27,6 +27,11 @@
     <string name="home_screen_task_pending_text">Task Pending</string>
     <string name="no_tasks_today">No tasks today</string>
     <string name="no_tasks_today_description">Create a new task to get started</string>
+    <string name="no_recurring_daily_title">No daily recurring tasks</string>
+    <string name="no_recurring_weekly_title">No weekly recurring tasks</string>
+    <string name="no_recurring_monthly_title">No monthly recurring tasks</string>
+    <string name="no_recurring_yearly_title">No yearly recurring tasks</string>
+    <string name="no_recurring_description">You don\'t have a task at this frequency yet</string>
     <string name="calendar_no_tasks_for_day">Nothing scheduled</string>
     <string name="calendar_no_tasks_for_day_description">No personal tasks or group deadlines on this day</string>
     <string name="deadline_in_hours_minutes">in %1$dh %2$dm</string>
@@ -57,7 +62,6 @@
     <string name="status_overdue">Overdue</string>
     <string name="task_complete">Task Done</string>
     <string name="task_pending">Task Pending</string>
-    <string name="tasks_today">Tasks Today</string>
     <string name="add_new_task">Add New Task</string>
     <string name="task_details">Task Details</string>
     <string name="edit_task_details">Edit Task Details</string>
@@ -136,6 +140,22 @@
     <string name="activity_streak_none">No streak yet — complete a task today</string>
     <string name="activity_best_day">Most productive: %1$s · %2$d tasks</string>
     <string name="activity_category_breakdown_title">Where you focused this week</string>
+    <string name="activity_heatmap_title">Last 6 months</string>
+    <string name="activity_heatmap_legend_less">Less</string>
+    <string name="activity_heatmap_legend_more">More</string>
+    <string name="activity_month_summary">%1$d done · %2$d pending this month</string>
+    <string name="activity_trend_up_month">↑ %1$d%% vs last month</string>
+    <string name="activity_trend_down_month">↓ %1$d%% vs last month</string>
+    <string name="activity_trend_flat_month">Same as last month</string>
+    <string name="activity_best_day_in_month">Most productive: %1$s · %2$d tasks</string>
+    <string name="activity_heatmap_month_title">%1$s activity</string>
+    <string name="activity_year_strip_title">Last 12 months</string>
+    <string name="activity_monthly_chart_title">Tasks by week</string>
+    <string name="bar_label_week">W%1$d</string>
+    <string name="activity_heatmap_tooltip">%1$s · %2$d</string>
+    <string name="activity_drill_in_week_title">Week %1$d</string>
+    <string name="activity_drill_in_chart_title">Daily breakdown</string>
+    <string name="activity_drill_in_back">Back</string>
     <string name="day_monday">Monday</string>
     <string name="day_tuesday">Tuesday</string>
     <string name="day_wednesday">Wednesday</string>
@@ -169,6 +189,7 @@
     <string name="start">Start</string>
     <string name="skip">Skip</string>
     <string name="advanced_settings">Advanced Settings</string>
+    <string name="details_label">Details</string>
     <string name="retry">Retry</string>
     <string name="secret_task">Secret Task</string>
     <string name="authentication_failed">Authentication Failed</string>
@@ -510,6 +531,151 @@
     <string name="notif_task_due_soon_body">%1$s is due soon in %2$s</string>
     <string name="pomodoro_notification_channel_name">Pomodoro Live Timer</string>
     <string name="pomodoro_notification_channel_description">Live countdown for the active Pomodoro session</string>
+    <string name="session_expired_dialog_message">Your session has expired. Please log in again.</string>
+    <string name="notification_channel_tasks_name">Tasks</string>
+    <string name="notification_channel_tasks_description">Used for task reminders and updates</string>
+    <string name="task_all_day_label">All Day</string>
+    <string name="deadline_all_day">All day</string>
+    <string name="zone_morning">Before noon</string>
+    <string name="zone_afternoon">Afternoon</string>
+    <string name="zone_evening">Evening</string>
+    <string name="info">Info</string>
+    <string name="got_it">Got it</string>
+    <string name="plan_your_day_info_title">Plan Your Day</string>
+    <string name="plan_your_day_info_description">Pick a time and DoneBot will notify you when it\'s time to plan your day.</string>
+    <string name="pomodoro_info_title">Pomodoro Technique</string>
+    <string name="pomodoro_info_description">Alternate focused work and short breaks to stay sharp and avoid burnout. Pick the durations and session count that suit you.</string>
+    <string name="pomodoro_info_bullet_1">Focus: a stretch of distraction-free work</string>
+    <string name="pomodoro_info_bullet_2">Short break: a quick reset between sessions</string>
+    <string name="pomodoro_info_bullet_3">Long break: a longer rest after a few rounds</string>
+    <string name="chat_info_title">Talk to DoneBot</string>
+    <string name="chat_info_description">DoneBot reads your tasks and can answer questions, create new ones, mark them done. Secret tasks stay invisible — they\'re yours.</string>
+    <string name="chat_info_bullet_1">Ask: \"What\'s due today?\" or \"How was my week?\"</string>
+    <string name="chat_info_bullet_2">Create: \"Add a meeting tomorrow at 3pm\"</string>
+    <string name="chat_info_bullet_3">Limit: secret tasks are invisible to DoneBot</string>
+    <string name="chat_info_bullet_4">Scope: only answers questions about your tasks and groups</string>
+
+    <string name="calendar_info_title">Calendar View</string>
+    <string name="calendar_info_description">See your tasks laid out by day. Tap any date to jump to its tasks; long-press a task to edit it.</string>
+    <string name="calendar_info_bullet_1">Dots under a day mean tasks are scheduled</string>
+    <string name="calendar_info_bullet_2">Switch months by swiping left or right</string>
+    <string name="calendar_info_bullet_3">Recurring tasks appear on every matching day</string>
+
+    <string name="activity_info_title">Your Activity</string>
+    <string name="activity_info_description">Track how your week and month are going. Charts show what you finished, what\'s pending, and your focus streak.</string>
+    <string name="activity_info_bullet_1">Completed vs. pending breakdown</string>
+    <string name="activity_info_bullet_2">Pomodoro focus time totals</string>
+    <string name="activity_info_bullet_3">Streaks reset at midnight</string>
+
+    <string name="settings_info_title">Settings</string>
+    <string name="settings_info_description">Tune the app to fit you — language, theme, notifications, secret mode, and account options live here.</string>
+    <string name="settings_info_bullet_1">Toggle dark mode and language</string>
+    <string name="settings_info_bullet_2">Manage notification permissions</string>
+    <string name="settings_info_bullet_3">Sign out or delete your account</string>
+
+    <string name="add_timer_info_title">Add a Pomodoro Timer</string>
+    <string name="add_timer_info_description">Build a custom timer: pick focus length, break lengths, and how many rounds you want. Saved timers show on the launch screen.</string>
+    <string name="add_timer_info_bullet_1">Focus duration sets your work block</string>
+    <string name="add_timer_info_bullet_2">Long break kicks in after the chosen round</string>
+    <string name="add_timer_info_bullet_3">You can edit or delete a timer anytime</string>
+
+    <string name="task_detail_info_title">Task Details</string>
+    <string name="task_detail_info_description">Everything about a single task — title, notes, due date, recurrence, alarm, and category. Edit any field to update on the fly.</string>
+    <string name="task_detail_info_bullet_1">Set a due date to see it on the calendar</string>
+    <string name="task_detail_info_bullet_2">Recurrence creates the next instance automatically</string>
+    <string name="task_detail_info_bullet_3">Toggle Done to mark complete</string>
+
+    <string name="secret_mode_info_title">Secret Mode</string>
+    <string name="secret_mode_info_description">Keep some tasks completely private. Secret tasks need a passcode and never appear in DoneBot, search, or shared activity.</string>
+    <string name="secret_mode_info_bullet_1">Tasks marked secret are hidden until unlocked</string>
+    <string name="secret_mode_info_bullet_2">DoneBot cannot read or modify them</string>
+    <string name="secret_mode_info_bullet_3">Forget the code and the data is unrecoverable</string>
+
+    <string name="groups_info_title">Groups</string>
+    <string name="groups_info_description">Share tasks with family, friends, or teammates. Create a group, invite members, and assign work together.</string>
+    <string name="groups_info_bullet_1">Anyone in the group can see and complete shared tasks</string>
+    <string name="groups_info_bullet_2">Owners manage members and roles</string>
+    <string name="groups_info_bullet_3">Leave a group anytime from its settings</string>
+
+    <string name="create_group_info_title">Create a New Group</string>
+    <string name="create_group_info_description">Give your group a name and optional avatar. You can invite members right after, or do it later from the group screen.</string>
+    <string name="create_group_info_bullet_1">Pick a name everyone will recognize</string>
+    <string name="create_group_info_bullet_2">An avatar makes it easier to spot</string>
+    <string name="create_group_info_bullet_3">You become the owner by default</string>
+
+    <string name="filtered_tasks_info_title">Filtered Tasks</string>
+    <string name="filtered_tasks_info_description">A focused slice of your tasks based on the filter you chose. Tap any to open, swipe to complete.</string>
+    <string name="filtered_tasks_info_bullet_1">Filters can stack: status + category + date</string>
+    <string name="filtered_tasks_info_bullet_2">Empty list means nothing matches</string>
+
+    <string name="search_info_title">Search</string>
+    <string name="search_info_description">Find any task by typing a word from its title or notes. Results update as you type.</string>
+    <string name="search_info_bullet_1">Search ignores case and accents</string>
+    <string name="search_info_bullet_2">Tap a result to open it directly</string>
+    <string name="search_info_bullet_3">Secret tasks never show up here</string>
+
+    <string name="pomodoro_summary_info_title">Pomodoro Summary</string>
+    <string name="pomodoro_summary_info_description">A recap of the session you just finished — focus time, breaks, and rounds completed. Use it to spot patterns over time.</string>
+    <string name="pomodoro_summary_info_bullet_1">Total focus time is added to your activity</string>
+    <string name="pomodoro_summary_info_bullet_2">Skipped rounds aren\'t counted</string>
+
+    <string name="group_detail_info_title">Group Tasks</string>
+    <string name="group_detail_info_description">All shared tasks for this group, plus its members. Anyone in the group can add, edit, or complete them.</string>
+    <string name="group_detail_info_bullet_1">Tap Members to see who\'s in the group</string>
+    <string name="group_detail_info_bullet_2">Use the gear icon to open settings</string>
+    <string name="group_detail_info_bullet_3">Roles show next to each member</string>
+
+    <string name="group_settings_info_title">Group Settings</string>
+    <string name="group_settings_info_description">Rename the group, change its avatar, manage members, or transfer ownership. Some actions are owner-only.</string>
+    <string name="group_settings_info_bullet_1">Owners can invite or remove members</string>
+    <string name="group_settings_info_bullet_2">Members can leave anytime</string>
+    <string name="group_settings_info_bullet_3">Deleting a group removes its tasks for everyone</string>
+
+    <string name="invite_member_info_title">Invite a Member</string>
+    <string name="invite_member_info_description">Send an invite by email. The recipient gets a link to join your group; they\'ll need a DoneBot account.</string>
+    <string name="invite_member_info_bullet_1">Pending invites can be canceled from group settings</string>
+    <string name="invite_member_info_bullet_2">Invitees join as members; promote them later</string>
+
+    <string name="manage_members_info_title">Manage Members</string>
+    <string name="manage_members_info_description">See everyone in the group, change their roles, or remove them. Owner privileges are required for changes.</string>
+    <string name="manage_members_info_bullet_1">Promote a member to admin to share moderation</string>
+    <string name="manage_members_info_bullet_2">Removing a member revokes their access immediately</string>
+
+    <string name="group_task_detail_info_title">Shared Task Details</string>
+    <string name="group_task_detail_info_description">Like a personal task, but visible to the whole group. Edits and completions sync to everyone.</string>
+    <string name="group_task_detail_info_bullet_1">See who marked it done</string>
+    <string name="group_task_detail_info_bullet_2">Comments and changes are shared in real time</string>
+
+    <string name="member_profile_info_title">Member Profile</string>
+    <string name="member_profile_info_description">A read-only view of a group member — their name, avatar, role, and shared activity within this group.</string>
+    <string name="member_profile_info_bullet_1">Tap to message or assign tasks (when allowed)</string>
+    <string name="member_profile_info_bullet_2">Personal task data stays private</string>
+
+    <string name="transfer_ownership_info_title">Transfer Ownership</string>
+    <string name="transfer_ownership_info_description">Hand the group over to another member. They get full owner rights; you become a regular member.</string>
+    <string name="transfer_ownership_info_bullet_1">Only one owner exists per group</string>
+    <string name="transfer_ownership_info_bullet_2">This action cannot be undone by you alone</string>
+
+    <string name="profile_info_title">Your Profile</string>
+    <string name="profile_info_description">Update your display name, avatar, and email preferences. Changes apply across DoneBot immediately.</string>
+    <string name="profile_info_bullet_1">Avatar shows on tasks and groups</string>
+    <string name="profile_info_bullet_2">Change your password from Settings</string>
+
+    <string name="notifications_info_title">Notifications</string>
+    <string name="notifications_info_description">Recent alerts from DoneBot — task reminders, group invites, and shared activity. Tap one to jump to its source.</string>
+    <string name="notifications_info_bullet_1">Unread items show a red dot</string>
+    <string name="notifications_info_bullet_2">Cleared items disappear after a while</string>
+
+    <string name="invitations_info_title">Invitations</string>
+    <string name="invitations_info_description">Pending group invites waiting on your decision. Accept to join, decline to dismiss.</string>
+    <string name="invitations_info_bullet_1">Accepting adds you as a member right away</string>
+    <string name="invitations_info_bullet_2">Declined invites can be re-sent by the inviter</string>
+
+    <string name="alarm_sounds_info_title">Alarm Sounds</string>
+    <string name="alarm_sounds_info_description">Choose the sound that plays when a task alarm fires. Tap one to preview before you set it.</string>
+    <string name="alarm_sounds_info_bullet_1">Selected sound applies to all task alarms</string>
+    <string name="alarm_sounds_info_bullet_2">System sounds use your device volume</string>
+
     <string name="pomodoro_notification_session_progress">Session %1$d of %2$d</string>
     <string name="pomodoro_notification_action_pause">Pause</string>
     <string name="pomodoro_notification_action_resume">Resume</string>
@@ -549,8 +715,73 @@
     <string name="filter_monthly">Monthly</string>
     <string name="filter_yearly">Yearly</string>
 
-    <string name="section_daily_tasks">Daily Tasks</string>
-    <string name="section_weekly_tasks">Weekly Tasks</string>
-    <string name="section_monthly_tasks">Monthly Tasks</string>
-    <string name="section_yearly_tasks">Yearly Tasks</string>
+
+    <!-- Chat (DoneBot AI assistant) -->
+    <string name="chat_title">DoneBot</string>
+    <string name="navbar_chat_screen_page_name">Chat</string>
+    <string name="bottombar_chat_tab_label">DoneBot</string>
+    <string name="chat_input_hint">Ask DoneBot…</string>
+    <string name="chat_send_button">Send</string>
+    <string name="chat_clear_history">Clear history</string>
+    <string name="chat_empty_title">Hi, I\'m DoneBot</string>
+    <string name="chat_empty_subtitle">Ask me what\'s on your plate, what\'s overdue, or how your week is going.</string>
+    <string name="chat_thinking">DoneBot is thinking…</string>
+    <string name="chat_error_generic">Something went wrong. Please try again.</string>
+    <string name="chat_error_blocked">That response was blocked. Try rephrasing.</string>
+    <string name="chat_error_offline">You\'re offline. Reconnect and try again.</string>
+    <string name="chat_error_rate_limited">Slow down — DoneBot\'s quota is full for now. Wait a minute and try again.</string>
+    <string name="chat_retry">Retry</string>
+    <string name="chat_dismiss">Dismiss</string>
+    <string name="chat_loop_overflow">I got stuck looking things up. Try asking again in a different way.</string>
+    <string name="chat_error_rate_limited_cooldown_format">Try again in %1$ds…</string>
+    <string name="chat_char_count_format">%1$d/%2$d</string>
+    <string name="chat_tool_busy_generic">Looking up your tasks…</string>
+    <string name="chat_action_copy">Copy text</string>
+    <string name="chat_action_try_again">Try again</string>
+    <string name="chat_action_copied_toast">Copied</string>
+    <string name="chat_persona_subtitle">Productivity assistant</string>
+    <string name="chat_suggested_today">What\'s due today?</string>
+    <string name="chat_suggested_overdue">Anything overdue?</string>
+    <string name="chat_suggested_progress">How am I doing this week?</string>
+    <string name="chat_suggested_planday">Plan my day</string>
+    <string name="chat_clear_confirm_title">Clear conversation?</string>
+    <string name="chat_clear_confirm_message">This deletes your chat history with DoneBot but does not affect your tasks.</string>
+    <string name="chat_clear_confirm_button">Clear</string>
+    <string name="chat_action_clear_history">Clear conversation</string>
+    <string name="chat_send_button_description">Send message</string>
+    <string name="chat_scroll_to_bottom">Scroll to latest message</string>
+    <string name="chat_local_today_count_format">You have %1$d task(s) today.</string>
+    <string name="chat_local_today_empty">You have no tasks today. Want to add one?</string>
+    <string name="chat_local_overdue_count_format">You have %1$d overdue task(s).</string>
+    <string name="chat_local_overdue_empty">Nothing overdue — nice work!</string>
+    <string name="chat_local_week_count_format">You\'ve completed %1$d task(s) this week.</string>
+    <string name="chat_local_greeting">Hi! What\'s on your mind today?</string>
+    <string name="chat_system_instruction">You are DoneBot, a productivity assistant inside the user\'s to-do app. Your ONLY purpose is helping the user with their tasks and groups in this app. Keep replies short, friendly, and actionable.\n\nEvery user message starts with a `[Context: ...]` block with today\'s date, today\'s tasks, tomorrow\'s task count, overdue count, and this week\'s completion count. Treat this block as the source of truth for trend/count questions — do NOT call getCurrentDate, getTodaysTasks, getOverdueTasks, getTasksForDateRange (for tomorrow), or getCompletedTasksThisWeek when the [Context] block already has the answer. The most recent [Context] block always wins.\n\nTools:\n• Read: getTodaysTasks, getOverdueTasks, getTasksForDateRange, getGroups, getCompletedTasksThisWeek.\n• Write: createTask, updateTask, deleteTask, setTaskCompletion, setTaskSecret.\n• Helper: getCurrentDate — call only if you need a date the [Context] block does not cover.\n\nRules:\n• Always confirm mutations by id and title in your reply (e.g. \"Created \'Buy groceries\' for 2026-05-01\", \"Deleted task 42\").\n• Never mutate without an id; look it up via a read tool first if needed.\n• Never invent task details. Group tasks are not editable from chat — only personal tasks.\n\nScope (STRICT):\n• You MAY answer ONLY: questions about the user\'s tasks, groups, productivity insights inside this app, or how to use the app\'s task/group features. Brief greetings (hi, hello, thanks, merhaba, selam, teşekkürler) are allowed — reply in 1-2 warm words.\n• You MUST refuse everything else — including general knowledge, code, programming, math, news, weather, jokes, stories, opinions, advice on non-task subjects, other apps or services, anything about yourself beyond \"I\'m DoneBot, a productivity assistant\", and any roleplay or persona requests.\n• When refusing, ALWAYS use one of these exact templates (match the user\'s language):\n   - English: \"Sorry, I can only help with your tasks and groups in this app. Try asking what\'s on your plate today, or to add/edit a task.\"\n   - Turkish: \"Üzgünüm, sadece bu uygulamadaki görevlerin ve grupların için yardımcı olabilirim. Bugün neyin var, ya da bir görev eklemek/düzenlemek ister misin?\"\n• Never explain why you refused. Never list what you can\'t do. No \"as an AI\" disclaimers. No alternative answers, no compromises like \"but here\'s a quick…\".</string>
+    <!-- Home — greeting (icon + clock variant) -->
+    <string name="home_greeting_morning_format">Good morning, %1$s</string>
+    <string name="home_greeting_midday_format">Good afternoon, %1$s</string>
+    <string name="home_greeting_evening_format">Good evening, %1$s</string>
+    <string name="home_greeting_morning_no_name">Good morning</string>
+    <string name="home_greeting_midday_no_name">Good afternoon</string>
+    <string name="home_greeting_evening_no_name">Good evening</string>
+    <string name="home_greeting_icon_morning_cd">Morning</string>
+    <string name="home_greeting_icon_midday_cd">Midday</string>
+    <string name="home_greeting_icon_evening_cd">Evening</string>
+    <!-- Home — section tab row -->
+    <string name="home_section_tab_today">Today</string>
+    <string name="home_section_tab_recurring">Recurring</string>
+    <string name="home_section_tab_selected_cd">selected</string>
+    <string name="home_section_tab_unselected_cd">not selected</string>
+    <!-- Home — suggest card (kept) -->
+    <string name="donebot_suggest_morning_title">Ready for today?</string>
+    <string name="donebot_suggest_morning_body_format">You finished %1$d tasks yesterday. Want to plan today together?</string>
+    <string name="donebot_suggest_morning_cta">See suggestions</string>
+    <string name="donebot_suggest_evening_title">Time to wrap up</string>
+    <string name="donebot_suggest_evening_body_format">%1$d of %2$d done. What about the remaining %3$d?</string>
+    <string name="donebot_suggest_evening_cta_primary">Move to tomorrow</string>
+    <string name="donebot_suggest_evening_cta_secondary">Leave as is</string>
+    <string name="donebot_suggest_evening_all_done_title">All done! 🎉</string>
+    <string name="donebot_suggest_evening_all_done_body_format">You completed all %1$d tasks for today. Great work!</string>
+    <string name="donebot_suggest_evening_all_done_cta">Got it</string>
+    <string name="donebot_suggest_dismiss_cd">Dismiss</string>
 </resources>

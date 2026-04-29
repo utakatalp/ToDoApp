@@ -26,12 +26,18 @@ data class Task(
     val category: TaskCategory = TaskCategory.PERSONAL,
     val customCategoryName: String? = null,
     val recurrence: Recurrence = Recurrence.NONE,
+    /**
+     * When true, the task spans the whole day; timeStart/timeEnd are placeholders
+     * (00:00 / 23:59) and notifications fire at the user's default morning hour.
+     */
+    val isAllDay: Boolean = false,
 )
 
 fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem = AlarmItem(
     time = LocalDateTime.of(date, timeStart.minusMinutes(remindBeforeMinutes)),
     message = title,
     minutesBefore = remindBeforeMinutes,
+    taskId = id,
 )
 
 fun Task.toCreateTaskRequestDto(

@@ -20,6 +20,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,65 +95,6 @@ internal fun AddTaskSheet(
             supportingText = formState.titleErrorRes?.let { stringResource(it) },
         )
         Spacer(Modifier.height(12.dp))
-        TDText(
-            text = stringResource(com.todoapp.mobile.R.string.category_label),
-            style = TDTheme.typography.heading6,
-            color = TDTheme.colors.onBackground,
-        )
-        Spacer(Modifier.height(8.dp))
-        TDCategoryPicker(
-            selectedKey = formState.selectedCategory.name,
-            options = categoryOptions(),
-            onSelected = { key ->
-                onAction(TaskFormUiAction.CategoryChange(TaskCategory.valueOf(key)))
-            },
-        )
-        if (formState.selectedCategory == TaskCategory.OTHER) {
-            Spacer(Modifier.height(8.dp))
-            TDCompactOutlinedTextField(
-                label = stringResource(com.todoapp.mobile.R.string.category_other_hint),
-                value = formState.customCategoryName,
-                onValueChange = { onAction(TaskFormUiAction.CustomCategoryNameChange(it)) },
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-        TDText(
-            text = stringResource(com.todoapp.mobile.R.string.recurrence_label),
-            style = TDTheme.typography.heading6,
-            color = TDTheme.colors.onBackground,
-        )
-        Spacer(Modifier.height(8.dp))
-        TDRecurrencePicker(
-            selectedKey = formState.selectedRecurrence.name,
-            options = recurrenceOptions(),
-            onSelected = { key ->
-                onAction(TaskFormUiAction.RecurrenceChange(Recurrence.valueOf(key)))
-            },
-        )
-        if (formState.selectedRecurrence != Recurrence.NONE) {
-            Spacer(Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(TDTheme.colors.background, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_warning),
-                    contentDescription = null,
-                    tint = TDTheme.colors.orange,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                TDText(
-                    text = recurrenceExplainer(formState.selectedRecurrence),
-                    style = TDTheme.typography.subheading1,
-                    color = TDTheme.colors.orange,
-                )
-            }
-        }
-        Spacer(Modifier.height(12.dp))
         TDDatePickerDialog(
             selectedDate = formState.dialogSelectedDate,
             onDateSelect = { onAction(TaskFormUiAction.DateSelect(it)) },
@@ -160,46 +103,87 @@ internal fun AddTaskSheet(
             supportingText = formState.dateErrorRes?.let { stringResource(it) },
         )
         Spacer(Modifier.height(12.dp))
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1f)) {
-                TDPickerField(
-                    title = stringResource(com.todoapp.mobile.R.string.set_time),
-                    value =
-                    formState.taskTimeStart?.format(timeFormatter)
-                        ?: stringResource(com.todoapp.mobile.R.string.starts),
-                    onClick = { showStartTimePicker = true },
-                    isError = formState.timeErrorRes != null,
-                    supportingText = formState.timeErrorRes?.let { stringResource(it) },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_clock),
-                            tint = TDTheme.colors.onBackground,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    },
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                TDPickerField(
-                    title = "",
-                    value =
-                    formState.taskTimeEnd?.format(timeFormatter)
-                        ?: stringResource(com.todoapp.mobile.R.string.ends),
-                    onClick = { showEndTimePicker = true },
-                    isError = formState.timeErrorRes != null,
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_clock),
-                            tint = TDTheme.colors.onBackground,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    },
-                )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_clock),
+                tint = TDTheme.colors.onBackground,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+            )
+            Spacer(Modifier.width(8.dp))
+            TDText(
+                text = stringResource(com.todoapp.mobile.R.string.task_all_day_label),
+                style = TDTheme.typography.regularTextStyle,
+                color = TDTheme.colors.onBackground,
+                modifier = Modifier.weight(1f),
+            )
+            Switch(
+                checked = formState.isAllDay,
+                onCheckedChange = { onAction(TaskFormUiAction.AllDayChange(it)) },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = TDTheme.colors.purple,
+                    checkedTrackColor = TDTheme.colors.lightPurple,
+                ),
+            )
+        }
+        if (!formState.isAllDay) {
+            Spacer(Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f)) {
+                    TDPickerField(
+                        title = stringResource(com.todoapp.mobile.R.string.set_time),
+                        value =
+                        formState.taskTimeStart?.format(timeFormatter)
+                            ?: stringResource(com.todoapp.mobile.R.string.starts),
+                        onClick = { showStartTimePicker = true },
+                        isError = formState.timeErrorRes != null,
+                        supportingText = formState.timeErrorRes?.let { stringResource(it) },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_clock),
+                                tint = TDTheme.colors.onBackground,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    TDPickerField(
+                        title = "",
+                        value =
+                        formState.taskTimeEnd?.format(timeFormatter)
+                            ?: stringResource(com.todoapp.mobile.R.string.ends),
+                        onClick = { showEndTimePicker = true },
+                        isError = formState.timeErrorRes != null,
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_clock),
+                                tint = TDTheme.colors.onBackground,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                    )
+                }
             }
         }
+        Spacer(Modifier.height(12.dp))
+        TDText(
+            text = stringResource(com.todoapp.mobile.R.string.reminder_label),
+            style = TDTheme.typography.heading6,
+            color = TDTheme.colors.onBackground,
+        )
+        Spacer(Modifier.height(8.dp))
+        com.todoapp.uikit.components.TDReminderOffsetPicker(
+            selectedMinutes = formState.reminderOffsetMinutes,
+            options = reminderOffsetOptions(),
+            onSelected = { onAction(TaskFormUiAction.ReminderOffsetChange(it)) },
+        )
         Spacer(Modifier.height(12.dp))
         TDCompactOutlinedTextField(
             label = stringResource(com.todoapp.mobile.R.string.description),
@@ -208,21 +192,22 @@ internal fun AddTaskSheet(
             singleLine = false,
         )
         Spacer(Modifier.height(12.dp))
-        PendingPhotosRow(
-            pending = formState.pendingPhotos,
-            onPick = { bytes, mime -> onAction(TaskFormUiAction.PhotoPicked(bytes, mime)) },
-            onRemoveAt = { idx -> onAction(TaskFormUiAction.PhotoRemoveAt(idx)) },
-        )
-        Spacer(Modifier.height(12.dp))
-        AdvancedSettings(
+        DetailsSection(
             isExpanded = formState.isAdvancedSettingsExpanded,
+            selectedCategory = formState.selectedCategory,
+            customCategoryName = formState.customCategoryName,
+            selectedRecurrence = formState.selectedRecurrence,
+            pendingPhotos = formState.pendingPhotos,
             isSecret = formState.isTaskSecret,
-            reminderOffsetMinutes = formState.reminderOffsetMinutes,
             availableGroups = availableGroups,
             selectedGroupId = formState.selectedGroupId,
             onToggleExpanded = { onAction(TaskFormUiAction.ToggleAdvancedSettings) },
+            onCategoryChange = { onAction(TaskFormUiAction.CategoryChange(it)) },
+            onCustomCategoryNameChange = { onAction(TaskFormUiAction.CustomCategoryNameChange(it)) },
+            onRecurrenceChange = { onAction(TaskFormUiAction.RecurrenceChange(it)) },
+            onPhotoPicked = { bytes, mime -> onAction(TaskFormUiAction.PhotoPicked(bytes, mime)) },
+            onPhotoRemoveAt = { onAction(TaskFormUiAction.PhotoRemoveAt(it)) },
             onSecretChange = { onAction(TaskFormUiAction.SecretChange(it)) },
-            onReminderOffsetChange = { onAction(TaskFormUiAction.ReminderOffsetChange(it)) },
             onGroupSelected = { groupId ->
                 onAction(
                     TaskFormUiAction.GroupSelectionChanged(
@@ -313,15 +298,22 @@ private fun GroupAssignmentSection(
 }
 
 @Composable
-private fun AdvancedSettings(
+private fun DetailsSection(
     isExpanded: Boolean,
+    selectedCategory: TaskCategory,
+    customCategoryName: String,
+    selectedRecurrence: Recurrence,
+    pendingPhotos: List<PendingPhoto>,
     isSecret: Boolean,
-    reminderOffsetMinutes: Long?,
     availableGroups: List<HomeContract.GroupSelectionItem>,
     selectedGroupId: Long?,
     onToggleExpanded: () -> Unit,
+    onCategoryChange: (TaskCategory) -> Unit,
+    onCustomCategoryNameChange: (String) -> Unit,
+    onRecurrenceChange: (Recurrence) -> Unit,
+    onPhotoPicked: (ByteArray, String) -> Unit,
+    onPhotoRemoveAt: (Int) -> Unit,
     onSecretChange: (Boolean) -> Unit,
-    onReminderOffsetChange: (Long?) -> Unit,
     onGroupSelected: (Long) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -335,7 +327,7 @@ private fun AdvancedSettings(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             TDText(
-                text = stringResource(com.todoapp.mobile.R.string.advanced_settings),
+                text = stringResource(com.todoapp.mobile.R.string.details_label),
                 style = TDTheme.typography.heading3,
                 color = TDTheme.colors.onBackground.copy(alpha = 0.7f),
             )
@@ -355,6 +347,67 @@ private fun AdvancedSettings(
 
         AnimatedVisibility(visible = isExpanded) {
             Column(modifier = Modifier.fillMaxWidth()) {
+                TDText(
+                    text = stringResource(com.todoapp.mobile.R.string.category_label),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground,
+                )
+                Spacer(Modifier.height(8.dp))
+                TDCategoryPicker(
+                    selectedKey = selectedCategory.name,
+                    options = categoryOptions(),
+                    onSelected = { key -> onCategoryChange(TaskCategory.valueOf(key)) },
+                )
+                if (selectedCategory == TaskCategory.OTHER) {
+                    Spacer(Modifier.height(8.dp))
+                    TDCompactOutlinedTextField(
+                        label = stringResource(com.todoapp.mobile.R.string.category_other_hint),
+                        value = customCategoryName,
+                        onValueChange = onCustomCategoryNameChange,
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+                TDText(
+                    text = stringResource(com.todoapp.mobile.R.string.recurrence_label),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground,
+                )
+                Spacer(Modifier.height(8.dp))
+                TDRecurrencePicker(
+                    selectedKey = selectedRecurrence.name,
+                    options = recurrenceOptions(),
+                    onSelected = { key -> onRecurrenceChange(Recurrence.valueOf(key)) },
+                )
+                if (selectedRecurrence != Recurrence.NONE) {
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(TDTheme.colors.background, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_warning),
+                            contentDescription = null,
+                            tint = TDTheme.colors.orange,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        TDText(
+                            text = recurrenceExplainer(selectedRecurrence),
+                            style = TDTheme.typography.subheading1,
+                            color = TDTheme.colors.orange,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                PendingPhotosRow(
+                    pending = pendingPhotos,
+                    onPick = onPhotoPicked,
+                    onRemoveAt = onPhotoRemoveAt,
+                )
+                Spacer(Modifier.height(8.dp))
                 Row(
                     modifier =
                     Modifier
@@ -378,18 +431,6 @@ private fun AdvancedSettings(
                         color = TDTheme.colors.onBackground,
                     )
                 }
-                Spacer(Modifier.height(12.dp))
-                TDText(
-                    text = stringResource(com.todoapp.mobile.R.string.reminder_label),
-                    style = TDTheme.typography.heading6,
-                    color = TDTheme.colors.onBackground,
-                )
-                Spacer(Modifier.height(8.dp))
-                com.todoapp.uikit.components.TDReminderOffsetPicker(
-                    selectedMinutes = reminderOffsetMinutes,
-                    options = reminderOffsetOptions(),
-                    onSelected = onReminderOffsetChange,
-                )
                 if (availableGroups.isNotEmpty()) {
                     Spacer(Modifier.height(12.dp))
                     GroupAssignmentSection(

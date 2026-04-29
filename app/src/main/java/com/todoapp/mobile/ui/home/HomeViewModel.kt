@@ -39,7 +39,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -49,6 +52,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
 
+@Suppress("LargeClass")
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel
 @Inject
@@ -60,6 +65,7 @@ constructor(
     private val pomodoroEngine: PomodoroEngine,
     private val groupRepository: GroupRepository,
     private val dataStoreHelper: DataStoreHelper,
+    private val clock: java.time.Clock,
     @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
     private data class DailyData(
@@ -84,6 +90,7 @@ constructor(
     init {
         taskSyncRepository.fetchTasks()
         loadInitialData()
+        setupAuxiliaryFlows()
     }
 
     override fun onCleared() {
@@ -114,7 +121,12 @@ constructor(
             is UiAction.OnCategoryChange -> changeCategory(uiAction.category)
             is UiAction.OnCustomCategoryNameChange -> changeCustomCategoryName(uiAction.name)
             is UiAction.OnRecurrenceChange -> changeRecurrence(uiAction.recurrence)
+            is UiAction.OnAllDayChange -> changeAllDay(uiAction.isAllDay)
             is UiAction.OnFilterChange -> changeFilter(uiAction.filter)
+            is UiAction.OnSuggestCardPrimaryAction -> handleSuggestCardPrimary()
+            is UiAction.OnSuggestCardSecondaryAction -> handleSuggestCardSecondary()
+            is UiAction.OnSuggestCardDismiss -> dismissSuggestCard()
+            is UiAction.OnTimeTick -> Unit
             is UiAction.OnDialogDateSelect -> updateDialogDate(uiAction)
             is UiAction.OnDialogDateDeselect -> deselectDialogDate()
             is UiAction.OnShowBottomSheet -> showBottomSheet()
@@ -236,24 +248,39 @@ constructor(
         fetchJob =
             viewModelScope.launch {
                 delay(LOADING_DELAY)
+                val today = LocalDate.now()
+                val overdueFlow =
+                    if (date == today) {
+                        taskRepository.observeOverdueTasks(today)
+                    } else {
+                        kotlinx.coroutines.flow.flowOf(emptyList<Task>())
+                    }
                 combine(
                     taskRepository.observeTasksByDate(date, includeRecurringInstances = false),
                     taskRepository.observePendingTasksInAWeek(date),
                     taskRepository.countCompletedTasksInAWeek(date),
                     taskRepository.observeTaskPhotoUrls(),
-                ) { tasks, pendingTaskCount, completedTaskCount, photoUrls ->
+                    overdueFlow,
+                ) { tasks, pendingTaskCount, completedTaskCount, photoUrls, overdue ->
+                    val merged = overdue + tasks
                     val withPhotos =
-                        tasks.map { t ->
+                        merged.map { t ->
                             val urls = t.remoteId?.let { photoUrls[it] } ?: emptyList()
                             if (urls.isNotEmpty()) t.copy(photoUrls = urls) else t
                         }
                     timber.log.Timber.tag("TaskFetch").d(
-                        "Home tasks=${withPhotos.size}, with photos=${withPhotos.count { it.photoUrls.isNotEmpty() }}, " +
+                        "Home tasks=${withPhotos.size} (overdue=${overdue.size}), with photos=${withPhotos.count { it.photoUrls.isNotEmpty() }}, " +
                             "in-mem map size=${photoUrls.size}",
                     )
                     DailyData(withPhotos, pendingTaskCount, completedTaskCount)
                 }.collect { data ->
                     var becameSuccess = false
+                    val initialDisplayName =
+                        if (_uiState.value !is UiState.Success) {
+                            dataStoreHelper.observeUser().first()?.displayName.orEmpty()
+                        } else {
+                            ""
+                        }
                     _uiState.update { current ->
                         when (current) {
                             is UiState.Success ->
@@ -265,7 +292,7 @@ constructor(
 
                             else -> {
                                 becameSuccess = true
-                                createInitialState(date, data)
+                                createInitialState(date, data, initialDisplayName)
                             }
                         }
                     }
@@ -277,6 +304,7 @@ constructor(
     private fun createInitialState(
         date: LocalDate,
         data: DailyData,
+        displayName: String = "",
     ) = UiState.Success(
         selectedDate = date,
         displayedMonth = YearMonth.from(date),
@@ -287,6 +315,9 @@ constructor(
         isDeleteDialogOpen = false,
         isSecretModeEnabled = false,
         taskFormState = TaskFormState(),
+        displayName = displayName,
+        dayMode = com.todoapp.mobile.common.computeDayMode(java.time.LocalTime.now(clock)),
+        currentTimeFormatted = java.time.LocalTime.now(clock).format(TIME_FORMATTER),
     )
 
     private fun changeSelectedDate(uiAction: UiAction.OnDateSelect) {
@@ -327,8 +358,8 @@ constructor(
                     title = form.taskTitle,
                     description = form.taskDescription.ifBlank { null },
                     date = form.dialogSelectedDate!!,
-                    timeStart = form.taskTimeStart!!,
-                    timeEnd = form.taskTimeEnd!!,
+                    timeStart = if (form.isAllDay) java.time.LocalTime.MIDNIGHT else form.taskTimeStart!!,
+                    timeEnd = if (form.isAllDay) java.time.LocalTime.of(23, 59) else form.taskTimeEnd!!,
                     isCompleted = false,
                     isSecret = form.isTaskSecret,
                     reminderOffsetMinutes = form.reminderOffsetMinutes,
@@ -338,6 +369,7 @@ constructor(
                             it.isNotBlank()
                     },
                     recurrence = form.selectedRecurrence,
+                    isAllDay = form.isAllDay,
                 )
             if (form.selectedGroupId != null) {
                 groupRepository.createGroupTask(form.selectedGroupId, task)
@@ -351,6 +383,7 @@ constructor(
                 taskRepository.insert(task)
                 scheduleTaskReminders(task)
             }
+            dataStoreHelper.setLastUsedReminderOffset(form.reminderOffsetMinutes)
             clearTaskForm()
             dismissBottomSheet()
         }
@@ -520,16 +553,123 @@ constructor(
         }
     }
 
+    private fun changeAllDay(isAllDay: Boolean) {
+        updateSuccessState { state ->
+            val form = state.taskFormState
+            state.copy(
+                taskFormState = form.copy(
+                    isAllDay = isAllDay,
+                    // Hiding time pickers; clear any prior selection + lingering time error.
+                    taskTimeStart = if (isAllDay) null else form.taskTimeStart,
+                    taskTimeEnd = if (isAllDay) null else form.taskTimeEnd,
+                    timeErrorRes = if (isAllDay) null else form.timeErrorRes,
+                ),
+            )
+        }
+    }
+
     private fun changeFilter(filter: HomeContract.HomeFilter) {
         val state = _uiState.value as? UiState.Success ?: return
         if (state.selectedFilter == filter) return
-        updateSuccessState { it.copy(selectedFilter = filter) }
+        updateSuccessState {
+            if (filter == HomeContract.HomeFilter.TODAY) {
+                it.copy(selectedFilter = filter)
+            } else {
+                it.copy(selectedFilter = filter, lastRecurringFilter = filter)
+            }
+        }
         // Restart the data flow with the new filter source.
         when (filter) {
             HomeContract.HomeFilter.TODAY -> fetchDailyTask(state.selectedDate)
             else -> fetchByRecurrence(filterToRecurrence(filter))
         }
     }
+
+    private fun setupAuxiliaryFlows() {
+        viewModelScope.launch {
+            kotlinx.coroutines.flow.flow {
+                while (true) {
+                    emit(java.time.LocalDateTime.now(clock))
+                    kotlinx.coroutines.delay(AUX_TICK_MILLIS)
+                }
+            }.map { now ->
+                Triple(
+                    now.toLocalDate(),
+                    com.todoapp.mobile.common.computeDayMode(now.toLocalTime()),
+                    now.toLocalDate().toEpochDay(),
+                )
+            }.distinctUntilChanged()
+                .flatMapLatest { (today, mode, todayEpoch) ->
+                    kotlinx.coroutines.flow.combine(
+                        dataStoreHelper.observeUser(),
+                        taskRepository.observeTasksByDate(today.minusDays(1), includeRecurringInstances = false),
+                        dataStoreHelper.observeSuggestCardDismissedDay(),
+                    ) { user, yesterdayTasks, dismissedDay ->
+                        AuxState(
+                            displayName = user?.displayName.orEmpty(),
+                            yesterdayCompleted = yesterdayTasks.count { it.isCompleted },
+                            isSuggestDismissedToday = dismissedDay == todayEpoch,
+                            dayMode = mode,
+                        )
+                    }
+                }
+                .collect { aux ->
+                    updateSuccessState { state ->
+                        state.copy(
+                            displayName = aux.displayName,
+                            yesterdayCompletedCount = aux.yesterdayCompleted,
+                            isSuggestCardDismissedToday = aux.isSuggestDismissedToday,
+                            dayMode = aux.dayMode,
+                        )
+                    }
+                }
+        }
+        viewModelScope.launch {
+            while (true) {
+                val now = java.time.LocalTime.now(clock).format(TIME_FORMATTER)
+                updateSuccessState { state ->
+                    if (state.currentTimeFormatted == now) state else state.copy(currentTimeFormatted = now)
+                }
+                kotlinx.coroutines.delay(AUX_TICK_MILLIS)
+            }
+        }
+    }
+
+    private fun handleSuggestCardPrimary() {
+        val state = _uiState.value as? UiState.Success ?: return
+        when (state.dayMode) {
+            com.todoapp.mobile.domain.model.DayMode.MORNING -> {
+                _navEffect.trySend(NavigationEffect.Navigate(Screen.Chat))
+            }
+            com.todoapp.mobile.domain.model.DayMode.EVENING -> {
+                val pendingIds = state.tasks.filter { !it.isCompleted }.map { it.id }
+                viewModelScope.launch {
+                    taskRepository.deferTasksToTomorrow(pendingIds)
+                    dismissSuggestCard()
+                }
+            }
+            com.todoapp.mobile.domain.model.DayMode.MIDDAY -> Unit
+        }
+    }
+
+    private fun handleSuggestCardSecondary() {
+        // Evening "Olduğu gibi bırak" — just dismisses for today
+        dismissSuggestCard()
+    }
+
+    private fun dismissSuggestCard() {
+        updateSuccessState { it.copy(isSuggestCardDismissedToday = true) }
+        viewModelScope.launch {
+            dataStoreHelper.setSuggestCardDismissedDay(LocalDate.now(clock).toEpochDay())
+        }
+    }
+
+    private data class AuxState(
+        val displayName: String,
+        val yesterdayCompleted: Int,
+        val isSuggestDismissedToday: Boolean,
+        val dayMode: com.todoapp.mobile.domain.model.DayMode,
+    )
 
     private fun filterToRecurrence(filter: HomeContract.HomeFilter): com.todoapp.mobile.domain.model.Recurrence = when (filter) {
         HomeContract.HomeFilter.TODAY -> com.todoapp.mobile.domain.model.Recurrence.NONE
@@ -587,14 +727,14 @@ constructor(
                 false
             }
 
-            form.taskTimeStart == null || form.taskTimeEnd == null -> {
+            !form.isAllDay && (form.taskTimeStart == null || form.taskTimeEnd == null) -> {
                 showTransientError(R.string.error_task_time_required) { s, v ->
                     s.copy(taskFormState = s.taskFormState.copy(timeErrorRes = v))
                 }
                 false
             }
 
-            form.taskTimeStart.isAfter(form.taskTimeEnd) -> {
+            !form.isAllDay && !form.taskTimeEnd!!.isAfter(form.taskTimeStart!!) -> {
                 showTransientError(R.string.error_task_end_before_start) { s, v ->
                     s.copy(taskFormState = s.taskFormState.copy(timeErrorRes = v))
                 }
@@ -631,7 +771,15 @@ constructor(
     }
 
     private fun showBottomSheet() {
-        updateSuccessState { it.copy(isSheetOpen = true) }
+        viewModelScope.launch {
+            val lastOffset = dataStoreHelper.observeLastUsedReminderOffset().first()
+            val smartDefault = TaskFormState.smartDefault(
+                today = LocalDate.now(clock),
+                now = java.time.LocalTime.now(clock),
+                lastReminderOffset = lastOffset,
+            )
+            updateSuccessState { it.copy(isSheetOpen = true, taskFormState = smartDefault) }
+        }
         viewModelScope.launch {
             groupRepository
                 .observeAllGroups()
@@ -718,6 +866,9 @@ constructor(
 
     companion object {
         private const val LOADING_DELAY = 200L
+        private const val AUX_TICK_MILLIS = 60_000L
         private const val UNDO_DELAY_MS = 5000L
+        private val TIME_FORMATTER: java.time.format.DateTimeFormatter =
+            java.time.format.DateTimeFormatter.ofPattern("HH:mm").withLocale(java.util.Locale.ROOT)
     }
 }

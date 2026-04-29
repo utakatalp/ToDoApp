@@ -9,8 +9,11 @@ import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.ui.topbar.TopBarContract.UiAction
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -32,6 +35,13 @@ constructor(
 
     private val _navEffect by lazy { Channel<NavigationEffect>() }
     val navEffect by lazy { _navEffect.receiveAsFlow() }
+
+    private val _infoClicks =
+        MutableSharedFlow<Unit>(
+            extraBufferCapacity = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
+    val infoClicks = _infoClicks.asSharedFlow()
 
     init {
         startObservingUserAuthState()
@@ -75,6 +85,8 @@ constructor(
                 sendNavEffect(
                     NavigationEffect.Navigate(Screen.GroupSettings(action.groupId)),
                 )
+
+            UiAction.OnInfoClick -> _infoClicks.tryEmit(Unit)
         }
     }
 

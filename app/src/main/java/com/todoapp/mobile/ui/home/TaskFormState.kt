@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Stable
 import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.TaskCategory
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -33,7 +34,31 @@ data class TaskFormState(
     val selectedCategory: TaskCategory = TaskCategory.PERSONAL,
     val customCategoryName: String = "",
     val selectedRecurrence: Recurrence = Recurrence.NONE,
-)
+    val isAllDay: Boolean = false,
+) {
+    companion object {
+        fun smartDefault(today: LocalDate, now: LocalTime, lastReminderOffset: Long?): TaskFormState {
+            val isWeekend = today.dayOfWeek == DayOfWeek.SATURDAY || today.dayOfWeek == DayOfWeek.SUNDAY
+            val rounded = roundToNearestHalfHour(now.plusHours(1))
+            return TaskFormState(
+                dialogSelectedDate = today,
+                isAllDay = isWeekend,
+                taskTimeStart = if (isWeekend) null else rounded,
+                taskTimeEnd = if (isWeekend) null else rounded.plusMinutes(30),
+                reminderOffsetMinutes = lastReminderOffset ?: 0L,
+            )
+        }
+
+        private fun roundToNearestHalfHour(time: LocalTime): LocalTime {
+            val minutes = time.minute
+            return when {
+                minutes < 15 -> time.withMinute(0).withSecond(0).withNano(0)
+                minutes < 45 -> time.withMinute(30).withSecond(0).withNano(0)
+                else -> time.withMinute(0).withSecond(0).withNano(0).plusHours(1)
+            }
+        }
+    }
+}
 
 data class PendingPhoto(
     val bytes: ByteArray,
@@ -117,5 +142,9 @@ sealed interface TaskFormUiAction {
 
     data class RecurrenceChange(
         val recurrence: Recurrence,
+    ) : TaskFormUiAction
+
+    data class AllDayChange(
+        val isAllDay: Boolean,
     ) : TaskFormUiAction
 }

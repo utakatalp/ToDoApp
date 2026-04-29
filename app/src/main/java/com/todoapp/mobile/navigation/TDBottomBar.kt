@@ -1,5 +1,10 @@
 package com.todoapp.mobile.navigation
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -7,14 +12,19 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.todoapp.mobile.LocalNavController
+import com.todoapp.mobile.R
 import com.todoapp.uikit.theme.TDTheme
 
 fun shouldShowNav(currentDestination: NavDestination?): Boolean {
@@ -41,6 +51,7 @@ fun TDBottomBar() {
                 currentDestination?.hierarchy?.any { dest ->
                     dest.route?.substringBefore("?")?.substringBefore("/") == screenRoute
                 } == true
+            val isChat = screen is AppDestination.Chat
 
             NavigationBarItem(
                 selected = selected,
@@ -48,7 +59,9 @@ fun TDBottomBar() {
                 NavigationBarItemDefaults.colors(
                     selectedIconColor = TDTheme.colors.pendingGray,
                     selectedTextColor = TDTheme.colors.pendingGray,
-                    indicatorColor = TDTheme.colors.pendingGray.copy(alpha = 0.2f),
+                    indicatorColor =
+                    if (isChat) Color.Transparent
+                    else TDTheme.colors.pendingGray.copy(alpha = 0.2f),
                 ),
                 onClick = {
                     if (selected) return@NavigationBarItem
@@ -61,14 +74,37 @@ fun TDBottomBar() {
                     }
                 },
                 icon = {
-                    val iconId = if (selected) screen.selectedIcon else screen.icon
-                    Icon(
-                        painter = painterResource(id = iconId!!),
-                        contentDescription = stringResource(screen.title),
-                        tint = Color.Unspecified,
-                    )
+                    if (isChat) {
+                        val chatImage =
+                            if (selected) R.drawable.img_donebot_bottombar_2
+                            else R.drawable.img_splash
+                        Box(
+                            modifier =
+                            Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(TDTheme.colors.pendingGray),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Image(
+                                painter = painterResource(id = chatImage),
+                                contentDescription = stringResource(screen.title),
+                                modifier = Modifier.size(32.dp),
+                            )
+                        }
+                    } else {
+                        val iconId = if (selected) screen.selectedIcon else screen.icon
+                        Icon(
+                            painter = painterResource(id = iconId!!),
+                            contentDescription = stringResource(screen.title),
+                            tint = Color.Unspecified,
+                        )
+                    }
                 },
-                label = { Text(text = stringResource(id = screen.title)) },
+                label = {
+                    val labelRes = if (isChat) R.string.bottombar_chat_tab_label else screen.title
+                    Text(text = stringResource(id = labelRes))
+                },
                 alwaysShowLabel = false,
             )
         }

@@ -43,6 +43,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
@@ -57,6 +59,7 @@ import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.delay
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
@@ -167,7 +170,8 @@ fun HomeContent(
                                     alpha = (pullState.distanceFraction * 1.5f).coerceIn(0.4f, 1f),
                                 ),
                                 shape = RoundedCornerShape(50.dp),
-                            ).padding(horizontal = 16.dp, vertical = 8.dp),
+                            )
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
                     ) {
@@ -196,6 +200,18 @@ fun HomeContent(
         },
     ) {
         Box(modifier = modifier.fillMaxSize()) {
+            val emptyTitleRes = when (uiState.selectedFilter) {
+                HomeContract.HomeFilter.TODAY -> com.todoapp.mobile.R.string.no_tasks_today
+                HomeContract.HomeFilter.DAILY -> com.todoapp.mobile.R.string.no_recurring_daily_title
+                HomeContract.HomeFilter.WEEKLY -> com.todoapp.mobile.R.string.no_recurring_weekly_title
+                HomeContract.HomeFilter.MONTHLY -> com.todoapp.mobile.R.string.no_recurring_monthly_title
+                HomeContract.HomeFilter.YEARLY -> com.todoapp.mobile.R.string.no_recurring_yearly_title
+            }
+            val emptyDescriptionRes = if (uiState.selectedFilter == HomeContract.HomeFilter.TODAY) {
+                com.todoapp.mobile.R.string.no_tasks_today_description
+            } else {
+                com.todoapp.mobile.R.string.no_recurring_description
+            }
             HomeTaskList(
                 tasks = localTasks.filter { it.id != uiState.pendingDeleteTask?.id },
                 lazyListState = lazyListState,
@@ -216,7 +232,39 @@ fun HomeContent(
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
+                emptyTitleRes = emptyTitleRes,
+                emptyDescriptionRes = emptyDescriptionRes,
                 headerContent = {
+                    item {
+                        HomeGreetingRow(
+                            displayName = uiState.displayName,
+                            dayMode = uiState.dayMode,
+                            currentTimeFormatted = uiState.currentTimeFormatted,
+                        )
+                    }
+                    val totalTasksToday = uiState.tasks.size
+                    val isMorningMode =
+                        uiState.dayMode == com.todoapp.mobile.domain.model.DayMode.MORNING
+                    val isEveningMode =
+                        uiState.dayMode == com.todoapp.mobile.domain.model.DayMode.EVENING
+                    val showSuggest =
+                        uiState.selectedFilter == HomeContract.HomeFilter.TODAY &&
+                            !uiState.isSuggestCardDismissedToday &&
+                            (isMorningMode || (isEveningMode && totalTasksToday > 0))
+                    if (showSuggest) {
+                        item {
+                            HomeSuggestCard(
+                                dayMode = uiState.dayMode,
+                                yesterdayCompleted = uiState.yesterdayCompletedCount,
+                                pendingCount = uiState.tasks.count { !it.isCompleted },
+                                completedCount = uiState.tasks.count { it.isCompleted },
+                                onPrimary = { onAction(UiAction.OnSuggestCardPrimaryAction) },
+                                onSecondary = { onAction(UiAction.OnSuggestCardSecondaryAction) },
+                                onDismiss = { onAction(UiAction.OnSuggestCardDismiss) },
+                            )
+                        }
+                        item { Spacer(Modifier.height(12.dp)) }
+                    }
                     if (uiState.pendingPermissions.isNotEmpty()) {
                         item {
                             HomePermissionPrompts(
@@ -227,61 +275,63 @@ fun HomeContent(
                     }
                     item { HomeHintCard(showHint = showHint, hintRes = currentHintRes) }
                     item {
-                        HomeFilterRow(
-                            selected = uiState.selectedFilter,
-                            onSelected = { onAction(UiAction.OnFilterChange(it)) },
+                        TDWeeklyDatePicker(
+                            modifier = Modifier.fillMaxWidth(),
+                            displayedMonth = uiState.displayedMonth,
+                            selectedDate = uiState.selectedDate,
+                            onDateSelect = { onAction(UiAction.OnDateSelect(it)) },
+                            onPreviousMonth = { onAction(UiAction.OnPreviousMonth) },
+                            onNextMonth = { onAction(UiAction.OnNextMonth) },
                         )
                     }
                     item { Spacer(Modifier.height(12.dp)) }
-                    if (uiState.selectedFilter == HomeContract.HomeFilter.TODAY) {
-                        item {
-                            TDWeeklyDatePicker(
-                                modifier = Modifier,
-                                displayedMonth = uiState.displayedMonth,
-                                selectedDate = uiState.selectedDate,
-                                onDateSelect = { onAction(UiAction.OnDateSelect(it)) },
-                                onPreviousMonth = { onAction(UiAction.OnPreviousMonth) },
-                                onNextMonth = { onAction(UiAction.OnNextMonth) },
+                    item {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            TDStatisticCard(
+                                text = stringResource(com.todoapp.mobile.R.string.task_complete),
+                                taskAmount = uiState.completedTaskCountThisWeek,
+                                modifier = Modifier.weight(1f),
+                                isCompleted = true,
+                                onClick = { onAction(UiAction.OnCompletedStatCardTap) },
                             )
-                        }
-                        item { Spacer(Modifier.height(24.dp)) }
-                        item {
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                TDStatisticCard(
-                                    text = stringResource(com.todoapp.mobile.R.string.task_complete),
-                                    taskAmount = uiState.completedTaskCountThisWeek,
-                                    modifier = Modifier.weight(1f),
-                                    isCompleted = true,
-                                    onClick = { onAction(UiAction.OnCompletedStatCardTap) },
-                                )
-                                Spacer(modifier = Modifier.size(20.dp))
-                                TDStatisticCard(
-                                    text = stringResource(com.todoapp.mobile.R.string.task_pending),
-                                    taskAmount = uiState.pendingTaskCountThisWeek,
-                                    modifier = Modifier.weight(1f),
-                                    isCompleted = false,
-                                    onClick = { onAction(UiAction.OnPendingStatCardTap) },
-                                )
-                            }
-                        }
-                        item { Spacer(Modifier.height(24.dp)) }
-                        item {
-                            TDText(
-                                text = stringResource(com.todoapp.mobile.R.string.tasks_today),
-                                color = TDTheme.colors.onBackground,
-                                style = TDTheme.typography.heading3,
-                            )
-                        }
-                    } else {
-                        item {
-                            TDText(
-                                text = stringResource(sectionHeaderRes(uiState.selectedFilter)),
-                                color = TDTheme.colors.onBackground,
-                                style = TDTheme.typography.heading3,
+                            Spacer(modifier = Modifier.size(12.dp))
+                            TDStatisticCard(
+                                text = stringResource(com.todoapp.mobile.R.string.task_pending),
+                                taskAmount = uiState.pendingTaskCountThisWeek,
+                                modifier = Modifier.weight(1f),
+                                isCompleted = false,
+                                onClick = { onAction(UiAction.OnPendingStatCardTap) },
                             )
                         }
                     }
-                    item { Spacer(Modifier.height(8.dp)) }
+                    item { Spacer(Modifier.height(12.dp)) }
+                    item {
+                        HomeSectionTabRow(
+                            isRecurring = uiState.selectedFilter != HomeContract.HomeFilter.TODAY,
+                            onSelectToday = {
+                                onAction(UiAction.OnFilterChange(HomeContract.HomeFilter.TODAY))
+                            },
+                            onSelectRecurring = {
+                                onAction(UiAction.OnFilterChange(uiState.lastRecurringFilter))
+                            },
+                        )
+                    }
+                    item {
+                        AnimatedVisibility(
+                            visible = uiState.selectedFilter != HomeContract.HomeFilter.TODAY,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
+                        ) {
+                            Column {
+                                Spacer(Modifier.height(12.dp))
+                                HomeRecurringChipRow(
+                                    selected = uiState.selectedFilter,
+                                    onSelected = { onAction(UiAction.OnFilterChange(it)) },
+                                )
+                            }
+                        }
+                    }
+                    item { Spacer(Modifier.height(12.dp)) }
                 },
             )
             HomeFabMenu(
@@ -335,12 +385,157 @@ fun HomeContent(
     }
 }
 
-private fun sectionHeaderRes(filter: HomeContract.HomeFilter): Int = when (filter) {
-    HomeContract.HomeFilter.TODAY -> com.todoapp.mobile.R.string.tasks_today
-    HomeContract.HomeFilter.DAILY -> com.todoapp.mobile.R.string.section_daily_tasks
-    HomeContract.HomeFilter.WEEKLY -> com.todoapp.mobile.R.string.section_weekly_tasks
-    HomeContract.HomeFilter.MONTHLY -> com.todoapp.mobile.R.string.section_monthly_tasks
-    HomeContract.HomeFilter.YEARLY -> com.todoapp.mobile.R.string.section_yearly_tasks
+@Composable
+private fun HomeGreetingRow(
+    displayName: String,
+    dayMode: com.todoapp.mobile.domain.model.DayMode,
+    currentTimeFormatted: String,
+) {
+    val name = displayName.takeIf { it.isNotBlank() }
+    val greetingText = when (dayMode) {
+        com.todoapp.mobile.domain.model.DayMode.MORNING ->
+            if (name != null) {
+                stringResource(com.todoapp.mobile.R.string.home_greeting_morning_format, name)
+            } else {
+                stringResource(com.todoapp.mobile.R.string.home_greeting_morning_no_name)
+            }
+
+        com.todoapp.mobile.domain.model.DayMode.MIDDAY ->
+            if (name != null) {
+                stringResource(com.todoapp.mobile.R.string.home_greeting_midday_format, name)
+            } else {
+                stringResource(com.todoapp.mobile.R.string.home_greeting_midday_no_name)
+            }
+
+        com.todoapp.mobile.domain.model.DayMode.EVENING ->
+            if (name != null) {
+                stringResource(com.todoapp.mobile.R.string.home_greeting_evening_format, name)
+            } else {
+                stringResource(com.todoapp.mobile.R.string.home_greeting_evening_no_name)
+            }
+    }
+    val (iconRes, iconCdRes, iconTint) = when (dayMode) {
+        com.todoapp.mobile.domain.model.DayMode.MORNING -> Triple(
+            R.drawable.ic_sun_cloud,
+            com.todoapp.mobile.R.string.home_greeting_icon_morning_cd,
+            TDTheme.colors.pendingGray,
+        )
+
+        com.todoapp.mobile.domain.model.DayMode.MIDDAY -> Triple(
+            R.drawable.ic_sun,
+            com.todoapp.mobile.R.string.home_greeting_icon_midday_cd,
+            TDTheme.colors.orange,
+        )
+
+        com.todoapp.mobile.domain.model.DayMode.EVENING -> Triple(
+            R.drawable.ic_moon,
+            com.todoapp.mobile.R.string.home_greeting_icon_evening_cd,
+            TDTheme.colors.darkPending,
+        )
+    }
+    val iconCd = stringResource(iconCdRes)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "$iconCd, $greetingText, $currentTimeFormatted"
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(24.dp),
+        )
+        Spacer(Modifier.width(8.dp))
+        TDText(
+            text = greetingText,
+            style = TDTheme.typography.subheading1,
+            color = TDTheme.colors.onBackground.copy(alpha = 0.85f),
+        )
+        if (currentTimeFormatted.isNotEmpty()) {
+            Spacer(Modifier.width(6.dp))
+            TDText(
+                text = "· $currentTimeFormatted",
+                style = TDTheme.typography.subheading1,
+                color = TDTheme.colors.onBackground.copy(alpha = 0.55f),
+            )
+        }
+        Spacer(Modifier.weight(1f))
+    }
+}
+
+@Suppress("CyclomaticComplexMethod")
+@Composable
+private fun HomeSuggestCard(
+    dayMode: com.todoapp.mobile.domain.model.DayMode,
+    yesterdayCompleted: Int,
+    pendingCount: Int,
+    completedCount: Int,
+    onPrimary: () -> Unit,
+    onSecondary: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val isMorning = dayMode == com.todoapp.mobile.domain.model.DayMode.MORNING
+    val isEveningAllDone = !isMorning && pendingCount == 0 && completedCount > 0
+    val avatarRes = if (isMorning || isEveningAllDone) {
+        if (TDTheme.isDark) R.drawable.img_donebot_plan_your_day_light else R.drawable.img_donebot_plan_your_day_dark
+    } else {
+        if (TDTheme.isDark) R.drawable.img_donebot_alarm_reminder_light else R.drawable.img_donebot_alarm_reminder_dark
+    }
+    val title = stringResource(
+        when {
+            isMorning -> com.todoapp.mobile.R.string.donebot_suggest_morning_title
+            isEveningAllDone -> com.todoapp.mobile.R.string.donebot_suggest_evening_all_done_title
+            else -> com.todoapp.mobile.R.string.donebot_suggest_evening_title
+        },
+    )
+    val body = when {
+        isMorning ->
+            stringResource(com.todoapp.mobile.R.string.donebot_suggest_morning_body_format, yesterdayCompleted)
+
+        isEveningAllDone ->
+            stringResource(com.todoapp.mobile.R.string.donebot_suggest_evening_all_done_body_format, completedCount)
+
+        else -> {
+            val total = pendingCount + completedCount
+            stringResource(
+                com.todoapp.mobile.R.string.donebot_suggest_evening_body_format,
+                completedCount,
+                total,
+                pendingCount,
+            )
+        }
+    }
+    val primaryCta = stringResource(
+        when {
+            isMorning -> com.todoapp.mobile.R.string.donebot_suggest_morning_cta
+            isEveningAllDone -> com.todoapp.mobile.R.string.donebot_suggest_evening_all_done_cta
+            else -> com.todoapp.mobile.R.string.donebot_suggest_evening_cta_primary
+        },
+    )
+    val secondaryCta =
+        if (isMorning || isEveningAllDone) {
+            null
+        } else {
+            stringResource(com.todoapp.mobile.R.string.donebot_suggest_evening_cta_secondary)
+        }
+    val onSecondaryNullable: (() -> Unit)? =
+        if (isMorning || isEveningAllDone) null else onSecondary
+    val onPrimaryAdjusted: () -> Unit = if (isEveningAllDone) onDismiss else onPrimary
+    com.todoapp.uikit.components.TDDoneBotSuggestCard(
+        avatarRes = avatarRes,
+        title = title,
+        body = body,
+        primaryCtaText = primaryCta,
+        onPrimary = onPrimaryAdjusted,
+        onDismiss = onDismiss,
+        dismissContentDescription = stringResource(com.todoapp.mobile.R.string.donebot_suggest_dismiss_cd),
+        secondaryCtaText = secondaryCta,
+        onSecondary = onSecondaryNullable,
+    )
 }
 
 @Composable
@@ -523,6 +718,100 @@ private fun HomeContentValidationErrorPreview() {
                 pendingTaskCountThisWeek = 8,
                 isSheetOpen = true,
                 titleErrorRes = com.todoapp.mobile.R.string.error_task_title_required,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentMorningSuggestPreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+                displayName = "Berat",
+                dayMode = com.todoapp.mobile.domain.model.DayMode.MORNING,
+                yesterdayCompletedCount = 4,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentEveningSuggestPreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+                displayName = "Berat",
+                dayMode = com.todoapp.mobile.domain.model.DayMode.EVENING,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentEveningAllDonePreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks.map { it.copy(isCompleted = true) },
+                completedTaskCountThisWeek = 8,
+                pendingTaskCountThisWeek = 0,
+                displayName = "Berat",
+                dayMode = com.todoapp.mobile.domain.model.DayMode.EVENING,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentRecurringPreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+                selectedFilter = HomeContract.HomeFilter.DAILY,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentRecurringNoTasksPreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = emptyList(),
+                completedTaskCountThisWeek = 0,
+                pendingTaskCountThisWeek = 0,
+                selectedFilter = HomeContract.HomeFilter.WEEKLY,
             ),
             onAction = {},
             modifier = Modifier.padding(horizontal = 24.dp),

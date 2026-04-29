@@ -52,6 +52,7 @@ import com.todoapp.mobile.ui.search.SearchContract.UiAction
 import com.todoapp.mobile.ui.search.SearchContract.UiEffect
 import com.todoapp.mobile.ui.search.SearchContract.UiState
 import com.todoapp.mobile.ui.security.biometric.BiometricAuthenticator
+import com.todoapp.uikit.components.TDEmptyState
 import com.todoapp.uikit.components.TDLoadingBar
 import com.todoapp.uikit.components.TDTaskCardWithCheckbox
 import com.todoapp.uikit.components.TDText
@@ -325,10 +326,8 @@ private fun SearchHint() {
 @Composable
 private fun SearchNoResults(query: String) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        TDText(
-            text = stringResource(R.string.search_no_results, query),
-            style = TDTheme.typography.heading6,
-            color = TDTheme.colors.onBackground.copy(alpha = 0.5f),
+        TDEmptyState(
+            title = stringResource(R.string.search_no_results, query),
         )
     }
 }

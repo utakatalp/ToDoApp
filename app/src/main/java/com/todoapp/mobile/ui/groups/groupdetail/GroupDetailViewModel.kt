@@ -327,6 +327,13 @@ constructor(
                     is TaskFormUiAction.CategoryChange -> f.copy(selectedCategory = action.category)
                     is TaskFormUiAction.CustomCategoryNameChange -> f.copy(customCategoryName = action.name)
                     is TaskFormUiAction.RecurrenceChange -> f.copy(selectedRecurrence = action.recurrence)
+                    is TaskFormUiAction.AllDayChange ->
+                        f.copy(
+                            isAllDay = action.isAllDay,
+                            taskTimeStart = if (action.isAllDay) null else f.taskTimeStart,
+                            taskTimeEnd = if (action.isAllDay) null else f.taskTimeEnd,
+                            timeErrorRes = if (action.isAllDay) null else f.timeErrorRes,
+                        )
                 }
             s.copy(taskFormState = updated)
         }

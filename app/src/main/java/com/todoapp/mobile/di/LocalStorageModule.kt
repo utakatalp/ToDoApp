@@ -132,7 +132,7 @@ object LocalStorageModule {
 
     @Provides
     @Singleton
-    fun provideClock(): Clock = Clock.systemUTC()
+    fun provideClock(): Clock = Clock.systemDefaultZone()
 
     @Provides
     @Singleton
@@ -167,6 +167,12 @@ object LocalStorageModule {
     fun provideTaskDailyCompletionDao(
         database: AppDatabase,
     ): com.todoapp.mobile.data.source.local.TaskDailyCompletionDao = database.taskDailyCompletionDao()
+
+    @Provides
+    @Singleton
+    fun provideChatMessageDao(
+        database: AppDatabase,
+    ): com.todoapp.mobile.data.source.local.ChatMessageDao = database.chatMessageDao()
 
     @Provides
     @Singleton

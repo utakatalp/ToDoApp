@@ -67,4 +67,8 @@ interface TaskLocalDataSource {
     fun observeByRecurrence(recurrence: String): Flow<List<TaskEntity>>
 
     fun observeAllRecurringTasks(): Flow<List<TaskEntity>>
+
+    fun observeOverdueTasks(today: Long): Flow<List<TaskEntity>>
+
+    suspend fun shiftDatesByOneDay(taskIds: List<Long>)
 }

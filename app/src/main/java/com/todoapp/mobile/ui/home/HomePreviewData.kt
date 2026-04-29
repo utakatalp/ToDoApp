@@ -2,6 +2,7 @@
 
 package com.todoapp.mobile.ui.home
 
+import com.todoapp.mobile.domain.model.DayMode
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.home.HomeContract.UiState
 import java.time.LocalDate
@@ -28,6 +29,13 @@ object HomePreviewData {
         titleErrorRes: Int? = null,
         timeErrorRes: Int? = null,
         dateErrorRes: Int? = null,
+        displayName: String = "Berat",
+        dayMode: DayMode = DayMode.MORNING,
+        isSuggestCardDismissedToday: Boolean = false,
+        yesterdayCompletedCount: Int = 0,
+        currentTimeFormatted: String = "09:30",
+        selectedFilter: com.todoapp.mobile.ui.home.HomeContract.HomeFilter = com.todoapp.mobile.ui.home.HomeContract.HomeFilter.TODAY,
+        lastRecurringFilter: com.todoapp.mobile.ui.home.HomeContract.HomeFilter = com.todoapp.mobile.ui.home.HomeContract.HomeFilter.DAILY,
     ) = UiState.Success(
         selectedDate = selectedDate,
         displayedMonth = displayedMonth,
@@ -50,6 +58,13 @@ object HomePreviewData {
             timeErrorRes = timeErrorRes,
             dateErrorRes = dateErrorRes,
         ),
+        displayName = displayName,
+        dayMode = dayMode,
+        isSuggestCardDismissedToday = isSuggestCardDismissedToday,
+        yesterdayCompletedCount = yesterdayCompletedCount,
+        currentTimeFormatted = currentTimeFormatted,
+        selectedFilter = selectedFilter,
+        lastRecurringFilter = lastRecurringFilter,
     )
 
     val sampleTasks =

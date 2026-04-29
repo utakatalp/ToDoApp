@@ -43,6 +43,9 @@ interface Screen {
     data object Activity : Screen
 
     @Serializable
+    data object Chat : Screen
+
+    @Serializable
     data object Profile : Screen
 
     @Serializable

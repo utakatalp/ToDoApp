@@ -38,7 +38,7 @@ class AlarmSchedulerImpl(
     }
 
     override fun cancelTask(item: AlarmItem) {
-        cancelAlarm(item.hashCode())
+        cancelAlarm(taskRequestCode(item))
     }
 
     override fun cancelScheduledAlarm(type: AlarmType) {
@@ -69,9 +69,14 @@ class AlarmSchedulerImpl(
     )
 
     private fun AlarmType.getRequestCode(item: AlarmItem): Int = when (this) {
-        AlarmType.TASK -> item.hashCode()
+        AlarmType.TASK -> taskRequestCode(item)
         AlarmType.DAILY_PLAN -> REQUEST_CODE_DAILY_PLAN
     }
+
+    // Deduping seed: prefer a stable per-task code so re-scheduling the same task
+    // (e.g. user edits the time) updates the existing PendingIntent (FLAG_UPDATE_CURRENT)
+    // instead of leaving the previous alarm armed alongside the new one.
+    private fun taskRequestCode(item: AlarmItem): Int = item.taskId?.let { (TASK_REQUEST_BASE + it).toInt() } ?: item.hashCode()
 
     private fun AlarmType.buildBroadcastIntent(item: AlarmItem): Intent = when (this) {
         AlarmType.TASK -> buildPreferredBroadcast(item, OverlayService.OVERLAY_TYPE_TASK)
@@ -239,7 +244,11 @@ class AlarmSchedulerImpl(
     private companion object {
         const val REQUEST_CODE_DAILY_PLAN = 10_001
 
-        // Distinct namespace from item.hashCode()-based TASK request codes.
+        // One-shot task request codes use TASK_REQUEST_BASE + taskId.
+        // Recurring task request codes use RECURRING_TASK_REQUEST_BASE + taskId.
+        // The two bases live in disjoint namespaces so a one-shot and recurring
+        // alarm for the same task can coexist without colliding.
+        const val TASK_REQUEST_BASE = 0x0200_0000L
         const val RECURRING_TASK_REQUEST_BASE = 0x0100_0000L
 
         const val MAX_MONTH_LOOKAHEAD = 13

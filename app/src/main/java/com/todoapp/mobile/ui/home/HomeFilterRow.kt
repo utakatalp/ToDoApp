@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,22 +25,23 @@ import com.todoapp.uikit.modifier.neumorphicShadow
 import com.todoapp.uikit.theme.TDTheme
 
 /**
- * Top-of-screen chip row for switching between Today / Daily / Weekly / Monthly / Yearly views.
- * Mirrors the TDCategoryPicker / TDRecurrencePicker chip styling — selected = purple, unselected
- * = lightPending, light-mode neumorphic shadow + dark-mode subtle border.
+ * Recurring filter chip row (Daily / Weekly / Monthly / Yearly). Surfaces under the section
+ * tab row when the user activates the "Tekrarlı" tab. TODAY filter is intentionally excluded —
+ * it lives in the tab itself.
  */
 @Composable
-internal fun HomeFilterRow(
+internal fun HomeRecurringChipRow(
     selected: HomeFilter,
     onSelected: (HomeFilter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val recurringFilters = remember { HomeFilter.values().filter { it != HomeFilter.TODAY } }
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(items = HomeFilter.values().toList(), key = { it.name }) { filter ->
+        items(items = recurringFilters, key = { it.name }) { filter ->
             FilterChip(
                 filter = filter,
                 isSelected = filter == selected,

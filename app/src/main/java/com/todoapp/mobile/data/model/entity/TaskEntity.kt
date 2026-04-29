@@ -32,6 +32,7 @@ data class TaskEntity(
     @ColumnInfo(name = "category", defaultValue = "PERSONAL") val category: String = "PERSONAL",
     @ColumnInfo(name = "custom_category_name") val customCategoryName: String? = null,
     @ColumnInfo(name = "recurrence", defaultValue = "NONE") val recurrence: String = "NONE",
+    @ColumnInfo(name = "is_all_day", defaultValue = "0") val isAllDay: Boolean = false,
 )
 
 enum class SyncStatus {

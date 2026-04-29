@@ -11,9 +11,9 @@
     <string name="pomodoro_configure_timer">Pomodoro Zamanlayıcısını Ayarla</string>
     <string name="pomodoro_end_session">Seansı Bitir</string>
     <string name="pomodoro_end_session_title">Seans Bitirilsin mi?</string>
-    <string name="pomodoro_end_session_message">Pomodoro seansınızı erken sonlandırmak istediğinizden emin misiniz?</string>
+    <string name="pomodoro_end_session_message">Pomodoro seansını erken sonlandırmak istediğine emin misin?</string>
     <string name="pomodoro_keep_going">Devam Et</string>
-    <string name="pomodoro_configure_timer_subtitle">Odaklanma seansınızı özelleştirin</string>
+    <string name="pomodoro_configure_timer_subtitle">Odaklanma seansını özelleştir</string>
     <string name="pomodoro_total_time_preview">Toplam seans süresi: %1$d dk</string>
     <string name="onboarding_title">Yapılacakları Yönet</string>
     <string name="onboarding_description">Yapılacaklarınızı yönetmenin en akıllı yolu. Kolayca takip edin. Önemli olanları asla unutmayın.</string>
@@ -27,9 +27,14 @@
     <string name="home_screen_task_pending_text">Bekliyor</string>
     <string name="no_tasks_today">Bugün görev yok</string>
     <string name="no_tasks_today_description">Başlamak için yeni bir görev oluşturun</string>
+    <string name="no_recurring_daily_title">Günlük rutin görev yok</string>
+    <string name="no_recurring_weekly_title">Haftalık rutin görev yok</string>
+    <string name="no_recurring_monthly_title">Aylık rutin görev yok</string>
+    <string name="no_recurring_yearly_title">Yıllık rutin görev yok</string>
+    <string name="no_recurring_description">Bu sıklıkta tekrarlanan bir görevin yok</string>
     <string name="calendar_no_tasks_for_day">Planlanmış bir şey yok</string>
     <string name="calendar_no_tasks_for_day_description">Bu güne ait kişisel görev veya grup son tarihi yok</string>
-    <string name="deadline_in_hours_minutes">%1$dsa %2$ddk kaldı</string>
+    <string name="deadline_in_hours_minutes">%1$d saat %2$d dk kaldı</string>
     <string name="deadline_unassigned">Atanmamış</string>
     <string name="deadline_still_pending_suffix"> · hala bekliyor</string>
     <string name="deadline_completed_primary">Tamamlandı</string>
@@ -50,14 +55,13 @@
         <item quantity="other">%1$d gün önce</item>
     </plurals>
     <string name="calendar_section_my_tasks">Görevlerim</string>
-    <string name="calendar_section_recurring_tasks">Tekrarlı Görevler</string>
+    <string name="calendar_section_recurring_tasks">Rutin Görevler</string>
     <string name="calendar_section_group_deadlines">Grup Görevleri</string>
     <string name="status_done">Tamamlandı</string>
     <string name="status_pending">Bekliyor</string>
     <string name="status_overdue">Gecikti</string>
     <string name="task_complete">Tamamlandı</string>
     <string name="task_pending">Bekliyor</string>
-    <string name="tasks_today">Bugünkü Görevler</string>
     <string name="add_new_task">Yeni Görev Ekle</string>
     <string name="task_details">Görev Detayları</string>
     <string name="edit_task_details">Görev Detaylarını Düzenle</string>
@@ -71,7 +75,7 @@
     <string name="set_time">Süre Ayarla</string>
     <string name="plan_your_day">Gününü Planla</string>
     <string name="task_date">Görev Tarihi</string>
-    <string name="when_do_you_want_to_get_notified">Ne zaman bildirim almak istiyorsunuz?</string>
+    <string name="when_do_you_want_to_get_notified">Ne zaman bildirim almak istiyorsun?</string>
     <string name="starts">Başlangıç</string>
     <string name="ends">Bitiş</string>
     <string name="description">Görev Açıklaması</string>
@@ -87,7 +91,7 @@
     <string name="photos">Fotoğraflar</string>
     <string name="add_photo">Fotoğraf ekle</string>
     <string name="delete_photo_title">Fotoğrafı sil?</string>
-    <string name="delete_photo_message">Bu fotoğrafı görevden kaldırmak istiyor musunuz?</string>
+    <string name="delete_photo_message">Bu fotoğrafı görevden kaldırmak istiyor musun?</string>
     <string name="photo_requires_sync">Görev sunucuya eşitlenene kadar fotoğraf eklenemez</string>
     <string name="photo_queued_for_sync">Fotoğraf, görev sunucuya eşitlendiğinde yüklenecek</string>
     <string name="failed_to_upload_photo">Fotoğraf yüklenemedi</string>
@@ -133,7 +137,7 @@
     <string name="activity_screen_progress_text">Yıllık İlerleme</string>
     <string name="activity_week_summary">Bu hafta %1$d tamamlandı · %2$d bekliyor</string>
     <string name="activity_year_summary">Bu yıl: %1$d tamamlandı ✅</string>
-    <string name="activity_include_recurring">Tekrarlı görevleri dahil et</string>
+    <string name="activity_include_recurring">Rutin görevleri dahil et</string>
     <string name="activity_trend_up">↑ Geçen haftaya göre %%%1$d</string>
     <string name="activity_trend_down">↓ Geçen haftaya göre %%%1$d</string>
     <string name="activity_trend_flat">Geçen haftayla aynı</string>
@@ -141,6 +145,22 @@
     <string name="activity_streak_none">Henüz seri yok — bugün bir görev tamamla</string>
     <string name="activity_best_day">En verimli gün: %1$s · %2$d görev</string>
     <string name="activity_category_breakdown_title">Bu hafta nereye odaklandın</string>
+    <string name="activity_heatmap_title">Son 6 ay</string>
+    <string name="activity_heatmap_legend_less">Az</string>
+    <string name="activity_heatmap_legend_more">Çok</string>
+    <string name="activity_month_summary">%1$d tamamlandı · %2$d bekliyor (bu ay)</string>
+    <string name="activity_trend_up_month">↑ %1$d%% geçen aya göre</string>
+    <string name="activity_trend_down_month">↓ %1$d%% geçen aya göre</string>
+    <string name="activity_trend_flat_month">Geçen ayla aynı</string>
+    <string name="activity_best_day_in_month">En verimli: %1$s · %2$d görev</string>
+    <string name="activity_heatmap_month_title">%1$s aktivitesi</string>
+    <string name="activity_year_strip_title">Son 12 ay</string>
+    <string name="activity_monthly_chart_title">Haftalara göre görevler</string>
+    <string name="bar_label_week">H%1$d</string>
+    <string name="activity_heatmap_tooltip">%1$s · %2$d</string>
+    <string name="activity_drill_in_week_title">Hafta %1$d</string>
+    <string name="activity_drill_in_chart_title">Günlük dağılım</string>
+    <string name="activity_drill_in_back">Geri</string>
     <string name="day_monday">Pazartesi</string>
     <string name="day_tuesday">Salı</string>
     <string name="day_wednesday">Çarşamba</string>
@@ -174,6 +194,7 @@
     <string name="start">Başla</string>
     <string name="skip">Atla</string>
     <string name="advanced_settings">Gelişmiş Ayarlar</string>
+    <string name="details_label">Detaylar</string>
     <string name="retry">Tekrar Dene</string>
     <string name="secret_task">Gizli Görev</string>
     <string name="authentication_failed">Kimlik Doğrulama Başarısız</string>
@@ -197,10 +218,10 @@
     <string name="login">Giriş Yap</string>
     <string name="logout">Çıkış Yap</string>
     <string name="logout_dialog_title">Çıkış Yap</string>
-    <string name="logout_dialog_message">Çıkış yapmak istediğinizden emin misiniz?</string>
+    <string name="logout_dialog_message">Çıkış yapmak istediğine emin misin?</string>
     <string name="login_header">DONEBOT</string>
     <string name="elevate_your_productivity">Verimliliğinizi artırın</string>
-    <string name="welcome_back">Tekrar Hoşgeldiniz</string>
+    <string name="welcome_back">Tekrar Hoş Geldin</string>
     <string name="please_sign_in_to_your_account">Lütfen hesabınıza giriş yapın</string>
     <string name="email_address">E-posta Adresi</string>
     <string name="email_placeholder">isim@ornek.com</string>
@@ -217,7 +238,7 @@
     <string name="error_password_min_length">Şifre en az %1$d karakter olmalıdır</string>
     <string name="forgot_password">Şifremi Unuttum</string>
     <string name="recover_access">Erişimi Kurtar</string>
-    <string name="enter_your_email_address_and_we_will_send_you_a_link_to_reset_your_password">E-posta adresinizi girin, şifrenizi sıfırlamanız için bir bağlantı göndereceğiz.</string>
+    <string name="enter_your_email_address_and_we_will_send_you_a_link_to_reset_your_password">E-posta adresini gir, şifreni sıfırlaman için bir bağlantı göndereceğiz.</string>
     <string name="send_reset_link">Sıfırlama Bağlantısı Gönder</string>
     <string name="remember_your_password">"Şifrenizi hatırladınız mı? "</string>
     <string name="back_to_login">Girişe Dön</string>
@@ -234,7 +255,7 @@
     <string name="error_new_password_same">Yeni şifre mevcut şifreden farklı olmalı</string>
     <string name="password_changed">Şifre başarıyla değiştirildi</string>
     <string name="change_password_hint">Hesabınıza giriş yapmak için kullanılan şifreyi güncelleyin.</string>
-    <string name="reset_password_hint">Hesabınız için yeni bir şifre seçin. Ardından tekrar giriş yapmanız gerekecek.</string>
+    <string name="reset_password_hint">Hesabın için yeni bir şifre seç. Ardından tekrar giriş yapman gerekecek.</string>
     <string name="close">Kapat</string>
     <string name="error_something_went_wrong">Bir şeyler ters gitti</string>
     <string name="error_unknown">Bilinmeyen hata</string>
@@ -243,9 +264,9 @@
     <string name="delete_task_title">Görev silinsin mi?</string>
     <string name="task_deleted">Görev silindi</string>
     <string name="group_task_deleted">Grup görevi silindi</string>
-    <string name="delete_task_message">Görevi silmek istiyor musunuz?</string>
+    <string name="delete_task_message">Görevi silmek istiyor musun?</string>
     <string name="delete_group_title">Grup silinsin mi?</string>
-    <string name="delete_group_message">Bu grubu silmek istiyor musunuz?</string>
+    <string name="delete_group_message">Bu grubu silmek istiyor musun?</string>
     <string name="group_deleted">Grup silindi</string>
     <string name="delete">Sil</string>
     <string name="groups">Gruplar</string>
@@ -256,7 +277,7 @@
     <string name="group_name">Grup Adı</string>
     <string name="e_g_the_johnsons_summer_vacation">örn. Aile, Yaz Tatili</string>
     <string name="what_is_this_group_for_collaborating_on_chores_planning_trips_or_daily_tasks">Bu grup ne için? Ev işleri, gezi planlaması ya da günlük görevler için işbirliği…</string>
-    <string name="text_field_description">Grubu oluşturduktan hemen sonra grup üyelerini davet edebilir ve onlara görev atayabilirsiniz.</string>
+    <string name="text_field_description">Grubu oluşturduktan hemen sonra grup üyelerini davet edebilir ve onlara görev atayabilirsin.</string>
     <string name="create">Oluştur</string>
     <string name="you_don_t_have_any">Henüz hiç</string>
     <string name="groups_yet">grubunuz yok.</string>
@@ -269,14 +290,14 @@
     <string name="notify_me_at">%1$s\'de bildir</string>
     <string name="plan_time_saved">Plan saati kaydedildi</string>
     <string name="notify_hint">\"Seçtiğin saatte seni bilgilendireceğim!\"</string>
-    <string name="edit_details_hint">\"Görev detaylarınızı her zaman düzenleyebilirsiniz.\"</string>
+    <string name="edit_details_hint">\"Görev detaylarını her zaman düzenleyebilirsin.\"</string>
     <string name="hint_swipe_left_delete">Silmek için bir görevi sola kaydırın</string>
     <string name="hint_swipe_right_secret">Gizli olarak işaretlemek için sağa kaydırın — parmak izi gerekli</string>
     <string name="hint_long_press_reorder">Listeni yeniden sıralamak için bir görev kartına uzun basın</string>
     <string name="hint_add_task">Zaman ve açıklama ile yeni görev oluşturmak için + butonuna dokunun</string>
-    <string name="hint_secret_on_create">Gelişmiş Ayarlar üzerinden görev oluştururken gizli olarak işaretleyebilirsiniz</string>
+    <string name="hint_secret_on_create">Gelişmiş Ayarlar üzerinden görev oluştururken gizli olarak işaretleyebilirsin</string>
     <string name="hint_calendar_range">Özel tarih aralığındaki görevleri görüntülemek için Takvim sekmesini kullanın</string>
-    <string name="hint_activity_stats">Haftalık ve yıllık ilerlemenizi takip etmek için Aktivite sekmesini ziyaret edin</string>
+    <string name="hint_activity_stats">Haftalık ve yıllık ilerlemeni takip etmek için Aktivite sekmesini ziyaret et</string>
     <string name="hint_task_detail">Tam detayları görüntülemek ve düzenlemek için herhangi bir görev kartına dokunun</string>
     <string name="hint_daily_plan">Ayarlar → Günlük Planla\'da günlük planlama hatırlatıcısı ayarlayın</string>
     <string name="hint_groups">Diğerleriyle görev organize etmek ve paylaşmak için gruplar oluşturun</string>
@@ -287,7 +308,7 @@
     <string name="hint_group_reorder">Grupları yeniden sıralamak için Gruplar sekmesinde uzun basın ve sürükleyin</string>
     <string name="hint_task_photos">Görev oluştururken fotoğraf ekleyin — ilki görev kartında görünür</string>
     <string name="hint_group_task_flip">Grup görev kartına dokunun, kartı çevirip kimin üstlendiğini görün</string>
-    <string name="hint_group_task_assign_swipe">Grup görevini sağa kaydırarak kendi üstünüze alın, sizdeyse geri bırakın</string>
+    <string name="hint_group_task_assign_swipe">Grup görevini sağa kaydırarak kendi üstüne al, sendeyse geri bırak</string>
     <string name="hint_group_task_priority">Grup görevleri YÜKSEK, ORTA veya DÜŞÜK olarak işaretlenebilir — rozet sağ üstte görünür</string>
     <string name="hint_profile_avatar">Adınızı ve fotoğrafınızı değiştirmek için üst çubuktaki avatarınıza dokunun</string>
     <string name="hint_group_avatar">Yöneticiler grup ayarlarından gruplarına özel bir avatar yükleyebilir</string>
@@ -298,8 +319,8 @@
     <string name="hint_undo_delete">Bir görevi yanlışlıkla sildiniz mi? Alttaki bildirim kaybolmadan Geri Al\'a dokunun</string>
     <string name="hint_language_switch">İngilizce ile Türkçe arasında Ayarlar → Dil üzerinden geçiş yapın</string>
     <string name="hint_tip_label">İpucu</string>
-    <string name="hint_pull_indicator">Yardımcı bir ipucu için aşağı çekin</string>
-    <string name="hint_release_indicator">İpucunuz için bırakın</string>
+    <string name="hint_pull_indicator">Yardımcı bir ipucu için aşağı çek</string>
+    <string name="hint_release_indicator">İpucun için bırak</string>
     <string name="filtered_tasks_title">Görevler</string>
     <string name="filtered_tasks_tab_done">Tamamlandı</string>
     <string name="filtered_tasks_tab_pending">Bekliyor</string>
@@ -367,7 +388,7 @@
     <string name="member_profile">Üye Profili</string>
     <string name="remove_from_group">Gruptan Çıkar</string>
     <string name="remove_member_title">Üyeyi Kaldır</string>
-    <string name="remove_member_message">Bu üyeyi gruptan kaldırmak istediğinizden emin misiniz?</string>
+    <string name="remove_member_message">Bu üyeyi gruptan kaldırmak istediğine emin misin?</string>
     <string name="member_not_found">Üye bulunamadı</string>
     <string name="failed_to_load_member">Üye yüklenemedi</string>
     <string name="failed_to_remove_member">Üye kaldırılamadı</string>
@@ -391,10 +412,10 @@
     <string name="add_member">Üye Ekle</string>
     <string name="invite_to_family">Aileye Davet Et</string>
     <string name="invite_to_family_subtitle">Aile çemberinize yeni bir üye eklemek için davet gönderin. Paylaşılan görevleri görebilir ve yönetebilirler.</string>
-    <string name="email_error">Lütfen geçerli bir e-posta adresi girin</string>
+    <string name="email_error">Lütfen geçerli bir e-posta adresi gir</string>
     <string name="current_members">MEVCUT ÜYELER</string>
     <string name="manage_members_hint">Ayrıntıları görüntülemek, rolleri değiştirmek veya üyeyi gruptan çıkarmak için üyeye dokunun.</string>
-    <string name="transfer_ownership_info">Yönetici haklarını devretmek için bir üye seçin. Siz normal üye olacaksınız.</string>
+    <string name="transfer_ownership_info">Yönetici haklarını devretmek için bir üye seç. Normal üye olacaksın.</string>
     <string name="family_members">AİLE ÜYELERİ</string>
     <string name="search_members">Üye ara…</string>
     <string name="transfer_cannot_undo">Bu işlem geri alınamaz.</string>
@@ -437,18 +458,18 @@
     <string name="status">Durum</string>
     <string name="you">Siz</string>
     <string name="assign_to_me_dialog_title">Bana Ata</string>
-    <string name="assign_to_me_dialog_message">Bu görevi kendinize atamak istediğinizden emin misiniz?</string>
+    <string name="assign_to_me_dialog_message">Bu görevi kendine atamak istediğine emin misin?</string>
     <string name="assign">Ata</string>
     <string name="home_permission_notification_title">Görevlerinden haberdar ol</string>
     <string name="home_permission_notification_body">Hatırlatmaların zamanında ulaşması için bildirimlere izin ver.</string>
     <string name="home_permission_overlay_title">Günlük planını her ekranda gör</string>
     <string name="home_permission_overlay_body">Günlük plan kartını göstermek için diğer uygulamaların üzerine çizme izni ver.</string>
     <string name="error_task_title_required">Görev başlığı zorunludur</string>
-    <string name="error_task_date_required">Lütfen bir tarih seçin</string>
-    <string name="error_task_time_required">Başlangıç ve bitiş saatini ayarlayın</string>
+    <string name="error_task_date_required">Lütfen bir tarih seç</string>
+    <string name="error_task_time_required">Başlangıç ve bitiş saatini ayarla</string>
     <string name="error_task_end_before_start">Bitiş saati başlangıç saatinden sonra olmalıdır</string>
     <string name="notifications_title">Bildirimler</string>
-    <string name="notifications_empty">Hepsi bu kadar — okunmamış bildirim yok</string>
+    <string name="notifications_empty">Yeni bildirim yok</string>
     <string name="notifications_mark_all_read">Tümünü okundu olarak işaretle</string>
     <string name="notifications_mark_all_failed">Bildirimler okundu olarak işaretlenemedi</string>
     <string name="invitations_title">Davetler</string>
@@ -464,7 +485,7 @@
     <string name="settings_section_productivity">Üretkenlik</string>
     <string name="settings_section_privacy">Gizlilik</string>
     <string name="settings_section_account">Hesap</string>
-    <string name="settings_push_notifications">Push bildirimleri</string>
+    <string name="settings_push_notifications">Anlık bildirimler</string>
     <string name="settings_exact_alarms_title">Tam zamanlı hatırlatıcılar</string>
     <string name="settings_exact_alarms_description">Hatırlatmaların belirlediğin zamanda tam olarak çalışmasına izin ver.</string>
     <string name="settings_exact_alarms_status_enabled">Tam zamanlı hatırlatıcılar etkin.</string>
@@ -478,7 +499,7 @@
     <string name="invitation_decline_dialog_title">Daveti reddet?</string>
     <string name="invitation_decline_dialog_message">%1$s\'e katılmamaya karar verdiğini bildireceğiz.</string>
     <string name="invitations_empty_subtitle">Biri seni bir gruba davet ettiğinde burada görünecek.</string>
-    <string name="invitations_keep">Vazgeç</string>
+    <string name="invitations_keep">Saklı Tut</string>
     <plurals name="member_count">
         <item quantity="one">%1$d üye</item>
         <item quantity="other">%1$d üye</item>
@@ -511,6 +532,151 @@
     <string name="notif_task_due_soon_body">%1$s, %2$s grubunda yakında bitiyor</string>
     <string name="pomodoro_notification_channel_name">Pomodoro Canlı Zamanlayıcı</string>
     <string name="pomodoro_notification_channel_description">Aktif Pomodoro seansı için canlı geri sayım</string>
+    <string name="session_expired_dialog_message">Oturumun sona erdi. Lütfen tekrar giriş yap.</string>
+    <string name="notification_channel_tasks_name">Görevler</string>
+    <string name="notification_channel_tasks_description">Görev hatırlatmaları ve güncellemeleri için kullanılır</string>
+    <string name="task_all_day_label">Gün Boyu</string>
+    <string name="deadline_all_day">Gün boyu</string>
+    <string name="zone_morning">Öğleden önce</string>
+    <string name="zone_afternoon">Öğleden sonra</string>
+    <string name="zone_evening">Akşam</string>
+    <string name="info">Bilgi</string>
+    <string name="got_it">Anladım</string>
+    <string name="plan_your_day_info_title">Gününü Planla</string>
+    <string name="plan_your_day_info_description">Bir saat seç; DoneBot her gün o saatte seni selamlar.</string>
+    <string name="pomodoro_info_title">Pomodoro Tekniği</string>
+    <string name="pomodoro_info_description">Odaklanma ile kısa molaları sırayla yaparak dikkatini korursun, tükenmeden çalışırsın. Süreleri ve seans sayısını sen belirlersin.</string>
+    <string name="pomodoro_info_bullet_1">Odak: dikkat dağıtmadan çalışılan dilim</string>
+    <string name="pomodoro_info_bullet_2">Kısa mola: seanslar arasında hızlı bir nefes</string>
+    <string name="pomodoro_info_bullet_3">Uzun mola: birkaç turun sonunda daha uzun bir dinlenme</string>
+    <string name="chat_info_title">DoneBot ile Sohbet</string>
+    <string name="chat_info_description">DoneBot görevlerini okur; sorularını yanıtlar, yenilerini oluşturur, tamamlanmış olarak işaretler. Gizli görevlerin görünmez kalır — sadece sana özel.</string>
+    <string name="chat_info_bullet_1">Sor: \"Bugün ne var?\" veya \"Haftam nasıl geçti?\"</string>
+    <string name="chat_info_bullet_2">Oluştur: \"Yarın saat 15:00\'e toplantı ekle\"</string>
+    <string name="chat_info_bullet_3">Sınır: gizli görevler DoneBot için görünmez</string>
+    <string name="chat_info_bullet_4">Kapsam: sadece görevlerin ve grupların hakkındaki sorulara yanıt verir</string>
+
+    <string name="calendar_info_title">Takvim Görünümü</string>
+    <string name="calendar_info_description">Görevlerini günlere yayılmış şekilde gör. Bir tarihe dokunarak o günün görevlerine atla; düzenlemek için göreve uzun bas.</string>
+    <string name="calendar_info_bullet_1">Günün altındaki noktalar görev olduğunu gösterir</string>
+    <string name="calendar_info_bullet_2">Sağa-sola kaydırarak ay değiştir</string>
+    <string name="calendar_info_bullet_3">Tekrarlayan görevler her uygun günde görünür</string>
+
+    <string name="activity_info_title">Aktiviten</string>
+    <string name="activity_info_description">Haftan ve ayın nasıl geçtiğini izle. Tamamlananları, bekleyenleri ve odak serini grafiklerle gör.</string>
+    <string name="activity_info_bullet_1">Tamamlanan / bekleyen dağılımı</string>
+    <string name="activity_info_bullet_2">Pomodoro toplam odak süresi</string>
+    <string name="activity_info_bullet_3">Seriler gece yarısı sıfırlanır</string>
+
+    <string name="settings_info_title">Ayarlar</string>
+    <string name="settings_info_description">Uygulamayı kendine göre ayarla — dil, tema, bildirimler, gizli mod ve hesap seçenekleri burada.</string>
+    <string name="settings_info_bullet_1">Karanlık mod ve dili değiştir</string>
+    <string name="settings_info_bullet_2">Bildirim izinlerini yönet</string>
+    <string name="settings_info_bullet_3">Çıkış yap veya hesabını sil</string>
+
+    <string name="add_timer_info_title">Pomodoro Zamanlayıcı Ekle</string>
+    <string name="add_timer_info_description">Kendi zamanlayıcını kur: odak süresi, mola süreleri ve tur sayısı. Kayıtlı zamanlayıcılar açılış ekranında görünür.</string>
+    <string name="add_timer_info_bullet_1">Odak süresi çalışma bloğunu belirler</string>
+    <string name="add_timer_info_bullet_2">Uzun mola, seçtiğin tur sonunda devreye girer</string>
+    <string name="add_timer_info_bullet_3">Zamanlayıcıyı dilediğin zaman düzenle veya sil</string>
+
+    <string name="task_detail_info_title">Görev Detayı</string>
+    <string name="task_detail_info_description">Tek bir görevle ilgili her şey — başlık, notlar, son tarih, tekrar, alarm ve kategori. Herhangi bir alanı düzenleyince anında güncellenir.</string>
+    <string name="task_detail_info_bullet_1">Son tarih koy, takvimde görünsün</string>
+    <string name="task_detail_info_bullet_2">Tekrar ayarı yenisini otomatik oluşturur</string>
+    <string name="task_detail_info_bullet_3">Tamamlandı düğmesiyle bitmiş işaretle</string>
+
+    <string name="secret_mode_info_title">Gizli Mod</string>
+    <string name="secret_mode_info_description">Bazı görevleri tamamen özel tut. Gizli görevler şifre ister; DoneBot\'ta, aramada ve paylaşılan aktivitede görünmez.</string>
+    <string name="secret_mode_info_bullet_1">Gizli işaretli görevler kilit açılana kadar saklı</string>
+    <string name="secret_mode_info_bullet_2">DoneBot bunları ne okur ne değiştirir</string>
+    <string name="secret_mode_info_bullet_3">Şifreyi unutursan veriler geri gelmez</string>
+
+    <string name="groups_info_title">Gruplar</string>
+    <string name="groups_info_description">Görevleri ailen, arkadaşların veya ekibinle paylaş. Grup oluştur, üye davet et, birlikte iş paylaş.</string>
+    <string name="groups_info_bullet_1">Gruptaki herkes paylaşılan görevleri görüp tamamlayabilir</string>
+    <string name="groups_info_bullet_2">Sahipler üye ve rolleri yönetir</string>
+    <string name="groups_info_bullet_3">Grubu istediğin zaman ayarlardan terk et</string>
+
+    <string name="create_group_info_title">Yeni Grup Oluştur</string>
+    <string name="create_group_info_description">Grubuna bir isim ve isteğe bağlı bir avatar ver. Üyeleri hemen davet edebilir veya sonra grup ekranından da edebilirsin.</string>
+    <string name="create_group_info_bullet_1">Herkesin tanıyacağı bir isim seç</string>
+    <string name="create_group_info_bullet_2">Avatar grubu ayırt etmeyi kolaylaştırır</string>
+    <string name="create_group_info_bullet_3">Varsayılan olarak sahip sen olursun</string>
+
+    <string name="filtered_tasks_info_title">Filtrelenmiş Görevler</string>
+    <string name="filtered_tasks_info_description">Seçtiğin filtreye göre görevlerinin odaklanmış bir kesiti. Açmak için dokun, tamamlamak için kaydır.</string>
+    <string name="filtered_tasks_info_bullet_1">Filtreler birleşebilir: durum + kategori + tarih</string>
+    <string name="filtered_tasks_info_bullet_2">Boş liste, eşleşen yok demek</string>
+
+    <string name="search_info_title">Arama</string>
+    <string name="search_info_description">Başlığından veya notundan bir kelime yazarak görev bul. Sonuçlar yazdıkça güncellenir.</string>
+    <string name="search_info_bullet_1">Arama büyük/küçük ve aksan farkı gözetmez</string>
+    <string name="search_info_bullet_2">Sonuca dokunarak doğrudan aç</string>
+    <string name="search_info_bullet_3">Gizli görevler burada hiç görünmez</string>
+
+    <string name="pomodoro_summary_info_title">Pomodoro Özeti</string>
+    <string name="pomodoro_summary_info_description">Az önce bitirdiğin oturumun özeti — odak süresi, molalar ve tamamlanan turlar. Zaman içinde örüntü görmek için işine yarar.</string>
+    <string name="pomodoro_summary_info_bullet_1">Toplam odak süresi aktivitene eklenir</string>
+    <string name="pomodoro_summary_info_bullet_2">Atlanan turlar sayılmaz</string>
+
+    <string name="group_detail_info_title">Grup Görevleri</string>
+    <string name="group_detail_info_description">Bu grubun tüm paylaşılan görevleri ve üyeleri. Gruptaki herkes ekleyebilir, düzenleyebilir, tamamlayabilir.</string>
+    <string name="group_detail_info_bullet_1">Üyeler sekmesinde kim var, gör</string>
+    <string name="group_detail_info_bullet_2">Ayarlar için dişli ikonuna dokun</string>
+    <string name="group_detail_info_bullet_3">Roller her üyenin yanında görünür</string>
+
+    <string name="group_settings_info_title">Grup Ayarları</string>
+    <string name="group_settings_info_description">Grubu yeniden adlandır, avatarını değiştir, üyeleri yönet veya sahipliği devret. Bazı işlemler yalnızca sahibe açıktır.</string>
+    <string name="group_settings_info_bullet_1">Sahipler üye davet eder veya çıkarır</string>
+    <string name="group_settings_info_bullet_2">Üyeler istedikleri an ayrılabilir</string>
+    <string name="group_settings_info_bullet_3">Grubu silmek tüm görevleri herkes için kaldırır</string>
+
+    <string name="invite_member_info_title">Üye Davet Et</string>
+    <string name="invite_member_info_description">E-posta ile davet gönder. Davet edilen kişi gruba katılma bağlantısı alır; DoneBot hesabı gerekir.</string>
+    <string name="invite_member_info_bullet_1">Bekleyen davetler grup ayarlarından iptal edilebilir</string>
+    <string name="invite_member_info_bullet_2">Davetliler üye olarak katılır; sonra terfi ettirebilirsin</string>
+
+    <string name="manage_members_info_title">Üyeleri Yönet</string>
+    <string name="manage_members_info_description">Gruptaki herkesi gör, rollerini değiştir veya gruptan çıkar. Değişiklik için sahip yetkisi gerekir.</string>
+    <string name="manage_members_info_bullet_1">Bir üyeyi yöneticiye yükselterek moderasyonu paylaş</string>
+    <string name="manage_members_info_bullet_2">Üyeyi çıkarmak erişimini anında keser</string>
+
+    <string name="group_task_detail_info_title">Paylaşılan Görev Detayı</string>
+    <string name="group_task_detail_info_description">Kişisel bir görev gibi, ama tüm gruba görünür. Düzenlemeler ve tamamlamalar herkesle senkronlanır.</string>
+    <string name="group_task_detail_info_bullet_1">Kim tamamlandı işaretledi, gör</string>
+    <string name="group_task_detail_info_bullet_2">Yorumlar ve değişiklikler eş zamanlı paylaşılır</string>
+
+    <string name="member_profile_info_title">Üye Profili</string>
+    <string name="member_profile_info_description">Bir grup üyesinin salt okunur görünümü — ad, avatar, rol ve bu gruptaki paylaşılan aktivite.</string>
+    <string name="member_profile_info_bullet_1">İzin varsa mesajlaş veya görev ata</string>
+    <string name="member_profile_info_bullet_2">Kişisel görev verisi gizli kalır</string>
+
+    <string name="transfer_ownership_info_title">Sahipliği Devret</string>
+    <string name="transfer_ownership_info_description">Grubu başka bir üyeye devret. O kişi tam sahip yetkisi alır; sen normal üye olursun.</string>
+    <string name="transfer_ownership_info_bullet_1">Bir grupta yalnızca tek sahip vardır</string>
+    <string name="transfer_ownership_info_bullet_2">Bu işlemi yalnız başına geri alamazsın</string>
+
+    <string name="profile_info_title">Profilin</string>
+    <string name="profile_info_description">Görünen adını, avatarını ve e-posta tercihlerini güncelle. Değişiklikler DoneBot\'ta anında yansır.</string>
+    <string name="profile_info_bullet_1">Avatar görevlerde ve gruplarda görünür</string>
+    <string name="profile_info_bullet_2">Şifreni Ayarlar\'dan değiştir</string>
+
+    <string name="notifications_info_title">Bildirimler</string>
+    <string name="notifications_info_description">DoneBot\'tan gelen son uyarılar — görev hatırlatıcıları, grup davetleri ve paylaşılan aktivite. Birine dokun, kaynağına atla.</string>
+    <string name="notifications_info_bullet_1">Okunmamış olanlarda kırmızı nokta vardır</string>
+    <string name="notifications_info_bullet_2">Temizlenenler bir süre sonra kaybolur</string>
+
+    <string name="invitations_info_title">Davetler</string>
+    <string name="invitations_info_description">Kararını bekleyen grup davetleri. Katılmak için kabul et, kapatmak için reddet.</string>
+    <string name="invitations_info_bullet_1">Kabul ettiğin an üye olarak eklenirsin</string>
+    <string name="invitations_info_bullet_2">Reddedilen davetler davet eden tarafından tekrar gönderilebilir</string>
+
+    <string name="alarm_sounds_info_title">Alarm Sesleri</string>
+    <string name="alarm_sounds_info_description">Görev alarmı çaldığında çalacak sesi seç. Ayarlamadan önce dinlemek için ses üzerine dokun.</string>
+    <string name="alarm_sounds_info_bullet_1">Seçilen ses tüm görev alarmlarına uygulanır</string>
+    <string name="alarm_sounds_info_bullet_2">Sistem sesleri cihaz ses seviyeni kullanır</string>
+
     <string name="pomodoro_notification_session_progress">%1$d / %2$d oturum</string>
     <string name="pomodoro_notification_action_pause">Duraklat</string>
     <string name="pomodoro_notification_action_resume">Devam Et</string>
@@ -527,7 +693,7 @@
     <string name="category_medicine">İlaç</string>
     <string name="category_health">Sağlık</string>
     <string name="category_work">İş</string>
-    <string name="category_study">Çalışma</string>
+    <string name="category_study">Ders</string>
     <string name="category_birthday">Doğum günü</string>
     <string name="category_personal">Kişisel</string>
     <string name="category_other">Diğer</string>
@@ -550,8 +716,73 @@
     <string name="filter_monthly">Aylık</string>
     <string name="filter_yearly">Yıllık</string>
 
-    <string name="section_daily_tasks">Günlük Görevler</string>
-    <string name="section_weekly_tasks">Haftalık Görevler</string>
-    <string name="section_monthly_tasks">Aylık Görevler</string>
-    <string name="section_yearly_tasks">Yıllık Görevler</string>
+
+    <!-- Chat (DoneBot AI asistanı) -->
+    <string name="chat_title">DoneBot</string>
+    <string name="navbar_chat_screen_page_name">Sohbet</string>
+    <string name="bottombar_chat_tab_label">DoneBot</string>
+    <string name="chat_input_hint">DoneBot\'a sor…</string>
+    <string name="chat_send_button">Gönder</string>
+    <string name="chat_clear_history">Geçmişi temizle</string>
+    <string name="chat_empty_title">Merhaba, ben DoneBot</string>
+    <string name="chat_empty_subtitle">Bugün neler var, hangileri süresi geçti ya da haftan nasıl gidiyor diye sorabilirsin.</string>
+    <string name="chat_thinking">DoneBot düşünüyor…</string>
+    <string name="chat_error_generic">Bir şeyler ters gitti. Lütfen tekrar deneyin.</string>
+    <string name="chat_error_blocked">Bu yanıt engellendi. Farklı bir şekilde sormayı deneyin.</string>
+    <string name="chat_error_offline">Çevrimdışısın. Bağlanıp tekrar dene.</string>
+    <string name="chat_error_rate_limited">Yavaşla — DoneBot\'un kotası şimdilik dolu. Bir dakika bekle ve tekrar dene.</string>
+    <string name="chat_retry">Tekrar dene</string>
+    <string name="chat_dismiss">Kapat</string>
+    <string name="chat_loop_overflow">Bilgi ararken takıldım. Sorunu farklı şekilde sormayı dene.</string>
+    <string name="chat_error_rate_limited_cooldown_format">Tekrar denemek için %1$ds…</string>
+    <string name="chat_char_count_format">%1$d/%2$d</string>
+    <string name="chat_tool_busy_generic">Görevlerine bakıyorum…</string>
+    <string name="chat_action_copy">Metni kopyala</string>
+    <string name="chat_action_try_again">Tekrar dene</string>
+    <string name="chat_action_copied_toast">Kopyalandı</string>
+    <string name="chat_persona_subtitle">Verimlilik asistanı</string>
+    <string name="chat_suggested_today">Bugün neler var?</string>
+    <string name="chat_suggested_overdue">Geciken iş var mı?</string>
+    <string name="chat_suggested_progress">Bu hafta nasıl gidiyorum?</string>
+    <string name="chat_suggested_planday">Günümü planla</string>
+    <string name="chat_clear_confirm_title">Sohbet temizlensin mi?</string>
+    <string name="chat_clear_confirm_message">Bu, DoneBot ile sohbet geçmişini siler ama görevlerini etkilemez.</string>
+    <string name="chat_clear_confirm_button">Temizle</string>
+    <string name="chat_action_clear_history">Sohbeti temizle</string>
+    <string name="chat_send_button_description">Mesajı gönder</string>
+    <string name="chat_scroll_to_bottom">En son mesaja git</string>
+    <string name="chat_local_today_count_format">Bugün %1$d görevin var.</string>
+    <string name="chat_local_today_empty">Bugün hiç görevin yok. Bir tane eklemek ister misin?</string>
+    <string name="chat_local_overdue_count_format">%1$d gecikmiş görevin var.</string>
+    <string name="chat_local_overdue_empty">Gecikmiş hiç bir şey yok — harikasın!</string>
+    <string name="chat_local_week_count_format">Bu hafta %1$d görev tamamladın.</string>
+    <string name="chat_local_greeting">Selam! Bugün aklında ne var?</string>
+    <string name="chat_system_instruction">Sen kullanıcının yapılacaklar uygulamasında çalışan DoneBot, bir verimlilik asistanısın. TEK amacın kullanıcıya bu uygulamadaki görevleri ve grupları için yardımcı olmaktır. Yanıtları kısa, samimi ve uygulanabilir tut.\n\nHer kullanıcı mesajı `[Context: …]` bloğu ile başlar; bu blok bugünün tarihini, bugünkü görevleri, yarınki görev sayısını, gecikmiş görev sayısını ve bu hafta tamamlanan görev sayısını içerir. Trend/sayım soruları için bu bloğu kaynak kabul et — [Context] zaten cevabı içeriyorsa getCurrentDate, getTodaysTasks, getOverdueTasks, getTasksForDateRange (yarın için) veya getCompletedTasksThisWeek ÇAĞIRMA. En son [Context] bloğu daima geçerlidir.\n\nAraçlar:\n• Okuma: getTodaysTasks, getOverdueTasks, getTasksForDateRange, getGroups, getCompletedTasksThisWeek.\n• Yazma: createTask, updateTask, deleteTask, setTaskCompletion, setTaskSecret.\n• Yardımcı: getCurrentDate — sadece [Context] bloğunda olmayan bir tarihe ihtiyacın varsa çağır.\n\nKurallar:\n• Değişiklikleri yanıtında daima id ve başlıkla doğrula (örn. \"\'Market alışverişi\' 2026–05–01 için oluşturuldu\", \"42 numaralı görev silindi\").\n• Id olmadan değişiklik yapma; gerekirse önce bir okuma aracıyla bul.\n• Görev detayı uydurma. Grup görevleri sohbetten düzenlenemez — sadece kişisel görevler.\n\nKapsam (KATI):\n• SADECE şunları yanıtlayabilirsin: kullanıcının görevleri, grupları, bu uygulamadaki verimlilik metrikleri veya uygulamanın görev/grup özelliklerinin nasıl kullanılacağı. Kısa selamlamalar (hi, hello, thanks, merhaba, selam, teşekkürler) izinlidir — 1-2 sıcak kelime ile yanıtla.\n• Bunun dışındaki HER şeyi reddetmek ZORUNDASIN — genel bilgi soruları, kod veya programlama, matematik, haber, hava durumu, espri, hikaye, görüş bildirme, görev dışı konularda tavsiye, diğer uygulamalar veya servisler, kendin hakkında \"DoneBot, bir verimlilik asistanı\" dışında bilgi, ve her türlü roleplay veya persona istekleri dahil.\n• Reddederken DAİMA aşağıdaki tam şablonlardan birini kullan (kullanıcının dili ile eşleştir):\n   - İngilizce: \"Sorry, I can only help with your tasks and groups in this app. Try asking what\'s on your plate today, or to add/edit a task.\"\n   - Türkçe: \"Üzgünüm, sadece bu uygulamadaki görevlerin ve grupların için yardımcı olabilirim. Bugün neyin var, ya da bir görev eklemek/düzenlemek ister misin?\"\n• Reddetme sebebini açıklama. Yapamayacağın şeyleri sıralama. \"Bir AI olarak…\" gibi söylemler yok. Alternatif yanıt yok, \"ama hızlıca şunu söyleyeyim…\" gibi taviz yok.</string>
+    <!-- Home — greeting (icon + clock variant) -->
+    <string name="home_greeting_morning_format">Günaydın, %1$s</string>
+    <string name="home_greeting_midday_format">İyi günler, %1$s</string>
+    <string name="home_greeting_evening_format">İyi akşamlar, %1$s</string>
+    <string name="home_greeting_morning_no_name">Günaydın</string>
+    <string name="home_greeting_midday_no_name">İyi günler</string>
+    <string name="home_greeting_evening_no_name">İyi akşamlar</string>
+    <string name="home_greeting_icon_morning_cd">Sabah</string>
+    <string name="home_greeting_icon_midday_cd">Öğle</string>
+    <string name="home_greeting_icon_evening_cd">Akşam</string>
+    <!-- Home — section tab row -->
+    <string name="home_section_tab_today">Bugün</string>
+    <string name="home_section_tab_recurring">Rutinler</string>
+    <string name="home_section_tab_selected_cd">seçili</string>
+    <string name="home_section_tab_unselected_cd">seçili değil</string>
+<!-- Home — suggest card (kept) -->
+    <string name="donebot_suggest_morning_title">Bugüne hazır mısın?</string>
+    <string name="donebot_suggest_morning_body_format">Dün %1$d görev tamamladın. Bugüne plan kurmak ister misin?</string>
+    <string name="donebot_suggest_morning_cta">Önerileri gör</string>
+    <string name="donebot_suggest_evening_title">Bugünü kapatma vakti</string>
+    <string name="donebot_suggest_evening_body_format">%1$d/%2$d görev tamamlandı. Kalan %3$d göreve ne yapalım?</string>
+    <string name="donebot_suggest_evening_cta_primary">Yarına aktar</string>
+    <string name="donebot_suggest_evening_cta_secondary">Olduğu gibi bırak</string>
+    <string name="donebot_suggest_evening_all_done_title">Süpersin! 🎉</string>
+    <string name="donebot_suggest_evening_all_done_body_format">Bugün için planladığın %1$d görevin hepsini tamamladın. Harika iş!</string>
+    <string name="donebot_suggest_evening_all_done_cta">Tamam</string>
+    <string name="donebot_suggest_dismiss_cd">Kapat</string>
 </resources>

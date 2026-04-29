@@ -10,6 +10,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Configuration
+import com.todoapp.mobile.data.network.NetworkMonitor
 import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.data.notification.PomodoroNotificationChannels
 import com.todoapp.mobile.domain.alarm.RescheduleAllAlarmsUseCase
@@ -44,6 +45,9 @@ class Application :
     @Inject
     lateinit var rescheduleAllAlarmsUseCase: RescheduleAllAlarmsUseCase
 
+    @Inject
+    lateinit var networkMonitor: NetworkMonitor
+
     override val workManagerConfiguration: Configuration
         get() =
             Configuration
@@ -56,6 +60,7 @@ class Application :
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
+        installAppCheck()
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         createNotificationChannel()
         PomodoroNotificationChannels.ensurePomodoroChannel(this)
@@ -84,6 +89,7 @@ class Application :
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
         pomodoroEngine.shutdown()
+        networkMonitor.shutdown()
     }
 
     private fun createNotificationChannel() {
@@ -91,7 +97,7 @@ class Application :
             val channel =
                 NotificationChannel(
                     NotificationService.CHANNEL_ID,
-                    "Tasks",
+                    getString(R.string.notification_channel_tasks_name),
                     NotificationManager.IMPORTANCE_HIGH,
                 ).apply {
                     enableVibration(true)
@@ -99,7 +105,7 @@ class Application :
                     setShowBadge(true)
                     lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
                 }
-            channel.description = "Used for the notifications"
+            channel.description = getString(R.string.notification_channel_tasks_description)
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }

@@ -38,6 +38,13 @@ constructor(
     private val _state = MutableStateFlow(PomodoroEngineState())
     override val state = _state.asStateFlow()
 
+    // replay=0 already prevents new subscribers from seeing past emissions
+    // (verified against Kotlin's SharedFlow semantics). The buffer is sized to
+    // absorb fast back-to-back emissions while a subscriber is busy handling
+    // the previous one — without it, tryEmit can drop SessionFinished mid-tick,
+    // breaking the in-screen ringtone/transition path. The hasStartedAnySession
+    // guard in startNextSession() is what actually prevents stale state from
+    // re-emitting PomodoroFinished on a fresh launch.
     private val _events =
         MutableSharedFlow<PomodoroEvent>(
             replay = 0,
@@ -57,6 +64,12 @@ constructor(
     private var totalSessionsCount: Int = 0
     private var sessionIndexCounter: Int = -1
 
+    // True only after a session has actually been popped off the queue. Prevents
+    // PomodoroFinished from being emitted when prepare()/skip() lands on an empty
+    // queue WITHOUT having started anything (e.g. after setSessionQueue(ArrayDeque())
+    // or any leftover state from a previous run that the new ViewModel observes).
+    private var hasStartedAnySession: Boolean = false
+
     // ---------------- QUEUE ----------------
 
     override fun setSessionQueue(queue: ArrayDeque<Session>) {
@@ -64,6 +77,7 @@ constructor(
         queue.forEach { sessionQueue.addLast(it) }
         totalSessionsCount = queue.size
         sessionIndexCounter = -1
+        hasStartedAnySession = false
         _state.update { it.copy(totalSessions = totalSessionsCount, currentSessionIndex = 0) }
     }
 
@@ -97,7 +111,19 @@ constructor(
         _state.update { it.copy(isRunning = false) }
         alarmScheduler.cancel()
         serviceController.stop()
-        _events.tryEmit(PomodoroEvent.PomodoroFinished)
+        emitIfSubscribed(PomodoroEvent.PomodoroFinished)
+    }
+
+    /**
+     * Drop the event entirely if no PomodoroViewModel is currently collecting.
+     * Without this, [extraBufferCapacity] would queue the emission and hand it
+     * to the next subscriber that connects (e.g. on a fresh Pomodoro launch),
+     * sending the user straight to Summary without ever starting a session.
+     */
+    private fun emitIfSubscribed(event: PomodoroEvent) {
+        if (_events.subscriptionCount.value > 0) {
+            _events.tryEmit(event)
+        }
     }
 
     override fun updateBannerVisibility(isVisible: Boolean) {
@@ -109,6 +135,19 @@ constructor(
         alarmScheduler.cancel()
         serviceController.stop()
         scope.cancel()
+    }
+
+    override fun resetState() {
+        cancelRunningJobs()
+        sessionQueue.clear()
+        sessionIndexCounter = -1
+        totalSessionsCount = 0
+        remainingMillis = ZERO_MILLIS
+        overtimeMillis = ZERO_MILLIS
+        hasStartedAnySession = false
+        _state.value = PomodoroEngineState()
+        alarmScheduler.cancel()
+        serviceController.stop()
     }
 
     private fun scheduleEndAlarm(remainingMs: Long) {
@@ -143,7 +182,7 @@ constructor(
             )
         }
 
-        _events.tryEmit(PomodoroEvent.SessionFinished)
+        emitIfSubscribed(PomodoroEvent.SessionFinished)
 
         overtimeJob =
             scope.launch {
@@ -162,10 +201,17 @@ constructor(
         if (next == null) {
             alarmScheduler.cancel()
             serviceController.stop()
-            _events.tryEmit(PomodoroEvent.PomodoroFinished)
+            // Only emit PomodoroFinished if we actually started at least one session in
+            // this run. Without this guard, calling prepare() on an empty queue (e.g.
+            // observed leftover state) would navigate to Summary on a fresh launch.
+            if (hasStartedAnySession) {
+                emitIfSubscribed(PomodoroEvent.PomodoroFinished)
+            }
             updateBannerVisibility(false)
             return
         }
+
+        hasStartedAnySession = true
 
         // When coming from overtime, startOvertime() already incremented the counter.
         // Only increment here for initial prepare() and manual skips mid-session.

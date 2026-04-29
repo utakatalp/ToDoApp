@@ -17,6 +17,8 @@ import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.firesOn
 import com.todoapp.mobile.domain.model.toDomain
 import com.todoapp.mobile.domain.repository.CompletedCountByDay
+import com.todoapp.mobile.domain.repository.DailyBucket
+import com.todoapp.mobile.domain.repository.MonthlyWeekBucket
 import com.todoapp.mobile.domain.repository.TaskRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +32,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import javax.inject.Inject
 
+@Suppress("LargeClass")
 class TaskRepositoryImpl
 @Inject
 constructor(
@@ -93,6 +96,16 @@ constructor(
         if (recurrence == Recurrence.NONE) return kotlinx.coroutines.flow.flowOf(emptyList())
         return localDataSource.observeByRecurrence(recurrence.name).map { list ->
             list.map { it.toDomain() }
+        }
+    }
+
+    override fun observeOverdueTasks(today: LocalDate): Flow<List<Task>> = localDataSource.observeOverdueTasks(today.toEpochDay()).map { list ->
+        list.map { it.toDomain() }
+    }
+
+    override suspend fun deferTasksToTomorrow(taskIds: List<Long>) = withContext(Dispatchers.IO) {
+        if (taskIds.isNotEmpty()) {
+            localDataSource.shiftDatesByOneDay(taskIds)
         }
     }
 
@@ -184,41 +197,105 @@ constructor(
     ): Flow<Pair<Map<LocalDate, Int>, Map<LocalDate, Int>>> {
         val weekStart = date.with(DayOfWeek.MONDAY)
         val weekEnd = weekStart.plusDays(DAYS_TO_ADD.toLong())
-        return kotlinx.coroutines.flow.combine(
-            localDataSource.observeRange(weekStart.toEpochDay(), weekEnd.toEpochDay()),
-            localDataSource.observeAllRecurringTasks(),
-            dailyCompletionDao.observeRange(weekStart.toEpochDay(), weekEnd.toEpochDay()),
-        ) { dateBased, recurring, completions ->
-            val completed = mutableMapOf<LocalDate, Int>()
-            val pending = mutableMapOf<LocalDate, Int>()
-            // Non-recurring rows in the visible range — exclude recurring (they're handled below
-            // and would otherwise double-count the anchor day).
-            dateBased.filter { it.recurrence == Recurrence.NONE.name }.forEach { entity ->
-                val day = LocalDate.ofEpochDay(entity.date)
-                if (entity.isCompleted) completed.merge(day, 1, Int::plus)
-                else pending.merge(day, 1, Int::plus)
+        return observeRangeCounts(weekStart, weekEnd, includeRecurring)
+    }
+
+    override fun observeCompletedCountsByDateRange(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        includeRecurring: Boolean,
+    ): Flow<Map<LocalDate, Int>> = observeRangeCounts(startDate, endDate, includeRecurring).map { (completed, _) -> completed }
+
+    override fun observeMonthlyWeekBuckets(
+        monthStart: LocalDate,
+        includeRecurring: Boolean,
+    ): Flow<List<MonthlyWeekBucket>> {
+        val monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth())
+        return observeRangeCounts(monthStart, monthEnd, includeRecurring).map { (completed, pending) ->
+            val totalDays = monthStart.lengthOfMonth()
+            val bucketCount = (totalDays + DAYS_IN_WEEK - 1) / DAYS_IN_WEEK
+            (0 until bucketCount).map { index ->
+                val rangeStart = monthStart.plusDays((index * DAYS_IN_WEEK).toLong())
+                val rangeEndDayOfMonth = ((index + 1) * DAYS_IN_WEEK).coerceAtMost(totalDays)
+                val rangeEnd = monthStart.withDayOfMonth(rangeEndDayOfMonth)
+                var completedSum = 0
+                var pendingSum = 0
+                var cursor = rangeStart
+                while (!cursor.isAfter(rangeEnd)) {
+                    completedSum += completed[cursor] ?: 0
+                    pendingSum += pending[cursor] ?: 0
+                    cursor = cursor.plusDays(1)
+                }
+                MonthlyWeekBucket(
+                    weekIndex = index + 1,
+                    rangeStart = rangeStart,
+                    rangeEnd = rangeEnd,
+                    completed = completedSum,
+                    pending = pendingSum,
+                )
             }
-            if (includeRecurring) {
-                // Recurring tasks: expand to one instance per firing day in [weekStart, weekEnd].
-                // Completion comes from task_daily_completions, not from is_completed.
-                val completionKeys = completions.map { it.taskId to it.date }.toSet()
-                recurring.forEach { entity ->
-                    val recurrence = Recurrence.fromStorage(entity.recurrence)
-                    val anchor = LocalDate.ofEpochDay(entity.date)
-                    for (offset in 0 until DAYS_IN_WEEK) {
-                        val day = weekStart.plusDays(offset.toLong())
-                        if (recurrence.firesOn(anchor, day)) {
-                            if (entity.id to day.toEpochDay() in completionKeys) {
-                                completed.merge(day, 1, Int::plus)
-                            } else {
-                                pending.merge(day, 1, Int::plus)
-                            }
+        }
+    }
+
+    override fun countCompletedTasksInAMonth(
+        monthStart: LocalDate,
+        includeRecurring: Boolean,
+    ): Flow<Int> {
+        val monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth())
+        return observeRangeCounts(monthStart, monthEnd, includeRecurring).map { (completed, _) -> completed.values.sum() }
+    }
+
+    override fun observeDailyBucketsByDateRange(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        includeRecurring: Boolean,
+    ): Flow<List<DailyBucket>> = observeRangeCounts(startDate, endDate, includeRecurring).map { (completed, pending) ->
+        val totalDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate).toInt() + 1
+        (0 until totalDays).map { offset ->
+            val date = startDate.plusDays(offset.toLong())
+            DailyBucket(
+                date = date,
+                completed = completed[date] ?: 0,
+                pending = pending[date] ?: 0,
+            )
+        }
+    }
+
+    private fun observeRangeCounts(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        includeRecurring: Boolean,
+    ): Flow<Pair<Map<LocalDate, Int>, Map<LocalDate, Int>>> = kotlinx.coroutines.flow.combine(
+        localDataSource.observeRange(startDate.toEpochDay(), endDate.toEpochDay()),
+        localDataSource.observeAllRecurringTasks(),
+        dailyCompletionDao.observeRange(startDate.toEpochDay(), endDate.toEpochDay()),
+    ) { dateBased, recurring, completions ->
+        val completed = mutableMapOf<LocalDate, Int>()
+        val pending = mutableMapOf<LocalDate, Int>()
+        dateBased.filter { it.recurrence == Recurrence.NONE.name }.forEach { entity ->
+            val day = LocalDate.ofEpochDay(entity.date)
+            if (entity.isCompleted) completed.merge(day, 1, Int::plus)
+            else pending.merge(day, 1, Int::plus)
+        }
+        if (includeRecurring) {
+            val completionKeys = completions.map { it.taskId to it.date }.toSet()
+            val totalDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate).toInt() + 1
+            recurring.forEach { entity ->
+                val recurrence = Recurrence.fromStorage(entity.recurrence)
+                val anchor = LocalDate.ofEpochDay(entity.date)
+                for (offset in 0 until totalDays) {
+                    val day = startDate.plusDays(offset.toLong())
+                    if (recurrence.firesOn(anchor, day)) {
+                        if (entity.id to day.toEpochDay() in completionKeys) {
+                            completed.merge(day, 1, Int::plus)
+                        } else {
+                            pending.merge(day, 1, Int::plus)
                         }
                     }
                 }
             }
-            completed to pending
         }
+        completed to pending
     }
 
     override suspend fun insert(task: Task) {

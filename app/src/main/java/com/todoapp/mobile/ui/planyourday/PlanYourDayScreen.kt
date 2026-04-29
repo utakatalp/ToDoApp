@@ -52,6 +52,7 @@ fun PlanYourDayScreen(
             is UiEffect.NavigateBack -> onNavigateBack()
         }
     }
+
     Column(
         modifier =
         Modifier

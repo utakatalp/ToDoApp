@@ -31,11 +31,13 @@ constructor(
     }
 
     fun stop() {
-        val intent = Intent(context, PomodoroForegroundService::class.java).apply {
-            action = PomodoroForegroundService.ACTION_STOP
-        }
-        runCatching { context.startService(intent) }
-            .onFailure { Timber.tag(TAG).w(it, "stopService start signal failed") }
+        // Use stopService (not startService with ACTION_STOP) to avoid an infinite
+        // loop: ACTION_STOP in onStartCommand calls engine.finish(), which calls
+        // serviceController.stop() again — sending another ACTION_STOP intent. Direct
+        // stopService bypasses onStartCommand entirely and goes through onDestroy.
+        val intent = Intent(context, PomodoroForegroundService::class.java)
+        runCatching { context.stopService(intent) }
+            .onFailure { Timber.tag(TAG).w(it, "stopService failed") }
     }
 
     private fun hasNotificationPermission(): Boolean {

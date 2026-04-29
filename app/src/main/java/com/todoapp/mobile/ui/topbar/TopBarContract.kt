@@ -25,5 +25,7 @@ sealed interface TopBarContract {
         data class OnGroupSettingsClick(
             val groupId: Long,
         ) : UiAction
+
+        data object OnInfoClick : UiAction
     }
 }

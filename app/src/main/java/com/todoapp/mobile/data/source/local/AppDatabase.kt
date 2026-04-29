@@ -8,6 +8,7 @@ import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.todoapp.mobile.data.model.entity.ChatMessageEntity
 import com.todoapp.mobile.data.model.entity.GroupActivityEntity
 import com.todoapp.mobile.data.model.entity.GroupEntity
 import com.todoapp.mobile.data.model.entity.GroupMemberEntity
@@ -20,7 +21,7 @@ import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.data.source.local.datasource.GroupDao
 
 @Database(
-    version = 13,
+    version = 15,
     entities = [
         TaskEntity::class,
         PomodoroEntity::class,
@@ -30,6 +31,7 @@ import com.todoapp.mobile.data.source.local.datasource.GroupDao
         GroupActivityEntity::class,
         PendingPhotoEntity::class,
         TaskDailyCompletionEntity::class,
+        ChatMessageEntity::class,
     ],
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = AppDatabase.Migration1To2Spec::class),
@@ -43,6 +45,9 @@ import com.todoapp.mobile.data.source.local.datasource.GroupDao
         AutoMigration(from = 9, to = 10),
         AutoMigration(from = 10, to = 11),
         AutoMigration(from = 11, to = 12),
+        AutoMigration(from = 12, to = 13),
+        AutoMigration(from = 13, to = 14),
+        AutoMigration(from = 14, to = 15),
     ],
 )
 @TypeConverters(AppDatabase.SyncStatusConverter::class)
@@ -85,6 +90,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun pendingPhotoDao(): PendingPhotoDao
 
     abstract fun taskDailyCompletionDao(): TaskDailyCompletionDao
+
+    abstract fun chatMessageDao(): ChatMessageDao
 
     class SyncStatusConverter {
         @TypeConverter

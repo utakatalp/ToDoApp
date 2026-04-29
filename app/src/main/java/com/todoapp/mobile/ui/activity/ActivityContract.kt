@@ -1,21 +1,23 @@
 package com.todoapp.mobile.ui.activity
 
 import com.todoapp.mobile.domain.model.TaskCategory
+import com.todoapp.mobile.domain.repository.DailyBucket
+import com.todoapp.mobile.domain.repository.MonthlyWeekBucket
 import com.todoapp.mobile.ui.home.TaskFormState
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
 
 object ActivityContract {
     enum class TrendDirection { UP, DOWN, FLAT }
 
-    data class WeekTrend(
+    data class MonthTrend(
         val direction: TrendDirection,
         val percentDelta: Int,
     )
 
     data class BestDay(
-        val day: DayOfWeek,
+        val date: LocalDate,
         val count: Int,
     )
 
@@ -25,26 +27,32 @@ object ActivityContract {
         val count: Int,
     )
 
+    data class YearStripMonth(
+        val month: YearMonth,
+        val totalCompleted: Int,
+    )
+
     sealed interface UiState {
         data object Loading : UiState
 
         data class Success(
-            val selectedDate: LocalDate,
-            val weeklyCompleted: Int,
-            val weeklyPending: Int,
-            val weeklyProgress: Float,
-            val weeklyPendingProgress: Float,
-            val weeklyBarValues: List<Int>,
-            val weeklyPendingBarValues: List<Int>,
-            val yearlyProgress: Float,
-            val yearlyPendingProgress: Float,
-            val yearlyCompleted: Int,
-            val yearlyTotal: Int,
-            val includeRecurring: Boolean = false,
-            val weekTrend: WeekTrend? = null,
+            val selectedMonth: YearMonth,
+            val monthCompleted: Int,
+            val monthPending: Int,
+            val monthlyWeekBuckets: List<MonthlyWeekBucket>,
+            val monthTrend: MonthTrend? = null,
             val streakDays: Int = 0,
             val bestDay: BestDay? = null,
             val categoryBreakdown: List<CategoryStat> = emptyList(),
+            val heatmapData: Map<LocalDate, Int> = emptyMap(),
+            val yearStripBuckets: List<YearStripMonth> = emptyList(),
+            val includeRecurring: Boolean = false,
+            val slideDirection: Int = 0,
+            val expandedWeekIndex: Int? = null,
+            val expandedWeekDays: List<DailyBucket> = emptyList(),
+            val yearlyCompleted: Int = 0,
+            val yearlyTotal: Int = 0,
+            val yearlyProgress: Float = 0f,
             val isSheetOpen: Boolean = false,
             val taskFormState: TaskFormState = TaskFormState(),
         ) : UiState
@@ -58,9 +66,15 @@ object ActivityContract {
     sealed interface UiAction {
         data object OnRetry : UiAction
 
-        data class OnWeekSelected(
-            val date: LocalDate,
+        data class OnMonthSelected(
+            val month: YearMonth,
         ) : UiAction
+
+        data class OnBarTap(
+            val weekIndex: Int,
+        ) : UiAction
+
+        data object OnBarChartBack : UiAction
 
         data object OnShowBottomSheet : UiAction
 

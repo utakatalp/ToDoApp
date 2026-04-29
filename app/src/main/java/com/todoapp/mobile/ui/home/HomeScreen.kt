@@ -67,7 +67,9 @@ fun HomeScreen(
                 }
             }
 
-            is UiEffect.ShowError -> TODO()
+            is UiEffect.ShowError -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -175,6 +177,9 @@ private fun HomeSuccessContent(
 
                         is TaskFormUiAction.RecurrenceChange ->
                             onAction(UiAction.OnRecurrenceChange(action.recurrence))
+
+                        is TaskFormUiAction.AllDayChange ->
+                            onAction(UiAction.OnAllDayChange(action.isAllDay))
                     }
                 },
             )

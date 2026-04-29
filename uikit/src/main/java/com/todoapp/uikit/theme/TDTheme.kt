@@ -36,8 +36,6 @@ fun TDTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val colors = if (darkTheme) darkColors() else lightColors()
-
     val view = LocalView.current
     if (!view.isInEditMode) {
         LaunchedEffect(darkTheme) {
@@ -67,9 +65,8 @@ fun TDTheme(
 
     CompositionLocalProvider(
         LocalIsDarkTheme provides darkTheme,
-        LocalLightColors provides colors,
-        LocalDarkColors provides colors,
-        // LocalIcons provides TDTheme.icons,
+        LocalLightColors provides lightColors(),
+        LocalDarkColors provides darkColors(),
         LocalTypography provides TDTheme.typography,
     ) {
         content()

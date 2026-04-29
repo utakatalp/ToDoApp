@@ -111,6 +111,10 @@ fun ShowTopBar(
     val destination = appDestinationFromRoute(normalizedRoute) ?: return
     val titleText = stringResource(destination.title)
     val currentEntry = navController.currentBackStackEntryAsState().value
+    val infoAction = TDTopBarAction(
+        icon = R.drawable.ic_info,
+        onClick = { onEvent(UiAction.OnInfoClick) },
+    )
     val state =
         when (destination) {
             AppDestination.Home ->
@@ -133,6 +137,7 @@ fun ShowTopBar(
                                 unreadBadgeCount = uiState.unreadNotifications,
                             ),
                         )
+                        if (destination.hasInfoDialog) add(infoAction)
                     },
                     profileChip =
                     if (uiState.isUserAuthenticated) {
@@ -153,14 +158,17 @@ fun ShowTopBar(
                     onNavigationClick = { onEvent(UiAction.OnBackClick) },
                     navigationIcon = R.drawable.ic_arrow_back,
                     actions =
-                    listOfNotNull(
+                    buildList {
                         groupDetailArgs?.let { args ->
-                            TDTopBarAction(
-                                icon = com.example.uikit.R.drawable.ic_settings,
-                                onClick = { onEvent(UiAction.OnGroupSettingsClick(args.groupId)) },
+                            add(
+                                TDTopBarAction(
+                                    icon = com.example.uikit.R.drawable.ic_settings,
+                                    onClick = { onEvent(UiAction.OnGroupSettingsClick(args.groupId)) },
+                                ),
                             )
-                        },
-                    ),
+                        }
+                        if (destination.hasInfoDialog) add(infoAction)
+                    },
                 )
             }
 
@@ -169,6 +177,7 @@ fun ShowTopBar(
                     title = titleText,
                     onNavigationClick = { onEvent(UiAction.OnBackClick) },
                     navigationIcon = R.drawable.ic_arrow_back,
+                    actions = if (destination.hasInfoDialog) listOf(infoAction) else emptyList(),
                 )
             }
         }

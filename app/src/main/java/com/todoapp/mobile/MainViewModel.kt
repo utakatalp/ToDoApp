@@ -1,5 +1,6 @@
 package com.todoapp.mobile
 
+import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +24,7 @@ import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.navigation.RouteArgs
 import com.todoapp.mobile.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,6 +40,7 @@ import javax.inject.Inject
 class MainViewModel
 @Inject
 constructor(
+    @ApplicationContext private val context: Context,
     private val authRepository: AuthRepository,
     private val sessionPreferences: SessionPreferences,
     private val taskRepository: TaskRepository,
@@ -87,7 +90,7 @@ constructor(
                     is AuthEvent.ForceLogout -> {
                         _uiEffect.send(
                             UiEffect.ShowDialog(
-                                "Your session has expired. Please log in again.",
+                                context.getString(R.string.session_expired_dialog_message),
                             ),
                         )
                         clearLocalSession()

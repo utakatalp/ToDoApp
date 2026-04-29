@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.home
 
+import com.todoapp.mobile.domain.model.DayMode
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.settings.PermissionType
 import java.time.LocalDate
@@ -29,6 +30,12 @@ object HomeContract {
             val availableGroups: List<GroupSelectionItem> = emptyList(),
             val pendingPermissions: List<PermissionType> = emptyList(),
             val selectedFilter: HomeFilter = HomeFilter.TODAY,
+            val displayName: String = "",
+            val dayMode: DayMode = DayMode.MIDDAY,
+            val isSuggestCardDismissedToday: Boolean = false,
+            val yesterdayCompletedCount: Int = 0,
+            val currentTimeFormatted: String = "",
+            val lastRecurringFilter: HomeFilter = HomeFilter.DAILY,
         ) : UiState
 
         data class Error(
@@ -164,9 +171,21 @@ object HomeContract {
             val recurrence: com.todoapp.mobile.domain.model.Recurrence,
         ) : UiAction
 
+        data class OnAllDayChange(
+            val isAllDay: Boolean,
+        ) : UiAction
+
         data class OnFilterChange(
             val filter: HomeFilter,
         ) : UiAction
+
+        data object OnSuggestCardPrimaryAction : UiAction
+
+        data object OnSuggestCardSecondaryAction : UiAction
+
+        data object OnSuggestCardDismiss : UiAction
+
+        data object OnTimeTick : UiAction
     }
 
     enum class HomeFilter {
