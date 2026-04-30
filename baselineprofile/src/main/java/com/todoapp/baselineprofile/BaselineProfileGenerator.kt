@@ -35,17 +35,15 @@ class BaselineProfileGenerator {
             // Let the splash + first frame settle.
             device.waitForIdle()
 
-            // Try to find the Home scroll surface and scroll briefly. Fall back gracefully
-            // if the test isn't logged in / onboarding is showing — we still capture the
-            // cold-start path which is the biggest win.
-            val homeScroll = device.wait(Until.findObject(By.scrollable(true)), 5_000)
-            if (homeScroll != null) {
-                repeat(3) {
-                    homeScroll.fling(androidx.test.uiautomator.Direction.DOWN)
-                    device.waitForIdle()
-                }
-                repeat(2) {
-                    homeScroll.fling(androidx.test.uiautomator.Direction.UP)
+            // Best-effort scroll. Re-resolve the scrollable each iteration since the UI
+            // may swap nodes between flings (drawer, sheet, list reflow), and wrap in
+            // try/catch so a StaleObjectException doesn't fail the whole run — the
+            // cold-start path is already captured and is the biggest win.
+            device.wait(Until.findObject(By.scrollable(true)), 5_000)
+            repeat(5) {
+                runCatching {
+                    val scrollable = device.findObject(By.scrollable(true)) ?: return@runCatching
+                    scrollable.fling(androidx.test.uiautomator.Direction.DOWN)
                     device.waitForIdle()
                 }
             }
