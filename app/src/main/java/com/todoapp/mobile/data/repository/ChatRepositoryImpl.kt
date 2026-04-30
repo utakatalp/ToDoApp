@@ -1,7 +1,12 @@
 package com.todoapp.mobile.data.repository
 
+import com.todoapp.mobile.common.handleRequest
 import com.todoapp.mobile.data.model.entity.ChatMessageEntity
+import com.todoapp.mobile.data.model.network.request.ChatHistoryTurn
+import com.todoapp.mobile.data.model.network.request.ChatMessageRequest
+import com.todoapp.mobile.data.model.network.response.ChatMessageResponseData
 import com.todoapp.mobile.data.source.local.ChatMessageDao
+import com.todoapp.mobile.data.source.remote.api.ToDoApi
 import com.todoapp.mobile.domain.model.ChatMessage
 import com.todoapp.mobile.domain.repository.ChatRepository
 import kotlinx.coroutines.flow.Flow
@@ -10,6 +15,7 @@ import javax.inject.Inject
 
 class ChatRepositoryImpl @Inject constructor(
     private val chatMessageDao: ChatMessageDao,
+    private val todoApi: ToDoApi,
 ) : ChatRepository {
     override fun observeMessages(): Flow<List<ChatMessage>> = chatMessageDao.observeAll().map { list -> list.map(::toDomain) }
 
@@ -20,6 +26,16 @@ class ChatRepositoryImpl @Inject constructor(
     override suspend fun appendAssistantMessage(content: String): Long = chatMessageDao.insert(ChatMessageEntity(role = ROLE_MODEL, content = content))
 
     override suspend fun clear() = chatMessageDao.deleteAll()
+
+    override suspend fun sendMessage(
+        prompt: String,
+        locale: String,
+        history: List<ChatHistoryTurn>,
+    ): Result<ChatMessageResponseData> = handleRequest {
+        todoApi.sendChatMessage(
+            ChatMessageRequest(prompt = prompt, locale = locale, history = history),
+        )
+    }
 
     private fun toDomain(entity: ChatMessageEntity): ChatMessage = ChatMessage(
         id = entity.id,

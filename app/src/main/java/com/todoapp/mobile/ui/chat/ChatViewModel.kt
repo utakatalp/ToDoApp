@@ -3,24 +3,13 @@ package com.todoapp.mobile.ui.chat
 import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.ai.Chat
-import com.google.firebase.ai.GenerativeModel
-import com.google.firebase.ai.type.Content
-import com.google.firebase.ai.type.FunctionResponsePart
-import com.google.firebase.ai.type.GenerateContentResponse
-import com.google.firebase.ai.type.InvalidStateException
-import com.google.firebase.ai.type.PromptBlockedException
-import com.google.firebase.ai.type.QuotaExceededException
-import com.google.firebase.ai.type.ResponseStoppedException
-import com.google.firebase.ai.type.ServerException
-import com.google.firebase.ai.type.content
-import com.todoapp.mobile.data.ai.ChatToolRegistry
+import com.todoapp.mobile.common.DomainException
 import com.todoapp.mobile.data.ai.LocalIntentClassifier
+import com.todoapp.mobile.data.model.network.request.ChatHistoryTurn
 import com.todoapp.mobile.data.network.NetworkMonitor
 import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.model.ChatMessage
 import com.todoapp.mobile.domain.repository.ChatRepository
-import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -34,21 +23,21 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.IOException
-import java.time.Clock
-import java.time.LocalDate
+import java.util.Locale
 import javax.inject.Inject
 
+/**
+ * ChatViewModel after the move to the backend chat proxy. The model used to
+ * call Vertex AI directly via Firebase AI Logic; now it just POSTs to
+ * /chat/message and waits for a final text reply. Tools and the function-
+ * calling loop live on the server.
+ */
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val generativeModel: GenerativeModel,
-    private val toolRegistry: ChatToolRegistry,
     private val chatRepository: ChatRepository,
-    private val taskRepository: TaskRepository,
     private val networkMonitor: NetworkMonitor,
     private val dataStoreHelper: DataStoreHelper,
     private val intentClassifier: LocalIntentClassifier,
-    private val clock: Clock,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<ChatContract.UiState>(ChatContract.UiState.Loading)
     val uiState: StateFlow<ChatContract.UiState> = _uiState.asStateFlow()
@@ -59,11 +48,9 @@ class ChatViewModel @Inject constructor(
     private val _navEffect by lazy { Channel<NavigationEffect>() }
     val navEffect by lazy { _navEffect.receiveAsFlow() }
 
-    private var chat: Chat = generativeModel.startChat()
     private var cooldownJob: Job? = null
     private var cooldownEndElapsedMs: Long = 0L
     private var draftSaveJob: Job? = null
-    private var quotaHitCount: Int = 0
     private var refusalCount: Int = 0
     private var lastSendElapsedMs: Long = 0L
 
@@ -71,7 +58,6 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             val initial = chatRepository.getMessages()
             val savedDraft = dataStoreHelper.observeChatDraft().first()
-            chat = generativeModel.startChat(history = initial.takeLast(MAX_HISTORY_TURNS).toFirebaseHistory())
             _uiState.value = ChatContract.UiState.Ready(messages = initial, draft = savedDraft)
             chatRepository.observeMessages().collect { messages ->
                 _uiState.update { current ->
@@ -200,8 +186,18 @@ class ChatViewModel @Inject constructor(
     }
 
     private suspend fun executeSendInternal(prompt: String) {
-        val enriched = buildContextPreamble() + "\n\n" + prompt
-        runFunctionCallingLoop(enriched, originalPrompt = prompt)
+        val turnStartNs = System.nanoTime()
+        val locale = currentLocale()
+        val history = buildHistorySnapshot()
+        chatRepository
+            .sendMessage(prompt = prompt, locale = locale, history = history)
+            .onSuccess { response ->
+                chatRepository.appendAssistantMessage(response.text)
+                logTurnSummary(response.meta.roundTrips, turnStartNs, response.text)
+            }
+            .onFailure { error ->
+                handleSendFailure(error, prompt)
+            }
         _uiState.update { latest ->
             when (latest) {
                 is ChatContract.UiState.Ready -> latest.copy(isThinking = false, toolInFlight = null)
@@ -210,146 +206,73 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private suspend fun buildContextPreamble(): String {
-        val today = LocalDate.now(clock)
-        val tomorrow = today.plusDays(1)
-        val tasksToday = taskRepository.observeTasksByDate(today, includeRecurringInstances = true).first()
-        val tasksTomorrow = taskRepository.observeTasksByDate(tomorrow, includeRecurringInstances = true).first()
-        val overdue = taskRepository.observeOverdueTasks(today).first()
-        val completedThisWeek = taskRepository.countCompletedTasksInAWeek(today, includeRecurring = true).first()
-        return buildString {
-            append("[Context: Today is ").append(today).append(" (").append(today.dayOfWeek).append(").\n")
-            if (tasksToday.isEmpty()) {
-                append("Today: no tasks.\n")
-            } else {
-                append("Today: ").append(tasksToday.size).append(" tasks:\n")
-                tasksToday.take(MAX_PREAMBLE_TASKS).forEach { task ->
-                    append("  #").append(task.id)
-                    append(" \"").append(task.title).append("\" ")
-                    append(task.timeStart).append("-").append(task.timeEnd)
-                    append(" [").append(if (task.isCompleted) "completed" else "pending").append("]\n")
-                }
-                if (tasksToday.size > MAX_PREAMBLE_TASKS) {
-                    append("  (and ").append(tasksToday.size - MAX_PREAMBLE_TASKS)
-                    append(" more — call getTodaysTasks for full list)\n")
-                }
-            }
-            append("Tomorrow: ").append(tasksTomorrow.size).append(" tasks scheduled.\n")
-            append("Overdue: ").append(overdue.size).append(" tasks past due.\n")
-            append("Completed this week: ").append(completedThisWeek).append(" tasks.\n")
-            append("]")
-        }
-    }
-
-    @Suppress("LongMethod", "CyclomaticComplexMethod")
-    private suspend fun runFunctionCallingLoop(initialUserText: String, originalPrompt: String) {
-        val memo = mutableMapOf<String, FunctionResponsePart>()
-        var emptyTextRetried = false
-        var nextContent: Any = initialUserText
-        var iteration = 0
-        val turnStartNs = System.nanoTime()
-        try {
-            while (iteration < MAX_TOOL_ITERATIONS) {
-                val response = sendMessageWithRetry(nextContent)
-                val calls = response.functionCalls
-                if (calls.isEmpty()) {
-                    val text = response.text?.trim().orEmpty()
-                    if (text.isNotBlank()) {
-                        chatRepository.appendAssistantMessage(text)
-                        logTurnSummary(iteration, turnStartNs, text)
-                        return
-                    }
-                    if (!emptyTextRetried) {
-                        emptyTextRetried = true
-                        Timber.tag(LOG_TAG).w("Empty response, retrying with nudge once")
-                        nextContent = nudgeForLanguageOf(originalPrompt)
-                        iteration++
-                        continue
-                    }
-                    setError(ChatContract.ChatError.GENERIC, lastFailedPrompt = originalPrompt)
-                    return
-                }
-                Timber.tag(LOG_TAG).d("Iteration %d → %d tool call(s)", iteration, calls.size)
-                _uiState.update { current ->
-                    when (current) {
-                        is ChatContract.UiState.Ready -> current.copy(toolInFlight = calls.first().name)
-                        else -> current
-                    }
-                }
-                val responseParts = calls.map { call ->
-                    val key = "${call.name}|${call.args.toSortedMap()}"
-                    memo.getOrPut(key) {
-                        val toolStartNs = System.nanoTime()
-                        val result = toolRegistry.execute(call)
-                        val toolMs = (System.nanoTime() - toolStartNs) / NS_PER_MS
-                        Timber.tag(METRICS_TAG).i("tool=%s ms=%d", call.name, toolMs)
-                        result
-                    }
-                }
-                _uiState.update { current ->
-                    when (current) {
-                        is ChatContract.UiState.Ready -> current.copy(toolInFlight = null)
-                        else -> current
-                    }
-                }
-                nextContent = content("function") {
-                    responseParts.forEach { part(it) }
-                }
-                iteration++
-            }
-            setError(ChatContract.ChatError.LOOP_OVERFLOW, lastFailedPrompt = originalPrompt)
-        } catch (e: QuotaExceededException) {
-            quotaHitCount++
-            Timber.tag(METRICS_TAG).w("quotaHit count=%d", quotaHitCount)
-            Timber.tag(LOG_TAG).w(e, "Quota exceeded (free tier limit hit)")
-            setError(
-                ChatContract.ChatError.RATE_LIMITED,
-                lastFailedPrompt = originalPrompt,
-                retryAfterSeconds = parseRetryAfterSeconds(e),
+    /**
+     * Snapshot of the persisted conversation, trimmed to the last MAX_HISTORY_TURNS
+     * turns and converted to the wire DTO. Drops the brand-new user turn we just
+     * persisted because that's already in the request `prompt`.
+     */
+    private suspend fun buildHistorySnapshot(): List<ChatHistoryTurn> {
+        val all = chatRepository.getMessages()
+        if (all.isEmpty()) return emptyList()
+        // Drop the most recent user message (we just appended it) so we don't
+        // double-send it as both prompt + last history entry.
+        val priorMessages = all.dropLast(1).takeLast(MAX_HISTORY_TURNS)
+        return priorMessages.map { msg ->
+            ChatHistoryTurn(
+                role = when (msg.role) {
+                    ChatMessage.Role.USER -> "user"
+                    ChatMessage.Role.ASSISTANT -> "assistant"
+                },
+                content = msg.content,
             )
-        } catch (e: PromptBlockedException) {
-            Timber.tag(LOG_TAG).w(e, "Prompt blocked by safety filter")
-            setError(ChatContract.ChatError.BLOCKED, lastFailedPrompt = null)
-        } catch (e: ResponseStoppedException) {
-            Timber.tag(LOG_TAG).w(e, "Response stopped by safety filter")
-            setError(ChatContract.ChatError.BLOCKED, lastFailedPrompt = null)
-        } catch (e: InvalidStateException) {
-            Timber.tag(LOG_TAG).w(e, "Invalid chat state")
-            setError(ChatContract.ChatError.GENERIC, lastFailedPrompt = originalPrompt)
-        } catch (e: ServerException) {
-            if (e.isRateLimited()) {
-                Timber.tag(LOG_TAG).w(e, "Rate limited (free tier quota hit)")
-                setError(
-                    ChatContract.ChatError.RATE_LIMITED,
-                    lastFailedPrompt = originalPrompt,
-                    retryAfterSeconds = parseRetryAfterSeconds(e),
-                )
-            } else {
-                Timber.tag(LOG_TAG).w(e, "Server error")
-                setError(ChatContract.ChatError.GENERIC, lastFailedPrompt = originalPrompt)
-            }
-        } catch (e: IOException) {
-            Timber.tag(LOG_TAG).w(e, "Network error")
-            setError(ChatContract.ChatError.OFFLINE, lastFailedPrompt = originalPrompt)
-        } catch (e: Exception) {
-            Timber.tag(LOG_TAG).w(e, "Unexpected chat error")
-            setError(ChatContract.ChatError.GENERIC, lastFailedPrompt = originalPrompt)
         }
     }
 
-    private fun nudgeForLanguageOf(prompt: String): String = if (TR_CHAR_REGEX.containsMatchIn(prompt)) EMPTY_RESPONSE_NUDGE_TR else EMPTY_RESPONSE_NUDGE_EN
+    private fun currentLocale(): String = if (Locale.getDefault().language.equals("tr", ignoreCase = true)) "tr" else "en"
+
+    private fun handleSendFailure(error: Throwable, prompt: String) {
+        when (error) {
+            is DomainException.NoInternet -> {
+                Timber.tag(LOG_TAG).w(error, "Network error")
+                setError(ChatContract.ChatError.OFFLINE, lastFailedPrompt = prompt)
+            }
+            is DomainException.Unauthorized -> {
+                // OkHttp auth-refresh path will normally rotate the token; if it
+                // really expired the global session-end flow takes over.
+                Timber.tag(LOG_TAG).w(error, "Unauthorized chat call")
+                setError(ChatContract.ChatError.GENERIC, lastFailedPrompt = prompt)
+            }
+            is DomainException.Server -> {
+                val message = error.message.orEmpty()
+                if (RATE_LIMIT_MARKERS.any { it in message }) {
+                    Timber.tag(LOG_TAG).w(error, "Rate limited")
+                    setError(
+                        ChatContract.ChatError.RATE_LIMITED,
+                        lastFailedPrompt = prompt,
+                        retryAfterSeconds = parseRetryAfterSeconds(message),
+                    )
+                } else {
+                    Timber.tag(LOG_TAG).w(error, "Server error: %s", message)
+                    setError(ChatContract.ChatError.GENERIC, lastFailedPrompt = prompt)
+                }
+            }
+            else -> {
+                Timber.tag(LOG_TAG).w(error, "Unexpected chat error")
+                setError(ChatContract.ChatError.GENERIC, lastFailedPrompt = prompt)
+            }
+        }
+    }
 
     private fun logTurnSummary(roundTripCount: Int, turnStartNs: Long, replyText: String) {
         val totalMs = (System.nanoTime() - turnStartNs) / NS_PER_MS
         val refused = REFUSAL_PREFIXES.any { replyText.startsWith(it, ignoreCase = true) }
         if (refused) refusalCount++
         Timber.tag(METRICS_TAG).i(
-            "turn rt=%d ms=%d refused=%s refusalTotal=%d quotaTotal=%d",
-            roundTripCount + 1,
+            "turn rt=%d ms=%d refused=%s refusalTotal=%d",
+            roundTripCount,
             totalMs,
             refused,
             refusalCount,
-            quotaHitCount,
         )
     }
 
@@ -385,9 +308,8 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private fun parseRetryAfterSeconds(throwable: Throwable): Int? {
-        val haystack = "${throwable.message.orEmpty()} ${throwable.cause?.message.orEmpty()}"
-        val match = RETRY_AFTER_REGEX.find(haystack) ?: return null
+    private fun parseRetryAfterSeconds(message: String): Int? {
+        val match = RETRY_AFTER_REGEX.find(message) ?: return null
         val seconds = match.groupValues[1].toDoubleOrNull() ?: return null
         if (seconds <= 0) return null
         return seconds.toInt() + RETRY_AFTER_PADDING_SECONDS
@@ -415,7 +337,6 @@ class ChatViewModel @Inject constructor(
         cooldownJob?.cancel()
         viewModelScope.launch {
             chatRepository.clear()
-            chat = generativeModel.startChat()
             _uiState.update { current ->
                 when (current) {
                     is ChatContract.UiState.Ready -> current.copy(
@@ -431,57 +352,15 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private fun List<ChatMessage>.toFirebaseHistory(): List<Content> = map { message ->
-        val role = when (message.role) {
-            ChatMessage.Role.USER -> ROLE_USER
-            ChatMessage.Role.ASSISTANT -> ROLE_MODEL
-        }
-        content(role) { text(message.content) }
-    }
-
     private inline fun MutableStateFlow<ChatContract.UiState>.update(
         transform: (ChatContract.UiState) -> ChatContract.UiState,
     ) {
         value = transform(value)
     }
 
-    private fun ServerException.isRateLimited(): Boolean {
-        val haystack = "${message.orEmpty()} ${cause?.message.orEmpty()}"
-        return RATE_LIMIT_MARKERS.any { haystack.contains(it, ignoreCase = true) }
-    }
-
-    @Suppress("ThrowsCount")
-    private suspend fun sendMessageWithRetry(payload: Any): GenerateContentResponse {
-        var attempt = 0
-        while (true) {
-            try {
-                return when (payload) {
-                    is String -> chat.sendMessage(payload)
-                    is Content -> chat.sendMessage(payload)
-                    else -> error("Unexpected payload type: ${payload::class}")
-                }
-            } catch (e: QuotaExceededException) {
-                throw e
-            } catch (e: ServerException) {
-                if (e.isRateLimited() || attempt >= MAX_RETRIES) throw e
-                Timber.tag(LOG_TAG).w(e, "Server error on attempt %d, retrying", attempt + 1)
-                delay(BACKOFF_DELAYS_MS[attempt])
-                attempt++
-            } catch (e: IOException) {
-                if (attempt >= MAX_RETRIES) throw e
-                Timber.tag(LOG_TAG).w(e, "Network error on attempt %d, retrying", attempt + 1)
-                delay(BACKOFF_DELAYS_MS[attempt])
-                attempt++
-            }
-        }
-    }
-
     companion object {
-        private const val MAX_TOOL_ITERATIONS = 5
-        private const val MAX_RETRIES = 2
         private const val MAX_HISTORY_TURNS = 10
-        private const val MAX_PREAMBLE_TASKS = 20
-        const val MAX_DRAFT_LENGTH = 100
+        const val MAX_DRAFT_LENGTH = 1000
         private const val SEND_COOLDOWN_MS = 3_000L
         private const val RATE_LIMIT_COOLDOWN_SECONDS = 30
         private const val MIN_DYNAMIC_COOLDOWN_SECONDS = 5
@@ -491,24 +370,13 @@ class ChatViewModel @Inject constructor(
         private const val MS_PER_SEC = 1_000L
         private val RETRY_AFTER_REGEX = Regex("""[Rr]etry in (\d+(?:\.\d+)?)s""")
         private const val DRAFT_SAVE_DEBOUNCE_MS = 500L
-        private const val ROLE_USER = "user"
-        private const val ROLE_MODEL = "model"
         private const val LOG_TAG = "ChatViewModel"
         private const val METRICS_TAG = "DoneBotMetrics"
         private const val NS_PER_MS = 1_000_000L
-        private const val EMPTY_RESPONSE_NUDGE_EN = "Please answer the previous question briefly."
-        private const val EMPTY_RESPONSE_NUDGE_TR = "Lütfen önceki soruyu kısaca yanıtla."
-        private val TR_CHAR_REGEX = Regex("[ıİşŞğĞüÜöÖçÇ]")
         private val REFUSAL_PREFIXES = listOf(
             "Sorry, I can only help",
             "Üzgünüm, sadece bu uygulamadaki",
         )
-        private val RATE_LIMIT_MARKERS = listOf(
-            "429",
-            "RESOURCE_EXHAUSTED",
-            "quota",
-            "rate limit",
-        )
-        private val BACKOFF_DELAYS_MS = longArrayOf(1_000L, 3_000L)
+        private val RATE_LIMIT_MARKERS = listOf("429", "rate limit", "quota")
     }
 }

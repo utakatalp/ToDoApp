@@ -134,6 +134,11 @@ interface ToDoApi {
     @DELETE("users/me")
     suspend fun deleteAccount(): Response<BaseResponse<Unit?>>
 
+    @POST("chat/message")
+    suspend fun sendChatMessage(
+        @Body request: com.todoapp.mobile.data.model.network.request.ChatMessageRequest,
+    ): Response<BaseResponse<com.todoapp.mobile.data.model.network.response.ChatMessageResponseData?>>
+
     @retrofit2.http.Multipart
     @POST("users/me/avatar")
     suspend fun uploadAvatar(
