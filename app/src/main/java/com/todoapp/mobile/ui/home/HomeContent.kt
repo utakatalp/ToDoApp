@@ -246,7 +246,8 @@ fun HomeContent(
                     val isMorningMode =
                         uiState.dayMode == com.todoapp.mobile.domain.model.DayMode.MORNING
                     val isEveningMode =
-                        uiState.dayMode == com.todoapp.mobile.domain.model.DayMode.EVENING
+                        uiState.dayMode == com.todoapp.mobile.domain.model.DayMode.EVENING ||
+                            uiState.dayMode == com.todoapp.mobile.domain.model.DayMode.NIGHT
                     val showSuggest =
                         uiState.selectedFilter == HomeContract.HomeFilter.TODAY &&
                             !uiState.isSuggestCardDismissedToday &&
@@ -391,7 +392,7 @@ private fun HomeGreetingRow(
     dayMode: com.todoapp.mobile.domain.model.DayMode,
     currentTimeFormatted: String,
 ) {
-    val name = displayName.takeIf { it.isNotBlank() }
+    val name = displayName.trim().substringBefore(' ').takeIf { it.isNotBlank() }
     val greetingText = when (dayMode) {
         com.todoapp.mobile.domain.model.DayMode.MORNING ->
             if (name != null) {
@@ -413,12 +414,19 @@ private fun HomeGreetingRow(
             } else {
                 stringResource(com.todoapp.mobile.R.string.home_greeting_evening_no_name)
             }
+
+        com.todoapp.mobile.domain.model.DayMode.NIGHT ->
+            if (name != null) {
+                stringResource(com.todoapp.mobile.R.string.home_greeting_night_format, name)
+            } else {
+                stringResource(com.todoapp.mobile.R.string.home_greeting_night_no_name)
+            }
     }
     val (iconRes, iconCdRes, iconTint) = when (dayMode) {
         com.todoapp.mobile.domain.model.DayMode.MORNING -> Triple(
-            R.drawable.ic_sun_cloud,
+            R.drawable.ic_sun,
             com.todoapp.mobile.R.string.home_greeting_icon_morning_cd,
-            TDTheme.colors.pendingGray,
+            TDTheme.colors.orange,
         )
 
         com.todoapp.mobile.domain.model.DayMode.MIDDAY -> Triple(
@@ -430,7 +438,13 @@ private fun HomeGreetingRow(
         com.todoapp.mobile.domain.model.DayMode.EVENING -> Triple(
             R.drawable.ic_moon,
             com.todoapp.mobile.R.string.home_greeting_icon_evening_cd,
-            TDTheme.colors.darkPending,
+            TDTheme.colors.orange,
+        )
+
+        com.todoapp.mobile.domain.model.DayMode.NIGHT -> Triple(
+            R.drawable.ic_moon,
+            com.todoapp.mobile.R.string.home_greeting_icon_night_cd,
+            TDTheme.colors.orange,
         )
     }
     val iconCd = stringResource(iconCdRes)
@@ -757,6 +771,26 @@ private fun HomeContentEveningSuggestPreview() {
                 pendingTaskCountThisWeek = 8,
                 displayName = "Berat",
                 dayMode = com.todoapp.mobile.domain.model.DayMode.EVENING,
+            ),
+            onAction = {},
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+    }
+}
+
+@com.todoapp.uikit.previews.TDPreview
+@Composable
+private fun HomeContentNightSuggestPreview() {
+    TDTheme {
+        HomeContent(
+            uiState =
+            HomePreviewData.successState(
+                tasks = HomePreviewData.sampleTasks,
+                completedTaskCountThisWeek = 5,
+                pendingTaskCountThisWeek = 8,
+                displayName = "Berat",
+                dayMode = com.todoapp.mobile.domain.model.DayMode.NIGHT,
+                currentTimeFormatted = "23:15",
             ),
             onAction = {},
             modifier = Modifier.padding(horizontal = 24.dp),

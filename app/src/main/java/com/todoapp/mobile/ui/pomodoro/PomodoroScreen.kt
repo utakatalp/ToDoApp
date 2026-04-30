@@ -7,7 +7,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -97,7 +96,7 @@ private fun PomodoroPortraitContent(
     onAction: (UiAction) -> Unit,
 ) {
     // Resolve per-mode palette (handles both light & dark theme)
-    val isDark = isSystemInDarkTheme()
+    val isDark = TDTheme.isDark
     val targetPalette =
         remember(uiState.mode.colorKey, isDark) {
             PomodoroModeTheme.resolve(uiState.mode.colorKey, isDark)
@@ -267,7 +266,7 @@ private fun PomodoroLandscapeContent(
     uiState: UiState,
     onAction: (UiAction) -> Unit,
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = TDTheme.isDark
     val targetPalette =
         remember(uiState.mode.colorKey, isDark) {
             PomodoroModeTheme.resolve(uiState.mode.colorKey, isDark)

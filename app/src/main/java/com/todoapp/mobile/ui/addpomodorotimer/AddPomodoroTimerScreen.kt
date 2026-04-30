@@ -3,7 +3,6 @@ package com.todoapp.mobile.ui.addpomodorotimer
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -206,7 +205,7 @@ private fun PomodoroPreviewCard(
     longBreak: Int,
     modifier: Modifier = Modifier,
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = TDTheme.isDark
     Column(
         modifier =
         modifier
@@ -286,7 +285,7 @@ private fun PomodoroStepperCard(
 ) {
     val canDecrement = value > range.first
     val canIncrement = value < range.last
-    val isDark = isSystemInDarkTheme()
+    val isDark = TDTheme.isDark
 
     Row(
         modifier =

@@ -40,7 +40,7 @@ import com.todoapp.uikit.theme.TDTheme
 
 @Composable
 internal fun LoginBrandingPanel(modifier: Modifier = Modifier) {
-    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val isDark = TDTheme.isDark
     val gradient = androidx.compose.ui.graphics.Brush.verticalGradient(
         colors = listOf(
             TDTheme.colors.bgColorPurple,

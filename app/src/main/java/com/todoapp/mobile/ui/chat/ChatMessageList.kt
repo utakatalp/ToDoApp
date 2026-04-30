@@ -111,7 +111,7 @@ private fun QuickReplyPill(text: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(TDTheme.colors.bgColorPurple)
+            .background(TDTheme.colors.lightPurple)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

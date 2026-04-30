@@ -3,7 +3,6 @@ package com.todoapp.mobile.ui.alarmsounds
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -106,7 +105,7 @@ private fun AlarmSoundRow(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = TDTheme.isDark
     val cardModifier = Modifier
         .fillMaxWidth()
         .let { base ->
@@ -119,7 +118,7 @@ private fun AlarmSoundRow(
             } else {
                 base.neumorphicShadow(
                     lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
-                    darkShadow = TDTheme.colors.lightGray.copy(alpha = 0.30f),
+                    darkShadow = TDTheme.colors.darkPending.copy(alpha = 0.15f),
                     cornerRadius = 16.dp,
                     elevation = 6.dp,
                 )

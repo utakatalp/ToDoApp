@@ -4,4 +4,5 @@ enum class DayMode {
     MORNING,
     MIDDAY,
     EVENING,
+    NIGHT,
 }

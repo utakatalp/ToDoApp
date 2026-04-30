@@ -9,6 +9,7 @@ import android.media.ToneGenerator
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import timber.log.Timber
 
 class RingtoneHolder {
     private var ringtone: Ringtone? = null
@@ -38,6 +39,15 @@ class RingtoneHolder {
         // Cancel any previously scheduled stop.
         stopRunnable?.let(mainHandler::removeCallbacks)
         stopRunnable = null
+
+        // Respect device silent / vibrate-only ringer modes: post the visual
+        // notification but suppress alarm sound. USAGE_ALARM otherwise bypasses
+        // silent mode on most Android versions.
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+        if (audioManager?.ringerMode != AudioManager.RINGER_MODE_NORMAL) {
+            Timber.tag("RingtoneHolder").d("Ringer mode != NORMAL; suppressing alarm sound")
+            return
+        }
 
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
         val notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)

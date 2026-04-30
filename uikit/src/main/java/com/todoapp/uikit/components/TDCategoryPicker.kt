@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -70,7 +69,7 @@ private fun CategoryChip(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = TDTheme.isDark
     val background = if (isSelected) TDTheme.colors.purple else TDTheme.colors.lightPending
     val foreground = if (isSelected) TDTheme.colors.white else TDTheme.colors.onBackground
 
@@ -84,7 +83,7 @@ private fun CategoryChip(
     } else {
         baseModifier.neumorphicShadow(
             lightShadow = TDTheme.colors.white.copy(alpha = 0.85f),
-            darkShadow = TDTheme.colors.lightGray.copy(alpha = 0.30f),
+            darkShadow = TDTheme.colors.darkPending.copy(alpha = 0.15f),
             cornerRadius = 20.dp,
             elevation = 4.dp,
         )

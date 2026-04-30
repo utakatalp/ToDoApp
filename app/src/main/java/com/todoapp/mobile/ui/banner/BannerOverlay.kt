@@ -1,7 +1,6 @@
 package com.todoapp.mobile.ui.banner
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -53,7 +52,7 @@ fun BannerContent(
 ) {
     if (!uiState.isVisible) return
 
-    val isDark = isSystemInDarkTheme()
+    val isDark = TDTheme.isDark
     val palette = PomodoroModeTheme.resolve(uiState.mode.toModeColorKey(), isDark)
 
     TDPomodoroBanner(

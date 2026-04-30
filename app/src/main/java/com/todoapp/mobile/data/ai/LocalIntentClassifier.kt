@@ -47,14 +47,11 @@ class LocalIntentClassifier @Inject constructor(
         }
     }
 
-    private fun matchesToday(text: String): Boolean =
-        TODAY_TR_ANCHOR.containsMatchIn(text) || TODAY_EN_ANCHOR.containsMatchIn(text)
+    private fun matchesToday(text: String): Boolean = TODAY_TR_ANCHOR.containsMatchIn(text) || TODAY_EN_ANCHOR.containsMatchIn(text)
 
-    private fun matchesOverdue(text: String): Boolean =
-        OVERDUE_KEYWORDS.containsMatchIn(text)
+    private fun matchesOverdue(text: String): Boolean = OVERDUE_KEYWORDS.containsMatchIn(text)
 
-    private fun matchesWeekly(text: String): Boolean =
-        WEEKLY_TR_ANCHOR.containsMatchIn(text) || WEEKLY_EN_ANCHOR.containsMatchIn(text)
+    private fun matchesWeekly(text: String): Boolean = WEEKLY_TR_ANCHOR.containsMatchIn(text) || WEEKLY_EN_ANCHOR.containsMatchIn(text)
 
     private suspend fun buildTodayResponse(): String {
         val today = LocalDate.now(clock)

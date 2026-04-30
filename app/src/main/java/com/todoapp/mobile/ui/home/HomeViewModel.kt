@@ -641,7 +641,8 @@ constructor(
             com.todoapp.mobile.domain.model.DayMode.MORNING -> {
                 _navEffect.trySend(NavigationEffect.Navigate(Screen.Chat))
             }
-            com.todoapp.mobile.domain.model.DayMode.EVENING -> {
+            com.todoapp.mobile.domain.model.DayMode.EVENING,
+            com.todoapp.mobile.domain.model.DayMode.NIGHT -> {
                 val pendingIds = state.tasks.filter { !it.isCompleted }.map { it.id }
                 viewModelScope.launch {
                     taskRepository.deferTasksToTomorrow(pendingIds)
