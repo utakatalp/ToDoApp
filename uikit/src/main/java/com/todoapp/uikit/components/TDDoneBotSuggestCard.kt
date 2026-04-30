@@ -52,7 +52,7 @@ fun TDDoneBotSuggestCard(
                 painter = painterResource(avatarRes),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(72.dp)
+                    .size(96.dp)
                     .clip(RoundedCornerShape(percent = 50)),
             )
             Spacer(Modifier.width(12.dp))
