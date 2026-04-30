@@ -89,7 +89,7 @@ fun TDBottomBar() {
                             Image(
                                 painter = painterResource(id = chatImage),
                                 contentDescription = stringResource(screen.title),
-                                modifier = Modifier.size(32.dp),
+                                modifier = Modifier.size(40.dp),
                             )
                         }
                     } else {

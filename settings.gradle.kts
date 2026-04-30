@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "ToDoApp"
 include(":app")
 include(":uikit")
+include(":baselineprofile")

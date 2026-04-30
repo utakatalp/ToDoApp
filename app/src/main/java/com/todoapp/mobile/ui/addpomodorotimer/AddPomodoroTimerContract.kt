@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.addpomodorotimer
 
+import androidx.compose.runtime.Immutable
+
 object AddPomodoroTimerContract {
+    @Immutable
     data class UiState(
         val sessionCount: Float = 8f,
         val focusTime: Float = 25f,

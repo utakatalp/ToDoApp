@@ -1,5 +1,8 @@
 package com.todoapp.mobile.domain.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class GroupTask(
     val id: Long,
     val title: String,

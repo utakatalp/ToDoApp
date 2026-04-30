@@ -1,8 +1,10 @@
 package com.todoapp.mobile.ui.changepassword
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 
 object ChangePasswordContract {
+    @Immutable
     data class UiState(
         val currentPassword: String = "",
         val newPassword: String = "",

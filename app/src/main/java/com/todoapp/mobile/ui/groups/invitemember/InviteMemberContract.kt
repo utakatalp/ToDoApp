@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.groups.invitemember
 
+import androidx.compose.runtime.Immutable
+
 object InviteMemberContract {
+    @Immutable
     data class UiState(
         val email: String = "",
         val emailError: String? = null,

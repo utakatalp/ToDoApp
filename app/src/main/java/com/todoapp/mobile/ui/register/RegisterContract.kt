@@ -1,8 +1,10 @@
 package com.todoapp.mobile.ui.register
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.common.passwordValidation.PasswordStrength
 
 object RegisterContract {
+    @Immutable
     data class UiState(
         val fullName: String = "",
         val email: String = "",

@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.login
 
+import androidx.compose.runtime.Immutable
+
 object LoginContract {
+    @Immutable
     data class UiState(
         val email: String = "",
         val password: String = "",

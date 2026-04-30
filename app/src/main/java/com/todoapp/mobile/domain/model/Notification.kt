@@ -15,6 +15,7 @@ enum class NotificationType {
     }
 }
 
+@androidx.compose.runtime.Immutable
 data class Notification(
     val id: Long,
     val type: NotificationType,

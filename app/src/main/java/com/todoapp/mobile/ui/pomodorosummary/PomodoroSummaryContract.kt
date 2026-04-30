@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.pomodorosummary
 
+import androidx.compose.runtime.Immutable
+
 object PomodoroSummaryContract {
+    @Immutable
     data class UiState(
         val focusSessions: Int = 0,
         val totalFocusMinutes: Int = 0,

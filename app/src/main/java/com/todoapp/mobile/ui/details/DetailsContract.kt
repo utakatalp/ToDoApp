@@ -1,6 +1,7 @@
 package com.todoapp.mobile.ui.details
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -8,6 +9,7 @@ object DetailsContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val isDirty: Boolean,
             val isSaving: Boolean,

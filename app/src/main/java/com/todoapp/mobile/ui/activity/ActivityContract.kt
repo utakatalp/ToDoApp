@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.activity
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.model.TaskCategory
 import com.todoapp.mobile.domain.repository.DailyBucket
 import com.todoapp.mobile.domain.repository.MonthlyWeekBucket
@@ -11,22 +12,26 @@ import java.time.YearMonth
 object ActivityContract {
     enum class TrendDirection { UP, DOWN, FLAT }
 
+    @Immutable
     data class MonthTrend(
         val direction: TrendDirection,
         val percentDelta: Int,
     )
 
+    @Immutable
     data class BestDay(
         val date: LocalDate,
         val count: Int,
     )
 
+    @Immutable
     data class CategoryStat(
         val category: TaskCategory,
         val customLabel: String?,
         val count: Int,
     )
 
+    @Immutable
     data class YearStripMonth(
         val month: YearMonth,
         val totalCompleted: Int,
@@ -35,6 +40,7 @@ object ActivityContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val selectedMonth: YearMonth,
             val monthCompleted: Int,

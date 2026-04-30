@@ -1,11 +1,13 @@
 package com.todoapp.mobile.ui.invitations
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.model.Invitation
 
 object InvitationsContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val items: List<Invitation>,
             val isRefreshing: Boolean = false,

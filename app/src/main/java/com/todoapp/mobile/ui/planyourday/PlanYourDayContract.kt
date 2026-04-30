@@ -1,9 +1,11 @@
 package com.todoapp.mobile.ui.planyourday
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 import java.time.LocalTime
 
 object PlanYourDayContract {
+    @Immutable
     data class UiState(
         val selectedTime: LocalTime = LocalTime.of(9, 0),
         val savedTime: LocalTime? = null,

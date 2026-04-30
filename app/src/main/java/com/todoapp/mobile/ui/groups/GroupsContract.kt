@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.groups
 
+import androidx.compose.runtime.Immutable
+
 object GroupsContract {
+    @Immutable
     data class GroupUiItem(
         val id: Long,
         val remoteId: Long?,
@@ -16,10 +19,12 @@ object GroupsContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Empty(
             val isUserAuthenticated: Boolean,
         ) : UiState
 
+        @Immutable
         data class Success(
             val isUserAuthenticated: Boolean,
             val groups: List<GroupUiItem>,

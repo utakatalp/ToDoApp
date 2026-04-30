@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.calendar
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.ui.home.TaskFormState
 import java.time.LocalDate
 import java.time.LocalTime
@@ -9,6 +10,7 @@ object CalendarContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val selectedDate: LocalDate? = null,
             val selectedMonth: YearMonth = YearMonth.now(),
@@ -93,6 +95,7 @@ object CalendarContract {
         ) : UiAction
     }
 
+    @Immutable
     data class PersonalTaskCalendarItem(
         val taskId: Long,
         val title: String,
@@ -103,6 +106,7 @@ object CalendarContract {
         val isRecurringInstance: Boolean = false,
     )
 
+    @Immutable
     data class GroupTaskCalendarItem(
         val taskId: Long,
         val groupId: Long?,

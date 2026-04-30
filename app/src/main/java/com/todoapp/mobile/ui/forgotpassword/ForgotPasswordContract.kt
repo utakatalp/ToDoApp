@@ -1,8 +1,10 @@
 package com.todoapp.mobile.ui.forgotpassword
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 
 object ForgotPasswordContract {
+    @Immutable
     data class UiState(
         val email: String = "",
         val isEmailFieldEnabled: Boolean = false,

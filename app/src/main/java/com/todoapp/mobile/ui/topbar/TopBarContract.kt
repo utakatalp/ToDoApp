@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.topbar
 
+import androidx.compose.runtime.Immutable
+
 sealed interface TopBarContract {
+    @Immutable
     data class UiState(
         val isUserAuthenticated: Boolean,
         val avatarUrl: String? = null,

@@ -20,7 +20,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun PendingPhotosRow(
@@ -88,12 +94,14 @@ fun PendingPhotosRow(
                 }
             }
             itemsIndexed(pending) { index, photo ->
-                val bitmap: ImageBitmap? =
-                    remember(photo.bytes) {
+                var bitmap by remember(photo.bytes) { mutableStateOf<ImageBitmap?>(null) }
+                LaunchedEffect(photo.bytes) {
+                    bitmap = withContext(Dispatchers.IO) {
                         runCatching {
                             BitmapFactory.decodeByteArray(photo.bytes, 0, photo.bytes.size)?.asImageBitmap()
                         }.getOrNull()
                     }
+                }
                 DisposableEffect(bitmap) {
                     onDispose { bitmap?.asAndroidBitmap()?.recycle() }
                 }
@@ -105,9 +113,9 @@ fun PendingPhotosRow(
                         .background(TDTheme.colors.lightPending)
                         .clickable { onRemoveAt(index) },
                 ) {
-                    if (bitmap != null) {
+                    bitmap?.let { decoded ->
                         Image(
-                            bitmap = bitmap,
+                            bitmap = decoded,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.size(72.dp),

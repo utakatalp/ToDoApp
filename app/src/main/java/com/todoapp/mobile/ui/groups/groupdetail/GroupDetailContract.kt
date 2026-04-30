@@ -1,9 +1,11 @@
 package com.todoapp.mobile.ui.groups.groupdetail
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.ui.home.TaskFormState
 import com.todoapp.mobile.ui.home.TaskFormUiAction
 
 object GroupDetailContract {
+    @Immutable
     data class GroupTaskUiItem(
         val id: Long,
         val title: String,
@@ -21,6 +23,7 @@ object GroupDetailContract {
         val photoUrls: List<String> = emptyList(),
     )
 
+    @Immutable
     data class GroupMemberUiItem(
         val userId: Long,
         val displayName: String,
@@ -33,6 +36,7 @@ object GroupDetailContract {
         val isCurrentUser: Boolean,
     )
 
+    @Immutable
     data class GroupActivityUiItem(
         val id: Long,
         val type: String,
@@ -47,6 +51,7 @@ object GroupDetailContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val groupId: Long,
             val groupName: String,

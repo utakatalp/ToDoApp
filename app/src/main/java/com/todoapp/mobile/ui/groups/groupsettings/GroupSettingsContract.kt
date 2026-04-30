@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.groups.groupsettings
 
+import androidx.compose.runtime.Immutable
+
 object GroupSettingsContract {
+    @Immutable
     data class UiState(
         val groupId: Long = 0L,
         val name: String = "",

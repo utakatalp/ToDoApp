@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.profile
 
+import androidx.compose.runtime.Immutable
+
 object ProfileContract {
+    @Immutable
     data class UiState(
         val isLoading: Boolean = true,
         val userId: Long = 0L,

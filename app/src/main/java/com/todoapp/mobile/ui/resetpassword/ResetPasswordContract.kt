@@ -1,8 +1,10 @@
 package com.todoapp.mobile.ui.resetpassword
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 
 object ResetPasswordContract {
+    @Immutable
     data class UiState(
         val newPassword: String = "",
         val confirmPassword: String = "",

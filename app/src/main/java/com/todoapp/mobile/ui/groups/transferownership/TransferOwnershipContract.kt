@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.groups.transferownership
 
+import androidx.compose.runtime.Immutable
+
 object TransferOwnershipContract {
+    @Immutable
     data class TransferMemberUiItem(
         val userId: Long,
         val displayName: String,
@@ -12,6 +15,7 @@ object TransferOwnershipContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val members: List<TransferMemberUiItem>,
             val filteredMembers: List<TransferMemberUiItem>,

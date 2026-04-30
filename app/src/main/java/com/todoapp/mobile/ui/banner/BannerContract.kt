@@ -1,8 +1,10 @@
 package com.todoapp.mobile.ui.banner
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.engine.PomodoroMode
 
 object BannerContract {
+    @Immutable
     data class UiState(
         val minutes: Int? = null,
         val seconds: Int? = null,

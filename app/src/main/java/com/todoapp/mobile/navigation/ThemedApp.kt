@@ -2,9 +2,9 @@ package com.todoapp.mobile.navigation
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todoapp.mobile.ThemeViewModel
 import com.todoapp.mobile.domain.model.ThemePreference
 import com.todoapp.uikit.theme.TDTheme
@@ -13,7 +13,7 @@ import com.todoapp.uikit.theme.TDTheme
 fun ThemedApp() {
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val themePreference by themeViewModel.themeFlow
-        .collectAsState(initial = ThemePreference.SYSTEM_DEFAULT)
+        .collectAsStateWithLifecycle(initialValue = ThemePreference.SYSTEM_DEFAULT)
 
     val darkTheme =
         when (themePreference) {

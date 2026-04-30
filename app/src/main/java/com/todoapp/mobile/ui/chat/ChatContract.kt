@@ -1,11 +1,13 @@
 package com.todoapp.mobile.ui.chat
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.model.ChatMessage
 
 object ChatContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Ready(
             val messages: List<ChatMessage> = emptyList(),
             val draft: String = "",

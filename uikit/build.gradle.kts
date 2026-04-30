@@ -36,6 +36,13 @@ android {
         freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
+
+composeCompiler {
+    if (project.findProperty("composeCompilerReports") == "true") {
+        metricsDestination.set(layout.buildDirectory.dir("compose_compiler"))
+        reportsDestination.set(layout.buildDirectory.dir("compose_compiler"))
+    }
+}
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     android.set(true)
     ignoreFailures.set(false)

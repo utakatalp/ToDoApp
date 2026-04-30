@@ -1,12 +1,14 @@
 package com.todoapp.mobile.ui.alarmsounds
 
 import android.net.Uri
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.repository.AlarmSoundOption
 
 object AlarmSoundsContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val items: List<AlarmSoundOption>,
             val selectedUri: Uri,

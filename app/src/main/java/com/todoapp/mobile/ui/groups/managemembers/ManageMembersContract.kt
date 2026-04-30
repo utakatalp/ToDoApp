@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.groups.managemembers
 
+import androidx.compose.runtime.Immutable
+
 object ManageMembersContract {
+    @Immutable
     data class ManageMemberUiItem(
         val userId: Long,
         val displayName: String,
@@ -13,6 +16,7 @@ object ManageMembersContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val members: List<ManageMemberUiItem>,
         ) : UiState

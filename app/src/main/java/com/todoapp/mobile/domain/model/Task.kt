@@ -1,11 +1,13 @@
 package com.todoapp.mobile.domain.model
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.data.model.network.data.TaskData
 import com.todoapp.mobile.data.model.network.request.TaskRequest
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
+@Immutable
 data class Task(
     val id: Long = 0L,
     val remoteId: Long? = null,

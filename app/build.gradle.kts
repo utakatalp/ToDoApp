@@ -20,6 +20,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.androidx.baselineprofile)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
 }
@@ -41,6 +42,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Restrict packaged locales to what we actually translate. Drops AppCompat/Material
+        // resource tables for ~50 unused locales (~500 KB APK savings).
+        @Suppress("UnstableApiUsage")
+        androidResources.localeFilters += listOf("en", "tr")
     }
 
     buildTypes {
@@ -58,7 +64,8 @@ android {
             )
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             buildConfigField("String", "BASE_URL", "\"https://donebot-backend.onrender.com/\"")
             buildConfigField(
                 "String",
@@ -87,6 +94,15 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+}
+
+// Compose compiler metrics/reports — gated behind `-PcomposeCompilerReports=true`.
+// Strong skipping is enabled by default for Kotlin 2.2.x with the kotlin-compose plugin.
+composeCompiler {
+    if (project.findProperty("composeCompilerReports") == "true") {
+        metricsDestination.set(layout.buildDirectory.dir("compose_compiler"))
+        reportsDestination.set(layout.buildDirectory.dir("compose_compiler"))
     }
 }
 
@@ -188,4 +204,13 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.lottie.compose)
     implementation(libs.coil.compose)
+
+    // Generated baseline profile is merged into app/src/main/baseline-prof.txt.
+    "baselineProfile"(project(":baselineprofile"))
+}
+
+baselineProfile {
+    // Merge any newly generated profile into src/main/baseline-prof.txt so it ships
+    // with the APK without a per-build regeneration step.
+    mergeIntoMain = true
 }

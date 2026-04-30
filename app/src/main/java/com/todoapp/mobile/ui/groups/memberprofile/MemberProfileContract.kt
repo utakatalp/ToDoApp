@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.groups.memberprofile
 
+import androidx.compose.runtime.Immutable
+
 object MemberProfileContract {
+    @Immutable
     data class MemberUiItem(
         val userId: Long,
         val displayName: String,
@@ -16,6 +19,7 @@ object MemberProfileContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val member: MemberUiItem,
             val pendingRemoval: Boolean = false,

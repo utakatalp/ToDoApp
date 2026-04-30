@@ -1,6 +1,9 @@
 package com.todoapp.mobile.ui.pomodorolaunch
 
+import androidx.compose.runtime.Immutable
+
 object PomodoroLaunchContract {
+    @Immutable
     data class UiState(
         val sessionCount: Int = 0,
         val focusTime: Int = 0,

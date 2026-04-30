@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.search
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.model.Group
 import com.todoapp.mobile.domain.model.GroupTask
 import com.todoapp.mobile.domain.model.Recurrence
@@ -13,6 +14,7 @@ object SearchContract {
 
     enum class DateRangeFilter { ALL_TIME, TODAY, THIS_WEEK, THIS_MONTH }
 
+    @Immutable
     data class SearchFilters(
         val resultType: SearchFilter = SearchFilter.ALL,
         val categories: Set<TaskCategory> = emptySet(),
@@ -49,6 +51,7 @@ object SearchContract {
 
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val results: List<SearchResultItem>,
             val query: String,

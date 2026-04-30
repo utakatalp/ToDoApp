@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.home
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.model.DayMode
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.ui.settings.PermissionType
@@ -8,6 +9,7 @@ import java.time.LocalTime
 import java.time.YearMonth
 
 object HomeContract {
+    @Immutable
     data class GroupSelectionItem(
         val groupId: Long,
         val name: String,
@@ -16,6 +18,7 @@ object HomeContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val selectedDate: LocalDate,
             val displayedMonth: YearMonth = YearMonth.now(),

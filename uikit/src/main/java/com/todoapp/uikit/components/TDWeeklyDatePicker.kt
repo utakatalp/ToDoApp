@@ -75,7 +75,7 @@ fun TDWeeklyDatePicker(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             state = listState,
         ) {
-            items(daysInMonth) { i ->
+            items(count = daysInMonth, key = { it }) { i ->
                 DatePickerCard(
                     modifier = Modifier,
                     currentDate = displayedMonth.atDay(i + 1),

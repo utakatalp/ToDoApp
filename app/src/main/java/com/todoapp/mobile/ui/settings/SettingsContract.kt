@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.settings
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.constants.DailyPlanDefaults.DEFAULT_PLAN_TIME
 import com.todoapp.mobile.domain.model.LanguagePreference
 import com.todoapp.mobile.domain.model.ThemePreference
@@ -10,6 +11,7 @@ import java.time.LocalTime
 enum class PermissionType { OVERLAY, NOTIFICATION }
 
 object SettingsContract {
+    @Immutable
     data class UiState(
         val currentTheme: ThemePreference = ThemePreference.SYSTEM_DEFAULT,
         val currentLanguage: LanguagePreference = LanguagePreference.ENGLISH,

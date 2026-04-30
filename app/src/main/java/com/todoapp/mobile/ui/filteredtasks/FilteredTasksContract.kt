@@ -1,5 +1,6 @@
 package com.todoapp.mobile.ui.filteredtasks
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.model.Task
 import java.time.LocalDate
 
@@ -11,6 +12,7 @@ object FilteredTasksContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val tasks: List<Task>,
             val selectedTab: TaskTab,

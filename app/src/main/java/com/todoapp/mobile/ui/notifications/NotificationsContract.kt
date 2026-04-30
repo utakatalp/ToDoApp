@@ -1,11 +1,13 @@
 package com.todoapp.mobile.ui.notifications
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.model.Notification
 
 object NotificationsContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val items: List<Notification>,
             val isRefreshing: Boolean = false,

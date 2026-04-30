@@ -1,10 +1,12 @@
 package com.todoapp.mobile.ui.groups.grouptaskdetail
 
+import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.ui.groups.groupdetail.GroupDetailContract
 import java.time.LocalDate
 import java.time.LocalTime
 
 object GroupTaskDetailContract {
+    @Immutable
     data class TaskUiModel(
         val id: Long,
         val title: String,
@@ -25,6 +27,7 @@ object GroupTaskDetailContract {
     sealed interface UiState {
         data object Loading : UiState
 
+        @Immutable
         data class Success(
             val task: TaskUiModel,
             val groupName: String,

@@ -21,7 +21,7 @@ import com.todoapp.mobile.data.model.entity.TaskEntity
 import com.todoapp.mobile.data.source.local.datasource.GroupDao
 
 @Database(
-    version = 15,
+    version = 16,
     entities = [
         TaskEntity::class,
         PomodoroEntity::class,
@@ -48,6 +48,7 @@ import com.todoapp.mobile.data.source.local.datasource.GroupDao
         AutoMigration(from = 12, to = 13),
         AutoMigration(from = 13, to = 14),
         AutoMigration(from = 14, to = 15),
+        AutoMigration(from = 15, to = 16),
     ],
 )
 @TypeConverters(AppDatabase.SyncStatusConverter::class)
