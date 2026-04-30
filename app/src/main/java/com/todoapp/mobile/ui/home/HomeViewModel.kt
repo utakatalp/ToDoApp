@@ -593,23 +593,31 @@ constructor(
                     kotlinx.coroutines.delay(AUX_TICK_MILLIS)
                 }
             }.map { now ->
-                Triple(
-                    now.toLocalDate(),
-                    com.todoapp.mobile.common.computeDayMode(now.toLocalTime()),
-                    now.toLocalDate().toEpochDay(),
+                val mode = com.todoapp.mobile.common.computeDayMode(now.toLocalTime())
+                // End-of-day suggestion (e.g. "move to tomorrow") is only meaningful at the
+                // tail of the calendar day. NIGHT also covers 00:00-05:59, where the user
+                // has just entered today — gate that out via the explicit hour check.
+                val isEndOfDay = mode == com.todoapp.mobile.domain.model.DayMode.EVENING ||
+                    (mode == com.todoapp.mobile.domain.model.DayMode.NIGHT && now.hour >= END_OF_DAY_HOUR)
+                AuxTick(
+                    today = now.toLocalDate(),
+                    mode = mode,
+                    isEndOfDay = isEndOfDay,
+                    todayEpoch = now.toLocalDate().toEpochDay(),
                 )
             }.distinctUntilChanged()
-                .flatMapLatest { (today, mode, todayEpoch) ->
+                .flatMapLatest { tick ->
                     kotlinx.coroutines.flow.combine(
                         dataStoreHelper.observeUser(),
-                        taskRepository.observeTasksByDate(today.minusDays(1), includeRecurringInstances = false),
+                        taskRepository.observeTasksByDate(tick.today.minusDays(1), includeRecurringInstances = false),
                         dataStoreHelper.observeSuggestCardDismissedDay(),
                     ) { user, yesterdayTasks, dismissedDay ->
                         AuxState(
                             displayName = user?.displayName.orEmpty(),
                             yesterdayCompleted = yesterdayTasks.count { it.isCompleted },
-                            isSuggestDismissedToday = dismissedDay == todayEpoch,
-                            dayMode = mode,
+                            isSuggestDismissedToday = dismissedDay == tick.todayEpoch,
+                            dayMode = tick.mode,
+                            isEndOfDayMoment = tick.isEndOfDay,
                         )
                     }
                 }
@@ -620,6 +628,7 @@ constructor(
                             yesterdayCompletedCount = aux.yesterdayCompleted,
                             isSuggestCardDismissedToday = aux.isSuggestDismissedToday,
                             dayMode = aux.dayMode,
+                            isEndOfDayMoment = aux.isEndOfDayMoment,
                         )
                     }
                 }
@@ -643,6 +652,7 @@ constructor(
             }
             com.todoapp.mobile.domain.model.DayMode.EVENING,
             com.todoapp.mobile.domain.model.DayMode.NIGHT -> {
+                if (!state.isEndOfDayMoment) return
                 val pendingIds = state.tasks.filter { !it.isCompleted }.map { it.id }
                 viewModelScope.launch {
                     taskRepository.deferTasksToTomorrow(pendingIds)
@@ -670,6 +680,14 @@ constructor(
         val yesterdayCompleted: Int,
         val isSuggestDismissedToday: Boolean,
         val dayMode: com.todoapp.mobile.domain.model.DayMode,
+        val isEndOfDayMoment: Boolean,
+    )
+
+    private data class AuxTick(
+        val today: java.time.LocalDate,
+        val mode: com.todoapp.mobile.domain.model.DayMode,
+        val isEndOfDay: Boolean,
+        val todayEpoch: Long,
     )
 
     private fun filterToRecurrence(filter: HomeContract.HomeFilter): com.todoapp.mobile.domain.model.Recurrence = when (filter) {
@@ -869,6 +887,10 @@ constructor(
         private const val LOADING_DELAY = 200L
         private const val AUX_TICK_MILLIS = 60_000L
         private const val UNDO_DELAY_MS = 5000L
+
+        // Lower bound of the late-evening half of NIGHT mode (22:00-23:59).
+        // Below this, NIGHT means 00:00-05:59 — a freshly started day, not the day's end.
+        private const val END_OF_DAY_HOUR = 22
         private val TIME_FORMATTER: java.time.format.DateTimeFormatter =
             java.time.format.DateTimeFormatter.ofPattern("HH:mm").withLocale(java.util.Locale.ROOT)
     }

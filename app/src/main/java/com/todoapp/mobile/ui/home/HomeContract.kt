@@ -32,6 +32,7 @@ object HomeContract {
             val selectedFilter: HomeFilter = HomeFilter.TODAY,
             val displayName: String = "",
             val dayMode: DayMode = DayMode.MIDDAY,
+            val isEndOfDayMoment: Boolean = false,
             val isSuggestCardDismissedToday: Boolean = false,
             val yesterdayCompletedCount: Int = 0,
             val currentTimeFormatted: String = "",

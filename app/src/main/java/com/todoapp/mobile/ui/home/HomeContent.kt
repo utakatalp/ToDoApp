@@ -245,13 +245,11 @@ fun HomeContent(
                     val totalTasksToday = uiState.tasks.size
                     val isMorningMode =
                         uiState.dayMode == com.todoapp.mobile.domain.model.DayMode.MORNING
-                    val isEveningMode =
-                        uiState.dayMode == com.todoapp.mobile.domain.model.DayMode.EVENING ||
-                            uiState.dayMode == com.todoapp.mobile.domain.model.DayMode.NIGHT
+                    val isEndOfDayMoment = uiState.isEndOfDayMoment
                     val showSuggest =
                         uiState.selectedFilter == HomeContract.HomeFilter.TODAY &&
                             !uiState.isSuggestCardDismissedToday &&
-                            (isMorningMode || (isEveningMode && totalTasksToday > 0))
+                            (isMorningMode || (isEndOfDayMoment && totalTasksToday > 0))
                     if (showSuggest) {
                         item {
                             HomeSuggestCard(
