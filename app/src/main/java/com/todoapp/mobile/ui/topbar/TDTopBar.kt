@@ -1,6 +1,7 @@
 package com.todoapp.mobile.ui.topbar
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -55,7 +56,11 @@ fun TDTopBar(
         navigationIcon = {
             state.navigationIcon.let {
                 IconButton(onClick = state.onNavigationClick!!) {
-                    Icon(painterResource(it), tint = TDTheme.colors.onBackground, contentDescription = null)
+                    Icon(
+                        painterResource(it),
+                        tint = TDTheme.colors.onBackground,
+                        contentDescription = stringResource(state.navigationContentDescription),
+                    )
                 }
             }
         },
@@ -66,7 +71,7 @@ fun TDTopBar(
                         Icon(
                             painterResource(action.icon),
                             tint = TDTheme.colors.onBackground,
-                            contentDescription = null,
+                            contentDescription = stringResource(action.contentDescription),
                         )
                         if (action.unreadBadgeCount > 0) {
                             Box(
@@ -113,6 +118,7 @@ fun ShowTopBar(
     val currentEntry = navController.currentBackStackEntryAsState().value
     val infoAction = TDTopBarAction(
         icon = R.drawable.ic_info,
+        contentDescription = com.todoapp.mobile.R.string.cd_top_bar_info,
         onClick = { onEvent(UiAction.OnInfoClick) },
     )
     val state =
@@ -122,17 +128,20 @@ fun ShowTopBar(
                     title = titleText,
                     onNavigationClick = { onEvent(UiAction.OnSettingsClick) },
                     navigationIcon = R.drawable.ic_settings,
+                    navigationContentDescription = com.todoapp.mobile.R.string.cd_top_bar_settings,
                     actions =
                     buildList {
                         add(
                             TDTopBarAction(
                                 icon = R.drawable.ic_search,
+                                contentDescription = com.todoapp.mobile.R.string.cd_top_bar_search,
                                 onClick = { onEvent(UiAction.OnSearchClick) },
                             ),
                         )
                         add(
                             TDTopBarAction(
                                 icon = R.drawable.ic_notification,
+                                contentDescription = com.todoapp.mobile.R.string.cd_top_bar_notifications,
                                 onClick = { onEvent(UiAction.OnNotificationClick) },
                                 unreadBadgeCount = uiState.unreadNotifications,
                             ),
@@ -157,12 +166,14 @@ fun ShowTopBar(
                     title = groupDetailArgs?.groupName ?: titleText,
                     onNavigationClick = { onEvent(UiAction.OnBackClick) },
                     navigationIcon = R.drawable.ic_arrow_back,
+                    navigationContentDescription = com.todoapp.mobile.R.string.cd_navigate_back,
                     actions =
                     buildList {
                         groupDetailArgs?.let { args ->
                             add(
                                 TDTopBarAction(
                                     icon = com.example.uikit.R.drawable.ic_settings,
+                                    contentDescription = com.todoapp.mobile.R.string.cd_top_bar_group_settings,
                                     onClick = { onEvent(UiAction.OnGroupSettingsClick(args.groupId)) },
                                 ),
                             )
@@ -177,6 +188,7 @@ fun ShowTopBar(
                     title = titleText,
                     onNavigationClick = { onEvent(UiAction.OnBackClick) },
                     navigationIcon = R.drawable.ic_arrow_back,
+                    navigationContentDescription = com.todoapp.mobile.R.string.cd_navigate_back,
                     actions = if (destination.hasInfoDialog) listOf(infoAction) else emptyList(),
                 )
             }
@@ -188,6 +200,7 @@ fun ShowTopBar(
 data class TDTopBarState(
     val title: String,
     @DrawableRes val navigationIcon: Int,
+    @StringRes val navigationContentDescription: Int,
     val onNavigationClick: (() -> Unit)? = null,
     val actions: List<TDTopBarAction> = emptyList(),
     val profileChip: TDProfileChip? = null,
@@ -195,6 +208,7 @@ data class TDTopBarState(
 
 data class TDTopBarAction(
     @DrawableRes val icon: Int,
+    @StringRes val contentDescription: Int,
     val onClick: () -> Unit,
     val unreadBadgeCount: Int = 0,
 )
@@ -266,15 +280,18 @@ private fun TDTopBarPreview_Home() {
             TDTopBarState(
                 title = "Home",
                 navigationIcon = R.drawable.ic_settings,
+                navigationContentDescription = com.todoapp.mobile.R.string.cd_top_bar_settings,
                 onNavigationClick = {},
                 actions =
                 listOf(
                     TDTopBarAction(
                         icon = R.drawable.ic_hamburger,
+                        contentDescription = com.todoapp.mobile.R.string.cd_top_bar_search,
                         onClick = {},
                     ),
                     TDTopBarAction(
                         icon = R.drawable.ic_notification,
+                        contentDescription = com.todoapp.mobile.R.string.cd_top_bar_notifications,
                         onClick = {},
                     ),
                 ),
@@ -293,11 +310,13 @@ private fun TDTopBarPreview_Calendar() {
             TDTopBarState(
                 title = "Calendar",
                 navigationIcon = R.drawable.ic_arrow_back,
+                navigationContentDescription = com.todoapp.mobile.R.string.cd_navigate_back,
                 onNavigationClick = { },
                 actions =
                 listOf(
                     TDTopBarAction(
                         icon = R.drawable.ic_hamburger,
+                        contentDescription = com.todoapp.mobile.R.string.cd_top_bar_search,
                         onClick = {},
                     ),
                 ),
@@ -316,6 +335,7 @@ private fun TDTopBarPreview_NoActions() {
             TDTopBarState(
                 title = "Settings",
                 navigationIcon = R.drawable.ic_arrow_back,
+                navigationContentDescription = com.todoapp.mobile.R.string.cd_navigate_back,
                 onNavigationClick = {},
                 actions = emptyList(),
             ),
@@ -333,6 +353,7 @@ private fun TDTopBarPreview_LongTitle() {
             TDTopBarState(
                 title = "Manage Members of Smith Family Group",
                 navigationIcon = R.drawable.ic_arrow_back,
+                navigationContentDescription = com.todoapp.mobile.R.string.cd_navigate_back,
                 onNavigationClick = {},
                 actions = emptyList(),
             ),

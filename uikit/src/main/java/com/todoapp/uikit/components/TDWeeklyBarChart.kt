@@ -177,7 +177,7 @@ private fun TDWeeklyBarChartContent(
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_fullscreen),
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.cd_expand_chart),
                         tint = TDTheme.colors.onBackground,
                         modifier = Modifier.size(18.dp),
                     )

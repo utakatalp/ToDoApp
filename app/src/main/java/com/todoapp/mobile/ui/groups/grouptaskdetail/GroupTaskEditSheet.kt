@@ -72,7 +72,7 @@ fun GroupTaskEditSheet(
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_close),
-                contentDescription = null,
+                contentDescription = stringResource(com.todoapp.mobile.R.string.cd_close),
                 tint = TDTheme.colors.onBackground,
                 modifier = Modifier.size(20.dp),
             )

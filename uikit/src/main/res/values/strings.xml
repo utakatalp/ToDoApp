@@ -43,4 +43,11 @@
     <string name="group_card_created_label">Created %1$s</string>
     <string name="group_card_view_details">View Details</string>
     <string name="today">Today</string>
+    <!-- Content descriptions -->
+    <string name="cd_close">Close</string>
+    <string name="cd_previous_month">Previous month</string>
+    <string name="cd_next_month">Next month</string>
+    <string name="cd_toggle_password_visibility">Toggle password visibility</string>
+    <string name="cd_add_task">Add task</string>
+    <string name="cd_expand_chart">Expand chart</string>
 </resources>

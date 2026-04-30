@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -99,7 +100,7 @@ fun TDTextField(
                                     R.drawable.ic_visibility_off
                                 },
                             ),
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.cd_toggle_password_visibility),
                             tint =
                             if (isError) {
                                 TDTheme.colors.red

@@ -137,7 +137,7 @@ fun SearchScreen(
                         }) {
                             Icon(
                                 painter = painterResource(UikitR.drawable.ic_close),
-                                contentDescription = null,
+                                contentDescription = stringResource(R.string.cd_clear_search),
                                 tint = TDTheme.colors.gray,
                             )
                         }
