@@ -131,6 +131,9 @@ interface ToDoApi {
         @Body request: UpdateUserRequest,
     ): Response<BaseResponse<UserData?>>
 
+    @DELETE("users/me")
+    suspend fun deleteAccount(): Response<BaseResponse<Unit?>>
+
     @retrofit2.http.Multipart
     @POST("users/me/avatar")
     suspend fun uploadAvatar(

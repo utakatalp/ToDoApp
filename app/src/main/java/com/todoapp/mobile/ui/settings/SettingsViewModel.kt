@@ -3,6 +3,7 @@ package com.todoapp.mobile.ui.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todoapp.mobile.R
 import com.todoapp.mobile.common.needsOverlayPermission
 import com.todoapp.mobile.common.needsPostNotificationsPermission
 import com.todoapp.mobile.data.repository.DataStoreHelper
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -60,6 +62,7 @@ constructor(
     private val authRepository: AuthRepository,
     private val dataStoreHelper: DataStoreHelper,
     private val userRepository: UserRepository,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -130,6 +133,11 @@ constructor(
                 }
             }
         }
+        viewModelScope.launch {
+            dataStoreHelper.observeReduceMotion().collect { enabled ->
+                _uiState.update { it.copy(reduceMotionEnabled = enabled) }
+            }
+        }
     }
 
     fun checkPermission(context: Context) {
@@ -194,6 +202,42 @@ constructor(
             UiAction.OnNavigateToAlarmSounds ->
                 _navEffect.trySend(NavigationEffect.Navigate(Screen.AlarmSounds))
             is UiAction.OnPushNotificationsToggle -> togglePushNotifications(action.enabled)
+            is UiAction.OnReduceMotionToggle -> toggleReduceMotion(action.enabled)
+            UiAction.OnDeleteAccountClick ->
+                _uiState.update { it.copy(showDeleteAccountDialog = true) }
+            UiAction.OnDeleteAccountDismiss ->
+                _uiState.update { it.copy(showDeleteAccountDialog = false) }
+            UiAction.OnDeleteAccountConfirm -> deleteAccount()
+        }
+    }
+
+    private fun deleteAccount() {
+        if (_uiState.value.isDeletingAccount) return
+        _uiState.update { it.copy(isDeletingAccount = true) }
+        viewModelScope.launch {
+            userRepository
+                .deleteAccount()
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(showDeleteAccountDialog = false, isDeletingAccount = false)
+                    }
+                    authRepository.logout()
+                }.onFailure { error ->
+                    Timber.tag("AccountDelete").w(error, "deleteAccount failed")
+                    _uiState.update { it.copy(isDeletingAccount = false) }
+                    val msg = when (error) {
+                        is com.todoapp.mobile.common.DomainException.Unauthorized ->
+                            R.string.delete_account_error_unauthorized
+                        else -> R.string.delete_account_error_generic
+                    }
+                    _uiEffect.send(UiEffect.ShowToast(context.getString(msg)))
+                }
+        }
+    }
+
+    private fun toggleReduceMotion(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreHelper.setReduceMotion(enabled)
         }
     }
 

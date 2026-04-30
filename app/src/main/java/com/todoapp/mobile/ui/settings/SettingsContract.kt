@@ -22,6 +22,9 @@ object SettingsContract {
         val isUserAuthenticated: Boolean = false,
         val pushNotificationsEnabled: Boolean = true,
         val isPushTogglePending: Boolean = false,
+        val reduceMotionEnabled: Boolean = false,
+        val showDeleteAccountDialog: Boolean = false,
+        val isDeletingAccount: Boolean = false,
     )
 
     sealed interface UiAction {
@@ -64,6 +67,14 @@ object SettingsContract {
         data object OnNavigateToAlarmSounds : UiAction
 
         data class OnPushNotificationsToggle(val enabled: Boolean) : UiAction
+
+        data class OnReduceMotionToggle(val enabled: Boolean) : UiAction
+
+        data object OnDeleteAccountClick : UiAction
+
+        data object OnDeleteAccountDismiss : UiAction
+
+        data object OnDeleteAccountConfirm : UiAction
     }
 
     sealed interface UiEffect {

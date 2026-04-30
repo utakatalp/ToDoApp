@@ -129,6 +129,16 @@ constructor(
         }
     }
 
+    fun observeReduceMotion(): Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[REDUCE_MOTION] ?: false
+    }
+
+    suspend fun setReduceMotion(value: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[REDUCE_MOTION] = value
+        }
+    }
+
     companion object {
         private val json =
             Json {
@@ -143,5 +153,6 @@ constructor(
         private val LAST_USED_REMINDER_OFFSET = longPreferencesKey("last_used_reminder_offset")
         private val SUGGEST_CARD_DISMISSED_DAY = longPreferencesKey("suggest_card_dismissed_day")
         private val CHAT_DRAFT = stringPreferencesKey("chat_draft")
+        private val REDUCE_MOTION = booleanPreferencesKey("accessibility_reduce_motion")
     }
 }

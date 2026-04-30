@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.todoapp.mobile.BuildConfig
 import com.todoapp.mobile.R
 import com.todoapp.mobile.domain.model.ThemePreference
 import com.todoapp.mobile.domain.security.SecretModeReopenOptions
@@ -89,6 +90,14 @@ private fun SettingsContent(
     onAction: (UiAction) -> Unit,
     onDismissPermission: (PermissionType) -> Unit,
 ) {
+    if (uiState.showDeleteAccountDialog) {
+        DeleteAccountDialog(
+            isDeleting = uiState.isDeletingAccount,
+            onDismiss = { onAction(UiAction.OnDeleteAccountDismiss) },
+            onConfirm = { onAction(UiAction.OnDeleteAccountConfirm) },
+        )
+    }
+
     if (uiState.showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { onAction(UiAction.OnLogoutDismiss) },
@@ -127,6 +136,8 @@ private fun SettingsContent(
             containerColor = TDTheme.colors.surface,
         )
     }
+
+    val context = LocalContext.current
 
     Column(
         modifier =
@@ -276,6 +287,155 @@ private fun SettingsContent(
             )
         }
 
+        SectionHeader(R.string.settings_section_accessibility)
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable {
+                    runCatching {
+                        context.startActivity(
+                            Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    }
+                },
+        ) {
+            TDText(
+                text = stringResource(R.string.settings_open_system_a11y),
+                style = TDTheme.typography.heading6,
+                color = TDTheme.colors.onBackground,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
+                contentDescription = null,
+                tint = TDTheme.colors.onBackground,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                TDText(
+                    text = stringResource(R.string.settings_reduce_motion),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground,
+                )
+                TDText(
+                    text = stringResource(R.string.settings_reduce_motion_desc),
+                    style = TDTheme.typography.subheading2,
+                    color = TDTheme.colors.gray,
+                )
+            }
+            Switch(
+                checked = uiState.reduceMotionEnabled,
+                onCheckedChange = { onAction(UiAction.OnReduceMotionToggle(it)) },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = TDTheme.colors.white,
+                    checkedTrackColor = TDTheme.colors.pendingGray,
+                ),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable {
+                    runCatching {
+                        context.startActivity(
+                            Intent(Settings.ACTION_DISPLAY_SETTINGS)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    }
+                },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                TDText(
+                    text = stringResource(R.string.settings_larger_text),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground,
+                )
+                TDText(
+                    text = stringResource(R.string.settings_larger_text_desc),
+                    style = TDTheme.typography.subheading2,
+                    color = TDTheme.colors.gray,
+                )
+            }
+            Icon(
+                painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
+                contentDescription = null,
+                tint = TDTheme.colors.onBackground,
+            )
+        }
+
+        SectionHeader(R.string.settings_section_legal)
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable {
+                    runCatching {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.PRIVACY_POLICY_URL))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    }
+                },
+        ) {
+            TDText(
+                text = stringResource(R.string.settings_privacy_policy),
+                style = TDTheme.typography.heading6,
+                color = TDTheme.colors.onBackground,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
+                contentDescription = null,
+                tint = TDTheme.colors.onBackground,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable {
+                    runCatching {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.TERMS_OF_SERVICE_URL))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    }
+                },
+        ) {
+            TDText(
+                text = stringResource(R.string.settings_terms_of_service),
+                style = TDTheme.typography.heading6,
+                color = TDTheme.colors.onBackground,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                painter = painterResource(com.example.uikit.R.drawable.ic_arrow_forward),
+                contentDescription = null,
+                tint = TDTheme.colors.onBackground,
+            )
+        }
+
         SectionHeader(R.string.settings_section_account)
 
         if (uiState.isUserAuthenticated) {
@@ -296,6 +456,26 @@ private fun SettingsContent(
                     contentDescription = null,
                     tint = TDTheme.colors.crossRed,
                 )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider(color = TDTheme.colors.onBackground.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable(enabled = !uiState.isDeletingAccount) {
+                        onAction(UiAction.OnDeleteAccountClick)
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TDText(
+                    text = stringResource(R.string.settings_delete_account),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.crossRed,
+                )
+                Spacer(modifier = Modifier.weight(1f))
             }
         } else {
             Row(
@@ -445,6 +625,28 @@ private fun PermissionPager(
             }
         }
     }
+}
+
+@Composable
+private fun DeleteAccountDialog(
+    isDeleting: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    val reduceMotion = com.todoapp.mobile.ui.common.LocalReduceMotion.current
+    com.todoapp.uikit.components.TDGoodbyeDialog(
+        speechBubbleText = stringResource(R.string.delete_account_speech_bubble),
+        legalDetailText = stringResource(R.string.delete_account_dialog_message),
+        typedConfirmLabel = stringResource(R.string.delete_account_typed_confirm_label),
+        typedConfirmWord = stringResource(R.string.delete_account_typed_confirm_word),
+        confirmButtonText = stringResource(R.string.delete_account_button),
+        dismissButtonText = stringResource(R.string.cancel),
+        inProgressText = stringResource(R.string.delete_account_in_progress),
+        isProcessing = isDeleting,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm,
+        reduceMotion = reduceMotion,
+    )
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)

@@ -17,8 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.runtime.Composable
@@ -110,26 +108,10 @@ private fun TransferOwnershipSuccessContent(
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
+            com.todoapp.uikit.components.TDOutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = { onAction(UiAction.OnSearchChange(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    TDText(
-                        text = stringResource(R.string.search_members),
-                        color = TDTheme.colors.gray,
-                        style = TDTheme.typography.subheading3,
-                    )
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors =
-                OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = TDTheme.colors.pendingGray,
-                    unfocusedBorderColor = TDTheme.colors.lightGray,
-                    focusedTextColor = TDTheme.colors.onBackground,
-                    unfocusedTextColor = TDTheme.colors.onBackground,
-                    cursorColor = TDTheme.colors.pendingGray,
-                ),
+                placeholder = stringResource(R.string.search_members),
                 singleLine = true,
             )
             Spacer(modifier = Modifier.height(16.dp))

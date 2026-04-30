@@ -46,10 +46,30 @@ android {
     buildTypes {
         debug {
             buildConfigField("String", "BASE_URL", "\"$debugBaseUrl\"")
+            buildConfigField(
+                "String",
+                "PRIVACY_POLICY_URL",
+                "\"https://donebot-backend.onrender.com/legal/privacy.html\"",
+            )
+            buildConfigField(
+                "String",
+                "TERMS_OF_SERVICE_URL",
+                "\"https://donebot-backend.onrender.com/legal/terms.html\"",
+            )
         }
         release {
             isMinifyEnabled = false
             buildConfigField("String", "BASE_URL", "\"https://donebot-backend.onrender.com/\"")
+            buildConfigField(
+                "String",
+                "PRIVACY_POLICY_URL",
+                "\"https://donebot-backend.onrender.com/legal/privacy.html\"",
+            )
+            buildConfigField(
+                "String",
+                "TERMS_OF_SERVICE_URL",
+                "\"https://donebot-backend.onrender.com/legal/terms.html\"",
+            )
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

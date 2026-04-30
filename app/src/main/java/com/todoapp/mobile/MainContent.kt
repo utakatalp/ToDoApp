@@ -21,14 +21,18 @@ import com.todoapp.mobile.navigation.NavigationEffectController
 import com.todoapp.mobile.navigation.RouteArgs
 import com.todoapp.mobile.navigation.Screen
 import com.todoapp.mobile.navigation.ThemedApp
+import com.todoapp.mobile.ui.common.LocalReduceMotion
 import com.todoapp.uikit.extensions.collectWithLifecycle
 
 @Composable
 fun MainContent() {
     val navController = rememberNavController()
-    CompositionLocalProvider(LocalNavController provides navController) {
-        val mainViewModel: MainViewModel = hiltViewModel()
-
+    val mainViewModel: MainViewModel = hiltViewModel()
+    val reduceMotion by mainViewModel.reduceMotion.collectAsStateWithLifecycle(initialValue = false)
+    CompositionLocalProvider(
+        LocalNavController provides navController,
+        LocalReduceMotion provides reduceMotion,
+    ) {
         var dialogMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
         mainViewModel.uiEffect.collectWithLifecycle { effect ->

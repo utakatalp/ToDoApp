@@ -113,6 +113,18 @@ sealed class PushPayload {
         }
     }
 
+    data class GroupOwnershipTransferred(
+        override val title: String?,
+        override val body: String?,
+        val groupId: Long,
+        val groupName: String?,
+    ) : PushPayload() {
+        override val type: String = TYPE
+        companion object {
+            const val TYPE = "group_ownership_transferred"
+        }
+    }
+
     data class Unknown(
         override val type: String,
         override val title: String?,
@@ -185,6 +197,17 @@ object PushPayloadParser {
                     null
                 }
             PushPayload.TaskListChanged.TYPE -> PushPayload.TaskListChanged(title, body)
+            PushPayload.GroupOwnershipTransferred.TYPE ->
+                if (groupId != null) {
+                    PushPayload.GroupOwnershipTransferred(
+                        title = title,
+                        body = body,
+                        groupId = groupId,
+                        groupName = data["groupName"],
+                    )
+                } else {
+                    null
+                }
             else -> PushPayload.Unknown(type, title, body)
         }
     }

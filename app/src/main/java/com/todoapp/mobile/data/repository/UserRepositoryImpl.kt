@@ -180,6 +180,10 @@ constructor(
         )
     }.map { it.pushEnabled }
 
+    override suspend fun deleteAccount(): Result<Unit> = handleEmptyRequest {
+        todoApi.deleteAccount()
+    }
+
     private fun rememberUser(user: UserData) {
         cachedUser = user
         userCachedAt = System.currentTimeMillis()

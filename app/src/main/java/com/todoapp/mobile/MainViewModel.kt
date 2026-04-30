@@ -64,6 +64,8 @@ constructor(
     private val _pendingDeepLink = MutableStateFlow<DeepLink?>(null)
     val pendingDeepLink = _pendingDeepLink.asStateFlow()
 
+    val reduceMotion = dataStoreHelper.observeReduceMotion()
+
     init {
         viewModelScope.launch {
             sessionPreferences

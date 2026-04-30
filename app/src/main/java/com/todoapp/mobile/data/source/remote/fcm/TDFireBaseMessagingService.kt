@@ -127,6 +127,15 @@ class TDFireBaseMessagingService : FirebaseMessagingService() {
             is PushPayload.TaskListChanged -> {
                 taskSyncRepository.fetchTasks(force = true)
             }
+            is PushPayload.GroupOwnershipTransferred -> {
+                scope.launch { runCatching { groupRepository.getGroups(force = true) } }
+                val resolvedTitle = payload.groupName?.let {
+                    getString(com.todoapp.mobile.R.string.notification_group_ownership_title_format, it)
+                } ?: title
+                val resolvedBody = body
+                    ?: getString(com.todoapp.mobile.R.string.notification_group_ownership_body)
+                showGroupTaskNotification(resolvedTitle, resolvedBody, payload.groupId, taskId = null)
+            }
             is PushPayload.Unknown -> {
                 Timber.tag(TAG).d("Unknown push type=%s", payload.type)
                 if (!payload.title.isNullOrBlank() || !payload.body.isNullOrBlank()) {
