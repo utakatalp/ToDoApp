@@ -790,6 +790,12 @@
     <string name="chat_local_overdue_empty">Nothing overdue — nice work!</string>
     <string name="chat_local_week_count_format">You\'ve completed %1$d task(s) this week.</string>
     <string name="chat_local_greeting">Hi! What\'s on your mind today?</string>
+    <string name="chat_local_pomodoro_started_format">%1$d-minute pomodoro started — focus mode on. Good luck!</string>
+    <string name="chat_local_pomodoro_already_running_format">A pomodoro is already running, %1$d minute(s) left. Manage it from the Pomodoro tab.</string>
+    <string name="chat_local_pomodoro_status_running_format">%1$d:%2$02d remaining on your current pomodoro.</string>
+    <string name="chat_local_pomodoro_no_active">No active pomodoro right now.</string>
+    <string name="chat_local_pomodoro_stopped">Pomodoro stopped.</string>
+    <string name="chat_local_pomodoro_not_running">No pomodoro to stop.</string>
     <!-- Home — greeting (icon + clock variant) -->
     <string name="home_greeting_morning_format">Good morning, %1$s</string>
     <string name="home_greeting_midday_format">Good afternoon, %1$s</string>

@@ -253,6 +253,16 @@ object XyzContract {
 - **Don't** decode `Bitmap`s into a `remember { }` without cleanup. Back the lifecycle with `DisposableEffect(bitmap) { onDispose { bitmap?.asAndroidBitmap()?.recycle() } }`, or (preferred) use Coil's `AsyncImage(model = byteArray, ...)` so Coil manages the native memory.
 - **Don't** register a singleton `CoroutineScope` without a shutdown path. `@Singleton class Foo { val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default) }` leaks unless a `fun shutdown() { scope.cancel() }` is invoked from `Application.onDestroy` via `ProcessLifecycleOwner`.
 
+## Chat (DoneBot) architecture
+
+- Chat goes through the backend proxy: client → `POST /chat/message` (JWT) → backend Vertex AI manual function-call loop → server-side Postgres tools. The Firebase AI Logic SDK was removed; do not re-add `firebase-ai` to dependencies.
+- `LocalIntentClassifier` (in `data/ai/`) handles trivial/local intents (today, overdue, weekly, greeting, pomodoro start/stop/status) without a backend round-trip. Pomodoro especially must stay client-side because `PomodoroEngine` state lives on the device.
+- Chat history is persisted in client Room (`chat_messages`); the backend is stateless and the client sends the last 10 turns each call. The Room table is therefore still load-bearing — do NOT drop it as part of a "backend migration cleanup."
+- The system instruction lives in backend resources (`chat/system-instruction-{en,tr}.md`); the client `chat_system_instruction` string was removed. Do not put new prompt rules in client strings.xml — edit the backend prompt file.
+- All chat tools (read + write) execute server-side except pomodoro (client-only). Group tasks (`familyGroupId != null`) are intentionally blocked for any chat write — error code `group_task_blocked`. Do not relax this without an audit/transparency story.
+- Bulk write tools require user confirmation: bot must list affected tasks and get explicit "yes" before calling `bulkSetTaskCompletion` / `bulkDeleteTasks` / `bulkRescheduleTasks`. The `REQUIRES_CONFIRMATION` note in the tool declaration descriptions is load-bearing — keep it when editing.
+- Bot must NEVER mention internal numeric task IDs in user-facing replies (the app surfaces no IDs anywhere). Always confirm by title + date.
+
 ## Networking / images / backend
 
 - The backend base URL comes from `local.properties` via `BuildConfig.BASE_URL` (set in `app/build.gradle.kts`). Do not hardcode hosts in Retrofit or anywhere else.

@@ -2,6 +2,9 @@ package com.todoapp.mobile.data.ai
 
 import android.content.Context
 import com.todoapp.mobile.R
+import com.todoapp.mobile.domain.engine.PomodoroEngine
+import com.todoapp.mobile.domain.engine.PomodoroMode
+import com.todoapp.mobile.domain.engine.Session
 import com.todoapp.mobile.domain.repository.TaskRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
@@ -14,9 +17,18 @@ import javax.inject.Singleton
 class LocalIntentClassifier @Inject constructor(
     @ApplicationContext private val context: Context,
     private val taskRepository: TaskRepository,
+    private val pomodoroEngine: PomodoroEngine,
     private val clock: Clock,
 ) {
-    enum class Intent { TODAY_TASKS, OVERDUE_TASKS, WEEKLY_PROGRESS, GREETING }
+    enum class Intent {
+        TODAY_TASKS,
+        OVERDUE_TASKS,
+        WEEKLY_PROGRESS,
+        GREETING,
+        POMODORO_START,
+        POMODORO_STOP,
+        POMODORO_STATUS,
+    }
 
     data class Match(val intent: Intent, val response: String)
 
@@ -24,6 +36,11 @@ class LocalIntentClassifier @Inject constructor(
         val normalized = prompt.trim().lowercase()
         if (normalized.isEmpty()) return null
         if (normalized.length > MAX_INTENT_LENGTH) return null
+
+        // Pomodoro intents include "başlat"/"start" which are mutation-verb-shaped,
+        // so we match them BEFORE the mutation-verb filter.
+        pomodoroMatch(normalized)?.let { return it }
+
         if (containsMutationVerb(normalized)) return null
 
         return when {
@@ -45,6 +62,82 @@ class LocalIntentClassifier @Inject constructor(
             )
             else -> null
         }
+    }
+
+    private fun pomodoroMatch(text: String): Match? {
+        val isPomodoroLike = "pomodoro" in text || "fokus" in text || "focus" in text
+        if (!isPomodoroLike) return null
+
+        return when {
+            POMODORO_STOP_REGEX.containsMatchIn(text) -> handlePomodoroStop()
+            POMODORO_STATUS_REGEX.containsMatchIn(text) -> handlePomodoroStatus()
+            else -> handlePomodoroStart(text)
+        }
+    }
+
+    private fun handlePomodoroStart(text: String): Match {
+        val state = pomodoroEngine.state.value
+        if (state.isRunning) {
+            val mins = (state.remainingSeconds / 60).coerceAtLeast(1).toInt()
+            return Match(
+                Intent.POMODORO_START,
+                context.getString(R.string.chat_local_pomodoro_already_running_format, mins),
+            )
+        }
+        val minutes = MINUTE_PATTERN.find(text)
+            ?.groupValues
+            ?.firstOrNull { it.toIntOrNull() != null }
+            ?.toIntOrNull()
+            ?.coerceIn(POMODORO_MIN_MINUTES, POMODORO_MAX_MINUTES)
+            ?: POMODORO_DEFAULT_MINUTES
+        pomodoroEngine.setSessionQueue(
+            ArrayDeque(
+                listOf(
+                    Session(
+                        durationSeconds = minutes.toLong() * 60L,
+                        mode = PomodoroMode.Focus,
+                    ),
+                ),
+            ),
+        )
+        pomodoroEngine.prepare()
+        pomodoroEngine.start()
+        return Match(
+            Intent.POMODORO_START,
+            context.getString(R.string.chat_local_pomodoro_started_format, minutes),
+        )
+    }
+
+    private fun handlePomodoroStop(): Match {
+        val isRunning = pomodoroEngine.state.value.isRunning
+        if (!isRunning) {
+            return Match(
+                Intent.POMODORO_STOP,
+                context.getString(R.string.chat_local_pomodoro_not_running),
+            )
+        }
+        pomodoroEngine.resetState()
+        return Match(
+            Intent.POMODORO_STOP,
+            context.getString(R.string.chat_local_pomodoro_stopped),
+        )
+    }
+
+    private fun handlePomodoroStatus(): Match {
+        val state = pomodoroEngine.state.value
+        if (!state.isRunning) {
+            return Match(
+                Intent.POMODORO_STATUS,
+                context.getString(R.string.chat_local_pomodoro_no_active),
+            )
+        }
+        val remaining = state.remainingSeconds.coerceAtLeast(0)
+        val mins = (remaining / 60).toInt()
+        val secs = (remaining % 60).toInt()
+        return Match(
+            Intent.POMODORO_STATUS,
+            context.getString(R.string.chat_local_pomodoro_status_running_format, mins, secs),
+        )
     }
 
     private fun matchesToday(text: String): Boolean = TODAY_TR_ANCHOR.containsMatchIn(text) || TODAY_EN_ANCHOR.containsMatchIn(text)
@@ -83,6 +176,16 @@ class LocalIntentClassifier @Inject constructor(
 
     companion object {
         private const val MAX_INTENT_LENGTH = 60
+        private const val POMODORO_DEFAULT_MINUTES = 25
+        private const val POMODORO_MIN_MINUTES = 1
+        private const val POMODORO_MAX_MINUTES = 180
+        private val MINUTE_PATTERN = Regex("(\\d{1,3})\\s*(dk|dakika|min(?:ute)?s?|m\\b)")
+        private val POMODORO_STOP_REGEX = Regex(
+            "\\b(durdur|iptal|sonland[ıi]r|bitir|stop|cancel|end|finish)\\b",
+        )
+        private val POMODORO_STATUS_REGEX = Regex(
+            "\\b(durum|kalan|kald[ıi]|kal[ıi]yor|status|left|remaining|how\\s+much)\\b",
+        )
         private val GREETING = Regex(
             "^(merhaba|selam|s\\.?a\\.?|naber|iyi\\s+(günler|sabahlar|akşamlar)|" +
                 "hi|hello|hey|good\\s+(morning|afternoon|evening))[!?.\\s]*\$",

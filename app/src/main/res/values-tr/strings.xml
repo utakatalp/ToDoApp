@@ -791,6 +791,12 @@
     <string name="chat_local_overdue_empty">Gecikmiş hiç bir şey yok — harikasın!</string>
     <string name="chat_local_week_count_format">Bu hafta %1$d görev tamamladın.</string>
     <string name="chat_local_greeting">Selam! Bugün aklında ne var?</string>
+    <string name="chat_local_pomodoro_started_format">%1$d dakikalık pomodoro başladı — odak modu açık. Kolay gelsin!</string>
+    <string name="chat_local_pomodoro_already_running_format">Zaten bir pomodoro çalışıyor, %1$d dakika kaldı. Pomodoro sekmesinden yönet.</string>
+    <string name="chat_local_pomodoro_status_running_format">Pomodoro\'na %1$d:%2$02d kaldı.</string>
+    <string name="chat_local_pomodoro_no_active">Şu an aktif bir pomodoro yok.</string>
+    <string name="chat_local_pomodoro_stopped">Pomodoro durduruldu.</string>
+    <string name="chat_local_pomodoro_not_running">Durdurulacak bir pomodoro yok.</string>
     <!-- Home — greeting (icon + clock variant) -->
     <string name="home_greeting_morning_format">Günaydın, %1$s</string>
     <string name="home_greeting_midday_format">İyi günler, %1$s</string>
