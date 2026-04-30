@@ -10,6 +10,7 @@ import com.todoapp.mobile.data.network.NetworkMonitor
 import com.todoapp.mobile.data.repository.DataStoreHelper
 import com.todoapp.mobile.domain.model.ChatMessage
 import com.todoapp.mobile.domain.repository.ChatRepository
+import com.todoapp.mobile.domain.repository.TaskSyncRepository
 import com.todoapp.mobile.navigation.NavigationEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -38,6 +39,7 @@ class ChatViewModel @Inject constructor(
     private val networkMonitor: NetworkMonitor,
     private val dataStoreHelper: DataStoreHelper,
     private val intentClassifier: LocalIntentClassifier,
+    private val taskSyncRepository: TaskSyncRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<ChatContract.UiState>(ChatContract.UiState.Loading)
     val uiState: StateFlow<ChatContract.UiState> = _uiState.asStateFlow()
@@ -194,6 +196,11 @@ class ChatViewModel @Inject constructor(
             .onSuccess { response ->
                 chatRepository.appendAssistantMessage(response.text)
                 logTurnSummary(response.meta.roundTrips, turnStartNs, response.text)
+                if (response.meta.roundTrips > 1) {
+                    taskSyncRepository.resetCooldown()
+                    taskSyncRepository.fetchTasks(force = true)
+                    Timber.tag(METRICS_TAG).d("post-chat sync rt=%d", response.meta.roundTrips)
+                }
             }
             .onFailure { error ->
                 handleSendFailure(error, prompt)
