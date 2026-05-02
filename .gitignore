@@ -14,3 +14,13 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Thesis sources (local only)
+thesis/
+
+# Claude-generated docs & tooling (local only)
+CLAUDE.md
+FCM_SESSION_REPORT.md
+LOGO_AUDIT.md
+.claude/commands/
+.claude/skills/
