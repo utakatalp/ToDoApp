@@ -1,5 +1,6 @@
 package com.todoapp.uikit.components
 
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -47,7 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.uikit.R
+import com.example.uikit.R.drawable
 import com.todoapp.uikit.previews.TDPreviewDialog
 import com.todoapp.uikit.theme.TDTheme
 
@@ -83,7 +84,7 @@ fun TDGoodbyeDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
-    @DrawableRes avatarRes: Int = R.drawable.img_donebot_sad,
+    @DrawableRes avatarRes: Int = drawable.img_donebot_sad,
     reduceMotion: Boolean = false,
 ) {
     val inPreview = LocalInspectionMode.current
@@ -193,10 +194,6 @@ private fun AvatarWithHalo(
     @DrawableRes avatarRes: Int,
     breathingScale: Float,
 ) {
-    // Halo tuned per theme: dark mode reads softPink fine on the deep card surface, but
-    // on the light blue card the same pink is too washed out. In light mode we layer a
-    // warmer, more opaque core (lightOrange) into a softPink wash so the avatar always
-    // sits inside a visible glow.
     val haloBrush = if (TDTheme.isDark) {
         Brush.radialGradient(
             colors = listOf(
@@ -322,9 +319,8 @@ private fun ButtonsRow(
     }
 }
 
-// region Previews
-// Preview-only placeholder drawable from uikit. Real callers pass a DoneBot illustration.
-private const val PREVIEW_AVATAR_RES = R.drawable.ic_bot
+@SuppressLint("NonConstantResourceId")
+private const val PREVIEW_AVATAR_RES = drawable.ic_bot
 
 @TDPreviewDialog
 @Composable
@@ -349,9 +345,6 @@ private fun TDGoodbyeDialogPreview_Idle() {
 @TDPreviewDialog
 @Composable
 private fun TDGoodbyeDialogPreview_Typed() {
-    // Typed-state preview can't easily set internal state; the idle preview
-    // is enough — the button-enabled visual is identical except the confirm
-    // button color shifts. Callers see this state at runtime.
     TDTheme {
         TDGoodbyeDialog(
             speechBubbleText = "Dur biraz… gerçekten gidiyor musun?",

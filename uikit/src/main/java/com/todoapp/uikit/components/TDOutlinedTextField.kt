@@ -127,7 +127,10 @@ fun TDOutlinedTextField(
         visualTransformation = effectiveTransformation,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
-        textStyle = TDTheme.typography.regularTextStyle,
+        // Strip the baked-in color from regularTextStyle so the focused/unfocusedTextColor
+        // below win — otherwise Material3 OutlinedTextField uses the textStyle's color and
+        // typed text stays #000000 in dark theme (regularTextStyle hardcodes black).
+        textStyle = TDTheme.typography.regularTextStyle.copy(color = Color.Unspecified),
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = TDTheme.colors.onBackground,
