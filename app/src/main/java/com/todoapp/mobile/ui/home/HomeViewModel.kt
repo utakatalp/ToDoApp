@@ -171,6 +171,11 @@ constructor(
     }
 
     private fun refreshPermissions() {
+        // Lifecycle ON_RESUME also triggers a remote task sync so off-device mutations
+        // (DoneBot on web, another phone, direct backend writes) flow into Room and the
+        // reactive Flows powering Home re-emit. The 60s cooldown in TaskSyncRepository
+        // keeps quick foreground/background flips from hammering the worker.
+        taskSyncRepository.fetchTasks()
         viewModelScope.launch {
             val pending = dataStoreHelper.observeFirstLoginPermissionPromptPending().first()
             val list =
