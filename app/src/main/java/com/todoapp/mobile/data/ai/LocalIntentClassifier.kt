@@ -35,12 +35,17 @@ class LocalIntentClassifier @Inject constructor(
     suspend fun tryAnswer(prompt: String): Match? {
         val normalized = prompt.trim().lowercase()
         if (normalized.isEmpty()) return null
+
+        // Pomodoro keyword bypasses the global length cap because phrasings like
+        // "hey donebot, can you start a 25-minute pomodoro for me please" are realistic
+        // and would otherwise fall through to the backend, which has no pomodoro tool.
+        // Matched BEFORE the mutation-verb filter because "başlat"/"start" overlap.
+        val pomodoroLike = "pomodoro" in normalized || "fokus" in normalized || "focus" in normalized
+        if (pomodoroLike) {
+            pomodoroMatch(normalized)?.let { return it }
+        }
+
         if (normalized.length > MAX_INTENT_LENGTH) return null
-
-        // Pomodoro intents include "başlat"/"start" which are mutation-verb-shaped,
-        // so we match them BEFORE the mutation-verb filter.
-        pomodoroMatch(normalized)?.let { return it }
-
         if (containsMutationVerb(normalized)) return null
 
         return when {
