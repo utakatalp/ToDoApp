@@ -1,10 +1,8 @@
 package com.todoapp.mobile.ui.home
 
-import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,28 +17,18 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.todoapp.mobile.R
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @Composable
 fun PendingPhotosRow(
@@ -94,17 +82,10 @@ fun PendingPhotosRow(
                 }
             }
             itemsIndexed(pending) { index, photo ->
-                var bitmap by remember(photo.bytes) { mutableStateOf<ImageBitmap?>(null) }
-                LaunchedEffect(photo.bytes) {
-                    bitmap = withContext(Dispatchers.IO) {
-                        runCatching {
-                            BitmapFactory.decodeByteArray(photo.bytes, 0, photo.bytes.size)?.asImageBitmap()
-                        }.getOrNull()
-                    }
-                }
-                DisposableEffect(bitmap) {
-                    onDispose { bitmap?.asAndroidBitmap()?.recycle() }
-                }
+                // Coil decodes from the byte array off the main thread and manages
+                // recycling itself, so we no longer race a manual `bitmap.recycle()`
+                // against in-flight draw frames (the previous bug:
+                // `Canvas: trying to use a recycled bitmap`).
                 Box(
                     modifier =
                     Modifier
@@ -113,14 +94,12 @@ fun PendingPhotosRow(
                         .background(TDTheme.colors.lightPending)
                         .clickable { onRemoveAt(index) },
                 ) {
-                    bitmap?.let { decoded ->
-                        Image(
-                            bitmap = decoded,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(72.dp),
-                        )
-                    }
+                    AsyncImage(
+                        model = photo.bytes,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(72.dp),
+                    )
                 }
             }
         }

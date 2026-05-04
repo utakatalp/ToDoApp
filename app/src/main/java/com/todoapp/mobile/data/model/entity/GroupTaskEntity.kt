@@ -33,4 +33,8 @@ data class GroupTaskEntity(
     @ColumnInfo(name = "assignee_display_name") val assigneeDisplayName: String? = null,
     @ColumnInfo(name = "assignee_avatar_url") val assigneeAvatarUrl: String? = null,
     @ColumnInfo(name = "photo_urls", defaultValue = "") val photoUrls: String = "",
+    @ColumnInfo(name = "location_lat") val locationLat: Double? = null,
+    @ColumnInfo(name = "location_lng") val locationLng: Double? = null,
+    @ColumnInfo(name = "location_name") val locationName: String? = null,
+    @ColumnInfo(name = "location_address") val locationAddress: String? = null,
 )

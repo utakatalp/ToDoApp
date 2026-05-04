@@ -21,8 +21,9 @@ data class Task(
     val photoUrls: List<String> = emptyList(),
     /**
      * Minutes before timeStart at which to fire the reminder. 0 = on time,
-     * positive = N minutes before, null = no reminder. Stored locally; not synced
-     * to the backend (alarms are device-local).
+     * positive = N minutes before, null = no reminder. Synced with the backend
+     * since V9 so chat-set reminders survive cross-device usage. The actual
+     * alarm is still scheduled device-side via AlarmScheduler.
      */
     val reminderOffsetMinutes: Long? = 0L,
     val category: TaskCategory = TaskCategory.PERSONAL,
@@ -33,11 +34,24 @@ data class Task(
      * (00:00 / 23:59) and notifications fire at the user's default morning hour.
      */
     val isAllDay: Boolean = false,
+    /**
+     * Optional location attached to the task. Any subset can be present:
+     *  - name + address only → tap-to-Maps uses geo:0,0?q=<name+address>
+     *  - lat + lng + name → opens with the precise pin and the name as label
+     *  - all four → richest experience (precise pin + readable label)
+     * Set from the Add/Edit task sheet (place picker) or from chat ("at Kadıköy").
+     */
+    val locationName: String? = null,
+    val locationAddress: String? = null,
+    val locationLat: Double? = null,
+    val locationLng: Double? = null,
 )
 
 fun Task.toAlarmItem(remindBeforeMinutes: Long = 0): AlarmItem = AlarmItem(
     time = LocalDateTime.of(date, timeStart.minusMinutes(remindBeforeMinutes)),
-    message = title,
+    // Append the location name with a bullet so the system tray notification reads like
+    // "Doctor • Acıbadem Hastanesi". Locale-neutral separator (works in EN + TR copy).
+    message = locationName?.takeIf { it.isNotBlank() }?.let { "$title • $it" } ?: title,
     minutesBefore = remindBeforeMinutes,
     taskId = id,
 )
@@ -61,6 +75,12 @@ fun Task.toCreateTaskRequestDto(
     category = category.name,
     customCategoryName = customCategoryName,
     recurrence = recurrence.name,
+    isAllDay = isAllDay,
+    reminderOffsetMinutes = reminderOffsetMinutes ?: 0L,
+    locationLat = locationLat,
+    locationLng = locationLng,
+    locationName = locationName,
+    locationAddress = locationAddress,
 )
 
 fun TaskData.toDomain(): Task = Task(
@@ -73,7 +93,13 @@ fun TaskData.toDomain(): Task = Task(
     isCompleted = isCompleted,
     isSecret = isSecret,
     photoUrls = photoUrls,
+    reminderOffsetMinutes = reminderOffsetMinutes,
     category = TaskCategory.fromStorage(category),
     customCategoryName = customCategoryName,
     recurrence = Recurrence.fromStorage(recurrence),
+    isAllDay = isAllDay,
+    locationLat = locationLat,
+    locationLng = locationLng,
+    locationName = locationName,
+    locationAddress = locationAddress,
 )

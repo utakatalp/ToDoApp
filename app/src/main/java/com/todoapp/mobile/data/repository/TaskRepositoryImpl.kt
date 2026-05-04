@@ -17,9 +17,11 @@ import com.todoapp.mobile.data.source.local.datasource.GroupTaskLocalDataSource
 import com.todoapp.mobile.data.source.local.datasource.TaskLocalDataSource
 import com.todoapp.mobile.data.source.remote.datasource.TaskRemoteDataSource
 import com.todoapp.mobile.domain.alarm.AlarmScheduler
+import com.todoapp.mobile.domain.alarm.AlarmType
 import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.Task
 import com.todoapp.mobile.domain.model.firesOn
+import com.todoapp.mobile.domain.model.toAlarmItem
 import com.todoapp.mobile.domain.model.toDomain
 import com.todoapp.mobile.domain.repository.CompletedCountByDay
 import com.todoapp.mobile.domain.repository.DailyBucket
@@ -423,6 +425,10 @@ constructor(
         // (no-op if there was no alarm) so a change to NONE clears it.
         runCatching { alarmScheduler.cancelRecurring(task.id) }
         scheduleRecurringAlarmIfNeeded(task.id, task)
+        // Edits to a non-recurring task can change date/timeStart/reminderOffsetMinutes, all of which
+        // affect when the one-shot alarm fires. Cancel + reschedule so the user-visible reminder stays
+        // in sync with what they just saved. cancelTask is taskId-based and idempotent (no-op if none scheduled).
+        rescheduleOneShotAlarm(task)
 
         if (taskEntity?.syncStatus != SyncStatus.SYNCED) {
             // no need to update remote because its not synced
@@ -484,6 +490,15 @@ constructor(
     private fun cancelRecurringAlarmIfNeeded(taskId: Long, task: Task) {
         if (task.recurrence == Recurrence.NONE) return
         runCatching { alarmScheduler.cancelRecurring(taskId) }
+    }
+
+    private fun rescheduleOneShotAlarm(task: Task) {
+        runCatching { alarmScheduler.cancelTask(task.toAlarmItem()) }
+        if (task.recurrence != Recurrence.NONE) return
+        val offset = task.reminderOffsetMinutes ?: return
+        runCatching {
+            alarmScheduler.schedule(task.toAlarmItem(remindBeforeMinutes = offset), AlarmType.TASK)
+        }.onFailure { Log.w("scheduleOneShot", "failed: ${it.message}") }
     }
 
     override suspend fun syncRemoteTasksWithLocal(): Result<Unit> {

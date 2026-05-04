@@ -117,6 +117,19 @@ fun GroupTaskEditSheet(
             onValueChange = { onAction(UiAction.OnEditDescriptionChange(it)) },
             singleLine = false,
         )
+        Spacer(Modifier.height(12.dp))
+        val launchLocationPicker =
+            com.todoapp.mobile.ui.common.rememberLocationPickerLauncher { name, address, lat, lng ->
+                onAction(UiAction.OnEditLocationPicked(name, address, lat, lng))
+            }
+        com.todoapp.uikit.components.TDLocationPicker(
+            name = state.editLocationName,
+            address = state.editLocationAddress,
+            addLabel = stringResource(com.todoapp.mobile.R.string.location_add_hint),
+            clearContentDescription = stringResource(com.todoapp.mobile.R.string.location_clear),
+            onClick = launchLocationPicker,
+            onClear = { onAction(UiAction.OnEditLocationCleared) },
+        )
         if (state.members.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
             EditTaskAssigneeSelector(

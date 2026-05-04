@@ -523,6 +523,9 @@
         <item quantity="one">%1$d member</item>
         <item quantity="other">%1$d members</item>
     </plurals>
+    <string name="location_label">Location</string>
+    <string name="location_add_hint">Add location</string>
+    <string name="location_clear">Clear location</string>
     <string name="reminder_label">Remind me</string>
     <string name="reminder_none">No reminder</string>
     <string name="reminder_on_time">On time</string>

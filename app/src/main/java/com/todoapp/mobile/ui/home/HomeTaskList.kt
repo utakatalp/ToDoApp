@@ -48,6 +48,7 @@ import com.example.uikit.R
 import com.todoapp.mobile.common.maskDescription
 import com.todoapp.mobile.common.maskTitle
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.ui.common.rememberOpenLocation
 import com.todoapp.uikit.components.TDTaskCardWithCheckbox
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
@@ -228,6 +229,12 @@ fun HomeTaskList(
                                         },
                                         isSecret = task.isSecret,
                                     )
+                                    val openLocation = rememberOpenLocation(
+                                        task.locationName,
+                                        task.locationAddress,
+                                        task.locationLat,
+                                        task.locationLng,
+                                    )
                                     TDTaskCardWithCheckbox(
                                         taskText = if (task.isSecret) task.title.maskTitle() else task.title,
                                         taskDescription = if (task.isSecret) task.description?.maskDescription() else task.description,
@@ -243,9 +250,18 @@ fun HomeTaskList(
                                             bottomEnd = 12.dp,
                                         ),
                                         categoryLabel = categoryLabelFor(task),
+                                        categoryIcon = categoryIconFor(task.category),
+                                        locationLabel = task.locationName,
+                                        onLocationClick = openLocation,
                                     )
                                 }
                             } else {
+                                val openLocation = rememberOpenLocation(
+                                    task.locationName,
+                                    task.locationAddress,
+                                    task.locationLat,
+                                    task.locationLng,
+                                )
                                 TDTaskCardWithCheckbox(
                                     taskText = if (task.isSecret) task.title.maskTitle() else task.title,
                                     taskDescription = if (task.isSecret) task.description?.maskDescription() else task.description,
@@ -254,6 +270,9 @@ fun HomeTaskList(
                                     isDragging = isDragging,
                                     isAnyDragging = isAnyDragging,
                                     categoryLabel = categoryLabelFor(task),
+                                    categoryIcon = categoryIconFor(task.category),
+                                    locationLabel = task.locationName,
+                                    onLocationClick = openLocation,
                                 )
                             }
                         }
@@ -339,6 +358,19 @@ private fun categoryDisplayText(task: com.todoapp.mobile.domain.model.Task): Str
         -> return null
     }
     return stringResource(res)
+}
+
+@androidx.annotation.DrawableRes
+private fun categoryIconFor(category: com.todoapp.mobile.domain.model.TaskCategory): Int? = when (category) {
+    com.todoapp.mobile.domain.model.TaskCategory.SHOPPING -> com.example.uikit.R.drawable.ic_shopping_label
+    com.todoapp.mobile.domain.model.TaskCategory.MEDICINE -> com.example.uikit.R.drawable.ic_medication_label
+    com.todoapp.mobile.domain.model.TaskCategory.HEALTH -> com.example.uikit.R.drawable.ic_health_label
+    com.todoapp.mobile.domain.model.TaskCategory.WORK -> com.example.uikit.R.drawable.ic_work_label
+    com.todoapp.mobile.domain.model.TaskCategory.STUDY -> com.example.uikit.R.drawable.ic_study_label
+    com.todoapp.mobile.domain.model.TaskCategory.BIRTHDAY -> com.example.uikit.R.drawable.ic_birthday_label
+    com.todoapp.mobile.domain.model.TaskCategory.PERSONAL,
+    com.todoapp.mobile.domain.model.TaskCategory.OTHER,
+    -> null
 }
 
 @androidx.compose.runtime.Composable

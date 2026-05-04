@@ -35,6 +35,10 @@ data class TaskFormState(
     val customCategoryName: String = "",
     val selectedRecurrence: Recurrence = Recurrence.NONE,
     val isAllDay: Boolean = false,
+    val locationName: String? = null,
+    val locationAddress: String? = null,
+    val locationLat: Double? = null,
+    val locationLng: Double? = null,
 ) {
     companion object {
         fun smartDefault(today: LocalDate, now: LocalTime, lastReminderOffset: Long?): TaskFormState {
@@ -147,4 +151,13 @@ sealed interface TaskFormUiAction {
     data class AllDayChange(
         val isAllDay: Boolean,
     ) : TaskFormUiAction
+
+    data class LocationPicked(
+        val name: String,
+        val address: String,
+        val lat: Double?,
+        val lng: Double?,
+    ) : TaskFormUiAction
+
+    data object LocationCleared : TaskFormUiAction
 }

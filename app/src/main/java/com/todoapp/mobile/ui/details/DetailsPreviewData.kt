@@ -3,6 +3,8 @@
 package com.todoapp.mobile.ui.details
 
 import androidx.annotation.StringRes
+import com.todoapp.mobile.domain.model.Recurrence
+import com.todoapp.mobile.domain.model.TaskCategory
 import com.todoapp.mobile.ui.details.DetailsContract.UiState
 import java.time.LocalDate
 import java.time.LocalTime
@@ -18,6 +20,11 @@ object DetailsPreviewData {
         taskDescription: String = "Sample description",
         dialogSelectedDate: LocalDate? = LocalDate.now(),
         @StringRes titleError: Int? = null,
+        selectedCategory: TaskCategory = TaskCategory.PERSONAL,
+        customCategoryName: String = "",
+        selectedRecurrence: Recurrence = Recurrence.NONE,
+        reminderOffsetMinutes: Long? = 0L,
+        isAllDay: Boolean = false,
     ) = UiState.Success(
         isDirty = isDirty,
         isSaving = isSaving,
@@ -29,5 +36,10 @@ object DetailsPreviewData {
         taskDescription = taskDescription,
         dialogSelectedDate = dialogSelectedDate,
         titleError = titleError,
+        selectedCategory = selectedCategory,
+        customCategoryName = customCategoryName,
+        selectedRecurrence = selectedRecurrence,
+        reminderOffsetMinutes = reminderOffsetMinutes,
+        isAllDay = isAllDay,
     )
 }

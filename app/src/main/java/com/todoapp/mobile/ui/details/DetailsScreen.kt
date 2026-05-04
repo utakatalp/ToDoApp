@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -36,6 +38,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.todoapp.mobile.R
+import com.todoapp.mobile.domain.model.Recurrence
+import com.todoapp.mobile.domain.model.TaskCategory
+import com.todoapp.mobile.ui.common.categoryOptions
+import com.todoapp.mobile.ui.common.recurrenceExplainer
+import com.todoapp.mobile.ui.common.recurrenceOptions
+import com.todoapp.mobile.ui.common.reminderOffsetOptions
 import com.todoapp.mobile.ui.details.DetailsContract.UiAction
 import com.todoapp.mobile.ui.details.DetailsContract.UiEffect
 import com.todoapp.mobile.ui.details.DetailsContract.UiState
@@ -43,10 +51,13 @@ import com.todoapp.mobile.ui.groups.grouptaskdetail.TaskPhotosSection
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
 import com.todoapp.uikit.components.TDButtonType
+import com.todoapp.uikit.components.TDCategoryPicker
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
 import com.todoapp.uikit.components.TDLoadingBar
 import com.todoapp.uikit.components.TDPickerField
+import com.todoapp.uikit.components.TDRecurrencePicker
+import com.todoapp.uikit.components.TDReminderOffsetPicker
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDWheelTimePicker
 import com.todoapp.uikit.extensions.collectWithLifecycle
@@ -182,49 +193,153 @@ private fun DetailsSuccessContent(
                     )
                 }
 
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        TDPickerField(
-                            title = stringResource(R.string.set_time),
-                            value =
-                            uiState.taskTimeStart?.format(timeFormatter)
-                                ?: stringResource(R.string.starts),
-                            onClick = { showStartTimePicker = true },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(com.example.uikit.R.drawable.ic_clock),
-                                    tint = TDTheme.colors.onBackground,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
-                        )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(com.example.uikit.R.drawable.ic_clock),
+                        tint = TDTheme.colors.onBackground,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    TDText(
+                        text = stringResource(R.string.task_all_day_label),
+                        style = TDTheme.typography.regularTextStyle,
+                        color = TDTheme.colors.onBackground,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Switch(
+                        checked = uiState.isAllDay,
+                        onCheckedChange = { onAction(UiAction.OnAllDayChange(it)) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = TDTheme.colors.purple,
+                            checkedTrackColor = TDTheme.colors.lightPurple,
+                        ),
+                    )
+                }
+
+                if (!uiState.isAllDay) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            TDPickerField(
+                                title = stringResource(R.string.set_time),
+                                value =
+                                uiState.taskTimeStart?.format(timeFormatter)
+                                    ?: stringResource(R.string.starts),
+                                onClick = { showStartTimePicker = true },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(com.example.uikit.R.drawable.ic_clock),
+                                        tint = TDTheme.colors.onBackground,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                },
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            TDPickerField(
+                                title = "",
+                                value =
+                                uiState.taskTimeEnd?.format(timeFormatter)
+                                    ?: stringResource(R.string.ends),
+                                onClick = { showEndTimePicker = true },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(com.example.uikit.R.drawable.ic_clock),
+                                        tint = TDTheme.colors.onBackground,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                },
+                            )
+                        }
                     }
-                    Spacer(Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        TDPickerField(
-                            title = "",
-                            value =
-                            uiState.taskTimeEnd?.format(timeFormatter)
-                                ?: stringResource(R.string.ends),
-                            onClick = { showEndTimePicker = true },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(com.example.uikit.R.drawable.ic_clock),
-                                    tint = TDTheme.colors.onBackground,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
+                }
+
+                TDText(
+                    text = stringResource(R.string.category_label),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground,
+                )
+                TDCategoryPicker(
+                    selectedKey = uiState.selectedCategory.name,
+                    options = categoryOptions(),
+                    onSelected = { key -> onAction(UiAction.OnCategoryChange(TaskCategory.valueOf(key))) },
+                )
+                if (uiState.selectedCategory == TaskCategory.OTHER) {
+                    TDCompactOutlinedTextField(
+                        label = stringResource(R.string.category_other_hint),
+                        value = uiState.customCategoryName,
+                        onValueChange = { onAction(UiAction.OnCustomCategoryNameChange(it)) },
+                    )
+                }
+
+                TDText(
+                    text = stringResource(R.string.recurrence_label),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground,
+                )
+                TDRecurrencePicker(
+                    selectedKey = uiState.selectedRecurrence.name,
+                    options = recurrenceOptions(),
+                    onSelected = { key -> onAction(UiAction.OnRecurrenceChange(Recurrence.valueOf(key))) },
+                )
+                if (uiState.selectedRecurrence != Recurrence.NONE) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(TDTheme.colors.background, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(com.example.uikit.R.drawable.ic_warning),
+                            contentDescription = null,
+                            tint = TDTheme.colors.orange,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        TDText(
+                            text = recurrenceExplainer(uiState.selectedRecurrence),
+                            style = TDTheme.typography.subheading1,
+                            color = TDTheme.colors.orange,
                         )
                     }
                 }
+
+                TDText(
+                    text = stringResource(R.string.reminder_label),
+                    style = TDTheme.typography.heading6,
+                    color = TDTheme.colors.onBackground,
+                )
+                TDReminderOffsetPicker(
+                    selectedMinutes = uiState.reminderOffsetMinutes,
+                    options = reminderOffsetOptions(),
+                    onSelected = { onAction(UiAction.OnReminderOffsetChange(it)) },
+                )
 
                 TDCompactOutlinedTextField(
                     label = stringResource(R.string.description),
                     value = uiState.taskDescription,
                     onValueChange = { onAction(UiAction.OnTaskDescriptionEdit(it)) },
                     singleLine = false,
+                )
+
+                val launchLocationPicker =
+                    com.todoapp.mobile.ui.common.rememberLocationPickerLauncher { name, address, lat, lng ->
+                        onAction(UiAction.OnLocationPicked(name, address, lat, lng))
+                    }
+                com.todoapp.uikit.components.TDLocationPicker(
+                    name = uiState.locationName,
+                    address = uiState.locationAddress,
+                    addLabel = stringResource(R.string.location_add_hint),
+                    clearContentDescription = stringResource(R.string.location_clear),
+                    onClick = launchLocationPicker,
+                    onClear = { onAction(UiAction.OnLocationCleared) },
                 )
             }
 
@@ -345,4 +460,36 @@ private fun DetailsSuccessPreview_Dark() {
 @Composable
 private fun DetailsSuccessPreview_Light() {
     TDTheme { DetailsSuccessContent(DetailsPreviewData.successState()) {} }
+}
+
+@Preview("Light Rich", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun DetailsSuccessPreview_Rich() {
+    TDTheme {
+        DetailsSuccessContent(
+            DetailsPreviewData.successState(
+                taskTitle = "Mom's Birthday",
+                taskDescription = "Don't forget the cake",
+                selectedCategory = com.todoapp.mobile.domain.model.TaskCategory.BIRTHDAY,
+                selectedRecurrence = com.todoapp.mobile.domain.model.Recurrence.YEARLY,
+                reminderOffsetMinutes = 1440L,
+                isAllDay = true,
+            ),
+        ) {}
+    }
+}
+
+@Preview("Light Other", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun DetailsSuccessPreview_OtherCategory() {
+    TDTheme {
+        DetailsSuccessContent(
+            DetailsPreviewData.successState(
+                selectedCategory = com.todoapp.mobile.domain.model.TaskCategory.OTHER,
+                customCategoryName = "Vet visit",
+                selectedRecurrence = com.todoapp.mobile.domain.model.Recurrence.WEEKLY,
+                reminderOffsetMinutes = 60L,
+            ),
+        ) {}
+    }
 }

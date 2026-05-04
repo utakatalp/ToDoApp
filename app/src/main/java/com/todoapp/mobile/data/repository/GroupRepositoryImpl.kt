@@ -339,6 +339,11 @@ constructor(
         dueDate: Long?,
         priority: String?,
         assignedToUserId: Long?,
+        locationName: String?,
+        locationAddress: String?,
+        locationLat: Double?,
+        locationLng: Double?,
+        clearLocation: Boolean,
     ): Result<Unit> {
         val localGroup = groupLocalDataSource.getAllGroupsOrdered().first().find { it.remoteId == groupId }
         val assigneeMember =
@@ -359,6 +364,11 @@ constructor(
                     priority = priority,
                     assigneeId = assignedToUserId,
                     clearAssignee = assignedToUserId == null,
+                    locationName = locationName,
+                    locationAddress = locationAddress,
+                    locationLat = locationLat,
+                    locationLng = locationLng,
+                    clearLocation = clearLocation,
                 ),
             ).map { }
             .onSuccess {

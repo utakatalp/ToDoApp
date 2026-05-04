@@ -22,6 +22,10 @@ object GroupTaskDetailContract {
         val isAssignedToMe: Boolean,
         val canDelete: Boolean,
         val photoUrls: List<String> = emptyList(),
+        val locationName: String? = null,
+        val locationAddress: String? = null,
+        val locationLat: Double? = null,
+        val locationLng: Double? = null,
     )
 
     sealed interface UiState {
@@ -39,6 +43,10 @@ object GroupTaskDetailContract {
             val editTime: LocalTime? = null,
             val editAssigneeId: Long? = null,
             val isSaving: Boolean = false,
+            val editLocationName: String? = null,
+            val editLocationAddress: String? = null,
+            val editLocationLat: Double? = null,
+            val editLocationLng: Double? = null,
         ) : UiState
 
         data class Error(
@@ -87,6 +95,15 @@ object GroupTaskDetailContract {
         data class OnPhotoDelete(
             val photoId: Long,
         ) : UiAction
+
+        data class OnEditLocationPicked(
+            val name: String,
+            val address: String,
+            val lat: Double?,
+            val lng: Double?,
+        ) : UiAction
+
+        data object OnEditLocationCleared : UiAction
     }
 
     sealed interface UiEffect {

@@ -10,6 +10,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Configuration
+import com.google.android.libraries.places.api.Places
 import com.todoapp.mobile.data.network.NetworkMonitor
 import com.todoapp.mobile.data.notification.NotificationService
 import com.todoapp.mobile.data.notification.PomodoroNotificationChannels
@@ -61,12 +62,30 @@ class Application :
             Timber.plant(Timber.DebugTree())
         }
         installAppCheck()
+        initializePlacesSdk()
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         createNotificationChannel()
         PomodoroNotificationChannels.ensurePomodoroChannel(this)
         ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.IO) {
             runCatching { rescheduleAllAlarmsUseCase() }
                 .onFailure { Timber.tag("RescheduleAllAlarms").w(it, "reschedule on app start failed") }
+        }
+    }
+
+    /**
+     * Places SDK requires a one-time initialization with the Maps API key. We skip if the
+     * key is missing (CI/local-no-key dev) — autocomplete will simply fail at runtime, but
+     * the rest of the app keeps working. Skip on already-initialized to avoid the SDK's
+     * "Initialize" warning during Application restarts in instrumented tests.
+     */
+    private fun initializePlacesSdk() {
+        if (BuildConfig.MAPS_API_KEY.isBlank()) {
+            Timber.tag("PlacesSdk").w("MAPS_API_KEY missing — location autocomplete disabled.")
+            return
+        }
+        if (!Places.isInitialized()) {
+            runCatching { Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY) }
+                .onFailure { Timber.tag("PlacesSdk").w(it, "Places.initialize failed") }
         }
     }
 

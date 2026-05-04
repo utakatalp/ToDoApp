@@ -278,12 +278,17 @@ private fun SearchTaskItem(
     task: Task,
     onAction: (UiAction) -> Unit,
 ) {
+    val openLocation = com.todoapp.mobile.ui.common.rememberOpenLocation(
+        task.locationName, task.locationAddress, task.locationLat, task.locationLng,
+    )
     Column(modifier = Modifier.clickable { onAction(UiAction.OnTaskClick(task)) }) {
         TDTaskCardWithCheckbox(
             taskText = if (task.isSecret) task.title.maskTitle() else task.title,
             taskDescription = if (task.isSecret) task.description?.maskDescription() else task.description,
             isChecked = task.isCompleted,
             onCheckBoxClick = { onAction(UiAction.OnTaskCheck(task)) },
+            locationLabel = task.locationName,
+            onLocationClick = openLocation,
         )
         Spacer(Modifier.height(4.dp))
         Row(

@@ -18,6 +18,12 @@ data class TaskRequest(
     val category: String? = null,
     val customCategoryName: String? = null,
     val recurrence: String? = null,
+    val isAllDay: Boolean = false,
+    val reminderOffsetMinutes: Long = 0L,
+    val locationLat: Double? = null,
+    val locationLng: Double? = null,
+    val locationName: String? = null,
+    val locationAddress: String? = null,
 )
 
 @Serializable

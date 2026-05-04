@@ -4,12 +4,16 @@ import java.util.Properties
 
 // Read debug BASE_URL from local.properties (not in git). Defaults to the deployed Render backend.
 // Emulator dev: add `debugBaseUrl=http://10.0.2.2:8080/` to local.properties.
-val debugBaseUrl: String =
-    Properties()
-        .apply {
-            val f = rootProject.file("local.properties")
-            if (f.exists()) f.inputStream().use { load(it) }
-        }.getProperty("debugBaseUrl", "https://donebot-backend.onrender.com/")
+private val localProps: Properties =
+    Properties().apply {
+        val f = rootProject.file("local.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
+val debugBaseUrl: String = localProps.getProperty("debugBaseUrl", "https://donebot-backend.onrender.com/")
+// Google Maps Platform API key. Add `MAPS_API_KEY=…` to local.properties (not in git).
+// Empty string is acceptable at build-time — Maps SDK will fail at runtime which is fine
+// for CI/local-only-no-key dev. Production releases must set the key.
+val mapsApiKey: String = localProps.getProperty("MAPS_API_KEY", "")
 
 plugins {
     alias(libs.plugins.android.application)
@@ -47,6 +51,12 @@ android {
         // resource tables for ~50 unused locales (~500 KB APK savings).
         @Suppress("UnstableApiUsage")
         androidResources.localeFilters += listOf("en", "tr")
+
+        // Surface the Maps API key into AndroidManifest's `${MAPS_API_KEY}` placeholder
+        // (read by `<meta-data android:name="com.google.android.geo.API_KEY" .../>`)
+        // and to BuildConfig for Places SDK initialization in Application.onCreate.
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
     }
 
     buildTypes {
@@ -204,6 +214,12 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.lottie.compose)
     implementation(libs.coil.compose)
+
+    // Google Maps + Places (location feature)
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
+    implementation(libs.google.places)
+    implementation(libs.maps.compose)
 
     // Generated baseline profile is merged into app/src/main/baseline-prof.txt.
     "baselineProfile"(project(":baselineprofile"))

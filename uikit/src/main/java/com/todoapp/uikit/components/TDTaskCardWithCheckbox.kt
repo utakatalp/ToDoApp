@@ -59,7 +59,10 @@ fun TDTaskCardWithCheckbox(
     isAnyDragging: Boolean = false,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(12.dp),
     categoryLabel: String? = null,
+    @androidx.annotation.DrawableRes categoryIcon: Int? = null,
     categoryStripeColor: Color? = null,
+    locationLabel: String? = null,
+    onLocationClick: (() -> Unit)? = null,
 ) {
     var showConfetti by remember { mutableStateOf(false) }
     var prevChecked by remember { mutableStateOf(isChecked) }
@@ -162,21 +165,59 @@ fun TDTaskCardWithCheckbox(
                         ),
                     )
                 }
-                if (!categoryLabel.isNullOrBlank()) {
+                if (!categoryLabel.isNullOrBlank() || !locationLabel.isNullOrBlank()) {
                     Spacer(Modifier.height(6.dp))
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = TDTheme.colors.purple,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
-                    ) {
-                        TDText(
-                            text = categoryLabel,
-                            color = TDTheme.colors.white,
-                            style = TDTheme.typography.subheading2,
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (!categoryLabel.isNullOrBlank()) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .background(
+                                        color = if (isChecked) TDTheme.colors.darkGreen else TDTheme.colors.darkPending,
+                                        shape = RoundedCornerShape(8.dp),
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                            ) {
+                                if (categoryIcon != null) {
+                                    Icon(
+                                        painter = painterResource(categoryIcon),
+                                        contentDescription = null,
+                                        tint = TDTheme.colors.background,
+                                        modifier = Modifier.size(12.dp),
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                }
+                                TDText(
+                                    text = categoryLabel,
+                                    color = TDTheme.colors.background,
+                                    style = TDTheme.typography.subheading2,
+                                )
+                            }
+                            if (!locationLabel.isNullOrBlank()) Spacer(Modifier.width(6.dp))
+                        }
+                        if (!locationLabel.isNullOrBlank()) {
+                            val pillModifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(if (isChecked) TDTheme.colors.darkGreen else TDTheme.colors.darkPending)
+                                .let { base -> if (onLocationClick != null) base.clickable(onClick = onLocationClick) else base }
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                            Row(modifier = pillModifier, verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_pin),
+                                    contentDescription = null,
+                                    tint = TDTheme.colors.background,
+                                    modifier = Modifier.size(12.dp),
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                TDText(
+                                    text = locationLabel,
+                                    color = TDTheme.colors.background,
+                                    style = TDTheme.typography.subheading2,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -77,6 +77,24 @@ constructor(
             is UiAction.OnEditAssigneeChange -> updateSuccess { it.copy(editAssigneeId = action.userId) }
             is UiAction.OnPhotoPicked -> uploadPhoto(action.bytes, action.mimeType)
             is UiAction.OnPhotoDelete -> deletePhoto(action.photoId)
+            is UiAction.OnEditLocationPicked ->
+                updateSuccess {
+                    it.copy(
+                        editLocationName = action.name.takeIf { v -> v.isNotBlank() },
+                        editLocationAddress = action.address.takeIf { v -> v.isNotBlank() },
+                        editLocationLat = action.lat,
+                        editLocationLng = action.lng,
+                    )
+                }
+            UiAction.OnEditLocationCleared ->
+                updateSuccess {
+                    it.copy(
+                        editLocationName = null,
+                        editLocationAddress = null,
+                        editLocationLat = null,
+                        editLocationLng = null,
+                    )
+                }
         }
     }
 
@@ -176,6 +194,10 @@ constructor(
                 editDate = zdt?.toLocalDate(),
                 editTime = zdt?.toLocalTime(),
                 editAssigneeId = task.assigneeUserId,
+                editLocationName = task.locationName,
+                editLocationAddress = task.locationAddress,
+                editLocationLat = task.locationLat,
+                editLocationLng = task.locationLng,
             )
         }
     }
@@ -197,6 +219,7 @@ constructor(
             }
         updateSuccess { it.copy(isSaving = true) }
         viewModelScope.launch {
+            val locationCleared = state.editLocationName.isNullOrBlank() && state.task.locationName != null
             groupRepository
                 .updateGroupTask(
                     groupId = groupId,
@@ -206,6 +229,11 @@ constructor(
                     dueDate = dueDate,
                     priority = state.task.priority,
                     assignedToUserId = state.editAssigneeId,
+                    locationName = state.editLocationName?.takeIf { it.isNotBlank() },
+                    locationAddress = state.editLocationAddress?.takeIf { it.isNotBlank() },
+                    locationLat = state.editLocationLat,
+                    locationLng = state.editLocationLng,
+                    clearLocation = locationCleared,
                 ).onSuccess {
                     val newAssigneeName = state.members.find { it.userId == state.editAssigneeId }?.displayName
                     val newAssigneeInitials =
@@ -226,6 +254,10 @@ constructor(
                                 assigneeInitials = newAssigneeInitials,
                                 assigneeUserId = s.editAssigneeId,
                                 isAssignedToMe = s.editAssigneeId == currentUserId,
+                                locationName = s.editLocationName?.takeIf { it.isNotBlank() },
+                                locationAddress = s.editLocationAddress?.takeIf { it.isNotBlank() },
+                                locationLat = s.editLocationLat,
+                                locationLng = s.editLocationLng,
                             ),
                             isEditSheetOpen = false,
                             isSaving = false,
@@ -267,6 +299,10 @@ constructor(
             isAssignedToMe = isAssignedToMe,
             canDelete = isAssignedToMe || currentUserRole == "ADMIN",
             photoUrls = photoUrls,
+            locationName = locationName,
+            locationAddress = locationAddress,
+            locationLat = locationLat,
+            locationLng = locationLng,
         )
     }
 

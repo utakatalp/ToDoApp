@@ -30,6 +30,7 @@ import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -37,7 +38,7 @@ import java.util.Locale
 import kotlin.math.max
 
 @Composable
-fun TDWeeklyDatePicker(
+fun TDMonthlyDatePicker(
     modifier: Modifier,
     displayedMonth: YearMonth,
     selectedDate: LocalDate? = LocalDate.now(),
@@ -69,9 +70,9 @@ fun TDWeeklyDatePicker(
         )
         LazyRow(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             state = listState,
         ) {
@@ -101,9 +102,9 @@ private fun MonthNavigationHeader(
 
     Row(
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -137,24 +138,25 @@ private fun DatePickerCard(
     onDateSelect: (LocalDate) -> Unit = {},
 ) {
     val textColor = if (isSelected) TDTheme.colors.white else TDTheme.colors.lightGray
+    val configuration = LocalConfiguration.current
+    val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else Locale.getDefault()
     Column(
         modifier =
-        modifier
-            .background(
-                shape = RoundedCornerShape(12.dp),
-                color = if (isSelected) TDTheme.colors.pendingGray.copy(alpha = 0.8f) else Color.Transparent,
-            ).size(width = 48.dp, height = 80.dp)
-            .clickable(
-                onClick = { onDateSelect(currentDate) },
-            ).padding(vertical = 4.dp, horizontal = 8.dp),
+            modifier
+                .background(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isSelected) TDTheme.colors.pendingGray.copy(alpha = 0.8f) else Color.Transparent,
+                )
+                .size(width = 48.dp, height = 80.dp)
+                .clickable(
+                    onClick = { onDateSelect(currentDate) },
+                )
+                .padding(vertical = 4.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier.weight(0.8f))
         TDText(
-            text =
-            currentDate.dayOfWeek.toString().take(3).let {
-                it[0] + it[1].lowercase() + it[2].lowercase()
-            },
+            text = shortDayOfWeekLabel(currentDate.dayOfWeek, locale),
             style = TDTheme.typography.regularTextStyle,
             color = textColor,
         )
@@ -177,15 +179,21 @@ private fun DatePickerCard(
     }
 }
 
+private fun shortDayOfWeekLabel(day: DayOfWeek, locale: Locale): String = if (locale.language == "tr" && day == DayOfWeek.FRIDAY) {
+    "Cu"
+} else {
+    day.getDisplayName(TextStyle.SHORT, locale)
+}
+
 @TDPreviewWide
 @Composable
-fun WeeklyDatePickerPreview() {
+fun MonthlyDatePickerPreview() {
     TDTheme {
         var selected by remember {
             mutableStateOf(LocalDate.of(2025, 12, 3))
         }
 
-        TDWeeklyDatePicker(
+        TDMonthlyDatePicker(
             modifier = Modifier,
             displayedMonth = YearMonth.of(2025, 12),
             selectedDate = selected,

@@ -70,9 +70,9 @@ private fun ReminderChip(
     onClick: () -> Unit,
 ) {
     val isDark = TDTheme.isDark
-    val background = if (isSelected) TDTheme.colors.purple else TDTheme.colors.lightPending
+    val background = if (isSelected) TDTheme.colors.pendingGray else TDTheme.colors.lightPending
     val foreground = if (isSelected) TDTheme.colors.white else TDTheme.colors.onBackground
-    val iconTint = if (isSelected) TDTheme.colors.white else TDTheme.colors.purple
+    val iconTint = if (isSelected) TDTheme.colors.white else TDTheme.colors.darkPending
 
     val baseModifier = Modifier
         .clip(RoundedCornerShape(20.dp))

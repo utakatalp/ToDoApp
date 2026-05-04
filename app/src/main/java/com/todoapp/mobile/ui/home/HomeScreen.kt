@@ -180,6 +180,19 @@ private fun HomeSuccessContent(
 
                         is TaskFormUiAction.AllDayChange ->
                             onAction(UiAction.OnAllDayChange(action.isAllDay))
+
+                        is TaskFormUiAction.LocationPicked ->
+                            onAction(
+                                UiAction.OnLocationPicked(
+                                    name = action.name,
+                                    address = action.address,
+                                    lat = action.lat,
+                                    lng = action.lng,
+                                ),
+                            )
+
+                        is TaskFormUiAction.LocationCleared ->
+                            onAction(UiAction.OnLocationCleared)
                     }
                 },
             )

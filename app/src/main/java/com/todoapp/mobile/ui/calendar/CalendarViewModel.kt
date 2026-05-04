@@ -373,6 +373,10 @@ constructor(
             isCompleted = task.isCompleted,
             photoUrl = photoUrl,
             isRecurringInstance = task.recurrence != com.todoapp.mobile.domain.model.Recurrence.NONE,
+            locationName = task.locationName,
+            locationAddress = task.locationAddress,
+            locationLat = task.locationLat,
+            locationLng = task.locationLng,
         )
     }
 

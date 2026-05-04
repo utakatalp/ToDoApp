@@ -6,19 +6,25 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 
@@ -36,6 +42,8 @@ fun TDTaskCard(
     photoUrl: String? = null,
     onClick: () -> Unit = {},
     onPhotoClick: (() -> Unit)? = null,
+    locationLabel: String? = null,
+    onLocationClick: (() -> Unit)? = null,
 ) {
     val contentAlpha = if (isCompleted) 0.5f else 1f
     val titleDecoration = if (isCompleted) TextDecoration.LineThrough else TextDecoration.None
@@ -80,6 +88,8 @@ fun TDTaskCard(
                 deadlinePrimary = deadlinePrimary,
                 deadlineSecondary = deadlineSecondary,
                 deadlineColor = deadlineColor,
+                locationLabel = locationLabel,
+                onLocationClick = onLocationClick,
             )
         }
     }
@@ -96,6 +106,8 @@ private fun InnerContent(
     deadlinePrimary: String,
     deadlineSecondary: String?,
     deadlineColor: Color,
+    locationLabel: String?,
+    onLocationClick: (() -> Unit)?,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
@@ -139,6 +151,30 @@ private fun InnerContent(
                     text = deadlineSecondary,
                     style = TDTheme.typography.subheading1,
                     color = TDTheme.colors.onBackground.copy(alpha = 0.55f * contentAlpha),
+                )
+            }
+        }
+
+        if (!locationLabel.isNullOrBlank()) {
+            val pillModifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(TDTheme.colors.bgColorPurple)
+                .let { base -> if (onLocationClick != null) base.clickable(onClick = onLocationClick) else base }
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+            Row(modifier = pillModifier, verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_pin),
+                    contentDescription = null,
+                    tint = TDTheme.colors.darkPending.copy(alpha = contentAlpha),
+                    modifier = Modifier.size(14.dp),
+                )
+                Spacer(Modifier.width(4.dp))
+                TDText(
+                    text = locationLabel,
+                    color = TDTheme.colors.darkPending.copy(alpha = contentAlpha),
+                    style = TDTheme.typography.subheading2,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

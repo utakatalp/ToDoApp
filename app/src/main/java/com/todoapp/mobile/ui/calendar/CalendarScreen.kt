@@ -300,6 +300,9 @@ private fun PersonalTaskEntry(
         isCompleted = item.isCompleted,
         isRecurringInstance = item.isRecurringInstance,
     )
+    val openLocation = com.todoapp.mobile.ui.common.rememberOpenLocation(
+        item.locationName, item.locationAddress, item.locationLat, item.locationLng,
+    )
     TDTaskCard(
         modifier = modifier,
         taskTitle = item.title,
@@ -313,6 +316,8 @@ private fun PersonalTaskEntry(
         photoUrl = item.photoUrl,
         onClick = { onClick(item.taskId) },
         onPhotoClick = item.photoUrl?.let { url -> { onPhotoClick(url) } },
+        locationLabel = item.locationName,
+        onLocationClick = openLocation,
     )
 }
 

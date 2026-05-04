@@ -557,6 +557,9 @@ private fun GroupTaskCard(
                     },
                     isSecret = false,
                 )
+                val openLocation = com.todoapp.mobile.ui.common.rememberOpenLocation(
+                    task.locationName, task.locationAddress, task.locationLat, task.locationLng,
+                )
                 TDTaskCardWithCheckbox(
                     isChecked = task.isCompleted,
                     taskText = task.title,
@@ -569,14 +572,21 @@ private fun GroupTaskCard(
                         bottomStart = 12.dp,
                         bottomEnd = 12.dp,
                     ),
+                    locationLabel = task.locationName,
+                    onLocationClick = openLocation,
                 )
             }
         } else {
+            val openLocation = com.todoapp.mobile.ui.common.rememberOpenLocation(
+                task.locationName, task.locationAddress, task.locationLat, task.locationLng,
+            )
             TDTaskCardWithCheckbox(
                 isChecked = task.isCompleted,
                 taskText = task.title,
                 taskDescription = task.description,
                 onCheckBoxClick = onChecked,
+                locationLabel = task.locationName,
+                onLocationClick = openLocation,
             )
         }
         if (!task.priority.isNullOrBlank()) {

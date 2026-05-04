@@ -51,10 +51,10 @@ import com.example.uikit.R
 import com.todoapp.mobile.common.move
 import com.todoapp.mobile.ui.home.HomeContract.UiAction
 import com.todoapp.mobile.ui.home.HomeContract.UiState
+import com.todoapp.uikit.components.TDMonthlyDatePicker
 import com.todoapp.uikit.components.TDStatisticCard
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDUndoSnackbar
-import com.todoapp.uikit.components.TDWeeklyDatePicker
 import com.todoapp.uikit.theme.TDTheme
 import kotlinx.coroutines.delay
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -274,7 +274,7 @@ fun HomeContent(
                     }
                     item { HomeHintCard(showHint = showHint, hintRes = currentHintRes) }
                     item {
-                        TDWeeklyDatePicker(
+                        TDMonthlyDatePicker(
                             modifier = Modifier.fillMaxWidth(),
                             displayedMonth = uiState.displayedMonth,
                             selectedDate = uiState.selectedDate,

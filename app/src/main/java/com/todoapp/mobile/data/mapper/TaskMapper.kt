@@ -37,6 +37,10 @@ fun TaskEntity.toDomain(): Task = Task(
     customCategoryName = customCategoryName,
     recurrence = Recurrence.fromStorage(recurrence),
     isAllDay = isAllDay,
+    locationLat = locationLat,
+    locationLng = locationLng,
+    locationName = locationName,
+    locationAddress = locationAddress,
 )
 
 fun Task.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TaskEntity {
@@ -59,5 +63,9 @@ fun Task.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TaskEntity {
         customCategoryName = if (category == TaskCategory.OTHER) customCategoryName?.takeIf { it.isNotBlank() } else null,
         recurrence = recurrence.name,
         isAllDay = isAllDay,
+        locationLat = locationLat,
+        locationLng = locationLng,
+        locationName = locationName?.takeIf { it.isNotBlank() },
+        locationAddress = locationAddress?.takeIf { it.isNotBlank() },
     )
 }

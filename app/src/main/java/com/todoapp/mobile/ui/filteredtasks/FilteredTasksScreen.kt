@@ -328,12 +328,17 @@ private fun FilteredTasksSuccessContent(
                                         color = TDTheme.colors.onBackground.copy(alpha = 0.5f),
                                     )
                                 }
+                                val openLocation = com.todoapp.mobile.ui.common.rememberOpenLocation(
+                                    task.locationName, task.locationAddress, task.locationLat, task.locationLng,
+                                )
                                 Card(onClick = { onAction(UiAction.OnTaskClick(task)) }) {
                                     TDTaskCardWithCheckbox(
                                         taskText = if (task.isSecret) task.title.maskTitle() else task.title,
                                         taskDescription = if (task.isSecret) task.description?.maskDescription() else task.description,
                                         isChecked = task.isCompleted,
                                         onCheckBoxClick = { onAction(UiAction.OnTaskCheck(task)) },
+                                        locationLabel = task.locationName,
+                                        onLocationClick = openLocation,
                                     )
                                 }
                             }

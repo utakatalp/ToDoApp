@@ -338,6 +338,20 @@ constructor(
                             taskTimeEnd = if (action.isAllDay) null else f.taskTimeEnd,
                             timeErrorRes = if (action.isAllDay) null else f.timeErrorRes,
                         )
+                    is TaskFormUiAction.LocationPicked ->
+                        f.copy(
+                            locationName = action.name.takeIf { it.isNotBlank() },
+                            locationAddress = action.address.takeIf { it.isNotBlank() },
+                            locationLat = action.lat,
+                            locationLng = action.lng,
+                        )
+                    TaskFormUiAction.LocationCleared ->
+                        f.copy(
+                            locationName = null,
+                            locationAddress = null,
+                            locationLat = null,
+                            locationLng = null,
+                        )
                 }
             s.copy(taskFormState = updated)
         }
@@ -645,6 +659,10 @@ constructor(
             isAssignedToMe = isAssignedToMe,
             canDelete = currentUserRole.uppercase() == "ADMIN",
             photoUrls = photoUrls,
+            locationName = locationName,
+            locationAddress = locationAddress,
+            locationLat = locationLat,
+            locationLng = locationLng,
         )
     }
 

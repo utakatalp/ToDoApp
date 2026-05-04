@@ -13,4 +13,8 @@ data class GroupTask(
     val assignee: GroupMember?,
     val photoUrls: List<String> = emptyList(),
     val groupId: Long? = null,
+    val locationName: String? = null,
+    val locationAddress: String? = null,
+    val locationLat: Double? = null,
+    val locationLng: Double? = null,
 )

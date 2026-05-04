@@ -40,6 +40,10 @@ data class TaskEntity(
     @ColumnInfo(name = "custom_category_name") val customCategoryName: String? = null,
     @ColumnInfo(name = "recurrence", defaultValue = "NONE") val recurrence: String = "NONE",
     @ColumnInfo(name = "is_all_day", defaultValue = "0") val isAllDay: Boolean = false,
+    @ColumnInfo(name = "location_lat") val locationLat: Double? = null,
+    @ColumnInfo(name = "location_lng") val locationLng: Double? = null,
+    @ColumnInfo(name = "location_name") val locationName: String? = null,
+    @ColumnInfo(name = "location_address") val locationAddress: String? = null,
 )
 
 enum class SyncStatus {

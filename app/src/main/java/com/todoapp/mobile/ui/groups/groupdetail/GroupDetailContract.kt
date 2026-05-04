@@ -21,6 +21,10 @@ object GroupDetailContract {
         val isAssignedToMe: Boolean,
         val canDelete: Boolean = false,
         val photoUrls: List<String> = emptyList(),
+        val locationName: String? = null,
+        val locationAddress: String? = null,
+        val locationLat: Double? = null,
+        val locationLng: Double? = null,
     )
 
     @Immutable

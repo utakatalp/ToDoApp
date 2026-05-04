@@ -85,6 +85,7 @@ interface GroupRepository {
         isCompleted: Boolean,
     ): Result<Unit>
 
+    @Suppress("LongParameterList")
     suspend fun updateGroupTask(
         groupId: Long,
         taskId: Long,
@@ -93,6 +94,11 @@ interface GroupRepository {
         dueDate: Long?,
         priority: String?,
         assignedToUserId: Long? = null,
+        locationName: String? = null,
+        locationAddress: String? = null,
+        locationLat: Double? = null,
+        locationLng: Double? = null,
+        clearLocation: Boolean = false,
     ): Result<Unit>
 
     suspend fun assignGroupTask(

@@ -179,6 +179,15 @@ object HomeContract {
             val isAllDay: Boolean,
         ) : UiAction
 
+        data class OnLocationPicked(
+            val name: String,
+            val address: String,
+            val lat: Double?,
+            val lng: Double?,
+        ) : UiAction
+
+        data object OnLocationCleared : UiAction
+
         data class OnFilterChange(
             val filter: HomeFilter,
         ) : UiAction

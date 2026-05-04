@@ -104,6 +104,10 @@ object CalendarContract {
         val isCompleted: Boolean,
         val photoUrl: String?,
         val isRecurringInstance: Boolean = false,
+        val locationName: String? = null,
+        val locationAddress: String? = null,
+        val locationLat: Double? = null,
+        val locationLng: Double? = null,
     )
 
     @Immutable

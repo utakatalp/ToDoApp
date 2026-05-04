@@ -524,6 +524,9 @@
         <item quantity="one">%1$d üye</item>
         <item quantity="other">%1$d üye</item>
     </plurals>
+    <string name="location_label">Konum</string>
+    <string name="location_add_hint">Konum ekle</string>
+    <string name="location_clear">Konumu temizle</string>
     <string name="reminder_label">Hatırlat</string>
     <string name="reminder_none">Hatırlatma yok</string>
     <string name="reminder_on_time">Tam zamanında</string>

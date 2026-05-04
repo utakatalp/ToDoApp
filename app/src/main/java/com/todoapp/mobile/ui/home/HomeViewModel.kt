@@ -122,6 +122,8 @@ constructor(
             is UiAction.OnCustomCategoryNameChange -> changeCustomCategoryName(uiAction.name)
             is UiAction.OnRecurrenceChange -> changeRecurrence(uiAction.recurrence)
             is UiAction.OnAllDayChange -> changeAllDay(uiAction.isAllDay)
+            is UiAction.OnLocationPicked -> setFormLocation(uiAction.name, uiAction.address, uiAction.lat, uiAction.lng)
+            is UiAction.OnLocationCleared -> setFormLocation(null, null, null, null)
             is UiAction.OnFilterChange -> changeFilter(uiAction.filter)
             is UiAction.OnSuggestCardPrimaryAction -> handleSuggestCardPrimary()
             is UiAction.OnSuggestCardSecondaryAction -> handleSuggestCardSecondary()
@@ -375,6 +377,10 @@ constructor(
                     },
                     recurrence = form.selectedRecurrence,
                     isAllDay = form.isAllDay,
+                    locationName = form.locationName,
+                    locationAddress = form.locationAddress,
+                    locationLat = form.locationLat,
+                    locationLng = form.locationLng,
                 )
             if (form.selectedGroupId != null) {
                 groupRepository.createGroupTask(form.selectedGroupId, task)
@@ -568,6 +574,19 @@ constructor(
                     taskTimeStart = if (isAllDay) null else form.taskTimeStart,
                     taskTimeEnd = if (isAllDay) null else form.taskTimeEnd,
                     timeErrorRes = if (isAllDay) null else form.timeErrorRes,
+                ),
+            )
+        }
+    }
+
+    private fun setFormLocation(name: String?, address: String?, lat: Double?, lng: Double?) {
+        updateSuccessState { state ->
+            state.copy(
+                taskFormState = state.taskFormState.copy(
+                    locationName = name?.takeIf { it.isNotBlank() },
+                    locationAddress = address?.takeIf { it.isNotBlank() },
+                    locationLat = lat,
+                    locationLng = lng,
                 ),
             )
         }

@@ -35,6 +35,10 @@ fun TaskData.toGroupTask(): GroupTask = GroupTask(
         )
     },
     photoUrls = photoUrls,
+    locationName = locationName,
+    locationAddress = locationAddress,
+    locationLat = locationLat,
+    locationLng = locationLng,
 )
 
 fun GroupTaskData.toDomain(): GroupTask = GroupTask(
@@ -46,6 +50,10 @@ fun GroupTaskData.toDomain(): GroupTask = GroupTask(
     dueDate = dueDate,
     assignee = assignee?.toDomain(),
     photoUrls = photoUrls,
+    locationName = locationName,
+    locationAddress = locationAddress,
+    locationLat = locationLat,
+    locationLng = locationLng,
 )
 
 fun GroupMemberData.toDomain(): GroupMember = GroupMember(
@@ -79,6 +87,10 @@ fun GroupTaskEntity.toDomain(): GroupTask = GroupTask(
     },
     photoUrls = photoUrls.split(',').filter { it.isNotBlank() },
     groupId = remoteGroupId,
+    locationName = locationName,
+    locationAddress = locationAddress,
+    locationLat = locationLat,
+    locationLng = locationLng,
 )
 
 fun GroupTask.toEntity(
@@ -97,4 +109,8 @@ fun GroupTask.toEntity(
     assigneeDisplayName = assignee?.displayName,
     assigneeAvatarUrl = assignee?.avatarUrl,
     photoUrls = photoUrls.joinToString(","),
+    locationLat = locationLat,
+    locationLng = locationLng,
+    locationName = locationName,
+    locationAddress = locationAddress,
 )

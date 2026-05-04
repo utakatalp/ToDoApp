@@ -5,7 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todoapp.mobile.R
+import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.Task
+import com.todoapp.mobile.domain.model.TaskCategory
 import com.todoapp.mobile.domain.repository.PendingPhotoRepository
 import com.todoapp.mobile.domain.repository.TaskRepository
 import com.todoapp.mobile.navigation.NavigationEffect
@@ -74,6 +76,15 @@ constructor(
                         titleError = null,
                         isSaving = false,
                         photoUrls = task.photoUrls,
+                        locationName = task.locationName,
+                        locationAddress = task.locationAddress,
+                        locationLat = task.locationLat,
+                        locationLng = task.locationLng,
+                        selectedCategory = task.category,
+                        customCategoryName = task.customCategoryName.orEmpty(),
+                        selectedRecurrence = task.recurrence,
+                        reminderOffsetMinutes = task.reminderOffsetMinutes,
+                        isAllDay = task.isAllDay,
                     )
                 // Photos live server-side; fetch authoritative list via remoteId
                 task.remoteId?.let { remoteId ->
@@ -102,6 +113,63 @@ constructor(
             UiAction.OnRetry -> retry()
             is UiAction.OnPhotoPicked -> uploadPhoto(uiAction.bytes, uiAction.mimeType)
             is UiAction.OnPhotoDelete -> deletePhoto(uiAction.photoId)
+            is UiAction.OnLocationPicked -> setLocation(uiAction.name, uiAction.address, uiAction.lat, uiAction.lng)
+            UiAction.OnLocationCleared -> setLocation(null, null, null, null)
+            is UiAction.OnCategoryChange -> changeCategory(uiAction.category)
+            is UiAction.OnCustomCategoryNameChange -> changeCustomCategoryName(uiAction.name)
+            is UiAction.OnRecurrenceChange -> changeRecurrence(uiAction.recurrence)
+            is UiAction.OnReminderOffsetChange -> changeReminderOffset(uiAction.minutes)
+            is UiAction.OnAllDayChange -> changeAllDay(uiAction.isAllDay)
+        }
+    }
+
+    private fun changeCategory(category: TaskCategory) {
+        updateSuccessState { state ->
+            // BIRTHDAY auto-defaults to YEARLY when the user hasn't picked one;
+            // moving off BIRTHDAY reverts that auto-set so the explainer doesn't linger.
+            val nextRecurrence = when {
+                category == TaskCategory.BIRTHDAY && state.selectedRecurrence == Recurrence.NONE ->
+                    Recurrence.YEARLY
+
+                state.selectedCategory == TaskCategory.BIRTHDAY &&
+                    category != TaskCategory.BIRTHDAY &&
+                    state.selectedRecurrence == Recurrence.YEARLY ->
+                    Recurrence.NONE
+
+                else -> state.selectedRecurrence
+            }
+            state.copy(
+                selectedCategory = category,
+                selectedRecurrence = nextRecurrence,
+                customCategoryName = if (category == TaskCategory.OTHER) state.customCategoryName else "",
+            )
+        }
+    }
+
+    private fun changeCustomCategoryName(name: String) {
+        updateSuccessState { it.copy(customCategoryName = name) }
+    }
+
+    private fun changeRecurrence(recurrence: Recurrence) {
+        updateSuccessState { it.copy(selectedRecurrence = recurrence) }
+    }
+
+    private fun changeReminderOffset(minutes: Long?) {
+        updateSuccessState { it.copy(reminderOffsetMinutes = minutes) }
+    }
+
+    private fun changeAllDay(isAllDay: Boolean) {
+        updateSuccessState { it.copy(isAllDay = isAllDay) }
+    }
+
+    private fun setLocation(name: String?, address: String?, lat: Double?, lng: Double?) {
+        updateSuccessState {
+            it.copy(
+                locationName = name?.takeIf { v -> v.isNotBlank() },
+                locationAddress = address?.takeIf { v -> v.isNotBlank() },
+                locationLat = lat,
+                locationLng = lng,
+            )
         }
     }
 
@@ -240,6 +308,15 @@ constructor(
                 isDirty = false,
                 isSaving = false,
                 photoUrls = (currentState as? UiState.Success)?.photoUrls ?: emptyList(),
+                locationName = existingTask.locationName,
+                locationAddress = existingTask.locationAddress,
+                locationLat = existingTask.locationLat,
+                locationLng = existingTask.locationLng,
+                selectedCategory = existingTask.category,
+                customCategoryName = existingTask.customCategoryName.orEmpty(),
+                selectedRecurrence = existingTask.recurrence,
+                reminderOffsetMinutes = existingTask.reminderOffsetMinutes,
+                isAllDay = existingTask.isAllDay,
             )
         _uiEffect.trySend(UiEffect.ShowToast(R.string.changes_cancelled))
     }
@@ -283,6 +360,17 @@ constructor(
         date = current.taskDate,
         timeStart = current.taskTimeStart ?: existingTask.timeStart,
         timeEnd = current.taskTimeEnd ?: existingTask.timeEnd,
+        locationName = current.locationName,
+        locationAddress = current.locationAddress,
+        locationLat = current.locationLat,
+        locationLng = current.locationLng,
+        category = current.selectedCategory,
+        customCategoryName = current.customCategoryName.takeIf {
+            current.selectedCategory == TaskCategory.OTHER && it.isNotBlank()
+        },
+        recurrence = current.selectedRecurrence,
+        reminderOffsetMinutes = current.reminderOffsetMinutes,
+        isAllDay = current.isAllDay,
     )
 
     private fun computeIsDirty(state: UiState.Success): Boolean {
@@ -294,6 +382,17 @@ constructor(
                 date = state.taskDate,
                 timeStart = state.taskTimeStart ?: original.timeStart,
                 timeEnd = state.taskTimeEnd ?: original.timeEnd,
+                locationName = state.locationName,
+                locationAddress = state.locationAddress,
+                locationLat = state.locationLat,
+                locationLng = state.locationLng,
+                category = state.selectedCategory,
+                customCategoryName = state.customCategoryName.takeIf {
+                    state.selectedCategory == TaskCategory.OTHER && it.isNotBlank()
+                },
+                recurrence = state.selectedRecurrence,
+                reminderOffsetMinutes = state.reminderOffsetMinutes,
+                isAllDay = state.isAllDay,
             )
         return candidateTask != original
     }

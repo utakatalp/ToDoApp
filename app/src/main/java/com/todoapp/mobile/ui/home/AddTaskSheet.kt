@@ -2,9 +2,17 @@ package com.todoapp.mobile.ui.home
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,12 +31,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,15 +50,19 @@ import androidx.compose.ui.unit.dp
 import com.example.uikit.R
 import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.TaskCategory
+import com.todoapp.mobile.ui.common.categoryOptions
+import com.todoapp.mobile.ui.common.recurrenceExplainer
+import com.todoapp.mobile.ui.common.recurrenceOptions
+import com.todoapp.mobile.ui.common.reminderOffsetOptions
 import com.todoapp.uikit.components.TDButton
 import com.todoapp.uikit.components.TDButtonSize
-import com.todoapp.uikit.components.TDCategoryOption
 import com.todoapp.uikit.components.TDCategoryPicker
 import com.todoapp.uikit.components.TDCompactOutlinedTextField
 import com.todoapp.uikit.components.TDDatePickerDialog
+import com.todoapp.uikit.components.TDLocationPicker
 import com.todoapp.uikit.components.TDPickerField
-import com.todoapp.uikit.components.TDRecurrenceOption
 import com.todoapp.uikit.components.TDRecurrencePicker
+import com.todoapp.uikit.components.TDReminderOffsetPicker
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.components.TDWheelTimePickerDialog
 import com.todoapp.uikit.theme.TDTheme
@@ -179,7 +197,7 @@ internal fun AddTaskSheet(
             color = TDTheme.colors.onBackground,
         )
         Spacer(Modifier.height(8.dp))
-        com.todoapp.uikit.components.TDReminderOffsetPicker(
+        TDReminderOffsetPicker(
             selectedMinutes = formState.reminderOffsetMinutes,
             options = reminderOffsetOptions(),
             onSelected = { onAction(TaskFormUiAction.ReminderOffsetChange(it)) },
@@ -190,6 +208,18 @@ internal fun AddTaskSheet(
             value = formState.taskDescription,
             onValueChange = { onAction(TaskFormUiAction.DescriptionChange(it)) },
             singleLine = false,
+        )
+        Spacer(Modifier.height(12.dp))
+        val launchLocationPicker = com.todoapp.mobile.ui.common.rememberLocationPickerLauncher { name, address, lat, lng ->
+            onAction(TaskFormUiAction.LocationPicked(name, address, lat, lng))
+        }
+        TDLocationPicker(
+            name = formState.locationName,
+            address = formState.locationAddress,
+            addLabel = stringResource(com.todoapp.mobile.R.string.location_add_hint),
+            clearContentDescription = stringResource(com.todoapp.mobile.R.string.location_clear),
+            onClick = launchLocationPicker,
+            onClear = { onAction(TaskFormUiAction.LocationCleared) },
         )
         Spacer(Modifier.height(12.dp))
         DetailsSection(
@@ -415,16 +445,11 @@ private fun DetailsSection(
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Checkbox(
+                    SecretCheckbox(
                         checked = isSecret,
-                        onCheckedChange = { onSecretChange(it) },
-                        colors =
-                        CheckboxDefaults.colors(
-                            checkedColor = TDTheme.colors.pendingGray,
-                            uncheckedColor = TDTheme.colors.onBackground.copy(alpha = 0.6f),
-                        ),
+                        onCheckedChange = onSecretChange,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     TDText(
                         text = stringResource(com.todoapp.mobile.R.string.secret_task),
                         style = TDTheme.typography.heading6,
@@ -444,108 +469,6 @@ private fun DetailsSection(
     }
 }
 
-@Composable
-private fun categoryOptions(): List<TDCategoryOption> = listOf(
-    TDCategoryOption(
-        key = TaskCategory.SHOPPING.name,
-        label = stringResource(com.todoapp.mobile.R.string.category_shopping),
-        iconRes = R.drawable.ic_shopping_label,
-    ),
-    TDCategoryOption(
-        key = TaskCategory.MEDICINE.name,
-        label = stringResource(com.todoapp.mobile.R.string.category_medicine),
-        iconRes = R.drawable.ic_medication_label,
-    ),
-    TDCategoryOption(
-        key = TaskCategory.HEALTH.name,
-        label = stringResource(com.todoapp.mobile.R.string.category_health),
-        iconRes = R.drawable.ic_health_label,
-    ),
-    TDCategoryOption(
-        key = TaskCategory.WORK.name,
-        label = stringResource(com.todoapp.mobile.R.string.category_work),
-        iconRes = R.drawable.ic_work_label,
-    ),
-    TDCategoryOption(
-        key = TaskCategory.STUDY.name,
-        label = stringResource(com.todoapp.mobile.R.string.category_study),
-        iconRes = R.drawable.ic_study_label,
-    ),
-    TDCategoryOption(
-        key = TaskCategory.BIRTHDAY.name,
-        label = stringResource(com.todoapp.mobile.R.string.category_birthday),
-        iconRes = R.drawable.ic_birthday_label,
-    ),
-    TDCategoryOption(
-        key = TaskCategory.PERSONAL.name,
-        label = stringResource(com.todoapp.mobile.R.string.category_personal),
-        iconRes = R.drawable.ic_personal_label,
-    ),
-    TDCategoryOption(
-        key = TaskCategory.OTHER.name,
-        label = stringResource(com.todoapp.mobile.R.string.category_other),
-        iconRes = R.drawable.ic_label_label,
-    ),
-)
-
-@Composable
-private fun recurrenceOptions(): List<TDRecurrenceOption> = listOf(
-    TDRecurrenceOption(Recurrence.NONE.name, stringResource(com.todoapp.mobile.R.string.recurrence_none)),
-    TDRecurrenceOption(Recurrence.DAILY.name, stringResource(com.todoapp.mobile.R.string.recurrence_daily)),
-    TDRecurrenceOption(Recurrence.WEEKLY.name, stringResource(com.todoapp.mobile.R.string.recurrence_weekly)),
-    TDRecurrenceOption(Recurrence.MONTHLY.name, stringResource(com.todoapp.mobile.R.string.recurrence_monthly)),
-    TDRecurrenceOption(Recurrence.YEARLY.name, stringResource(com.todoapp.mobile.R.string.recurrence_yearly)),
-)
-
-@Composable
-private fun recurrenceExplainer(recurrence: Recurrence): String = when (recurrence) {
-    Recurrence.NONE -> ""
-    Recurrence.DAILY -> stringResource(com.todoapp.mobile.R.string.recurrence_explainer_daily)
-    Recurrence.WEEKLY -> stringResource(com.todoapp.mobile.R.string.recurrence_explainer_weekly)
-    Recurrence.MONTHLY -> stringResource(com.todoapp.mobile.R.string.recurrence_explainer_monthly)
-    Recurrence.YEARLY -> stringResource(com.todoapp.mobile.R.string.recurrence_explainer_yearly)
-}
-
-@Composable
-private fun reminderOffsetOptions(): List<com.todoapp.uikit.components.TDReminderOption> = listOf(
-    com.todoapp.uikit.components.TDReminderOption(
-        label = stringResource(com.todoapp.mobile.R.string.reminder_none),
-        minutes = null,
-    ),
-    com.todoapp.uikit.components.TDReminderOption(
-        label = stringResource(com.todoapp.mobile.R.string.reminder_on_time),
-        minutes = 0L,
-    ),
-    com.todoapp.uikit.components.TDReminderOption(
-        label = stringResource(com.todoapp.mobile.R.string.reminder_1_min),
-        minutes = 1L,
-    ),
-    com.todoapp.uikit.components.TDReminderOption(
-        label = stringResource(com.todoapp.mobile.R.string.reminder_30_min),
-        minutes = 30L,
-    ),
-    com.todoapp.uikit.components.TDReminderOption(
-        label = stringResource(com.todoapp.mobile.R.string.reminder_1_hour),
-        minutes = 60L,
-    ),
-    com.todoapp.uikit.components.TDReminderOption(
-        label = stringResource(com.todoapp.mobile.R.string.reminder_3_hours),
-        minutes = 180L,
-    ),
-    com.todoapp.uikit.components.TDReminderOption(
-        label = stringResource(com.todoapp.mobile.R.string.reminder_6_hours),
-        minutes = 360L,
-    ),
-    com.todoapp.uikit.components.TDReminderOption(
-        label = stringResource(com.todoapp.mobile.R.string.reminder_12_hours),
-        minutes = 720L,
-    ),
-    com.todoapp.uikit.components.TDReminderOption(
-        label = stringResource(com.todoapp.mobile.R.string.reminder_1_day),
-        minutes = 1440L,
-    ),
-)
-
 @Preview(showBackground = true, widthDp = 360)
 @Composable
 private fun AddTaskSheetPreview() {
@@ -564,6 +487,73 @@ private fun AddTaskSheetPreview_Dark() {
         AddTaskSheet(
             formState = TaskFormState(),
             onAction = {},
+        )
+    }
+}
+
+@Composable
+private fun SecretCheckbox(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(4.dp)
+    val bgColor by animateColorAsState(
+        targetValue = if (checked) TDTheme.colors.pendingGray else Color.Transparent,
+        animationSpec = tween(durationMillis = 200),
+        label = "secretCheckboxBg",
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (checked) {
+            TDTheme.colors.pendingGray
+        } else {
+            TDTheme.colors.onBackground.copy(alpha = 0.6f)
+        },
+        animationSpec = tween(durationMillis = 200),
+        label = "secretCheckboxBorder",
+    )
+
+    val iconScale = remember { Animatable(if (checked) 1f else 0f) }
+    val iconAlpha = remember { Animatable(if (checked) 1f else 0f) }
+    var prevChecked by remember { mutableStateOf(checked) }
+
+    LaunchedEffect(checked) {
+        if (checked && !prevChecked) {
+            iconAlpha.snapTo(0f)
+            iconScale.snapTo(0.4f)
+            iconAlpha.animateTo(1f, animationSpec = tween(durationMillis = 150))
+            iconScale.animateTo(
+                targetValue = 1.4f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMediumLow,
+                ),
+            )
+            iconScale.animateTo(1f, animationSpec = tween(durationMillis = 150))
+        } else if (!checked && prevChecked) {
+            iconAlpha.animateTo(0f, animationSpec = tween(durationMillis = 120))
+            iconScale.snapTo(0f)
+        }
+        prevChecked = checked
+    }
+
+    Box(
+        modifier = modifier
+            .size(24.dp)
+            .clip(shape)
+            .background(bgColor, shape)
+            .border(width = 2.dp, color = borderColor, shape = shape)
+            .clickable { onCheckedChange(!checked) },
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(com.todoapp.mobile.R.drawable.ic_secret_mode),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(TDTheme.colors.white),
+            modifier = Modifier
+                .size(16.dp)
+                .scale(iconScale.value)
+                .alpha(iconAlpha.value),
         )
     }
 }

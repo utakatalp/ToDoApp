@@ -2,6 +2,8 @@ package com.todoapp.mobile.ui.details
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import com.todoapp.mobile.domain.model.Recurrence
+import com.todoapp.mobile.domain.model.TaskCategory
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -22,6 +24,15 @@ object DetailsContract {
             val dialogSelectedDate: LocalDate?,
             @StringRes val titleError: Int?,
             val photoUrls: List<String> = emptyList(),
+            val locationName: String? = null,
+            val locationAddress: String? = null,
+            val locationLat: Double? = null,
+            val locationLng: Double? = null,
+            val selectedCategory: TaskCategory = TaskCategory.PERSONAL,
+            val customCategoryName: String = "",
+            val selectedRecurrence: Recurrence = Recurrence.NONE,
+            val reminderOffsetMinutes: Long? = 0L,
+            val isAllDay: Boolean = false,
         ) : UiState
 
         data class Error(
@@ -72,6 +83,35 @@ object DetailsContract {
 
         data class OnPhotoDelete(
             val photoId: Long,
+        ) : UiAction
+
+        data class OnLocationPicked(
+            val name: String,
+            val address: String,
+            val lat: Double?,
+            val lng: Double?,
+        ) : UiAction
+
+        data object OnLocationCleared : UiAction
+
+        data class OnCategoryChange(
+            val category: TaskCategory,
+        ) : UiAction
+
+        data class OnCustomCategoryNameChange(
+            val name: String,
+        ) : UiAction
+
+        data class OnRecurrenceChange(
+            val recurrence: Recurrence,
+        ) : UiAction
+
+        data class OnReminderOffsetChange(
+            val minutes: Long?,
+        ) : UiAction
+
+        data class OnAllDayChange(
+            val isAllDay: Boolean,
         ) : UiAction
     }
 

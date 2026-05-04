@@ -125,6 +125,10 @@ data class GroupTaskData(
     @SerialName("dueDate") val dueDate: Long? = null,
     @SerialName("assignee") val assignee: GroupMemberData? = null,
     @SerialName("photoUrls") val photoUrls: List<String> = emptyList(),
+    @SerialName("locationLat") val locationLat: Double? = null,
+    @SerialName("locationLng") val locationLng: Double? = null,
+    @SerialName("locationName") val locationName: String? = null,
+    @SerialName("locationAddress") val locationAddress: String? = null,
 )
 
 @Serializable

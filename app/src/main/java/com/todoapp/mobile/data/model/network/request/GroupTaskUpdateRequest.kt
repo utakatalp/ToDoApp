@@ -17,4 +17,10 @@ data class GroupTaskUpdateRequest(
     val priority: String? = null,
     val assigneeId: Long? = null,
     val clearAssignee: Boolean = false,
+    val locationLat: Double? = null,
+    val locationLng: Double? = null,
+    val locationName: String? = null,
+    val locationAddress: String? = null,
+    /** Set true to wipe all four location fields in one request. */
+    val clearLocation: Boolean = false,
 )

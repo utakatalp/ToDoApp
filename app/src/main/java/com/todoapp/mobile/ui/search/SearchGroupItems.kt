@@ -81,11 +81,16 @@ internal fun SearchGroupTaskItem(
             .padding(start = 16.dp)
             .clickable { onAction(UiAction.OnGroupTaskClick(group, groupTask)) },
     ) {
+        val openLocation = com.todoapp.mobile.ui.common.rememberOpenLocation(
+            groupTask.locationName, groupTask.locationAddress, groupTask.locationLat, groupTask.locationLng,
+        )
         TDTaskCardWithCheckbox(
             taskText = groupTask.title,
             taskDescription = groupTask.description,
             isChecked = groupTask.isCompleted,
             onCheckBoxClick = {},
+            locationLabel = groupTask.locationName,
+            onLocationClick = openLocation,
         )
         Spacer(Modifier.height(4.dp))
         Row(

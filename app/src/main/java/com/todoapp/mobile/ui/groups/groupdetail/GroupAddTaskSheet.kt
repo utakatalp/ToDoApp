@@ -146,6 +146,19 @@ fun GroupAddTaskSheet(
             singleLine = false,
         )
         Spacer(Modifier.height(12.dp))
+        val launchLocationPicker =
+            com.todoapp.mobile.ui.common.rememberLocationPickerLauncher { name, address, lat, lng ->
+                onAction(TaskFormUiAction.LocationPicked(name, address, lat, lng))
+            }
+        com.todoapp.uikit.components.TDLocationPicker(
+            name = formState.locationName,
+            address = formState.locationAddress,
+            addLabel = stringResource(com.todoapp.mobile.R.string.location_add_hint),
+            clearContentDescription = stringResource(com.todoapp.mobile.R.string.location_clear),
+            onClick = launchLocationPicker,
+            onClear = { onAction(TaskFormUiAction.LocationCleared) },
+        )
+        Spacer(Modifier.height(12.dp))
         PrioritySelector(
             selected = formState.selectedPriority,
             onSelect = { value -> onAction(TaskFormUiAction.PriorityChange(value)) },
