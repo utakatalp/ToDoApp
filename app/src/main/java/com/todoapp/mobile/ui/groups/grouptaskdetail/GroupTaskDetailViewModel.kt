@@ -111,7 +111,8 @@ constructor(
                 currentUserRole = detail.members
                     .find { it.userId == currentUserId }
                     ?.role
-                    ?.uppercase() ?: ""
+                    ?.uppercase()
+                    .orEmpty()
             }
 
             val members = groupRepository.getGroupMembers(groupId).getOrNull() ?: emptyList()
@@ -147,7 +148,7 @@ constructor(
                         _uiState.value =
                             UiState.Success(
                                 task = task.toUiModel(),
-                                groupName = detail?.name ?: "",
+                                groupName = detail?.name.orEmpty(),
                                 members = memberUiItems,
                             )
                     }
@@ -171,7 +172,7 @@ constructor(
             it.copy(
                 isEditSheetOpen = true,
                 editTitle = task.title,
-                editDescription = task.description ?: "",
+                editDescription = task.description.orEmpty(),
                 editDate = zdt?.toLocalDate(),
                 editTime = zdt?.toLocalTime(),
                 editAssigneeId = task.assigneeUserId,

@@ -87,7 +87,7 @@ constructor(
                 .createGroup(
                     CreateGroupRequest(
                         uiState.value.groupName,
-                        uiState.value.groupDescription ?: "",
+                        uiState.value.groupDescription.orEmpty(),
                     ),
                 ).onSuccess {
                     _navEffect.send(NavigationEffect.Back)

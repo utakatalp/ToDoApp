@@ -1,3 +1,8 @@
+// Detekt without type resolution mis-flags two patterns in this repository:
+//  - IgnoredReturnValue on `Flow<T> = source.map { it.toDomain() }` (the result IS the return)
+//  - UnusedPrivateMember on private extension fns (e.g. GroupData.toEntity) that ARE called
+@file:Suppress("IgnoredReturnValue", "UnusedPrivateMember")
+
 package com.todoapp.mobile.data.repository
 
 import com.todoapp.mobile.common.DomainException

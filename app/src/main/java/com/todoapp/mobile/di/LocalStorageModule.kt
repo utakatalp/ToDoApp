@@ -183,6 +183,10 @@ object LocalStorageModule {
     fun provideAuthTokensManager(dataStoreHelper: DataStoreHelper): AuthTokenManager = AuthTokenManager(dataStoreHelper)
 }
 
+// Hilt requires `abstract class` for `@Module` types containing `@Binds` methods —
+// converting to an interface is a compile error. Detekt's UnnecessaryAbstractClass rule
+// doesn't know about that constraint, hence the narrow suppression.
+@Suppress("UnnecessaryAbstractClass")
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class LocalStorageModuleForBindings {

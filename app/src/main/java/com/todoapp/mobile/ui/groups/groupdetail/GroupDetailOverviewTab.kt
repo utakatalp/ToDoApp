@@ -493,7 +493,7 @@ private fun AssigneeBackFace(task: GroupTaskUiItem) {
                     avatarUrl = task.assigneeAvatarUrl,
                 )
                 TDText(
-                    text = task.assigneeName ?: "",
+                    text = task.assigneeName.orEmpty(),
                     style = TDTheme.typography.subheading2,
                     color = TDTheme.colors.onBackground,
                     maxLines = 1,

@@ -1,3 +1,7 @@
+// Detekt without type resolution mis-flags the private `.toUiItem` extension fns at the
+// bottom of this file as unused, even though they're called from `loadGroupDetail`.
+@file:Suppress("UnusedPrivateMember")
+
 package com.todoapp.mobile.ui.groups.groupdetail
 
 import android.content.Context
@@ -183,7 +187,7 @@ constructor(
                     )
                 }
 
-            val currentUserRole = members.find { it.userId == currentUserId }?.role?.uppercase() ?: ""
+            val currentUserRole = members.find { it.userId == currentUserId }?.role?.uppercase().orEmpty()
             val previousState = _uiState.value as? UiState.Success
 
             _uiState.value =

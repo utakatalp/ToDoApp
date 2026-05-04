@@ -82,7 +82,7 @@ private fun CreateNewGroupContent(
         TDLabeledTextField(
             title = stringResource(description),
             placeholder = stringResource(what_is_this_group_for_collaborating_on_chores_planning_trips_or_daily_tasks),
-            value = uiState.groupDescription ?: "",
+            value = uiState.groupDescription.orEmpty(),
             onValueChange = { onAction(UiAction.OnGroupDescriptionChange(it)) },
             minLines = 5,
         )

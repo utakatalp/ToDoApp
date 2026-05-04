@@ -84,7 +84,7 @@ constructor(
             groupRepository
                 .getGroupDetail(groupId)
                 .onSuccess { detail ->
-                    val role = detail.members.find { it.userId == currentUserId }?.role ?: ""
+                    val role = detail.members.find { it.userId == currentUserId }?.role.orEmpty()
                     _uiState.update { state ->
                         state.copy(
                             name = detail.name,
