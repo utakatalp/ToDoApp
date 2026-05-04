@@ -1,3 +1,8 @@
+// Detekt's IgnoredReturnValue rule mis-flags `Flow<T> = source.map { it.toDomain() }` patterns
+// as ignored when in fact the result is the function's return value. Suppress at the file level
+// rather than per-call-site since the same pattern recurs throughout this repository.
+@file:Suppress("IgnoredReturnValue")
+
 package com.todoapp.mobile.data.repository
 
 import android.util.Log
@@ -346,21 +351,19 @@ constructor(
     }
 
     override suspend fun delete(task: Task) {
-        val taskEntity = localDataSource.getTaskById(task.id)
-        taskEntity?.let { taskEntity ->
-            cancelRecurringAlarmIfNeeded(taskEntity.id, taskEntity.toDomain())
-            if (taskEntity.syncStatus != SyncStatus.SYNCED) {
-                localDataSource.delete(taskEntity)
-                return
-            }
-            remoteDataSource
-                .deleteTask(taskEntity.remoteId!!)
-                .onSuccess {
-                    localDataSource.delete(taskEntity)
-                }.onFailure {
-                    localDataSource.update(taskEntity.copy(syncStatus = SyncStatus.PENDING_DELETE))
-                }
+        val entity = localDataSource.getTaskById(task.id) ?: return
+        cancelRecurringAlarmIfNeeded(entity.id, entity.toDomain())
+        if (entity.syncStatus != SyncStatus.SYNCED) {
+            localDataSource.delete(entity)
+            return
         }
+        remoteDataSource
+            .deleteTask(entity.remoteId!!)
+            .onSuccess {
+                localDataSource.delete(entity)
+            }.onFailure {
+                localDataSource.update(entity.copy(syncStatus = SyncStatus.PENDING_DELETE))
+            }
     }
 
     override suspend fun updateTaskCompletion(
@@ -502,46 +505,83 @@ constructor(
                 .associate { it.id to it.photoUrls }
 
         val localTasks = localDataSource.observeAll().first()
-        val remoteNotInLocalTasks =
-            remoteTasks.tasks.filter { remoteTask ->
-                remoteTask.familyGroupId == null &&
-                    localTasks.none { localTask ->
-                        localTask.remoteId == remoteTask.id
-                    }
-            }
-        Log.d("syncRemoteTasksWithLocal", remoteNotInLocalTasks.toString())
+        val remotePersonal = remoteTasks.tasks.filter { it.familyGroupId == null }
+        val remoteIds = remotePersonal.map { it.id }.toSet()
+        val localByRemoteId =
+            localTasks
+                .filter { it.remoteId != null }
+                .associateBy { it.remoteId!! }
 
-        suspend fun next(dateEpochDay: Long): Int {
+        val toInsert = mutableListOf<TaskEntity>()
+        val toUpdate = mutableListOf<TaskEntity>()
+
+        for (remote in remotePersonal) {
+            val incoming = remote.toDomain().toEntity()
+            val local = localByRemoteId[remote.id]
+            when {
+                local == null -> toInsert += incoming.copy(id = 0L)
+                local.syncStatus == SyncStatus.SYNCED && !local.contentEquals(incoming) ->
+                    // Off-device edit (chatbot, web, another phone). Reconcile, preserving
+                    // local id and orderIndex so UI ordering isn't disturbed.
+                    toUpdate += incoming.copy(id = local.id, orderIndex = local.orderIndex)
+                // else: identical, or local has pending CRUD — leave alone.
+            }
+        }
+
+        // Tasks that vanished from the server (deleted via chatbot/web/another device).
+        // Only purge SYNCED personal rows; never trample pending uploads/updates/deletes.
+        val orphaned =
+            localTasks.filter { local ->
+                local.remoteId != null &&
+                    local.syncStatus == SyncStatus.SYNCED &&
+                    local.remoteId !in remoteIds
+            }
+
+        suspend fun nextOrder(dateEpochDay: Long): Int {
             val current =
                 localDataSource
                     .observeByDate(date = dateEpochDay)
                     .first()
                     .maxOfOrNull { it.orderIndex }
                     ?: -1
-            val n = current + 1
-            return n
+            return current + 1
         }
 
-        val addedTaskEntities =
-            remoteNotInLocalTasks
-                .map { it.toDomain().toEntity().copy(id = 0L) }
-                .map { entity ->
-                    if (entity.orderIndex != 0) {
-                        entity
-                    } else {
-                        entity.copy(orderIndex = next(entity.date))
-                    }
-                }
+        val insertsWithOrder =
+            toInsert.map { entity ->
+                if (entity.orderIndex != 0) entity else entity.copy(orderIndex = nextOrder(entity.date))
+            }
 
         return runCatching {
             // Pre-delete any local row already holding a remoteId we're about to insert. Closes
             // the race window where a just-created task hadn't committed in Room yet when this
             // sync read its snapshot — without this, the same remoteId ends up in two rows.
-            val incomingRemoteIds = addedTaskEntities.mapNotNull { it.remoteId }
+            val incomingRemoteIds = insertsWithOrder.mapNotNull { it.remoteId }
             if (incomingRemoteIds.isNotEmpty()) {
                 localDataSource.deleteByRemoteIds(incomingRemoteIds)
             }
-            localDataSource.insertAll(addedTaskEntities)
+            if (insertsWithOrder.isNotEmpty()) {
+                localDataSource.insertAll(insertsWithOrder)
+            }
+
+            // Apply remote-side updates (titles, dates, completion flags changed off-device).
+            // Re-arm the recurring alarm in case the schedule moved.
+            toUpdate.forEach { updated ->
+                localDataSource.update(updated)
+                runCatching { alarmScheduler.cancelRecurring(updated.id) }
+                scheduleRecurringAlarmIfNeeded(updated.id, updated.toDomain())
+            }
+
+            // Apply remote-side deletes. Cancel alarms first so they don't fire for a row
+            // that's about to disappear.
+            if (orphaned.isNotEmpty()) {
+                orphaned.forEach { runCatching { alarmScheduler.cancelRecurring(it.id) } }
+                localDataSource.deleteByRemoteIds(orphaned.mapNotNull { it.remoteId })
+                timber.log.Timber
+                    .tag("TaskFetch")
+                    .d("syncRemoteTasksWithLocal: removed %d locally-orphaned tasks", orphaned.size)
+            }
+
             // Safety net: purge any personal-task rows whose remoteId actually belongs to a
             // group task (from stale data on earlier builds). Keeps Home free of dups.
             val groupRemoteIds = groupTaskLocalDataSource.getAllRemoteIds()
@@ -554,6 +594,20 @@ constructor(
             onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) },
         )
     }
+
+    private fun TaskEntity.contentEquals(other: TaskEntity): Boolean = title == other.title &&
+        description == other.description &&
+        date == other.date &&
+        timeStart == other.timeStart &&
+        timeEnd == other.timeEnd &&
+        isCompleted == other.isCompleted &&
+        isSecret == other.isSecret &&
+        category == other.category &&
+        customCategoryName == other.customCategoryName &&
+        recurrence == other.recurrence &&
+        reminderOffsetMinutes == other.reminderOffsetMinutes &&
+        isAllDay == other.isAllDay &&
+        photoUrls == other.photoUrls
 
     override suspend fun syncLocalTasksToServer(): Result<Unit> = withContext(Dispatchers.IO) {
         val nonSyncedTasks = findNonSyncedTasks()
