@@ -63,12 +63,31 @@ constructor(
     }
 
     init {
-        // Force a clean engine on every Pomodoro screen mount. Without this,
-        // any leftover state from a prior session (queue, counters, even a
-        // pending Navigate(Summary)) can leak into the new run via the
-        // singleton engine, sending the user straight to Summary.
-        engine.resetState()
-        initializeEngineIfNeeded()
+        // If the engine is already running with a valid queue (e.g. DoneBot
+        // started a session via LocalIntentClassifier), trust its state and
+        // mirror the snapshot into this VM. Resetting here would wipe the
+        // bot's queue and rebuild from saved settings — surfacing the old
+        // saved duration instead of what the bot actually started.
+        // The hasStartedAnySession guard inside the engine still protects
+        // the "leftover Summary leak" case for non-running stale state.
+        val engineSnapshot = engine.state.value
+        val originalSessions = engine.sessionsSnapshot
+        if (engineSnapshot.isRunning && originalSessions.isNotEmpty()) {
+            sessionQueue = originalSessions
+            currentSessionIndex = engineSnapshot.currentSessionIndex
+            _uiState.update {
+                it.copy(
+                    totalSessions = sessionQueue.size,
+                    currentSessionIndex = currentSessionIndex,
+                    totalSessionSeconds =
+                    sessionQueue.getOrNull(currentSessionIndex)?.durationSeconds
+                        ?: engineSnapshot.currentSessionTotalSeconds,
+                )
+            }
+        } else {
+            engine.resetState()
+            initializeEngineIfNeeded()
+        }
         observeEngineEvents()
         observeEngineState()
     }

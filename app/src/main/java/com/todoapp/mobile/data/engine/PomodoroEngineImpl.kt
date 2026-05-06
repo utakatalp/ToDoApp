@@ -55,6 +55,13 @@ constructor(
 
     private val sessionQueue: ArrayDeque<Session> = ArrayDeque()
 
+    // Immutable copy of the queue from the most recent setSessionQueue() call.
+    // sessionQueue itself is mutated as sessions are popped, so it can't be used
+    // to recover the original durations / count after the run starts.
+    private var _sessionsSnapshot: List<Session> = emptyList()
+    override val sessionsSnapshot: List<Session>
+        get() = _sessionsSnapshot
+
     private var timerJob: Job? = null
     private var overtimeJob: Job? = null
 
@@ -75,6 +82,7 @@ constructor(
     override fun setSessionQueue(queue: ArrayDeque<Session>) {
         sessionQueue.clear()
         queue.forEach { sessionQueue.addLast(it) }
+        _sessionsSnapshot = queue.toList()
         totalSessionsCount = queue.size
         sessionIndexCounter = -1
         hasStartedAnySession = false
@@ -140,6 +148,7 @@ constructor(
     override fun resetState() {
         cancelRunningJobs()
         sessionQueue.clear()
+        _sessionsSnapshot = emptyList()
         sessionIndexCounter = -1
         totalSessionsCount = 0
         remainingMillis = ZERO_MILLIS

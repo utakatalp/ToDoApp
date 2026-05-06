@@ -7,6 +7,14 @@ interface PomodoroEngine {
     val state: StateFlow<PomodoroEngineState>
     val events: SharedFlow<PomodoroEvent>
 
+    /**
+     * Immutable snapshot of the queue last passed to [setSessionQueue]. Read by
+     * PomodoroViewModel on screen mount to mirror an already-running session
+     * (e.g. one started by DoneBot via LocalIntentClassifier) instead of
+     * rebuilding from saved Pomodoro settings.
+     */
+    val sessionsSnapshot: List<Session>
+
     fun setSessionQueue(queue: ArrayDeque<Session>)
 
     fun prepare()
