@@ -47,7 +47,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val heading2: TextStyle
         @Composable
@@ -61,7 +61,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val heading3: TextStyle
         @Composable
@@ -75,7 +75,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val heading4: TextStyle
         @Composable
@@ -89,7 +89,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val heading5: TextStyle
         @Composable
@@ -103,7 +103,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val heading6: TextStyle
         @Composable
@@ -117,7 +117,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val heading7: TextStyle
         @Composable
@@ -131,7 +131,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val dayOfTheCalendar: TextStyle
         @Composable
@@ -145,7 +145,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
 
     val regularTextStyle: TextStyle
@@ -160,7 +160,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val subheading1: TextStyle
         @Composable
@@ -174,7 +174,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val subheading2: TextStyle
         @Composable
@@ -201,7 +201,7 @@ class TDTypography {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.None,
                 ),
-                color = TDTheme.colors.black,
+                color = TDTheme.colors.onBackground,
             )
     val subheading4: TextStyle
         @Composable
