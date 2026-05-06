@@ -24,3 +24,10 @@ FCM_SESSION_REPORT.md
 LOGO_AUDIT.md
 .claude/commands/
 .claude/skills/
+.claude/scheduled_tasks.lock
+
+# Screenshots & local docs (not part of source)
+docs/
+thesis-screenshots/
+todoapp-screnshots/
+.screenshots-review/
