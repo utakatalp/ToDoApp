@@ -283,6 +283,11 @@
     <string name="groups_yet">grubunuz yok.</string>
     <string name="create_a_group_to_start_collaborating_on">İşbirliği yapmaya başlamak için bir grup oluşturun</string>
     <string name="tasks_with_your_family">ailenizle görevler.</string>
+    <!-- Birleştirilmiş empty-state. Yukarıdaki _on / _yet bölünmüş varyantları TR'de
+         garip satır kırılmaları üretiyordu; tek satır kaynaklarıyla layout doğal akışla
+         sarsın. -->
+    <string name="groups_empty_title">Henüz hiç grubunuz yok.</string>
+    <string name="groups_empty_subtitle">Aileniz ile görevler üzerinde işbirliği yapmak için bir grup oluşturun.</string>
     <string name="create_new_group">Yeni Grup Oluştur</string>
     <string name="login_to_create_a_group">Grup oluşturmak için giriş yapın</string>
     <string name="login_or_create_account">Giriş Yap veya Hesap Oluştur</string>

@@ -18,7 +18,10 @@ fun PasswordStrength.toProgress(): Triple<Float, Color, String> = when (this) {
     PasswordStrength.MEDIUM ->
         Triple(
             0.50f,
-            TDTheme.colors.lightYellow,
+            // lightYellow (#FFF8E1) is a near-white surface tint — invisible on the light
+            // theme's near-white background. Use the saturated orange accent so the bar
+            // and trailing label read clearly on both themes.
+            TDTheme.colors.orange,
             stringResource(R.string.register_password_strength_MEDIUM),
         )
 

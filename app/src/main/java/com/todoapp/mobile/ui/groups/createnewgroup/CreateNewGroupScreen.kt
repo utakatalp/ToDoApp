@@ -21,8 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.todoapp.mobile.R
 import com.todoapp.mobile.R.string.bring_your_group_together_in_one_place
-import com.todoapp.mobile.R.string.description
 import com.todoapp.mobile.R.string.e_g_the_johnsons_summer_vacation
+import com.todoapp.mobile.R.string.group_description
 import com.todoapp.mobile.R.string.group_name
 import com.todoapp.mobile.R.string.let_s_get_started
 import com.todoapp.mobile.R.string.new_group
@@ -80,7 +80,7 @@ private fun CreateNewGroupContent(
         }
         Spacer(Modifier.height(24.dp))
         TDLabeledTextField(
-            title = stringResource(description),
+            title = stringResource(group_description),
             placeholder = stringResource(what_is_this_group_for_collaborating_on_chores_planning_trips_or_daily_tasks),
             value = uiState.groupDescription.orEmpty(),
             onValueChange = { onAction(UiAction.OnGroupDescriptionChange(it)) },

@@ -312,31 +312,22 @@ private fun GroupEmptyContent(
             tint = TDTheme.colors.pendingGray.copy(0.81f),
         )
         Spacer(Modifier.height(32.dp))
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            TDText(
-                text = stringResource(com.todoapp.mobile.R.string.you_don_t_have_any),
-                style = TDTheme.typography.heading2,
-                color = TDTheme.colors.onBackground,
-            )
-            TDText(
-                text = stringResource(com.todoapp.mobile.R.string.groups_yet),
-                style = TDTheme.typography.heading2,
-                color = TDTheme.colors.onBackground,
-            )
-        }
+        // Single TDText so the layout engine wraps the full sentence naturally per locale.
+        // Splitting across two TDText components forced a hard line break that read awkwardly
+        // when TR rephrased word order ("ailenizle görevler" landing on its own row).
+        TDText(
+            text = stringResource(com.todoapp.mobile.R.string.groups_empty_title),
+            style = TDTheme.typography.heading2,
+            color = TDTheme.colors.onBackground,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
         Spacer(Modifier.height(12.dp))
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            TDText(
-                text = stringResource(com.todoapp.mobile.R.string.create_a_group_to_start_collaborating_on),
-                style = TDTheme.typography.subheading3,
-                color = TDTheme.colors.lightGray,
-            )
-            TDText(
-                text = stringResource(com.todoapp.mobile.R.string.tasks_with_your_family),
-                style = TDTheme.typography.subheading3,
-                color = TDTheme.colors.lightGray,
-            )
-        }
+        TDText(
+            text = stringResource(com.todoapp.mobile.R.string.groups_empty_subtitle),
+            style = TDTheme.typography.subheading3,
+            color = TDTheme.colors.lightGray,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
         Spacer(Modifier.height(32.dp))
         TDButton(
             modifier = Modifier.clip(RoundedCornerShape(12.dp)),

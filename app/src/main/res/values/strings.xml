@@ -279,6 +279,11 @@
     <string name="groups_yet">groups yet.</string>
     <string name="create_a_group_to_start_collaborating_on">Create a group to start collaborating on</string>
     <string name="tasks_with_your_family">tasks with your family.</string>
+    <!-- Consolidated empty-state copy. The split _on / _yet variants above produced ugly
+         line-break artifacts when Turkish rephrased the sentence; use these single resources
+         at the screen level so the layout engine can wrap naturally per locale. -->
+    <string name="groups_empty_title">You don\'t have any groups yet.</string>
+    <string name="groups_empty_subtitle">Create a group to start collaborating on tasks with your family.</string>
     <string name="create_new_group">Create New Group</string>
     <string name="login_to_create_a_group">Login to create a group</string>
     <string name="login_or_create_account">Login or Create Account</string>

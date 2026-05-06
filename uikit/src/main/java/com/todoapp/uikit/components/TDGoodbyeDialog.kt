@@ -197,15 +197,15 @@ private fun AvatarWithHalo(
     val haloBrush = if (TDTheme.isDark) {
         Brush.radialGradient(
             colors = listOf(
-                TDTheme.colors.softPink.copy(alpha = 0.55f),
+                TDTheme.colors.onBackground,
                 Color.Transparent,
             ),
         )
     } else {
         Brush.radialGradient(
             colors = listOf(
-                TDTheme.colors.lightOrange.copy(alpha = 0.95f),
-                TDTheme.colors.softPink.copy(alpha = 0.55f),
+                TDTheme.colors.onBackground,
+                TDTheme.colors.pendingGray,
                 Color.Transparent,
             ),
         )

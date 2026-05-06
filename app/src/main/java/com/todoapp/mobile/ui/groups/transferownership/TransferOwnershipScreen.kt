@@ -164,7 +164,7 @@ private fun TransferMemberRow(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(TDTheme.colors.surface)
+            .background(TDTheme.colors.lightPending)
             .clickable(onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
