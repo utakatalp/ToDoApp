@@ -5,12 +5,11 @@ package com.todoapp.uikit.components
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -29,7 +28,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +37,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -55,8 +52,6 @@ import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreviewForm
 import com.todoapp.uikit.theme.TDTheme
 import com.todoapp.uikit.theme.textFieldColors
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun TDTextField(
@@ -263,10 +258,16 @@ fun TDCompactOutlinedTextField(
             }
 
         val focusRequester = remember { FocusRequester() }
-        val keyboardController = LocalSoftwareKeyboardController.current
-        val coroutineScope = rememberCoroutineScope()
 
         Column {
+            // The visual chrome (border, background, fixed height) lives on the outer Box, but the
+            // BasicTextField inside is sized with fillMaxSize() so its native pointer input covers
+            // the entire visible area. That's important: BasicTextField wires focus + caret + IME
+            // natively on every tap within its bounds. An earlier version had a clickable on the
+            // outer Box that called requestFocus() + keyboardController.show(), but Compose's
+            // SoftwareKeyboardController.show() is racy against the focus event and would only
+            // raise the IME on the *second* tap — first tap focused, second tap raised keyboard.
+            // Letting BasicTextField own the entire hit area sidesteps that race entirely.
             Box(
                 modifier =
                 Modifier
@@ -302,37 +303,15 @@ fun TDCompactOutlinedTextField(
                     ),
                     modifier =
                     Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .onFocusChanged { isFocused = it.isFocused }
                         .focusRequester(focusRequester),
                     decorationBox = { innerTextField ->
                         Row(
                             modifier =
                             Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
-                                .then(
-                                    if (enabled) {
-                                        Modifier
-                                            .clickable(
-                                                indication = null,
-                                                interactionSource = MutableInteractionSource(),
-                                            ) {
-                                                focusRequester.requestFocus()
-                                                // Ensure cursor is at the end when focusing via the container
-                                                textFieldValueState =
-                                                    textFieldValueState.copy(
-                                                        selection = TextRange(value.length),
-                                                    )
-                                                coroutineScope.launch {
-                                                    delay(50)
-                                                    keyboardController?.show()
-                                                }
-                                            }
-                                    } else {
-                                        Modifier
-                                    },
-                                ),
+                                .fillMaxSize()
+                                .padding(horizontal = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             leadingIcon?.invoke()

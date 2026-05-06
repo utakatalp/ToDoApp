@@ -99,7 +99,14 @@ fun TDOutlinedTextField(
         }
 
     val focusedBorder = if (destructive) TDTheme.colors.crossRed else TDTheme.colors.pendingGray
-    val unfocusedBorder = if (destructive) TDTheme.colors.lightRed else TDTheme.colors.lightGray
+    // Destructive unfocused border: lightRed (#FFE6E7) was invisible against the dialog
+    // `surface` (#FFFAF0) in light theme — both near-white. Tint with crossRed at low alpha
+    // so the field is discoverable while staying visually softer than the focused state.
+    val unfocusedBorder = if (destructive) {
+        TDTheme.colors.crossRed.copy(alpha = 0.5f)
+    } else {
+        TDTheme.colors.lightGray
+    }
     val cursor = if (destructive) TDTheme.colors.crossRed else TDTheme.colors.pendingGray
 
     OutlinedTextField(
