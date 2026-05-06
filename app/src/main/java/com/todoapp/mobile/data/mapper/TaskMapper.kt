@@ -44,8 +44,6 @@ fun TaskEntity.toDomain(): Task = Task(
 )
 
 fun Task.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TaskEntity {
-    val remoteIdOrNull = if (syncStatus == SyncStatus.SYNCED) id else null
-
     return TaskEntity(
         id = id,
         title = title,
@@ -55,7 +53,7 @@ fun Task.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TaskEntity {
         timeEnd = timeEnd.toMinuteOfDayLong(),
         isCompleted = isCompleted,
         isSecret = isSecret,
-        remoteId = remoteIdOrNull,
+        remoteId = remoteId,
         syncStatus = syncStatus,
         photoUrls = photoUrls.joinToString(","),
         reminderOffsetMinutes = reminderOffsetMinutes ?: 0L,

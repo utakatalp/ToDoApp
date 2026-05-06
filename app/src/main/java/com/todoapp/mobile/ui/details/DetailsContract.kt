@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import com.todoapp.mobile.domain.model.Recurrence
 import com.todoapp.mobile.domain.model.TaskCategory
+import com.todoapp.mobile.ui.home.PendingPhoto
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -33,6 +34,10 @@ object DetailsContract {
             val selectedRecurrence: Recurrence = Recurrence.NONE,
             val reminderOffsetMinutes: Long? = 0L,
             val isAllDay: Boolean = false,
+            // Staged photo uploads not yet on the server. Drained on Save.
+            val pendingPhotoUploads: List<PendingPhoto> = emptyList(),
+            // Existing photoIds that the user marked for deletion. Drained on Save.
+            val pendingPhotoDeleteIds: Set<Long> = emptySet(),
         ) : UiState
 
         data class Error(
@@ -83,6 +88,10 @@ object DetailsContract {
 
         data class OnPhotoDelete(
             val photoId: Long,
+        ) : UiAction
+
+        data class OnPendingPhotoCancel(
+            val index: Int,
         ) : UiAction
 
         data class OnLocationPicked(

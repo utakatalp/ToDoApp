@@ -85,6 +85,7 @@ fun Task.toCreateTaskRequestDto(
 
 fun TaskData.toDomain(): Task = Task(
     id = id,
+    remoteId = id,
     title = title,
     description = description,
     date = LocalDate.ofEpochDay(date),

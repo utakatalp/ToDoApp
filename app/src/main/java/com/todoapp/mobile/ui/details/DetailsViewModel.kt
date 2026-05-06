@@ -14,6 +14,7 @@ import com.todoapp.mobile.navigation.NavigationEffect
 import com.todoapp.mobile.ui.details.DetailsContract.UiAction
 import com.todoapp.mobile.ui.details.DetailsContract.UiEffect
 import com.todoapp.mobile.ui.details.DetailsContract.UiState
+import com.todoapp.mobile.ui.home.PendingPhoto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -111,8 +112,9 @@ constructor(
             is UiAction.OnDialogDateSelect -> selectDialogDate(uiAction.date)
             UiAction.OnDialogDateDeselect -> deselectDialogDate()
             UiAction.OnRetry -> retry()
-            is UiAction.OnPhotoPicked -> uploadPhoto(uiAction.bytes, uiAction.mimeType)
-            is UiAction.OnPhotoDelete -> deletePhoto(uiAction.photoId)
+            is UiAction.OnPhotoPicked -> stagePhotoUpload(uiAction.bytes, uiAction.mimeType)
+            is UiAction.OnPhotoDelete -> stagePhotoDelete(uiAction.photoId)
+            is UiAction.OnPendingPhotoCancel -> cancelPendingPhoto(uiAction.index)
             is UiAction.OnLocationPicked -> setLocation(uiAction.name, uiAction.address, uiAction.lat, uiAction.lng)
             UiAction.OnLocationCleared -> setLocation(null, null, null, null)
             is UiAction.OnCategoryChange -> changeCategory(uiAction.category)
@@ -173,44 +175,44 @@ constructor(
         }
     }
 
-    private fun uploadPhoto(
+    /** Stage a picked photo for upload-on-save. No network call until [saveChanges] runs. */
+    private fun stagePhotoUpload(
         bytes: ByteArray,
         mimeType: String,
     ) {
-        viewModelScope.launch {
-            val state = _uiState.value as? UiState.Success ?: return@launch
-            if (state.taskId <= 0) {
-                val localId = currentTaskId
-                if (localId == null) {
-                    _uiEffect.trySend(UiEffect.ShowToast(R.string.photo_requires_sync))
-                } else {
-                    pendingPhotoRepository.queue(localId, bytes, mimeType)
-                    _uiEffect.trySend(UiEffect.ShowToast(R.string.photo_queued_for_sync))
-                }
-                return@launch
+        updateSuccessState { state ->
+            state.copy(pendingPhotoUploads = state.pendingPhotoUploads + PendingPhoto(bytes, mimeType))
+        }
+    }
+
+    /**
+     * Stage an existing-photo deletion: remove it from the visible list and remember the photoId
+     * so [saveChanges] can issue the actual DELETE later. Does nothing if photoId can't be parsed
+     * (defensive — shouldn't happen with current backend URLs).
+     */
+    private fun stagePhotoDelete(photoId: Long) {
+        updateSuccessState { state ->
+            val matchingUrl = state.photoUrls.firstOrNull { photoIdFromUrl(it) == photoId }
+            if (matchingUrl == null) state else {
+                state.copy(
+                    photoUrls = state.photoUrls - matchingUrl,
+                    pendingPhotoDeleteIds = state.pendingPhotoDeleteIds + photoId,
+                )
             }
-            taskRepository
-                .uploadTaskPhoto(state.taskId, bytes, mimeType)
-                .onSuccess { refreshPhotos(state.taskId) }
-                .onFailure { _uiEffect.trySend(UiEffect.ShowToast(R.string.failed_to_upload_photo)) }
         }
     }
 
-    private fun deletePhoto(photoId: Long) {
-        viewModelScope.launch {
-            val state = _uiState.value as? UiState.Success ?: return@launch
-            if (state.taskId <= 0) return@launch
-            taskRepository
-                .deleteTaskPhoto(state.taskId, photoId)
-                .onSuccess { refreshPhotos(state.taskId) }
+    private fun cancelPendingPhoto(index: Int) {
+        updateSuccessState { state ->
+            if (index !in state.pendingPhotoUploads.indices) state else {
+                state.copy(
+                    pendingPhotoUploads = state.pendingPhotoUploads.filterIndexed { i, _ -> i != index },
+                )
+            }
         }
     }
 
-    private suspend fun refreshPhotos(taskId: Long) {
-        taskRepository.fetchRemoteTask(taskId).onSuccess { remote ->
-            updateSuccessState { it.copy(photoUrls = remote.photoUrls) }
-        }
-    }
+    private fun photoIdFromUrl(url: String): Long? = url.trimEnd('/').substringAfterLast('/').toLongOrNull()
 
     private fun retry() {
         currentTaskId?.let { loadTask(it) }
@@ -268,12 +270,14 @@ constructor(
         if (!validateFields(currentState)) return
 
         val existingTask = originalTask ?: return
-        val updatedTask = buildUpdatedTask(currentState, existingTask)
 
         updateSuccessState { it.copy(isSaving = true) }
 
         viewModelScope.launch {
             try {
+                val refreshedPhotoUrls = drainStagedPhotoChanges(currentState)
+                val updatedTask = buildUpdatedTask(currentState, existingTask)
+                    .copy(photoUrls = refreshedPhotoUrls)
                 taskRepository.update(updatedTask)
                 onSaveSuccess(updatedTask)
             } catch (e: IOException) {
@@ -282,6 +286,40 @@ constructor(
                 onSaveFailure()
             }
         }
+    }
+
+    /**
+     * Pushes staged photo deletes and uploads to the server, then returns the authoritative
+     * photoUrls list so the subsequent task update reflects current server state. If the task
+     * has no remoteId yet (offline-created), uploads are buffered via [pendingPhotoRepository]
+     * and the local UI list is used as-is.
+     */
+    private suspend fun drainStagedPhotoChanges(state: UiState.Success): List<String> {
+        if (state.taskId > 0) {
+            for (photoId in state.pendingPhotoDeleteIds) {
+                taskRepository.deleteTaskPhoto(state.taskId, photoId)
+                    .onFailure { Log.w("EditViewModel", "delete photo $photoId failed: ${it.message}") }
+            }
+            for (pending in state.pendingPhotoUploads) {
+                taskRepository.uploadTaskPhoto(state.taskId, pending.bytes, pending.mimeType)
+                    .onFailure { Log.w("EditViewModel", "upload photo failed: ${it.message}") }
+            }
+            return taskRepository.fetchRemoteTask(state.taskId).getOrNull()?.photoUrls
+                ?: state.photoUrls
+        }
+        // Task isn't synced yet — queue uploads for the eventual syncCreatedTask drain.
+        val localId = currentTaskId
+        if (localId != null) {
+            for (pending in state.pendingPhotoUploads) {
+                pendingPhotoRepository.queue(localId, pending.bytes, pending.mimeType)
+            }
+            if (state.pendingPhotoUploads.isNotEmpty()) {
+                _uiEffect.trySend(UiEffect.ShowToast(R.string.photo_queued_for_sync))
+            }
+        } else if (state.pendingPhotoUploads.isNotEmpty()) {
+            _uiEffect.trySend(UiEffect.ShowToast(R.string.photo_requires_sync))
+        }
+        return state.photoUrls
     }
 
     private fun cancelChanges() {
@@ -307,7 +345,9 @@ constructor(
                 dialogSelectedDate = existingTask.date,
                 isDirty = false,
                 isSaving = false,
-                photoUrls = (currentState as? UiState.Success)?.photoUrls ?: emptyList(),
+                photoUrls = existingTask.photoUrls,
+                pendingPhotoUploads = emptyList(),
+                pendingPhotoDeleteIds = emptySet(),
                 locationName = existingTask.locationName,
                 locationAddress = existingTask.locationAddress,
                 locationLat = existingTask.locationLat,
@@ -360,6 +400,7 @@ constructor(
         date = current.taskDate,
         timeStart = current.taskTimeStart ?: existingTask.timeStart,
         timeEnd = current.taskTimeEnd ?: existingTask.timeEnd,
+        photoUrls = current.photoUrls,
         locationName = current.locationName,
         locationAddress = current.locationAddress,
         locationLat = current.locationLat,
@@ -375,6 +416,9 @@ constructor(
 
     private fun computeIsDirty(state: UiState.Success): Boolean {
         val original = originalTask ?: return false
+        if (state.pendingPhotoUploads.isNotEmpty() || state.pendingPhotoDeleteIds.isNotEmpty()) {
+            return true
+        }
         val candidateTask =
             original.copy(
                 title = state.taskTitle,
@@ -382,6 +426,7 @@ constructor(
                 date = state.taskDate,
                 timeStart = state.taskTimeStart ?: original.timeStart,
                 timeEnd = state.taskTimeEnd ?: original.timeEnd,
+                photoUrls = state.photoUrls,
                 locationName = state.locationName,
                 locationAddress = state.locationAddress,
                 locationLat = state.locationLat,

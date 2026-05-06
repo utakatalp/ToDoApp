@@ -31,8 +31,13 @@ constructor(
         familyGroupId: Long?,
         assignedToUserId: Long?,
     ): Result<TaskData> = handleRequest {
+        // Backend's PUT /tasks identifies the task by `body.id` (= server id).
+        // Task.toCreateTaskRequestDto() carries Task.id which is the local Room PK,
+        // so we override it here with the server id passed by callers.
         todoApi.updateTask(
-            task.toCreateTaskRequestDto(familyGroupId = familyGroupId, assignedToUserId = assignedToUserId),
+            task
+                .toCreateTaskRequestDto(familyGroupId = familyGroupId, assignedToUserId = assignedToUserId)
+                .copy(id = id),
         )
     }
 

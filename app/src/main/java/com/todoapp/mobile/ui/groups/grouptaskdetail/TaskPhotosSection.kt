@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -40,6 +42,7 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.todoapp.mobile.BuildConfig
 import com.todoapp.mobile.R
+import com.todoapp.mobile.ui.home.PendingPhoto
 import com.todoapp.uikit.components.TDText
 import com.todoapp.uikit.theme.TDTheme
 
@@ -48,6 +51,8 @@ fun TaskPhotosSection(
     photoUrls: List<String>,
     onPick: (ByteArray, String) -> Unit,
     onDelete: (Long) -> Unit,
+    pendingUploads: List<PendingPhoto> = emptyList(),
+    onCancelPending: (Int) -> Unit = {},
 ) {
     val context = LocalContext.current
     val picker =
@@ -77,7 +82,7 @@ fun TaskPhotosSection(
             )
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
             TDText(
-                text = "(${photoUrls.size})",
+                text = "(${photoUrls.size + pendingUploads.size})",
                 style = TDTheme.typography.subheading1,
                 color = TDTheme.colors.gray,
             )
@@ -102,6 +107,12 @@ fun TaskPhotosSection(
                         viewerUrl = url
                         viewerPhotoId = photoId
                     },
+                )
+            }
+            itemsIndexed(pendingUploads) { index, pending ->
+                PendingPhotoTile(
+                    bytes = pending.bytes,
+                    onCancel = { onCancelPending(index) },
                 )
             }
         }
@@ -216,6 +227,47 @@ private fun AddPhotoTile(onClick: () -> Unit) {
             contentDescription = stringResource(R.string.add_photo),
             tint = TDTheme.colors.pendingGray,
         )
+    }
+}
+
+@Composable
+private fun PendingPhotoTile(
+    bytes: ByteArray,
+    onCancel: () -> Unit,
+) {
+    Box(modifier = Modifier.size(80.dp)) {
+        Box(
+            modifier =
+            Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(TDTheme.colors.lightPending),
+        ) {
+            AsyncImage(
+                model = bytes,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(80.dp),
+            )
+        }
+        Box(
+            modifier =
+            Modifier
+                .size(24.dp)
+                .offset(x = 4.dp, y = (-4).dp)
+                .align(Alignment.TopEnd)
+                .clip(RoundedCornerShape(12.dp))
+                .background(TDTheme.colors.crossRed)
+                .clickable(onClick = onCancel),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(com.example.uikit.R.drawable.ic_delete),
+                contentDescription = stringResource(R.string.delete),
+                tint = Color.White,
+                modifier = Modifier.size(14.dp),
+            )
+        }
     }
 }
 

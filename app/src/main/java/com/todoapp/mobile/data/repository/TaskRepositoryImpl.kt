@@ -306,51 +306,65 @@ constructor(
     }
 
     override suspend fun insert(task: Task) {
+        // Local-first to close the race with concurrent syncRemoteTasksWithLocal: if we awaited
+        // addTask before inserting locally, a sync running between the two could see the
+        // server-side row with no local match and insert a duplicate, which then collides with
+        // the local insert that runs after addTask returns.
+        val localEntity = task.toEntity(SyncStatus.PENDING_CREATE).copy(id = 0L)
+        val localId = localDataSource.insert(withInitializedOrder(localEntity))
+        scheduleRecurringAlarmIfNeeded(localId, task)
+
         remoteDataSource
             .addTask(task)
             .onSuccess { remoteTask ->
-                val entity = remoteTask.toDomain().toEntity().copy(id = 0L)
-                val localId = localDataSource.insert(withInitializedOrder(entity))
-                scheduleRecurringAlarmIfNeeded(localId, task)
-            }.onFailure {
-                val entity = task.toEntity(SyncStatus.PENDING_CREATE)
-                val localId = localDataSource.insert(withInitializedOrder(entity))
-                scheduleRecurringAlarmIfNeeded(localId, task)
+                val current = localDataSource.getTaskById(localId) ?: return@onSuccess
+                localDataSource.update(
+                    current.copy(
+                        remoteId = remoteTask.id,
+                        syncStatus = SyncStatus.SYNCED,
+                        photoUrls = remoteTask.photoUrls.joinToString(","),
+                    ),
+                )
             }
+        // onFailure: row already exists as PENDING_CREATE, SyncWorker will push it later.
     }
 
     override suspend fun insertWithPhotos(
         task: Task,
         photos: List<Pair<ByteArray, String>>,
-    ): Result<Unit> {
-        // Mirror insert()'s offline-tolerant behavior: always persist locally. If the backend
-        // create succeeds we also upload photos; if it fails we fall back to PENDING_CREATE so
-        // Home still renders the task (and a later sync will pick it up).
-        val remoteResult = remoteDataSource.addTask(task)
-        return remoteResult.fold(
-            onSuccess = { remoteTask ->
-                runCatching {
-                    val entity = remoteTask.toDomain().toEntity().copy(id = 0L)
-                    localDataSource.insert(withInitializedOrder(entity))
-                    for ((bytes, mime) in photos) {
-                        uploadTaskPhoto(remoteTask.id, bytes, mime).getOrNull()
-                    }
-                    refreshPhotoUrlsForTask(remoteTask.id)
+    ): Result<Unit> = runCatching {
+        // Same local-first pattern as insert(); see comment above for the race rationale.
+        val localEntity = task.toEntity(SyncStatus.PENDING_CREATE).copy(id = 0L)
+        val localId = localDataSource.insert(withInitializedOrder(localEntity))
+
+        remoteDataSource
+            .addTask(task)
+            .onSuccess { remoteTask ->
+                val current = localDataSource.getTaskById(localId)
+                if (current != null) {
+                    localDataSource.update(
+                        current.copy(
+                            remoteId = remoteTask.id,
+                            syncStatus = SyncStatus.SYNCED,
+                        ),
+                    )
                 }
-            },
-            onFailure = {
-                runCatching {
-                    val entity = task.toEntity(SyncStatus.PENDING_CREATE)
-                    val localId = localDataSource.insert(withInitializedOrder(entity))
-                    // Buffer photos in PendingPhotoRepository keyed by the local row id; they
-                    // will be drained and uploaded once syncCreatedTask succeeds and we have a remoteId.
-                    for ((bytes, mime) in photos) {
-                        pendingPhotoRepository.queue(localId, bytes, mime)
-                    }
+                for ((bytes, mime) in photos) {
+                    uploadTaskPhoto(remoteTask.id, bytes, mime).getOrNull()
                 }
-            },
-        )
-    }
+                refreshPhotoUrlsForTask(remoteTask.id)
+            }
+            .onFailure {
+                // Photos are buffered keyed by the local row id; drained once syncCreatedTask
+                // succeeds and we have a remoteId.
+                for ((bytes, mime) in photos) {
+                    pendingPhotoRepository.queue(localId, bytes, mime)
+                }
+            }
+    }.fold(
+        onSuccess = { Result.success(Unit) },
+        onFailure = { Result.failure(it) },
+    )
 
     override suspend fun delete(task: Task) {
         val entity = localDataSource.getTaskById(task.id) ?: return
@@ -433,20 +447,32 @@ constructor(
         if (taskEntity?.syncStatus != SyncStatus.SYNCED) {
             // no need to update remote because its not synced
             localDataSource.update(
-                task.toEntity(SyncStatus.PENDING_CREATE).copy(remoteId = taskEntity?.remoteId),
+                task.toEntity(SyncStatus.PENDING_CREATE).copy(
+                    id = task.id,
+                    remoteId = taskEntity?.remoteId,
+                ),
             )
             return@withContext
         }
 
         remoteDataSource
-            .updateTask(taskEntity.remoteId!!, taskEntity.toDomain())
+            .updateTask(taskEntity.remoteId!!, task)
             .onSuccess { remoteTask ->
                 localDataSource.update(
-                    remoteTask.toDomain().toEntity(SyncStatus.SYNCED).copy(id = taskEntity.id),
+                    task
+                        .toEntity(SyncStatus.SYNCED)
+                        .copy(
+                            id = taskEntity.id,
+                            remoteId = remoteTask.id,
+                            photoUrls = remoteTask.photoUrls.joinToString(","),
+                        ),
                 )
             }.onFailure {
                 localDataSource.update(
-                    task.toEntity(SyncStatus.PENDING_UPDATE).copy(remoteId = taskEntity.remoteId),
+                    task.toEntity(SyncStatus.PENDING_UPDATE).copy(
+                        id = taskEntity.id,
+                        remoteId = taskEntity.remoteId,
+                    ),
                 )
             }
     }
@@ -527,20 +553,30 @@ constructor(
                 .filter { it.remoteId != null }
                 .associateBy { it.remoteId!! }
 
+        // PENDING_CREATE rows have remoteId=null so they don't show up in localByRemoteId.
+        // If a sync runs between insert()'s local row commit and addTask returning, we'd
+        // otherwise insert a duplicate of the just-uploaded server task. Match by content
+        // (title + date + timeStart + timeEnd) so we can promote the local PENDING_CREATE
+        // row to SYNCED instead of inserting a second one.
+        val pendingCreateLocals =
+            localTasks.filter { it.remoteId == null && it.syncStatus == SyncStatus.PENDING_CREATE }
+        val pendingCreateBySignature =
+            pendingCreateLocals.associateBy { it.contentSignature() }
+
         val toInsert = mutableListOf<TaskEntity>()
         val toUpdate = mutableListOf<TaskEntity>()
+        val promoted = mutableSetOf<Long>()
 
         for (remote in remotePersonal) {
             val incoming = remote.toDomain().toEntity()
-            val local = localByRemoteId[remote.id]
-            when {
-                local == null -> toInsert += incoming.copy(id = 0L)
-                local.syncStatus == SyncStatus.SYNCED && !local.contentEquals(incoming) ->
-                    // Off-device edit (chatbot, web, another phone). Reconcile, preserving
-                    // local id and orderIndex so UI ordering isn't disturbed.
-                    toUpdate += incoming.copy(id = local.id, orderIndex = local.orderIndex)
-                // else: identical, or local has pending CRUD — leave alone.
-            }
+            reconcileRemote(
+                incoming = incoming,
+                local = localByRemoteId[remote.id],
+                pendingCreateBySignature = pendingCreateBySignature,
+                promoted = promoted,
+                toInsert = toInsert,
+                toUpdate = toUpdate,
+            )
         }
 
         // Tasks that vanished from the server (deleted via chatbot/web/another device).
@@ -608,6 +644,43 @@ constructor(
             onSuccess = { Result.success(Unit) },
             onFailure = { t -> Result.failure(DomainException.fromThrowable(t)) },
         )
+    }
+
+    /**
+     * Stable signature used to match a PENDING_CREATE local row against a server-side task
+     * when their remoteId hasn't been linked yet. Title + date + start/end times are enough
+     * to make duplicate rows extremely unlikely under realistic user behaviour, while keeping
+     * the match independent of fields the user can still toggle in the form (description,
+     * category, location, etc).
+     */
+    private fun TaskEntity.contentSignature(): String = "$title|$date|$timeStart|$timeEnd"
+
+    private fun reconcileRemote(
+        incoming: TaskEntity,
+        local: TaskEntity?,
+        pendingCreateBySignature: Map<String, TaskEntity>,
+        promoted: MutableSet<Long>,
+        toInsert: MutableList<TaskEntity>,
+        toUpdate: MutableList<TaskEntity>,
+    ) {
+        if (local != null) {
+            if (local.syncStatus == SyncStatus.SYNCED && !local.contentEquals(incoming)) {
+                // Off-device edit (chatbot, web, another phone). Reconcile, preserving
+                // local id and orderIndex so UI ordering isn't disturbed.
+                toUpdate += incoming.copy(id = local.id, orderIndex = local.orderIndex)
+            }
+            // else: identical, or local has pending CRUD — leave alone.
+            return
+        }
+        // No remoteId match. Try a content-signature match against PENDING_CREATE rows
+        // before falling through to a fresh insert (closes the insert() race).
+        val pending = pendingCreateBySignature[incoming.contentSignature()]
+        if (pending != null && pending.id !in promoted) {
+            promoted += pending.id
+            toUpdate += incoming.copy(id = pending.id, orderIndex = pending.orderIndex)
+        } else {
+            toInsert += incoming.copy(id = 0L)
+        }
     }
 
     private fun TaskEntity.contentEquals(other: TaskEntity): Boolean = title == other.title &&

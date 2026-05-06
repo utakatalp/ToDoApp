@@ -347,6 +347,8 @@ private fun DetailsSuccessContent(
                 photoUrls = uiState.photoUrls,
                 onPick = { bytes, mime -> onAction(UiAction.OnPhotoPicked(bytes, mime)) },
                 onDelete = { photoId -> onAction(UiAction.OnPhotoDelete(photoId)) },
+                pendingUploads = uiState.pendingPhotoUploads,
+                onCancelPending = { index -> onAction(UiAction.OnPendingPhotoCancel(index)) },
             )
         }
 
