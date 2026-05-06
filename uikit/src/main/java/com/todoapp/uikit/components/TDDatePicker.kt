@@ -23,18 +23,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreviewWide
 import com.todoapp.uikit.theme.TDTheme
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -56,12 +55,18 @@ fun TDDatePicker(
     val configuration = LocalConfiguration.current
     val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else Locale.getDefault()
 
-    val daysOfWeek =
-        remember(locale) {
-            DayOfWeek.entries.map {
-                it.getDisplayName(TextStyle.SHORT, locale).take(2)
-            }
-        }
+    // Resource-backed weekday labels. .take(2) on DayOfWeek.getDisplayName(SHORT, tr) used to
+    // emit "Pz" for Monday — which collides with Pazar (Sunday) in Turkish. The strings file
+    // ships unambiguous 3-letter abbreviations per locale (Pzt/Sal/Çar/Per/Cum/Cmt/Paz in TR).
+    val daysOfWeek = listOf(
+        stringResource(R.string.weekday_abbr_mon),
+        stringResource(R.string.weekday_abbr_tue),
+        stringResource(R.string.weekday_abbr_wed),
+        stringResource(R.string.weekday_abbr_thu),
+        stringResource(R.string.weekday_abbr_fri),
+        stringResource(R.string.weekday_abbr_sat),
+        stringResource(R.string.weekday_abbr_sun),
+    )
     val firstDayOfMonth = selectedMonth.atDay(1)
     val calendarStartDate =
         firstDayOfMonth.minusDays((firstDayOfMonth.dayOfWeek.value - 1).toLong())
@@ -258,12 +263,18 @@ fun TDDatePickerSingleInput(
     val configuration = LocalConfiguration.current
     val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else Locale.getDefault()
 
-    val daysOfWeek =
-        remember(locale) {
-            DayOfWeek.entries.map {
-                it.getDisplayName(TextStyle.SHORT, locale).take(2)
-            }
-        }
+    // Resource-backed weekday labels. .take(2) on DayOfWeek.getDisplayName(SHORT, tr) used to
+    // emit "Pz" for Monday — which collides with Pazar (Sunday) in Turkish. The strings file
+    // ships unambiguous 3-letter abbreviations per locale (Pzt/Sal/Çar/Per/Cum/Cmt/Paz in TR).
+    val daysOfWeek = listOf(
+        stringResource(R.string.weekday_abbr_mon),
+        stringResource(R.string.weekday_abbr_tue),
+        stringResource(R.string.weekday_abbr_wed),
+        stringResource(R.string.weekday_abbr_thu),
+        stringResource(R.string.weekday_abbr_fri),
+        stringResource(R.string.weekday_abbr_sat),
+        stringResource(R.string.weekday_abbr_sun),
+    )
 
     val firstDayOfMonth = selectedMonth.atDay(1)
     val calendarStartDate =

@@ -50,4 +50,16 @@
     <string name="cd_toggle_password_visibility">Şifre görünürlüğünü değiştir</string>
     <string name="cd_add_task">Görev ekle</string>
     <string name="cd_expand_chart">Grafiği genişlet</string>
+    <!-- Priority badge labels for group tasks -->
+    <string name="priority_badge_high">YÜKSEK</string>
+    <string name="priority_badge_medium">ORTA</string>
+    <string name="priority_badge_low">DÜŞÜK</string>
+    <!-- Takvim gün kısaltmaları (3-harfli) -->
+    <string name="weekday_abbr_mon">Pzt</string>
+    <string name="weekday_abbr_tue">Sal</string>
+    <string name="weekday_abbr_wed">Çar</string>
+    <string name="weekday_abbr_thu">Per</string>
+    <string name="weekday_abbr_fri">Cum</string>
+    <string name="weekday_abbr_sat">Cmt</string>
+    <string name="weekday_abbr_sun">Paz</string>
 </resources>

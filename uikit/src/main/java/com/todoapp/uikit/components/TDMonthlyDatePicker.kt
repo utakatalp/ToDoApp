@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreview
@@ -138,8 +139,6 @@ private fun DatePickerCard(
     onDateSelect: (LocalDate) -> Unit = {},
 ) {
     val textColor = if (isSelected) TDTheme.colors.white else TDTheme.colors.lightGray
-    val configuration = LocalConfiguration.current
-    val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else Locale.getDefault()
     Column(
         modifier =
             modifier
@@ -156,7 +155,7 @@ private fun DatePickerCard(
     ) {
         Spacer(modifier.weight(0.8f))
         TDText(
-            text = shortDayOfWeekLabel(currentDate.dayOfWeek, locale),
+            text = shortDayOfWeekLabel(currentDate.dayOfWeek),
             style = TDTheme.typography.regularTextStyle,
             color = textColor,
         )
@@ -179,10 +178,18 @@ private fun DatePickerCard(
     }
 }
 
-private fun shortDayOfWeekLabel(day: DayOfWeek, locale: Locale): String = if (locale.language == "tr" && day == DayOfWeek.FRIDAY) {
-    "Cu"
-} else {
-    day.getDisplayName(TextStyle.SHORT, locale)
+@Composable
+private fun shortDayOfWeekLabel(day: DayOfWeek): String {
+    val resId = when (day) {
+        DayOfWeek.MONDAY -> R.string.weekday_abbr_mon
+        DayOfWeek.TUESDAY -> R.string.weekday_abbr_tue
+        DayOfWeek.WEDNESDAY -> R.string.weekday_abbr_wed
+        DayOfWeek.THURSDAY -> R.string.weekday_abbr_thu
+        DayOfWeek.FRIDAY -> R.string.weekday_abbr_fri
+        DayOfWeek.SATURDAY -> R.string.weekday_abbr_sat
+        DayOfWeek.SUNDAY -> R.string.weekday_abbr_sun
+    }
+    return stringResource(resId)
 }
 
 @TDPreviewWide

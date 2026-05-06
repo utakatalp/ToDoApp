@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -136,8 +137,19 @@ private fun WeekdayGutter(
             ) {
                 val visible = showAllDays || day == DayOfWeek.MONDAY || day == DayOfWeek.WEDNESDAY || day == DayOfWeek.FRIDAY
                 if (visible) {
+                    // Resource-backed because DayOfWeek.getDisplayName(SHORT, tr) falls back
+                    // to English on some Android locale-data builds.
+                    val labelRes = when (day) {
+                        DayOfWeek.MONDAY -> com.example.uikit.R.string.weekday_abbr_mon
+                        DayOfWeek.TUESDAY -> com.example.uikit.R.string.weekday_abbr_tue
+                        DayOfWeek.WEDNESDAY -> com.example.uikit.R.string.weekday_abbr_wed
+                        DayOfWeek.THURSDAY -> com.example.uikit.R.string.weekday_abbr_thu
+                        DayOfWeek.FRIDAY -> com.example.uikit.R.string.weekday_abbr_fri
+                        DayOfWeek.SATURDAY -> com.example.uikit.R.string.weekday_abbr_sat
+                        DayOfWeek.SUNDAY -> com.example.uikit.R.string.weekday_abbr_sun
+                    }
                     TDText(
-                        text = day.getDisplayName(TextStyle.SHORT, locale),
+                        text = stringResource(labelRes),
                         style = TDTheme.typography.subheading2,
                         color = TDTheme.colors.pendingGray,
                     )

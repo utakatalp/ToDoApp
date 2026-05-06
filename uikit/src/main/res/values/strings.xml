@@ -50,4 +50,18 @@
     <string name="cd_toggle_password_visibility">Toggle password visibility</string>
     <string name="cd_add_task">Add task</string>
     <string name="cd_expand_chart">Expand chart</string>
+    <!-- Priority badge labels for group tasks -->
+    <string name="priority_badge_high">HIGH</string>
+    <string name="priority_badge_medium">MED</string>
+    <string name="priority_badge_low">LOW</string>
+    <!-- Calendar weekday abbreviations (3-letter). Sourced from strings instead of
+         DayOfWeek.getDisplayName(SHORT, tr) because Android's stdlib locale data falls
+         back to English for Turkish short-day names on some platform builds. -->
+    <string name="weekday_abbr_mon">Mon</string>
+    <string name="weekday_abbr_tue">Tue</string>
+    <string name="weekday_abbr_wed">Wed</string>
+    <string name="weekday_abbr_thu">Thu</string>
+    <string name="weekday_abbr_fri">Fri</string>
+    <string name="weekday_abbr_sat">Sat</string>
+    <string name="weekday_abbr_sun">Sun</string>
 </resources>

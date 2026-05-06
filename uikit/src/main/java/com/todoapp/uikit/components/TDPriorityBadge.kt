@@ -9,7 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.uikit.R
 import com.todoapp.uikit.previews.TDPreview
 import com.todoapp.uikit.theme.TDTheme
 
@@ -21,9 +23,21 @@ fun TDPriorityBadge(
     val normalized = priority.uppercase()
     val (bg, fg, label) =
         when (normalized) {
-            "HIGH" -> Triple(TDTheme.colors.lightRed, TDTheme.colors.crossRed, "HIGH")
-            "MEDIUM" -> Triple(TDTheme.colors.lightOrange, TDTheme.colors.orange, "MED")
-            "LOW" -> Triple(TDTheme.colors.lightPending, TDTheme.colors.darkPending, "LOW")
+            "HIGH" -> Triple(
+                TDTheme.colors.lightRed,
+                TDTheme.colors.crossRed,
+                stringResource(R.string.priority_badge_high),
+            )
+            "MEDIUM" -> Triple(
+                TDTheme.colors.lightOrange,
+                TDTheme.colors.orange,
+                stringResource(R.string.priority_badge_medium),
+            )
+            "LOW" -> Triple(
+                TDTheme.colors.lightPending,
+                TDTheme.colors.darkPending,
+                stringResource(R.string.priority_badge_low),
+            )
             else -> Triple(TDTheme.colors.lightPending, TDTheme.colors.pendingGray, normalized)
         }
     Box(
