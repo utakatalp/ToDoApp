@@ -2,7 +2,6 @@ package com.todoapp.mobile.ui.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +18,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -97,7 +95,6 @@ internal fun LoginFormPanel(
 
     TDCompactOutlinedTextField(
         value = uiState.email,
-        enabled = uiState.isEmailFieldEnabled,
         label = stringResource(R.string.email_address),
         onValueChange = { onAction(UiAction.OnEmailChange(it)) },
         placeholder = stringResource(R.string.email),
@@ -111,11 +108,6 @@ internal fun LoginFormPanel(
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier =
-        Modifier.clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-        ) { onAction(UiAction.OnEmailFieldTap) },
     )
     uiState.emailError?.let {
         TDText(text = it.message, color = TDTheme.colors.red)
@@ -144,7 +136,6 @@ internal fun LoginFormPanel(
 
     TDCompactOutlinedTextField(
         value = uiState.password,
-        enabled = uiState.isPasswordFieldEnabled,
         label = null,
         visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         onValueChange = { onAction(UiAction.OnPasswordChange(it)) },
@@ -175,11 +166,6 @@ internal fun LoginFormPanel(
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier =
-        Modifier.clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-        ) { onAction(UiAction.OnPasswordFieldTap) },
     )
     uiState.passwordError?.let {
         TDText(text = it.message, color = TDTheme.colors.red)

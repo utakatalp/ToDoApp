@@ -7,7 +7,6 @@ object ForgotPasswordContract {
     @Immutable
     data class UiState(
         val email: String = "",
-        val isEmailFieldEnabled: Boolean = false,
         val error: String? = null,
         val isSubmitting: Boolean = false,
         val isSent: Boolean = false,
@@ -17,8 +16,6 @@ object ForgotPasswordContract {
         data class OnEmailChange(
             val email: String,
         ) : UiAction
-
-        data object OnEmailFieldTap : UiAction
 
         data object OnForgotPasswordTap : UiAction
 

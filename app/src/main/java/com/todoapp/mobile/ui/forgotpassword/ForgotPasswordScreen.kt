@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -123,7 +122,6 @@ private fun ForgotPasswordFormPanel(
     Spacer(Modifier.height(16.dp))
     TDCompactOutlinedTextField(
         value = uiState.email,
-        enabled = uiState.isEmailFieldEnabled,
         label = stringResource(R.string.email),
         onValueChange = { onAction(UiAction.OnEmailChange(it)) },
         placeholder = stringResource(R.string.email),
@@ -137,10 +135,6 @@ private fun ForgotPasswordFormPanel(
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier =
-        Modifier.clickable(indication = null, interactionSource = MutableInteractionSource()) {
-            onAction(UiAction.OnEmailFieldTap)
-        },
     )
     uiState.error?.let {
         TDText(text = it, color = TDTheme.colors.red)
@@ -275,7 +269,7 @@ private fun ForgotPasswordContentPreview() {
 private fun ForgotPasswordEmptyPreview() {
     TDTheme {
         ForgotPasswordContent(
-            uiState = UiState(email = "", isEmailFieldEnabled = true),
+            uiState = UiState(email = ""),
             onAction = {},
         )
     }
@@ -286,7 +280,7 @@ private fun ForgotPasswordEmptyPreview() {
 private fun ForgotPasswordFilledPreview() {
     TDTheme {
         ForgotPasswordContent(
-            uiState = UiState(email = "berat@example.com", isEmailFieldEnabled = true),
+            uiState = UiState(email = "berat@example.com"),
             onAction = {},
         )
     }
@@ -300,7 +294,6 @@ private fun ForgotPasswordSubmittingPreview() {
             uiState =
             UiState(
                 email = "berat@example.com",
-                isEmailFieldEnabled = false,
                 isSubmitting = true,
             ),
             onAction = {},
@@ -316,7 +309,6 @@ private fun ForgotPasswordSentPreview() {
             uiState =
             UiState(
                 email = "berat@example.com",
-                isEmailFieldEnabled = false,
                 isSent = true,
             ),
             onAction = {},
@@ -332,7 +324,6 @@ private fun ForgotPasswordErrorPreview() {
             uiState =
             UiState(
                 email = "not-an-email",
-                isEmailFieldEnabled = true,
                 error = "Please enter a valid email",
             ),
             onAction = {},

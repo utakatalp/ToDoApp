@@ -63,13 +63,11 @@ constructor(
         when (uiAction) {
             is UiAction.OnEmailChange -> onEmailChange(uiAction.value)
             is UiAction.OnPasswordChange -> onPasswordChange(uiAction.value)
-            UiAction.OnEmailFieldTap -> enableEmailField()
             UiAction.OnForgotPasswordTap -> navigateToForgotPassword()
             is UiAction.OnGoogleSignInTap -> _uiEffect.trySend(UiEffect.GoogleLogin)
             is UiAction.OnGoogleSignInFailed -> _uiEffect.trySend(UiEffect.ShowToast(uiAction.message))
             is UiAction.OnSuccessfulGoogleLogin -> googleLogin(uiAction.token)
             UiAction.OnLoginTap -> handleLoginClick()
-            UiAction.OnPasswordFieldTap -> enablePasswordField()
             UiAction.OnPasswordVisibilityTap -> togglePasswordVisibility()
             UiAction.OnRegisterTap -> navigateToRegister()
         }
@@ -275,13 +273,5 @@ constructor(
     private fun togglePasswordVisibility() {
         val state = uiState.value
         _uiState.update { it.copy(isPasswordVisible = !state.isPasswordVisible) }
-    }
-
-    private fun enableEmailField() {
-        _uiState.update { it.copy(isEmailFieldEnabled = true) }
-    }
-
-    private fun enablePasswordField() {
-        _uiState.update { it.copy(isPasswordFieldEnabled = true) }
     }
 }

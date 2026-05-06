@@ -2,7 +2,6 @@ package com.todoapp.mobile.ui.register
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +18,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,7 +86,6 @@ internal fun RegisterFormPanel(
     Spacer(Modifier.height(16.dp))
     TDCompactOutlinedTextField(
         value = uiState.fullName,
-        enabled = uiState.isFullNameFieldEnabled,
         label = stringResource(R.string.full_name),
         onValueChange = { onAction(UiAction.OnFullNameChange(it)) },
         placeholder = stringResource(R.string.full_name),
@@ -102,15 +99,9 @@ internal fun RegisterFormPanel(
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier =
-        Modifier.clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-        ) { onAction(UiAction.OnFullNameFieldTap) },
     )
     TDCompactOutlinedTextField(
         value = uiState.email,
-        enabled = uiState.isEmailFieldEnabled,
         label = stringResource(R.string.email),
         onValueChange = { onAction(UiAction.OnEmailChange(it)) },
         placeholder = stringResource(R.string.email),
@@ -128,18 +119,12 @@ internal fun RegisterFormPanel(
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier =
-        Modifier.clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-        ) { onAction(UiAction.OnEmailFieldTap) },
     )
     uiState.emailError?.let {
         TDText(text = it.message, color = TDTheme.colors.red)
     }
     TDCompactOutlinedTextField(
         value = uiState.password,
-        enabled = uiState.isPasswordFieldEnabled,
         label = stringResource(R.string.password),
         visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         onValueChange = { onAction(UiAction.OnPasswordChange(it)) },
@@ -170,11 +155,6 @@ internal fun RegisterFormPanel(
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier =
-        Modifier.clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-        ) { onAction(UiAction.OnPasswordFieldTap) },
     )
     uiState.passwordError?.let {
         TDText(text = it.message, color = TDTheme.colors.red)
@@ -186,7 +166,6 @@ internal fun RegisterFormPanel(
 
     TDCompactOutlinedTextField(
         value = uiState.confirmPassword,
-        enabled = uiState.isPasswordConfirmationFieldEnabled,
         visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         label = stringResource(R.string.confirm_password),
         onValueChange = { onAction(UiAction.OnConfirmPasswordChange(it)) },
@@ -205,11 +184,6 @@ internal fun RegisterFormPanel(
         },
         roundedCornerShape = RoundedCornerShape(12.dp),
         height = 50.dp,
-        modifier =
-        Modifier.clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-        ) { onAction(UiAction.OnConfirmPasswordFieldTap) },
     )
     uiState.confirmPasswordError?.let {
         TDText(text = it.message, color = TDTheme.colors.red)

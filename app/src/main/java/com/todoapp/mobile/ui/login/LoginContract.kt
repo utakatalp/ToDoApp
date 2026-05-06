@@ -8,8 +8,6 @@ object LoginContract {
         val email: String = "",
         val password: String = "",
         val isPasswordVisible: Boolean = false,
-        val isEmailFieldEnabled: Boolean = false,
-        val isPasswordFieldEnabled: Boolean = false,
         val emailError: LoginError? = null,
         val passwordError: LoginError? = null,
         val generalError: LoginError? = null,
@@ -25,10 +23,6 @@ object LoginContract {
         data class OnPasswordChange(
             val value: String,
         ) : UiAction
-
-        data object OnEmailFieldTap : UiAction
-
-        data object OnPasswordFieldTap : UiAction
 
         data object OnPasswordVisibilityTap : UiAction
 

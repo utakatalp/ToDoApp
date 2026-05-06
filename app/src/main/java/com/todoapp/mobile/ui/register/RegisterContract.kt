@@ -11,10 +11,6 @@ object RegisterContract {
         val password: String = "",
         val confirmPassword: String = "",
         val isPasswordVisible: Boolean = false,
-        val isEmailFieldEnabled: Boolean = false,
-        val isFullNameFieldEnabled: Boolean = false,
-        val isPasswordConfirmationFieldEnabled: Boolean = false,
-        val isPasswordFieldEnabled: Boolean = false,
         val emailError: RegisterError? = null,
         val passwordError: RegisterError? = null,
         val confirmPasswordError: RegisterError? = null,
@@ -40,14 +36,6 @@ object RegisterContract {
         ) : UiAction
 
         data object OnPasswordVisibilityTap : UiAction
-
-        data object OnPasswordFieldTap : UiAction
-
-        data object OnConfirmPasswordFieldTap : UiAction
-
-        data object OnFullNameFieldTap : UiAction
-
-        data object OnEmailFieldTap : UiAction
 
         data class OnFullNameChange(
             val fullName: String,

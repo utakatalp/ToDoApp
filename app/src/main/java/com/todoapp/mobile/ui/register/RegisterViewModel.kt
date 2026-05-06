@@ -65,10 +65,6 @@ constructor(
             UiAction.OnLoginTap -> navigateToLogin()
             UiAction.OnSignUpTap -> onSignUpTap()
             UiAction.OnPasswordVisibilityTap -> togglePasswordVisibility()
-            UiAction.OnConfirmPasswordFieldTap -> enableConfirmPasswordField()
-            UiAction.OnEmailFieldTap -> enableEmailField()
-            UiAction.OnFullNameFieldTap -> enableFullNameField()
-            UiAction.OnPasswordFieldTap -> enablePasswordField()
             UiAction.OnGoogleSignInTap -> _uiEffect.trySend(UiEffect.LaunchGoogleSignIn)
             is UiAction.OnGoogleSignInResult -> googleLogin(uiAction.token)
             is UiAction.OnGoogleSignInFailed -> {
@@ -248,22 +244,6 @@ constructor(
         _uiState.update { state ->
             state.copy(fullName = fullName)
         }
-    }
-
-    private fun enableEmailField() {
-        _uiState.update { it.copy(isEmailFieldEnabled = true) }
-    }
-
-    private fun enableFullNameField() {
-        _uiState.update { it.copy(isFullNameFieldEnabled = true) }
-    }
-
-    private fun enablePasswordField() {
-        _uiState.update { it.copy(isPasswordFieldEnabled = true) }
-    }
-
-    private fun enableConfirmPasswordField() {
-        _uiState.update { it.copy(isPasswordConfirmationFieldEnabled = true) }
     }
 
     private fun validateEmail(email: String): RegisterError? {

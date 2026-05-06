@@ -47,7 +47,6 @@ constructor(
 
             UiAction.OnForgotPasswordTap -> handleForgotPassword()
             UiAction.OnBackToLoginTap -> navigateToBackToLogin()
-            UiAction.OnEmailFieldTap -> _uiState.update { it.copy(isEmailFieldEnabled = true) }
         }
     }
 
